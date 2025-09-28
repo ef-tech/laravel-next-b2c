@@ -100,8 +100,6 @@ networks:
 volumes:
     sail-redis:
         driver: local
-    sail-meilisearch:
-        driver: local
     sail-pgsql:
         driver: local
     sail-minio:
