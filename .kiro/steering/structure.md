@@ -103,35 +103,42 @@ laravel-api/
 - **型定義**: `types/` ディレクトリ、`.d.ts` 拡張子
 
 ## Import構成指針
-### バックエンド (Laravel)
+### バックエンド (Laravel API専用)
 ```php
-// Laravel標準
+// Laravel APIコア機能 (最小依存関係)
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;  // APIレスポンス専用
 use App\Models\User;
-use App\Services\UserService;
+use App\Services\Api\UserService;  // API専用サービス
 
-// 外部パッケージ
-use Carbon\Carbon;
+// Sanctum認証 (コアパッケージ)
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
+
+// 最小必要パッケージのみ
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 ```
 
-### フロントエンド (Next.js)
+### フロントエンド (Next.js 15.5 + React 19)
 ```typescript
-// React関連
+// React 19最新機能
 import React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'  // React 19 'use' hook
 
-// Next.js関連
+// Next.js 15.5 App Router
 import Link from 'next/link'
 import Image from 'next/image'
+import { notFound } from 'next/navigation'
 
 // 内部モジュール (相対パス避ける)
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/hooks/useAuth'
-import type { User } from '@/types/user'
+import { useAuth } from '@/hooks/useAuth'        // Sanctumトークン認証対応
+import type { User, ApiResponse } from '@/types/api'  // APIレスポンス型
 
-// 外部ライブラリ
+// API通信 (Laravel API専用最適化対応)
 import axios from 'axios'
+import { apiClient } from '@/lib/api-client'     // Sanctum認証統合
 import { clsx } from 'clsx'
 ```
 
