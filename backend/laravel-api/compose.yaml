@@ -12,7 +12,6 @@ services:
         ports:
             # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
             - '${APP_PORT:-13000}:${APP_PORT:-13000}'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
             WWWUSER: '${WWWUSER}'
             APP_PORT: '${APP_PORT:-80}'
