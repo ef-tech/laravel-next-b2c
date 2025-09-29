@@ -104,7 +104,7 @@ class ViewRemovalTest extends TestCase
                 $content = file_get_contents($routeFile);
                 // view()関数が使用されていないことを確認（API専用のため）
                 $this->assertStringNotContainsString('return view(', $content,
-                    "View function should not be used in API-only routes: " . basename($routeFile));
+                    'View function should not be used in API-only routes: '.basename($routeFile));
             }
         }
     }

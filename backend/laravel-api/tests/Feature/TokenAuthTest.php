@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class TokenAuthTest extends TestCase
 {
@@ -34,7 +34,7 @@ class TokenAuthTest extends TestCase
      */
     public function test_user_model_has_api_tokens_trait(): void
     {
-        $user = new User();
+        $user = new User;
 
         // HasApiTokensトレイトのメソッドが使用可能であることを確認
         $this->assertTrue(method_exists($user, 'createToken'), 'User model should have createToken method from HasApiTokens');
@@ -57,7 +57,7 @@ class TokenAuthTest extends TestCase
 
         // トークンを使ってAPIエンドポイントにアクセス
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token->plainTextToken,
+            'Authorization' => 'Bearer '.$token->plainTextToken,
         ])->getJson('/api/user');
 
         $response->assertStatus(200);

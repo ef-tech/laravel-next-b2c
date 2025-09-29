@@ -121,7 +121,7 @@ class CorsConfigTest extends TestCase
             'allowed_methods',
             'allowed_origins',
             'allowed_headers',
-            'supports_credentials'
+            'supports_credentials',
         ];
 
         foreach ($requiredKeys as $key) {

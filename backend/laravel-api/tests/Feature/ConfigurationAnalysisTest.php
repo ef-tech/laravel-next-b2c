@@ -2,9 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use Illuminate\Support\Facades\File;
-use Composer\Autoload\ClassLoader;
+use Tests\TestCase;
 
 class ConfigurationAnalysisTest extends TestCase
 {
@@ -83,7 +82,7 @@ class ConfigurationAnalysisTest extends TestCase
     public function test_backup_capability_exists(): void
     {
         // プロジェクトルートのGitリポジトリを確認（laravel-apiではなく上位）
-        $gitPath = dirname(dirname(base_path())) . '/.git';
+        $gitPath = dirname(dirname(base_path())).'/.git';
         $this->assertDirectoryExists($gitPath, 'Git repository should exist for backup');
 
         // 重要なファイルが存在してバックアップ可能であることを確認
@@ -92,7 +91,7 @@ class ConfigurationAnalysisTest extends TestCase
             'bootstrap/app.php',
             'routes/web.php',
             'config/auth.php',
-            'config/session.php'
+            'config/session.php',
         ];
 
         foreach ($criticalFiles as $file) {

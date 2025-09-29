@@ -108,7 +108,7 @@ class SessionOptimizationTest extends TestCase
             'domain',
             'secure',
             'http_only',
-            'same_site'
+            'same_site',
         ];
 
         foreach ($requiredKeys as $key) {

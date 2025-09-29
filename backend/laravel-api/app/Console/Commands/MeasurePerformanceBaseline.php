@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\File;
 class MeasurePerformanceBaseline extends Command
 {
     protected $signature = 'measure:baseline {--output=docs/performance_baseline.json : Output file path}';
+
     protected $description = 'Measure current performance baseline for optimization comparison';
 
     public function handle(): int
@@ -20,7 +21,7 @@ class MeasurePerformanceBaseline extends Command
 
         for ($i = 0; $i < $iterations; $i++) {
             $measurements[] = $this->singleMeasurement();
-            $this->info("Measurement " . ($i + 1) . " completed");
+            $this->info('Measurement '.($i + 1).' completed');
         }
 
         // 統計値計算
@@ -38,7 +39,7 @@ class MeasurePerformanceBaseline extends Command
 
         // ディレクトリが存在しない場合は作成
         $directory = dirname($fullPath);
-        if (!File::exists($directory)) {
+        if (! File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use Illuminate\Support\Facades\File;
+use Tests\TestCase;
 
 class DependencyOptimizationTest extends TestCase
 {
@@ -31,7 +31,7 @@ class DependencyOptimizationTest extends TestCase
             'php' => '^8.3',
             'laravel/framework' => '^12.0',
             'laravel/sanctum' => '^4.0',
-            'laravel/tinker' => '^2.10.1'
+            'laravel/tinker' => '^2.10.1',
         ];
 
         foreach ($requiredPackages as $package => $version) {
@@ -71,7 +71,7 @@ class DependencyOptimizationTest extends TestCase
         // Sanctum設定ファイルの存在確認
         $sanctumConfigPath = config_path('sanctum.php');
 
-        if (!File::exists($sanctumConfigPath)) {
+        if (! File::exists($sanctumConfigPath)) {
             // 設定ファイルが存在しない場合は、まだ公開されていない
             $this->markTestIncomplete('Sanctum config not published yet');
         }
@@ -96,7 +96,7 @@ class DependencyOptimizationTest extends TestCase
             'laravel/pint',
             'phpunit/phpunit',
             'mockery/mockery',
-            'nunomaduro/collision'
+            'nunomaduro/collision',
         ];
 
         foreach ($requiredDevPackages as $package) {
@@ -127,7 +127,7 @@ class DependencyOptimizationTest extends TestCase
             'autoload',
             'autoload-dev',
             'scripts',
-            'config'
+            'config',
         ];
 
         foreach ($requiredSections as $section) {
