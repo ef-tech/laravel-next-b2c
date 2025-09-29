@@ -10,7 +10,9 @@ laravel-next-b2c/
 │   └── user-app/        # エンドユーザー向けアプリケーション
 ├── .claude/             # Claude Code設定・コマンド
 ├── .kiro/               # Kiro仕様駆動開発設定
+├── .idea/               # IntelliJ IDEA設定 (IDE固有、gitignore済み)
 ├── .git/                # Gitリポジトリ
+├── .gitignore           # 統合ファイル除外設定 (モノレポ対応)
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
 └── README.md            # プロジェクト概要
 ```
