@@ -34,7 +34,6 @@ laravel-next-b2c/
 ├── frontend/user-app/       # Next.js 15 ユーザー画面
 │   ├── app/                 # ユーザー向けページ
 │   └── components/          # UI コンポーネント
-├── scripts/                 # 共通スクリプト
 ├── .kiro/                  # Kiro仕様管理
 └── .claude/                # Claude Code設定
 ```
@@ -181,29 +180,30 @@ graph LR
 
 ### 📦 5分セットアップ（Docker推奨）
 
-リポジトリをクローンしてから全サービスを起動するまで、わずか4つのコマンドで完了：
+リポジトリをクローンしてから全サービスを起動するまで、わずか5つのコマンドで完了：
 
 ```bash
-# 1. リポジトリのクローン
+# 1. リポジトリのクローンと移動
 git clone https://github.com/ef-tech/laravel-next-b2c.git
-cd laravel-next-b2c
+cd laravel-next-b2c/backend/laravel-api
 
-# 2. Laravel環境設定
-cd backend/laravel-api
+# 2. 依存関係インストールと環境設定
+composer install
 cp .env.example .env
-php artisan key:generate
 
 # 3. Laravel Sailでバックエンド起動（Docker）
 ./vendor/bin/sail up -d
 
-# 4. フロントエンドアプリケーション起動
-# Admin App (別ターミナル)
-cd ../../frontend/admin-app
-npm install && npm run dev
+# 4. コンテナ内でセットアップコマンド実行
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
 
-# User App (別ターミナル)
-cd ../user-app
-npm install && npm run dev
+# 5. フロントエンドアプリケーション起動（別ターミナル）
+# Admin App
+cd ../../frontend/admin-app && npm install && npm run dev
+
+# User App (さらに別ターミナル)
+cd ../user-app && npm install && npm run dev
 ```
 
 ### 🌐 アクセスURL
@@ -224,7 +224,7 @@ npm install && npm run dev
 
 ```bash
 # API疎通確認
-curl http://localhost:13000/api/health
+curl http://localhost:13000/up
 
 # フロントエンド確認
 curl http://localhost:3000
@@ -245,20 +245,11 @@ Laravel Sailを使用した開発環境はコンテナ化されており、依�
 ```bash
 cd backend/laravel-api
 
-# 環境変数ファイルの作成
-cp .env.example .env
-
-# Composerの依存関係インストール（初回のみ）
+# 依存関係インストール（初回のみ）
 composer install
 
-# アプリケーションキーの生成
-php artisan key:generate
-
-# データベースとテーブル作成
-./vendor/bin/sail artisan migrate
-
-# シードデータの挿入（オプション）
-./vendor/bin/sail artisan db:seed
+# 環境変数ファイルの作成
+cp .env.example .env
 ```
 
 #### ステップ2: Dockerサービス起動
@@ -269,6 +260,19 @@ php artisan key:generate
 
 # ログ確認（必要に応じて）
 ./vendor/bin/sail logs -f
+```
+
+#### ステップ3: アプリケーション初期化
+
+```bash
+# アプリケーションキーの生成（コンテナ内で実行）
+./vendor/bin/sail artisan key:generate
+
+# データベースとテーブル作成
+./vendor/bin/sail artisan migrate
+
+# シードデータの挿入（オプション）
+./vendor/bin/sail artisan db:seed
 ```
 
 </details>
@@ -454,32 +458,25 @@ cd ../../backend/laravel-api && ./vendor/bin/sail artisan test
 
 #### Laravel（`.env`）
 
-```bash
-# アプリケーション基本設定
-APP_NAME=Laravel
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://localhost
+| 設定項目 | Docker環境 | ネイティブ環境 | 説明 |
+|---------|-----------|--------------|------|
+| **基本設定** |
+| `APP_NAME` | `Laravel` | `Laravel` | アプリケーション名 |
+| `APP_ENV` | `local` | `local` | 実行環境 |
+| `APP_URL` | `http://localhost:13000` | `http://localhost:13000` | アプリケーションURL |
+| **データベース** |
+| `DB_CONNECTION` | `pgsql` | `sqlite` | DB種別 |
+| `DB_HOST` | `pgsql` | `127.0.0.1` | DBホスト（Docker=サービス名） |
+| `DB_PORT` | `5432` | `5432` | DBポート |
+| **Redis** |
+| `REDIS_HOST` | `redis` | `127.0.0.1` | Redisホスト（Docker=サービス名） |
+| `REDIS_PORT` | `6379` | `6379` | Redisポート |
+| **メール** |
+| `MAIL_HOST` | `mailpit` | `127.0.0.1` | メールサーバー（Docker=サービス名） |
+| `MAIL_PORT` | `1025` | `2525` | メールポート |
 
-# カスタムポート設定（13000番台）
-APP_PORT=13000
-FORWARD_REDIS_PORT=13379
-FORWARD_MAILPIT_PORT=11025
-FORWARD_MAILPIT_DASHBOARD_PORT=13025
-
-# データベース設定
-DB_CONNECTION=sqlite  # または mysql
-DB_DATABASE=laravel   # SQLiteの場合は database/database.sqlite
-
-# Redis設定
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-
-# メール設定（開発環境）
-MAIL_MAILER=log
-MAIL_HOST=127.0.0.1
-MAIL_PORT=2525
-```
+**重要**: Docker環境では、サービス間通信に **サービス名** を使用します（`redis`, `pgsql`, `mailpit`）。
+ネイティブ環境では、`127.0.0.1` を使用します。
 
 #### Next.js設定
 
@@ -591,18 +588,25 @@ kill -9 [PID]
 <details>
 <summary>🚨 CORS エラー</summary>
 
-Laravel側でCORS設定を確認：
+フロントエンドとAPIの通信でCORSエラーが発生した場合：
 
 ```bash
 cd backend/laravel-api
 
-# CORS設定確認
-cat config/cors.php
+# Laravel CORSパッケージをインストール（必要に応じて）
+composer require fruitcake/laravel-cors
 
-# 環境変数で許可オリジン追加
-# .env に追加:
-# FRONTEND_URL=http://localhost:3000,http://localhost:3001
+# config/cors.php の設定例
+# 'allowed_origins' => [
+#     'http://localhost:3000',
+#     'http://localhost:3001',
+# ],
+
+# または開発環境では
+# 'allowed_origins' => ['*'],
 ```
+
+**注意**: 本番環境では具体的なオリジンを指定してください。
 
 </details>
 
@@ -669,7 +673,7 @@ node --version
 npm --version
 
 # サービス起動確認
-curl http://localhost:13000/api/health
+curl http://localhost:13000/up
 curl http://localhost:3000
 curl http://localhost:3001
 
