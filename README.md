@@ -170,13 +170,12 @@ graph LR
         end
 
         subgraph "Backend"
-            API[Laravel API<br/>:8000]
-            DB[(MySQL<br/>:3306)]
-            Redis[(Redis<br/>:6379)]
+            API[Laravel API<br/>:13000]
+            DB[(PostgreSQL<br/>:13432)]
+            Redis[(Redis<br/>:13379)]
         end
 
         subgraph "Development Tools"
-            Vite[Vite Dev Server]
             Turbopack[Turbopack]
             ESLint[ESLint]
             Sail[Laravel Sail]
@@ -188,8 +187,6 @@ graph LR
     API --> DB
     API --> Redis
 
-    Vite -.-> Admin
-    Vite -.-> User
     Turbopack -.-> Admin
     Turbopack -.-> User
     Sail -.-> API
@@ -353,13 +350,13 @@ cd backend/laravel-api
 # 依存関係インストール
 composer install
 
-# キー生成とマイグレーション
-php artisan key:generate
-php artisan migrate
-php artisan db:seed
+# キー生成とマイグレーション (Docker環境)
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan db:seed
 
-# 開発サーバー起動
-php artisan serve --port=13000
+# 開発サーバー起動 (Docker環境 - sail up で自動起動)
+./vendor/bin/sail up -d
 ```
 
 </details>
@@ -372,7 +369,7 @@ php artisan serve --port=13000
 | Admin App | http://localhost:3000 | http://localhost:3000 |
 | User App | http://localhost:3001 | http://localhost:3001 |
 | Mailpit | http://localhost:13025 | ❌ |
-| Redis | localhost:13379 | localhost:6379 |
+| Redis | localhost:13379 | localhost:13379 |
 
 ## 💻 開発ワークフロー
 
