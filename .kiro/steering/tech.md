@@ -103,7 +103,6 @@ npm run lint   # ESLintチェック
 ### ポート設定 (カスタマイズ済み)
 ```env
 APP_PORT=13000                    # Laravel アプリケーション
-VITE_PORT=5173                    # Vite開発サーバー
 FORWARD_REDIS_PORT=13379          # Redis
 FORWARD_DB_PORT=13432             # PostgreSQL
 FORWARD_MAILPIT_PORT=11025        # Mailpit SMTP
@@ -126,6 +125,7 @@ FORWARD_MINIO_CONSOLE_PORT=13010  # MinIO Console
 - **型安全性**: TypeScript全面採用
 - **コード品質**: ESLint + Laravel Pint統合
 - **テスト環境**: PHPUnit統合、テスト用データベース自動作成
+- **統合.gitignore**: モノレポ全体のファイル管理（2024年12月更新）
 
 ## パフォーマンス最適化
 - **Turbopack**: 高速バンドリング

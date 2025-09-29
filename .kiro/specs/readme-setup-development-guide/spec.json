@@ -1,0 +1,85 @@
+{
+  "feature_name": "readme-setup-development-guide",
+  "created_at": "2025-09-29T09:55:00Z",
+  "updated_at": "2025-09-29T11:15:00Z",
+  "language": "ja",
+  "phase": "implemented",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 2,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/2",
+    "title": "README.md の整備（セットアップ手順、開発フロー記載）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": ["PHP 8.4", "Laravel 12", "Composer"],
+      "frontend": ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS 4"],
+      "infrastructure": ["Docker", "Git", "npm/pnpm", "Mermaid.js"],
+      "tools": ["GitHub CLI", "ESLint", "Makefile/Taskfile", "CI/CD"]
+    },
+    "requirements_hints": [
+      "15分以内でのローカル開発環境構築",
+      "モノレポ構成の包括的ドキュメント化",
+      "クイックスタートガイドの提供",
+      "技術スタック詳細とアーキテクチャ説明",
+      "環境構築の段階的手順（Docker + ネイティブ両対応）",
+      "日常的な開発ワークフローの標準化",
+      "テスト・品質保証手順の明文化",
+      "トラブルシューティングガイド作成"
+    ],
+    "project_structure": [
+      "backend/laravel-api/",
+      "frontend/admin-app/",
+      "frontend/user-app/",
+      "scripts/",
+      ".kiro/",
+      ".claude/",
+      "/README.md"
+    ],
+    "services": {
+      "Laravel API": {"description": "PHP 8.4, Laravel 12 API"},
+      "Admin App": {"description": "Next.js 15 管理画面 (React 19, TS, Tailwind 4)"},
+      "User App": {"description": "Next.js 15 ユーザー画面"}
+    },
+    "todo_items": [
+      "プロジェクト概要セクション作成",
+      "技術スタック一覧表作成",
+      "基本的な環境構築手順記述",
+      "クイックスタートガイド作成",
+      "アーキテクチャ図作成（Mermaid.js）",
+      "詳細セットアップ手順（Backend）",
+      "詳細セットアップ手順（Frontend）",
+      "開発ワークフロー標準化",
+      "テスト実行手順整備",
+      "コードフォーマット・リント手順",
+      "トラブルシューティングガイド",
+      "環境変数管理ガイド",
+      "Makefileコマンド統合",
+      "自動生成スクリプト作成",
+      "CI/CD統合チェック",
+      "継続的メンテナンス仕組み確立"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    },
+    "implementation": {
+      "completed": true,
+      "completed_at": "2025-09-29T11:15:00Z"
+    }
+  },
+  "ready_for_implementation": true
+}
