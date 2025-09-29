@@ -12,6 +12,10 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+.fleet/
+.nova/
+.phpactor.json
+.zed/
 
 # Logs
 logs
@@ -28,16 +32,51 @@ lerna-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.backup
+.env.production
 
-# Dependency directories
-node_modules/
-vendor/
+# === Laravel API (backend/laravel-api/) ===
+/backend/laravel-api/.phpunit.result.cache
+/backend/laravel-api/.phpunit.cache
+/backend/laravel-api/auth.json
+/backend/laravel-api/node_modules
+/backend/laravel-api/public/build
+/backend/laravel-api/public/hot
+/backend/laravel-api/public/storage
+/backend/laravel-api/storage/*.key
+/backend/laravel-api/storage/pail
+/backend/laravel-api/vendor
+/backend/laravel-api/Homestead.json
+/backend/laravel-api/Homestead.yaml
 
-# Build outputs
-/build
-/dist
-/.next/
-/out/
+# === Next.js Frontend Apps ===
+# Dependencies
+/frontend/*/node_modules
+/frontend/*/.pnp
+/frontend/*/.pnp.*
+/frontend/*/.yarn/*
+!/frontend/*/.yarn/patches
+!/frontend/*/.yarn/plugins
+!/frontend/*/.yarn/releases
+!/frontend/*/.yarn/versions
+
+# Testing
+/frontend/*/coverage
+
+# Next.js build outputs
+/frontend/*/.next/
+/frontend/*/out/
+/frontend/*/build
+
+# Vercel
+/frontend/*/.vercel
+
+# TypeScript
+/frontend/*/*.tsbuildinfo
+/frontend/*/next-env.d.ts
+
+# Misc
+*.pem
 
 # Runtime data
 pids
@@ -45,7 +84,7 @@ pids
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
+# Coverage directory
 coverage/
 *.lcov
 
@@ -70,43 +109,6 @@ temp/
 
 # Yarn Integrity file
 .yarn-integrity
-
-# dotenv environment variables file
-.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-out
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
-tmp/
-temp/
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
 
 # Database
 *.sqlite
