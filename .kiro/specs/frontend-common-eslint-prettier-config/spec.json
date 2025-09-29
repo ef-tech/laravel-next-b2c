@@ -1,0 +1,85 @@
+{
+  "feature_name": "frontend-common-eslint-prettier-config",
+  "created_at": "2025-09-30T00:00:00Z",
+  "updated_at": "2025-09-30T00:00:00Z",
+  "language": "ja",
+  "phase": "initialized",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 7,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/7",
+    "title": "フロントエンド共通 ESLint/Prettier 設定",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel",
+      "frontend": "Next.js, TypeScript, React, Tailwind CSS",
+      "infrastructure": "npm workspaces (monorepo)",
+      "tools": "ESLint 9, Prettier 3, Husky 9, lint-staged 15, VSCode"
+    },
+    "requirements_hints": [
+      "admin-appとuser-appの2つのNext.jsアプリケーション向け共通ESLint設定の作成",
+      "Prettier設定の導入とコードフォーマット統一",
+      "Git Hooks (husky + lint-staged) によるコミット前チェックの自動化",
+      "VSCodeエディタ設定の統一と保存時自動フォーマット設定",
+      "モノレポ構成での共通設定共有（FlatCompat活用）",
+      "段階的適用戦略（既存コードへの一括適用は対象外）"
+    ],
+    "project_structure": [
+      "/.prettierrc",
+      "/.prettierignore",
+      "/frontend/.eslint.base.mjs",
+      "/frontend/admin-app/eslint.config.mjs",
+      "/frontend/user-app/eslint.config.mjs",
+      "/package.json",
+      "/frontend/admin-app/package.json",
+      "/frontend/user-app/package.json",
+      "/.husky/pre-commit",
+      "/.vscode/settings.json",
+      "/.vscode/extensions.json"
+    ],
+    "services": {},
+    "todo_items": [
+      "/.prettierrc 作成",
+      "/.prettierignore 作成",
+      "/frontend/.eslint.base.mjs 作成",
+      "/frontend/admin-app/eslint.config.mjs 更新",
+      "/frontend/user-app/eslint.config.mjs 更新",
+      "ルート /package.json 作成",
+      "/frontend/admin-app/package.json スクリプト更新",
+      "/frontend/user-app/package.json スクリプト更新",
+      "npm install 実行（ルート）",
+      "各アプリの npm install 実行",
+      "npx husky init 実行",
+      "/.husky/pre-commit 作成",
+      "実行権限付与（chmod +x .husky/pre-commit）",
+      "コミット動作テスト",
+      "/.vscode/settings.json 作成",
+      "/.vscode/extensions.json 作成",
+      "VSCode再起動で設定反映確認",
+      "npm run format:check 実行成功",
+      "npm run lint 実行成功（警告は許容）",
+      "npm run type-check 実行成功",
+      "コミット時のlint-staged動作確認",
+      "各アプリの npm run dev 正常起動確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": false,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
