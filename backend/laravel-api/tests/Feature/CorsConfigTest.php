@@ -81,9 +81,9 @@ class CorsConfigTest extends TestCase
     {
         $corsConfig = config('cors');
 
-        // supports_credentialsがtrueに設定されていることを確認（Sanctumトークン認証のため）
-        $this->assertTrue($corsConfig['supports_credentials'],
-            'CORS should support credentials for Sanctum token authentication');
+        // supports_credentialsがfalseに設定されていることを確認（トークンベース認証のため）
+        $this->assertFalse($corsConfig['supports_credentials'],
+            'CORS should not support credentials for stateless token-based authentication');
     }
 
     /**
