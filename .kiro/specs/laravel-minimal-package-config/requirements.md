@@ -37,7 +37,7 @@ resources/views → 削除予定
 ```
 
 ### Development Services Configuration
-- Laravel: API Port 8000, Health Endpoint /up
+- Laravel: API Port 13000, Health Endpoint /up
 
 ### Requirements Hints
 Issue 解析から抽出された要件：
