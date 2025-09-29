@@ -72,7 +72,7 @@ Laravel最小限パッケージ構成の最適化において実施された全�
 1. **Laravel Sanctum追加**: API認証機能の提供
 2. **PHP 8.4 & Laravel 12.0**: 最新バージョンによる性能向上
 3. **Larastan追加**: 静的解析による品質向上
-4. **Laravel Sail削除**: Docker開発環境は別途管理
+4. **Laravel Sail保持**: Docker開発環境として継続使用
 
 ---
 
