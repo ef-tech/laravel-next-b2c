@@ -28,7 +28,7 @@ class DependencyOptimizationTest extends TestCase
         $composerContent = json_decode(File::get($composerPath), true);
 
         $requiredPackages = [
-            'php' => '^8.3',
+            'php' => '^8.4',
             'laravel/framework' => '^12.0',
             'laravel/sanctum' => '^4.0',
             'laravel/tinker' => '^2.10.1',
