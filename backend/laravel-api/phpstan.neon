@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - app/
+        - bootstrap/app.php
+        - routes/
+        - tests/
+    excludePaths:
+        - tests/Feature/OptimizationTargetAnalysisTest.php
+        - tests/Feature/ConfigurationAnalysisTest.php
+    reportUnmatchedIgnoredErrors: false

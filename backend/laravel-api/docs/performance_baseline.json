@@ -1,0 +1,76 @@
+{
+    "boot_time_ms": {
+        "min": 0.04,
+        "max": 3.748,
+        "avg": 0.786,
+        "median": 0.041
+    },
+    "memory_usage_mb": {
+        "min": 26,
+        "max": 26,
+        "avg": 26,
+        "median": 26
+    },
+    "memory_peak_mb": {
+        "min": 26,
+        "max": 26,
+        "avg": 26,
+        "median": 26
+    },
+    "measured_at": "2025-09-29T08:35:36.457118Z",
+    "iterations": 5,
+    "measurements": [
+        {
+            "boot_time_ms": 3.748,
+            "memory_usage_mb": 26,
+            "memory_peak_mb": 26,
+            "memory_delta_mb": 2
+        },
+        {
+            "boot_time_ms": 0.061,
+            "memory_usage_mb": 26,
+            "memory_peak_mb": 26,
+            "memory_delta_mb": 0
+        },
+        {
+            "boot_time_ms": 0.041,
+            "memory_usage_mb": 26,
+            "memory_peak_mb": 26,
+            "memory_delta_mb": 0
+        },
+        {
+            "boot_time_ms": 0.04,
+            "memory_usage_mb": 26,
+            "memory_peak_mb": 26,
+            "memory_delta_mb": 0
+        },
+        {
+            "boot_time_ms": 0.04,
+            "memory_usage_mb": 26,
+            "memory_peak_mb": 26,
+            "memory_delta_mb": 0
+        }
+    ],
+    "dependencies": {
+        "production": 4,
+        "development": 7,
+        "total": 11,
+        "packages": {
+            "production": [
+                "php",
+                "laravel\/framework",
+                "laravel\/sanctum",
+                "laravel\/tinker"
+            ],
+            "development": [
+                "fakerphp\/faker",
+                "laravel\/pail",
+                "laravel\/pint",
+                "laravel\/sail",
+                "mockery\/mockery",
+                "nunomaduro\/collision",
+                "phpunit\/phpunit"
+            ]
+        }
+    }
+}

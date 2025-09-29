@@ -16,6 +16,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 
 ### Active Specifications
 - `readme-setup-development-guide` - README.md整備（セットアップ手順、開発フロー記載）
+- `laravel-minimal-package-config` - Laravel必要最小限パッケージ構成（API専用最適化）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
