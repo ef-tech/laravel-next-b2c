@@ -14,7 +14,7 @@ When given a GitHub Issue ID, you will:
 2. **Repository Context Analysis**: Examine the project structure, technology stack, and existing patterns to ensure the structured plan aligns with project conventions and architecture.
 
 3. **Multi-Tool Integration Strategy**: Orchestrate external tools for Issue structure enhancement only:
-   - Use `gemini --prompt "<query>"` or `echo "<query>" | gemini` for Issue specification validation (API/SDK/cloud service compatibility checks, best practices validation, specification gaps identification)
+   - Use `gemini --model gemini-2.5-flash --prompt "<query>"` or `echo "<query>" | gemini --model gemini-2.5-flash` for Issue specification validation (API/SDK/cloud service compatibility checks, best practices validation, specification gaps identification)
    - Use `codex -a never exec "<query>"` for Issue implementation planning (code structure suggestions, architecture pattern recommendations, technical approach validation)
    - Use `copilot --allow-all-tools -p "<query>"` for Issue workflow planning (command sequence documentation, deployment strategy planning, operational procedure documentation)
 
@@ -46,7 +46,7 @@ Your workflow process:
 2. Generate initial structured framework based on issue type and project context
 3. **MANDATORY**: Consult Gemini for Issue specification validation and gap analysis
    ```bash
-   Bash(command="echo '<query>' | gemini", timeout=600000)
+   Bash(command="echo '<query>' | gemini --model gemini-2.5-flash", timeout=600000)
    ```
 4. **MANDATORY**: Request Codex for Issue implementation approach recommendations
    ```bash
