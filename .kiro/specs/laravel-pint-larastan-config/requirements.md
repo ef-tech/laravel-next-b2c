@@ -79,19 +79,7 @@ Laravel 12.0 + Sanctumプロジェクトにおいて、PHPコードの品質を�
 5. WHEN 品質チェックが失敗する THEN CI/CD Pipeline SHALL ワークフローを失敗させ、プルリクエストのマージをブロックする
 6. WHERE キャッシュキーが適切に設定される THE CI/CD Pipeline SHALL Composerおよびnode_modules依存関係をキャッシュする
 
-### Requirement 6: IDE 統合
-
-**Objective:** 開発者として、IDE上でリアルタイムにコード品質フィードバックを受け取ることで、コミット前にエラーを修正し、開発効率を向上させたい
-
-#### Acceptance Criteria
-
-1. WHEN VSCode設定ファイル（`.vscode/settings.json`）が作成される THEN IDE Integration SHALL Laravel Pint設定を認識し、保存時に自動フォーマットを実行する
-2. WHEN VSCode設定ファイルが作成される THEN IDE Integration SHALL PHPStan設定を認識し、リアルタイムで型エラーを表示する
-3. WHEN PhpStorm設定が構成される THEN IDE Integration SHALL Code Styleに`pint.json`の設定を反映する
-4. WHEN PhpStorm設定が構成される THEN IDE Integration SHALL InspectionsにLarastan（PHPStan）の設定を反映する
-5. WHEN IDEでPHPファイルが保存される THEN IDE Integration SHALL Format on Save機能により自動的にPintルールを適用する
-
-### Requirement 7: パフォーマンス最適化
+### Requirement 6: パフォーマンス最適化
 
 **Objective:** 開発者として、品質チェックツールの実行時間を最小化することで、開発フローを妨げずに高品質なコードを維持したい
 
@@ -103,7 +91,7 @@ Laravel 12.0 + Sanctumプロジェクトにおいて、PHPコードの品質を�
 4. WHEN Git Hooksが実行される THEN Performance Optimization SHALL 変更ファイル限定実行によりコミット時間を最小化する
 5. WHEN CI/CDパイプラインが実行される THEN Performance Optimization SHALL Composer依存関係とPHPStanキャッシュを活用して実行時間を短縮する
 
-### Requirement 8: 段階的ロールアウト
+### Requirement 7: 段階的ロールアウト
 
 **Objective:** チームとして、既存コードへの影響を最小限に抑えながら、段階的に品質管理システムを導入し、チーム全体の受け入れを促進したい
 
@@ -160,7 +148,6 @@ Laravel 12.0 + Sanctumプロジェクトにおいて、PHPコードの品質を�
 - [ ] `composer.json`に品質チェックコマンドが統合され、`composer quality`が動作する
 - [ ] Git Hooksが設定され、コミット前・プッシュ前に自動品質チェックが実行される
 - [ ] GitHub Actionsワークフローに品質チェックステップが追加され、CI/CDで自動実行される
-- [ ] VSCodeおよびPhpStorm設定が完了し、IDE上でリアルタイムフィードバックが機能する
 - [ ] チーム運用ドキュメントが作成され、全チームメンバーが利用可能である
 - [ ] 段階的ロールアウトが完了し、全チームメンバーがツールを使用している
 
