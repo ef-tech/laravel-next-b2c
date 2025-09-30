@@ -1,0 +1,96 @@
+{
+  "feature_name": "laravel-pest-migration",
+  "created_at": "2025-09-30T19:30:00Z",
+  "updated_at": "2025-09-30T19:45:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 10,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/10",
+    "title": "Laravel PHPUnit を Pest に移行して設定とテストサンプル作成",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "PHP 8.4, Laravel 12.0, PHPUnit 11.5",
+      "testing": "Pest 4, pestphp/pest-plugin-laravel 4.0, pestphp/pest-plugin-arch 4.0, nunomaduro/collision 8.0",
+      "infrastructure": "Laravel Sail, Docker",
+      "tools": "Composer, GitHub Actions, Xdebug"
+    },
+    "requirements_hints": [
+      "Pest 4のインストールと基本設定",
+      "tests/Pest.phpの作成（Laravel統合設定）",
+      "API専用テストサンプルの作成（Sanctum認証、CORS、JSONレスポンス検証）",
+      "アーキテクチャテストのサンプル作成",
+      "テストカバレッジ設定と品質ゲート",
+      "開発者向けドキュメント作成",
+      "CI/CD設定の更新（段階的移行対応）"
+    ],
+    "project_structure": [
+      "backend/laravel-api/tests/Pest.php",
+      "backend/laravel-api/pest.xml",
+      "backend/laravel-api/tests/Feature/Api/AuthenticationTest.php",
+      "backend/laravel-api/tests/Feature/Api/CorsTest.php",
+      "backend/laravel-api/tests/Feature/Api/JsonApiTest.php",
+      "backend/laravel-api/tests/Architecture/LayerTest.php",
+      "backend/laravel-api/tests/Architecture/NamingTest.php",
+      "backend/laravel-api/tests/Architecture/QualityTest.php",
+      "backend/laravel-api/scripts/convert-phpunit-to-pest.sh",
+      "backend/laravel-api/docs/PEST_MIGRATION_CHECKLIST.md",
+      "backend/laravel-api/docs/PEST4_NEW_FEATURES.md",
+      "backend/laravel-api/docs/PEST_TROUBLESHOOTING.md",
+      "backend/laravel-api/docs/PEST_CODING_STANDARDS.md",
+      ".github/workflows/test.yml"
+    ],
+    "services": {},
+    "todo_items": [
+      "PHP 8.4動作確認",
+      "Pest 4のインストール（composer require ^4.0）",
+      "php artisan pest:install 実行",
+      "tests/Pest.php 作成",
+      "pest.xml 作成",
+      "composer.jsonスクリプト更新",
+      "Sanctum認証テストサンプル作成",
+      "CORSテストサンプル作成",
+      "JSON APIレスポンステストサンプル作成",
+      "アーキテクチャテストサンプル作成（3ファイル）",
+      "サンプルテスト実行成功確認",
+      "変換スクリプト作成（scripts/convert-phpunit-to-pest.sh）",
+      "カバレッジチェックスクリプト作成",
+      "移行チェックリスト作成",
+      "Pest 4新機能ガイド作成",
+      "トラブルシューティングガイド作成",
+      "コーディング規約ドキュメント作成",
+      "GitHub Actionsワークフロー更新",
+      "テストマトリックス設定（pest/phpunit/integration）",
+      "Test Sharding設定（4並列）",
+      "カバレッジレポート連携",
+      "並列実行設定",
+      "composer test-pest 成功",
+      "composer test-phpunit 成功（既存テスト）",
+      "composer test-all 成功",
+      "composer test-coverage 実行成功",
+      "composer test-parallel 実行成功",
+      "composer test-shard 実行成功",
+      "CI/CD全パイプライン成功"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}

@@ -19,6 +19,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `laravel-minimal-package-config` - Laravel必要最小限パッケージ構成（API専用最適化）
 - `frontend-common-eslint-prettier-config` - フロントエンド共通ESLint/Prettier設定（モノレポ統一設定）
 - `laravel-pint-larastan-config` - Laravel用Laravel Pint・Larastan設定（PHP品質管理システム強化）
+- `laravel-pest-migration` - Laravel PHPUnit を Pest 4に移行（テストフレームワーク移行とサンプル作成）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
