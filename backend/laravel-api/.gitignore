@@ -2,4 +2,4 @@
 # Only include patterns that are specific to this Laravel instance
 
 # PHPStan
-/phpstan.neon
+phpstan-baseline.neon

@@ -21,6 +21,62 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Testing
+
+This project uses **Pest 4** as the testing framework. All tests have been migrated from PHPUnit to Pest for a more expressive and modern testing experience.
+
+### Running Tests
+
+```bash
+# Run all tests
+composer test
+
+# Run tests with coverage report
+composer test-coverage
+
+# Run tests in parallel (faster execution)
+composer test-parallel
+
+# Run specific test file
+./vendor/bin/pest tests/Feature/ExampleTest.php
+
+# Run tests with filtering
+./vendor/bin/pest --filter=authentication
+```
+
+### Available Test Commands
+
+- `composer test` - Run all Pest tests
+- `composer test-coverage` - Generate coverage report (requires Xdebug or PCOV)
+- `composer test-parallel` - Run tests in parallel using multiple processes
+- `composer test-shard` - Run tests in sharded mode for CI/CD environments
+
+### Test Structure
+
+- `tests/Unit/` - Unit tests (isolated component tests)
+- `tests/Feature/` - Feature tests (integration tests)
+- `tests/Architecture/` - Architecture tests (enforcing design rules)
+
+### Writing Tests
+
+Pest uses a function-based syntax that's more expressive than PHPUnit:
+
+```php
+it('returns successful response for health check endpoint', function () {
+    $response = $this->get('/up');
+    $response->assertStatus(200);
+});
+
+it('validates user authentication', function () {
+    $user = User::factory()->create();
+
+    expect($user->name)->not->toBeEmpty()
+        ->and($user->email)->toBeString();
+});
+```
+
+For more information about Pest, visit [Pest PHP Documentation](https://pestphp.com/docs).
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
