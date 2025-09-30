@@ -23,21 +23,25 @@ cp "$FILE" "$BACKUP"
 echo "✅ Backup created: $BACKUP"
 
 # Perform basic conversions
+# Note: Using -i.bak for cross-platform compatibility (works on both macOS and Linux)
 # 1. Remove namespace Tests declaration
-sed -i '' '/^namespace Tests;/d' "$FILE"
+sed -i.bak '/^namespace Tests;/d' "$FILE"
 
 # 2. Remove use Tests\TestCase
-sed -i '' '/^use Tests\\TestCase;/d' "$FILE"
+sed -i.bak '/^use Tests\\TestCase;/d' "$FILE"
 
 # 3. Remove class definition (simple pattern)
-sed -i '' '/^class [A-Za-z]* extends TestCase/d' "$FILE"
-sed -i '' '/^{$/d' "$FILE"
+sed -i.bak '/^class [A-Za-z]* extends TestCase/d' "$FILE"
+sed -i.bak '/^{$/d' "$FILE"
 
 # 4. Convert test_ methods to it() syntax (basic pattern)
-sed -i '' 's/public function test_\(.*\)(/it('\''\1'\'', function () {/g' "$FILE"
+sed -i.bak 's/public function test_\(.*\)(/it('\''\1'\'', function () {/g' "$FILE"
 
 # 5. Remove closing brace for class
-sed -i '' '/^}$/d' "$FILE"
+sed -i.bak '/^}$/d' "$FILE"
+
+# Remove additional .bak files created by sed
+rm -f "$FILE.bak"
 
 echo "✅ Basic conversion completed"
 echo ""
