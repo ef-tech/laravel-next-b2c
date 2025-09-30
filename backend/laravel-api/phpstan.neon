@@ -4,11 +4,13 @@ includes:
 parameters:
     level: 8
     paths:
-        - app/
-        - bootstrap/app.php
-        - routes/
-        - tests/
+        - app
     excludePaths:
-        - tests/Feature/OptimizationTargetAnalysisTest.php
-        - tests/Feature/ConfigurationAnalysisTest.php
-    reportUnmatchedIgnoredErrors: false
+        - vendor
+        - storage
+        - bootstrap/cache
+        - database/migrations
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 32
+    tmpDir: storage/framework/cache/phpstan
