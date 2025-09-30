@@ -46,31 +46,31 @@
   - _Requirements: 3.4, 3.5, 3.6_
 
 - [ ] 4. Git Hooks強化
-- [ ] 4.1 Pre-commitフックを更新
+- [x] 4.1 Pre-commitフックを更新
   - 変更されたPHPファイルのみをPintでチェックする機能を追加
   - フォーマットエラー検出時にコミットを中断する動作を実装
   - 変更ファイル限定実行によりチェック時間を最小化
   - _Requirements: 4.1, 4.2, 4.5_
 
-- [ ] 4.2 Pre-pushフックを作成
+- [x] 4.2 Pre-pushフックを作成
   - 全体品質チェック（composer quality）を実行する機能を実装
   - 品質チェック失敗時にプッシュを中断する動作を実装
   - _Requirements: 4.3, 4.4_
 
 - [ ] 5. CI/CD統合
-- [ ] 5.1 GitHub Actionsワークフローを作成
+- [x] 5.1 GitHub Actionsワークフローを作成
   - PHP品質チェックステップを追加
   - composer qualityコマンドを実行する設定を追加
   - composer validate --strictを実行してcomposer.jsonの整合性を検証
   - _Requirements: 5.1, 5.2, 5.4_
 
-- [ ] 5.2 CI/CDキャッシュを設定
+- [x] 5.2 CI/CDキャッシュを設定
   - PHPStanキャッシュを有効化して実行時間を短縮
   - Composer依存関係キャッシュを設定
   - キャッシュキーを適切に設定
   - _Requirements: 5.3, 5.6_
 
-- [ ] 5.3 CI/CD品質ゲートを検証
+- [x] 5.3 CI/CD品質ゲートを検証
   - 品質チェック失敗時にワークフローを失敗させる動作を確認
   - プルリクエストのマージがブロックされることを確認
   - _Requirements: 5.5_
