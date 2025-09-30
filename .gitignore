@@ -35,6 +35,9 @@ lerna-debug.log*
 .env.backup
 .env.production
 
+# === Monorepo Root ===
+/node_modules
+
 # === Laravel API (backend/laravel-api/) ===
 /backend/laravel-api/.phpunit.result.cache
 /backend/laravel-api/.phpunit.cache
