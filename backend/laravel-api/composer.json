@@ -62,18 +62,6 @@
             "@php artisan config:clear --ansi",
             "./vendor/bin/pest"
         ],
-        "test-pest": [
-            "@php artisan config:clear --ansi",
-            "./vendor/bin/pest"
-        ],
-        "test-phpunit": [
-            "@php artisan config:clear --ansi",
-            "./vendor/bin/phpunit"
-        ],
-        "test-all": [
-            "@test-phpunit",
-            "@test-pest"
-        ],
         "test-coverage": [
             "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=80"
         ],
