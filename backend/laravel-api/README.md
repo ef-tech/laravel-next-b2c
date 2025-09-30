@@ -55,8 +55,7 @@ composer test-parallel
 
 - `tests/Unit/` - Unit tests (isolated component tests)
 - `tests/Feature/` - Feature tests (integration tests)
-- `tests/Feature/Api/` - API endpoint tests
-- `tests/Arch/` - Architecture tests (enforcing design rules)
+- `tests/Architecture/` - Architecture tests (enforcing design rules)
 
 ### Writing Tests
 
