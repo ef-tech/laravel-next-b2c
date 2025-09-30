@@ -82,6 +82,17 @@ jobs:
         run: php artisan key:generate
         working-directory: backend/laravel-api
 
+      - name: Run database migrations
+        run: php artisan migrate --force
+        working-directory: backend/laravel-api
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 13432
+          DB_DATABASE: testing
+          DB_USERNAME: sail
+          DB_PASSWORD: password
+
       - name: Set up test environment
         run: |
           php artisan config:clear
@@ -96,6 +107,7 @@ jobs:
           DB_PASSWORD: password
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 13379
+          CACHE_STORE: array
 
       - name: Run Pest Tests (Shard ${{ matrix.shard }})
         run: ./vendor/bin/pest --shard=${{ matrix.shard }}/4
