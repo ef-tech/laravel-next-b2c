@@ -6,20 +6,20 @@
 
 ---
 
-- [ ] 1. Prettierコードフォーマット設定を導入する
-- [ ] 1.1 Prettierの基本設定を作成する
+- [x] 1. Prettierコードフォーマット設定を導入する
+- [x] 1.1 Prettierの基本設定を作成する
   - ルートディレクトリにPrettier設定ファイルを配置
   - printWidth、singleQuote、trailingComma、semi、tabWidth、endOfLine、Tailwind CSSプラグインを含む設定を定義
   - フォーマット対象外ディレクトリ（node_modules、.next、dist、build、out、coverage、.turbo、.vercel、*.min.*、backend、.kiro、.claude、.git、.husky、.idea）を除外するignore設定を作成
   - _Requirements: 1.1, 1.2_
 
-- [ ] 1.2 Prettierコマンドを統合する
+- [x] 1.2 Prettierコマンドを統合する
   - ルートpackage.jsonにformat:checkスクリプトを追加（frontend配下のTypeScript、JavaScript、JSON、CSS、Markdownファイルのフォーマット状態をチェック）
   - ルートpackage.jsonにformatスクリプトを追加（frontend配下のすべての対象ファイルを自動フォーマット）
   - _Requirements: 1.3, 1.4_
 
-- [ ] 2. ESLint共通設定とモノレポ統合を構築する
-- [ ] 2.1 共通ESLint設定を作成する
+- [x] 2. ESLint共通設定とモノレポ統合を構築する
+- [x] 2.1 共通ESLint設定を作成する
   - frontendディレクトリに共通ESLint基本設定ファイルを配置
   - FlatCompatを使用してNext.js推奨設定（core-web-vitals）とTypeScript推奨設定を継承
   - カスタムルール（no-console: warn、no-debugger: warn、unused-vars: warn）を定義
@@ -27,55 +27,55 @@
   - 共通ignoreパターン（node_modules、.next、out、build、dist、*.min.*、next-env.d.ts）を定義
   - _Requirements: 2.1, 2.5_
 
-- [ ] 2.2 各アプリのESLint設定を共通設定に変更する
+- [x] 2.2 各アプリのESLint設定を共通設定に変更する
   - admin-appのESLint設定ファイルを共通設定をimportする形式に変更
   - user-appのESLint設定ファイルを共通設定をimportする形式に変更
   - 各アプリで個別のカスタマイズも可能な構造を維持
   - _Requirements: 2.2_
 
-- [ ] 2.3 npm workspacesを設定してモノレポ統合を実現する
+- [x] 2.3 npm workspacesを設定してモノレポ統合を実現する
   - ルートpackage.jsonを作成し、workspacesにadmin-appとuser-appを指定
   - ルートpackage.jsonにlintスクリプトを追加（全ワークスペースで並列実行）
   - ルートpackage.jsonにlint:fixスクリプトを追加（全ワークスペースで自動修正）
   - ルートpackage.jsonにtype-checkスクリプトを追加（全ワークスペースで型チェック）
   - _Requirements: 2.3, 2.4, 5.1, 5.5_
 
-- [ ] 2.4 各アプリのpackage.jsonスクリプトを更新する
+- [x] 2.4 各アプリのpackage.jsonスクリプトを更新する
   - admin-appのpackage.jsonにlint、lint:fix、type-checkスクリプトを定義
   - user-appのpackage.jsonにlint、lint:fix、type-checkスクリプトを定義
   - 各アプリディレクトリおよびルートから該当コマンドを実行可能にする
   - _Requirements: 5.4_
 
-- [ ] 3. 依存関係をインストールして互換性を確保する
-- [ ] 3.1 ルートpackage.jsonに依存関係を追加する
+- [x] 3. 依存関係をインストールして互換性を確保する
+- [x] 3.1 ルートpackage.jsonに依存関係を追加する
   - devDependenciesにeslint、eslint-config-prettier、eslint-config-next、@eslint/eslintrcを追加
   - devDependenciesにprettier、prettier-plugin-tailwindcssを追加
   - devDependenciesにhusky、lint-stagedを追加（次フェーズで使用）
   - 相互に互換性のあるバージョンを指定（ESLint 9、Prettier 3、Husky 9、lint-staged 15）
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 3.2 依存関係をインストールして互換性を検証する
+- [x] 3.2 依存関係をインストールして互換性を検証する
   - ルートディレクトリでnpm installを実行
   - 各アプリディレクトリでnpm installを実行
   - 共通の依存関係がルートにhoistされることを確認
   - 既存のnext、react、typescript依存関係との競合がないことを確認
   - _Requirements: 5.2, 6.5_
 
-- [ ] 4. Git Hooksによるコミット前自動チェックを設定する
-- [ ] 4.1 Huskyを初期化してprepareスクリプトを設定する
+- [x] 4. Git Hooksによるコミット前自動チェックを設定する
+- [x] 4.1 Huskyを初期化してprepareスクリプトを設定する
   - ルートpackage.jsonにprepareスクリプトでhuskyを設定
   - npx husky initを実行して.huskyディレクトリを作成
   - npm install実行時に自動的にHuskyのセットアップが実行されることを確認
   - _Requirements: 3.1, 5.3_
 
-- [ ] 4.2 pre-commitフックを作成してlint-stagedを統合する
+- [x] 4.2 pre-commitフックを作成してlint-stagedを統合する
   - .huskyディレクトリにpre-commitファイルを作成
   - pre-commitフックでnpx lint-stagedを実行するように設定
   - 実行権限を付与（chmod +x）
   - コミット前にlint-stagedが自動実行されることを確認
   - _Requirements: 3.2_
 
-- [ ] 4.3 lint-staged設定を追加してファイルタイプ別チェックを実現する
+- [x] 4.3 lint-staged設定を追加してファイルタイプ別チェックを実現する
   - ルートpackage.jsonにlint-staged設定を追加
   - TypeScript/JavaScriptファイルに対してESLint自動修正（--fix --max-warnings=0）とPrettier自動フォーマットを順次実行
   - CSS、Markdown、JSONファイルに対してPrettier自動フォーマットのみを実行
@@ -88,8 +88,8 @@
   - git commit --no-verifyで緊急時にpre-commitフックをスキップできることを確認
   - _Requirements: 3.5, 3.6_
 
-- [ ] 5. VSCodeエディタ統合設定を追加する
-- [ ] 5.1 VSCodeワークスペース設定を作成する
+- [x] 5. VSCodeエディタ統合設定を追加する
+- [x] 5.1 VSCodeワークスペース設定を作成する
   - .vscodeディレクトリにsettings.jsonを作成
   - formatOnSave、codeActionsOnSave（ESLint自動修正）を有効化
   - defaultFormatterをPrettierに設定
@@ -98,7 +98,7 @@
   - TypeScript、TypeScriptReact、JavaScript、JSON各ファイルタイプのデフォルトフォーマッターをPrettierに設定
   - _Requirements: 4.1, 4.2, 4.4_
 
-- [ ] 5.2 推奨拡張機能を設定する
+- [x] 5.2 推奨拡張機能を設定する
   - .vscodeディレクトリにextensions.jsonを作成
   - recommendationsにESLint拡張機能（dbaeumer.vscode-eslint）を追加
   - recommendationsにPrettier拡張機能（esbenp.prettier-vscode）を追加
@@ -107,7 +107,7 @@
   - _Requirements: 4.3_
 
 - [ ] 6. 動作確認と統合テストを実施する
-- [ ] 6.1 フォーマットとリントの基本動作を確認する
+- [x] 6.1 フォーマットとリントの基本動作を確認する
   - npm run format:checkを実行して、フォーマット差分があるファイルを検出
   - npm run formatを実行して、すべての対象ファイルが自動フォーマットされることを確認
   - npm run lintを実行して、全ワークスペースのリントチェックが並列実行されることを確認（警告は許容）
