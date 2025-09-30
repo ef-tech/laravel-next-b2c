@@ -19,9 +19,6 @@ export default [
     },
   },
 
-  // Prettier競合ルール無効化（必ず最後）
-  eslintConfigPrettier,
-
   // 共通ignore
   {
     ignores: [
@@ -34,4 +31,7 @@ export default [
       "**/next-env.d.ts",
     ],
   },
+
+  // Prettier競合ルール無効化（必ず最後）
+  eslintConfigPrettier,
 ];
