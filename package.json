@@ -36,7 +36,7 @@
       "prettier --write"
     ],
     "backend/laravel-api/**/*.php": [
-      "cd backend/laravel-api && ./vendor/bin/pint"
+      "backend/laravel-api/vendor/bin/pint --"
     ]
   }
 }
