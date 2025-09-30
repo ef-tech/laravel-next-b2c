@@ -1,0 +1,16 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - app
+    excludePaths:
+        - vendor
+        - storage
+        - bootstrap/cache
+        - database/migrations
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 32
+    tmpDir: storage/framework/cache/phpstan

@@ -1,27 +1,27 @@
 # Implementation Plan
 
 - [ ] 1. Laravel Pint設定ファイルの作成と動作確認
-- [ ] 1.1 Pint設定ファイルを作成
+- [x] 1.1 Pint設定ファイルを作成
   - Laravel公式プリセットを基本設定として使用
   - カスタムルール（ordered_imports、single_quote）を追加
   - 除外パス（vendor、storage、bootstrap/cache）を設定
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 1.2 Pint基本動作を検証
+- [x] 1.2 Pint基本動作を検証
   - 全PHPファイルのフォーマットチェックを実行
   - テストモードでフォーマットが必要なファイルを検出
   - Git差分のあるファイルのみをフォーマット
   - _Requirements: 1.4, 1.5, 1.6_
 
 - [ ] 2. Larastan静的解析設定ファイルの作成と動作確認
-- [ ] 2.1 PHPStan設定ファイルを作成
+- [x] 2.1 PHPStan設定ファイルを作成
   - レベル8の厳格な型チェックを有効化
   - 並列処理設定（jobSize: 20、maximumNumberOfProcesses: 32）を追加
   - キャッシュディレクトリ（storage/framework/cache/phpstan）を設定
   - 除外パス（vendor、storage、bootstrap、database/migrations）を設定
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 2.2 Larastan基本動作を検証
+- [x] 2.2 Larastan基本動作を検証
   - 全PHPファイルの静的解析を実行
   - メモリ制限オプションで解析を実行
   - 型エラー検出機能を確認
