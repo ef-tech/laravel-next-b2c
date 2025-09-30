@@ -105,7 +105,7 @@ class MeasurePerformanceBaseline extends Command
     }
 
     /**
-     * @param array<int, array{boot_time_ms: float, memory_usage_mb: float, memory_peak_mb: float, memory_delta_mb: float}> $measurements
+     * @param  array<int, array{boot_time_ms: float, memory_usage_mb: float, memory_peak_mb: float, memory_delta_mb: float}>  $measurements
      * @return array<string, array{min: float, max: float, avg: float, median: float}>
      */
     private function calculateStatistics(array $measurements): array
@@ -139,7 +139,7 @@ class MeasurePerformanceBaseline extends Command
     }
 
     /**
-     * @param array<int|string, float> $values
+     * @param  array<int|string, float>  $values
      */
     private function median(array $values): float
     {
@@ -178,7 +178,7 @@ class MeasurePerformanceBaseline extends Command
     }
 
     /**
-     * @param array<string, mixed> $baseline
+     * @param  array<string, mixed>  $baseline
      */
     private function displayResults(array $baseline): void
     {
