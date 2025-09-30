@@ -53,8 +53,28 @@ jobs:
 
       - name: Run Laravel Pint (Code Style)
         working-directory: backend/laravel-api
-        run: composer pint:test
+        run: |
+          composer pint:test || {
+            echo "❌ Laravel Pint コードスタイルエラーが検出されました"
+            echo ""
+            echo "📋 対処方法:"
+            echo "  1. ローカルで自動修正: composer pint"
+            echo "  2. 変更をコミットしてプッシュ"
+            echo ""
+            echo "📖 詳細: https://github.com/ef-tech/laravel-next-b2c/blob/main/README.md#laravel-pint"
+            exit 1
+          }
 
       - name: Run Larastan (Static Analysis)
         working-directory: backend/laravel-api
-        run: composer stan
+        run: |
+          composer stan || {
+            echo "❌ PHPStan エラーが検出されました"
+            echo ""
+            echo "📋 対処方法:"
+            echo "  1. エラー内容を確認して型アノテーションを追加"
+            echo "  2. ベースラインの更新が必要な場合: composer stan:baseline"
+            echo ""
+            echo "📖 詳細: https://github.com/ef-tech/laravel-next-b2c/blob/main/README.md#larastan-phpstan"
+            exit 1
+          }
