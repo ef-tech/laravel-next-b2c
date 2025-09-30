@@ -1,7 +1,10 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import eslintConfigPrettier from "eslint-config-prettier";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const compat = new FlatCompat({ baseDirectory: __dirname });
 
 export default [
   // Next.js推奨 + TypeScript推奨
