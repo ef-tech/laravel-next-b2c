@@ -24,8 +24,15 @@
 
 ### ビルド・開発ツール
 - **Turbopack**: Next.js標準バンドラー (`--turbopack`フラグ)
-- **ESLint**: ^9 (コード品質管理)
+- **ESLint**: ^9 (コード品質管理、モノレポ統一設定)
+- **Prettier**: ^3 (コードフォーマッター、Tailwind CSS統合)
 - **PostCSS**: Tailwind CSS統合用
+
+### コード品質管理 (モノレポ統一設定)
+- **共通設定**: ルート`package.json`でワークスペース全体を管理
+- **husky**: ^9 (Gitフック管理、pre-commit自動実行)
+- **lint-staged**: ^15 (ステージされたファイルのみlint/format実行)
+- **設定ファイル**: 各アプリに`eslint.config.mjs`（ESLint 9対応flat config）
 
 ### デュアルアプリケーション構成
 - **Admin App** (`frontend/admin-app/`): 管理者向けダッシュボード
@@ -118,6 +125,13 @@ npm run dev    # 開発サーバー (Turbopack有効)
 npm run build  # 本番ビルド
 npm start      # 本番サーバー
 npm run lint   # ESLintチェック
+
+# モノレポルートから実行可能
+npm run lint          # 全ワークスペースでlint実行
+npm run lint:fix      # 全ワークスペースでlint自動修正
+npm run format        # Prettier実行
+npm run format:check  # Prettierチェックのみ
+npm run type-check    # TypeScriptチェック
 ```
 
 ### Docker環境
@@ -159,7 +173,8 @@ FORWARD_MINIO_CONSOLE_PORT=13010  # MinIO Console
 - **XDEBUG**: 開発・デバッグサポート
 - **環境分離**: .env設定による環境別管理
 - **型安全性**: TypeScript全面採用
-- **コード品質**: ESLint + Laravel Pint統合
+- **コード品質**: ESLint 9 + Prettier + Laravel Pint統合
+- **自動品質チェック**: husky + lint-stagedによるpre-commitフック
 - **包括的テスト**: 90+テストケースで品質保証、テスト用DB自動作成
 - **統合.gitignore**: モノレポ全体のファイル管理（2024年12月更新）
 

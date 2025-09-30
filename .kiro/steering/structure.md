@@ -10,9 +10,12 @@ laravel-next-b2c/
 │   └── user-app/        # エンドユーザー向けアプリケーション
 ├── .claude/             # Claude Code設定・コマンド
 ├── .kiro/               # Kiro仕様駆動開発設定
+├── .husky/              # Gitフック管理 (husky設定)
 ├── .idea/               # IntelliJ IDEA設定 (IDE固有、gitignore済み)
 ├── .git/                # Gitリポジトリ
 ├── .gitignore           # 統合ファイル除外設定 (モノレポ対応)
+├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
+├── node_modules/        # 共通依存関係
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
 └── README.md            # プロジェクト概要
 ```
@@ -73,8 +76,23 @@ laravel-api/
 ├── package.json         # フロントエンド依存関係管理
 ├── tsconfig.json        # TypeScript設定
 ├── tailwind.config.js   # Tailwind CSS設定
-├── next.config.js       # Next.js設定
-└── eslint.config.js     # ESLint設定
+├── next.config.ts       # Next.js設定
+└── eslint.config.mjs    # ESLint 9設定 (flat config形式)
+```
+
+### モノレポルート構成 (コード品質管理)
+```
+laravel-next-b2c/
+├── package.json         # ワークスペース定義、共通スクリプト
+│                        # workspaces: ["frontend/admin-app", "frontend/user-app"]
+│                        # lint-staged設定を含む
+├── .husky/              # Gitフック自動化
+│   └── pre-commit       # コミット前にlint-staged実行
+└── node_modules/        # 共通devDependencies
+    ├── eslint           # ESLint 9
+    ├── prettier         # Prettier 3
+    ├── husky            # Gitフック管理
+    └── lint-staged      # ステージファイルlint
 ```
 
 ## コード構成パターン
