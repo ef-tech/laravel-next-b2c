@@ -1,0 +1,80 @@
+name: PHP Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  php-quality:
+    name: PHP Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/laravel-api/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/laravel-api/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Cache PHPStan results
+        uses: actions/cache@v4
+        with:
+          path: backend/laravel-api/storage/framework/cache/phpstan
+          key: ${{ runner.os }}-phpstan-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-phpstan-
+
+      - name: Install Composer dependencies
+        working-directory: backend/laravel-api
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Validate composer.json
+        working-directory: backend/laravel-api
+        run: composer validate --strict
+
+      - name: Run Laravel Pint (Code Style)
+        working-directory: backend/laravel-api
+        run: |
+          composer pint:test || {
+            echo "❌ Laravel Pint コードスタイルエラーが検出されました"
+            echo ""
+            echo "📋 対処方法:"
+            echo "  1. ローカルで自動修正: composer pint"
+            echo "  2. 変更をコミットしてプッシュ"
+            echo ""
+            echo "📖 詳細: https://github.com/ef-tech/laravel-next-b2c/blob/main/README.md#laravel-pint"
+            exit 1
+          }
+
+      - name: Run Larastan (Static Analysis)
+        working-directory: backend/laravel-api
+        run: |
+          composer stan || {
+            echo "❌ PHPStan エラーが検出されました"
+            echo ""
+            echo "📋 対処方法:"
+            echo "  1. エラー内容を確認して型アノテーションを追加"
+            echo "  2. ベースラインの更新が必要な場合: composer stan:baseline"
+            echo ""
+            echo "📖 詳細: https://github.com/ef-tech/laravel-next-b2c/blob/main/README.md#larastan-phpstan"
+            exit 1
+          }

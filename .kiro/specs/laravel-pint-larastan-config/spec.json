@@ -1,0 +1,74 @@
+{
+  "feature_name": "laravel-pint-larastan-config",
+  "created_at": "2025-09-30T11:55:00Z",
+  "updated_at": "2025-09-30T05:30:00Z",
+  "language": "ja",
+  "phase": "implemented",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 8,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/8",
+    "title": "Laravel 用 Laravel Pint、Larastan 設定",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12.0, PHP, Sanctum",
+      "frontend": "",
+      "infrastructure": "Git Hooks, Composer, CI/CD (GitHub Actions)",
+      "tools": "Laravel Pint v1.24, Larastan v3.7, PHPStan, VSCode, PhpStorm"
+    },
+    "requirements_hints": [
+      "Laravel Pint設定最適化（pint.json、Laravel プリセット、カスタムルール、除外パス設定、自動import整理）",
+      "Larastan設定強化（phpstan.neon.dist、レベル8維持、並列処理設定、キャッシュディレクトリ設定）",
+      "Composer Scripts統合（品質チェックコマンド統一、差分チェック、メモリ最適化、ベースライン生成）",
+      "Git Hooks強化（Pre-commit: 変更ファイルのみ品質チェック、Pre-push: 全体品質チェック実行、パフォーマンス最適化）",
+      "CI/CD統合（GitHub Actions品質チェックステップ追加、PHPStanキャッシュ設定、composer validate --strict、段階的エラー解決戦略）",
+      "IDE統合（VSCode設定、PhpStorm設定、Format on Save設定）"
+    ],
+    "project_structure": [
+      "backend/laravel-api/pint.json",
+      "backend/laravel-api/phpstan.neon.dist",
+      "backend/laravel-api/composer.json",
+      ".vscode/settings.json",
+      ".github/workflows/ci.yml",
+      "storage/framework/cache/phpstan"
+    ],
+    "services": {},
+    "todo_items": [
+      "backend/laravel-api/pint.json作成",
+      "backend/laravel-api/phpstan.neon.dist強化",
+      "基本動作確認（vendor/bin/pint --test, vendor/bin/phpstan analyse）",
+      "composer.jsonにscripts追加（quality, quality:fix, pint, stan）",
+      "パフォーマンス最適化設定",
+      "ベースライン生成準備",
+      "VSCode設定（.vscode/settings.json）",
+      "PhpStorm設定（Code Style, Inspections）",
+      "Format on Save設定",
+      "Pre-commit hook更新（変更ファイル限定チェック）",
+      "Pre-push hook強化（全体品質チェック）",
+      "パフォーマンス最適化",
+      "GitHub Actions CI更新（.github/workflows/ci.yml）",
+      "PHPStanキャッシュ設定",
+      "composer validate追加",
+      "全体テスト・動作確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}
