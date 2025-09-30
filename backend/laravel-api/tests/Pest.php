@@ -33,8 +33,11 @@ expect()->extend('toBeJsonOk', function () {
     /** @var TestResponse $response */
     $response = $this->value;
 
-    $response->assertOk()
-        ->assertHeader('Content-Type', 'application/json');
+    $response->assertOk();
+
+    // Check Content-Type header (allows charset suffix like "application/json; charset=UTF-8")
+    $contentType = $response->headers->get('Content-Type');
+    expect($contentType)->toContain('application/json');
 
     return $this;
 });
