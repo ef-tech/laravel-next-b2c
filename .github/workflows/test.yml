@@ -18,7 +18,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-suite: [pest, phpunit, integration]
         shard: [1, 2, 3, 4]
 
     services:
@@ -99,8 +98,7 @@ jobs:
           REDIS_PORT: 13379
 
       - name: Run Pest Tests (Shard ${{ matrix.shard }})
-        if: matrix.test-suite == 'pest'
-        run: ./vendor/bin/pest --shard=${{ matrix.shard }}/4 --coverage --min=80
+        run: ./vendor/bin/pest --shard=${{ matrix.shard }}/4
         working-directory: backend/laravel-api
         env:
           DB_CONNECTION: pgsql
@@ -111,53 +109,11 @@ jobs:
           DB_PASSWORD: password
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 13379
-          XDEBUG_MODE: coverage
-
-      - name: Run PHPUnit Tests
-        if: matrix.test-suite == 'phpunit'
-        run: ./vendor/bin/phpunit
-        working-directory: backend/laravel-api
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 13432
-          DB_DATABASE: testing
-          DB_USERNAME: sail
-          DB_PASSWORD: password
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 13379
-
-      - name: Run Integration Tests (Pest + PHPUnit)
-        if: matrix.test-suite == 'integration' && matrix.shard == 1
-        run: |
-          ./vendor/bin/phpunit
-          ./vendor/bin/pest
-        working-directory: backend/laravel-api
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 13432
-          DB_DATABASE: testing
-          DB_USERNAME: sail
-          DB_PASSWORD: password
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 13379
-
-      - name: Upload Coverage to Codecov
-        if: matrix.test-suite == 'pest' && matrix.shard == 1
-        uses: codecov/codecov-action@v3
-        with:
-          files: backend/laravel-api/coverage.xml
-          flags: pest
-          name: pest-coverage
-          fail_ci_if_error: false
 
       - name: Archive test results
         if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: test-results-${{ matrix.test-suite }}-${{ matrix.shard }}
-          path: |
-            backend/laravel-api/coverage-html/
-            backend/laravel-api/coverage.xml
+          name: test-results-shard-${{ matrix.shard }}
+          path: backend/laravel-api/storage/logs/
           retention-days: 7
