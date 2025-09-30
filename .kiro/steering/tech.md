@@ -67,10 +67,48 @@
 
 ### 開発・テストツール
 - **Laravel Pint**: ^1.24 (コードフォーマッター - コアパッケージ)
+- **Larastan (PHPStan)**: ^3.0 (静的解析ツール - Level 8厳格チェック)
 - **PHPUnit**: ^11.5.3 (テストフレームワーク - 90+テストケース実装済み)
 - **Laravel Sail**: ^1.41 (Docker開発環境 - カスタムポート対応)
 - **Laravel Tinker**: ^2.10.1 (REPL環境 - コアパッケージ)
 - **Faker**: ^1.23 (テストデータ生成)
+
+### PHP品質管理システム
+**統合コード品質ツール**: Laravel Pint (フォーマット) + Larastan (静的解析) + Git Hooks + CI/CD
+
+#### Laravel Pint設定 (`pint.json`)
+```json
+{
+  "preset": "laravel",
+  "rules": {
+    "simplified_null_return": true,
+    "no_unused_imports": true
+  }
+}
+```
+
+#### Larastan設定 (`phpstan.neon`)
+```neon
+includes:
+    - vendor/larastan/larastan/extension.neon
+parameters:
+    level: 8
+    paths:
+        - app
+        - config
+        - database
+        - routes
+        - tests
+```
+
+#### Git Hooks自動化 (backend/.husky/)
+- **Pre-commit**: lint-staged実行 (変更PHPファイルのみPint自動フォーマット)
+- **Pre-push**: `composer quality`実行 (Pint + Larastan全体チェック)
+
+#### CI/CD統合 (GitHub Actions)
+- **ワークフロー**: `.github/workflows/php-quality-check.yml`
+- **自動実行**: Pull Request時に品質チェック
+- **チェック内容**: Pint検証 + Larastan Level 8静的解析
 
 ### 📝 最適化ドキュメント体系
 **`backend/laravel-api/docs/` に包括的ドキュメントを格納**:
@@ -80,6 +118,7 @@
 - `migration-guide.md`: 他プロジェクトへの移行ガイド
 - `troubleshooting.md`: トラブルシューティング完全ガイド
 - `configuration-changes.md`: 全設定変更の詳細記録
+- `laravel-pint-larastan-team-guide.md`: Laravel Pint・Larastanチーム運用ドキュメント
 
 ## 開発環境
 ### Docker構成 (Laravel Sail)
@@ -114,8 +153,20 @@ npm run dev               # Vite開発サーバー
 composer test
 php artisan test
 
-# コードフォーマット
-vendor/bin/pint
+# コード品質管理 (統合コマンド)
+composer quality          # フォーマットチェック + 静的解析
+composer quality:fix      # フォーマット自動修正 + 静的解析
+
+# コードフォーマット (Laravel Pint)
+composer pint             # 全ファイル自動フォーマット
+composer pint:test        # フォーマットチェックのみ（修正なし）
+composer pint:dirty       # Git変更ファイルのみフォーマット
+vendor/bin/pint           # 直接実行
+
+# 静的解析 (Larastan/PHPStan Level 8)
+composer stan             # 静的解析実行
+composer stan:baseline    # ベースライン生成（既存エラー記録）
+vendor/bin/phpstan analyse  # 直接実行
 ```
 
 ### フロントエンド (Next.js)

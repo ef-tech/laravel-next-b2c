@@ -8,6 +8,8 @@ laravel-next-b2c/
 ├── frontend/            # フロントエンド層
 │   ├── admin-app/       # 管理者向けアプリケーション
 │   └── user-app/        # エンドユーザー向けアプリケーション
+├── .github/             # GitHub設定
+│   └── workflows/       # GitHub Actionsワークフロー (CI/CD)
 ├── .claude/             # Claude Code設定・コマンド
 ├── .kiro/               # Kiro仕様駆動開発設定
 ├── .husky/              # Gitフック管理 (husky設定)
@@ -36,6 +38,7 @@ laravel-api/
 │   ├── migrations/      # マイグレーション
 │   └── seeders/         # シーダー
 ├── docker/              # Docker設定 (PHP 8.0-8.4対応)
+├── docs/                # プロジェクトドキュメント (最適化ガイド、運用手順)
 ├── public/              # 公開ディレクトリ (エントリーポイント)
 ├── resources/           # リソースファイル
 │   ├── css/             # スタイルシート
@@ -54,6 +57,8 @@ laravel-api/
 ├── composer.json        # PHP依存関係管理
 ├── package.json         # Node.js依存関係 (Vite用)
 ├── vite.config.js       # Vite設定
+├── pint.json            # Laravel Pint設定 (コードフォーマッター)
+├── phpstan.neon         # PHPStan/Larastan設定 (静的解析 Level 8)
 └── .env                 # 環境設定
 ```
 
@@ -178,6 +183,10 @@ import { clsx } from 'clsx'
 - **ビルド設定**: 各技術スタック専用 (`package.json`, `composer.json`)
 - **Docker設定**: バックエンドに統合 (`compose.yaml`)
 - **開発ツール設定**: 各ディレクトリに適切な設定ファイル
+- **PHP品質管理設定**:
+  - `backend/laravel-api/pint.json` - Laravel Pint設定
+  - `backend/laravel-api/phpstan.neon` - Larastan/PHPStan設定
+- **CI/CD設定**: `.github/workflows/` - GitHub Actionsワークフロー
 
 ## 開発フロー指針
 1. **API First**: バックエンドAPIを先行開発
@@ -185,3 +194,7 @@ import { clsx } from 'clsx'
 3. **型安全性**: TypeScript活用による開発時エラー防止
 4. **テスト駆動**: PHPUnit、Jest/Testing Libraryによる品質保証
 5. **環境分離**: 開発、ステージング、本番環境の明確な分離
+6. **品質管理の自動化**:
+   - Git Hooks (pre-commit: lint-staged, pre-push: composer quality)
+   - CI/CD (GitHub Actions: Pull Request時の自動品質チェック)
+   - 開発時の継続的品質保証
