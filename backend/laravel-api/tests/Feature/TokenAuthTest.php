@@ -1,124 +1,110 @@
 <?php
 
-namespace Tests\Feature;
+declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-class TokenAuthTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    /**
-     * config/auth.phpがSanctum中心の設定に変更されていることをテスト
-     */
-    public function test_auth_config_uses_sanctum_as_default(): void
-    {
-        $authConfig = config('auth');
+/**
+ * config/auth.phpがSanctum中心の設定に変更されていることをテスト
+ */
+it('auth_config_uses_sanctum_as_default', function () {
+    $authConfig = config('auth');
 
-        // デフォルトガードがsanctumに設定されていることを確認
-        $this->assertEquals('sanctum', $authConfig['defaults']['guard'], 'Default guard should be sanctum');
+    // デフォルトガードがsanctumに設定されていることを確認
+    expect($authConfig['defaults']['guard'])->toBe('sanctum', 'Default guard should be sanctum');
 
-        // Sanctumガードが設定されていることを確認
-        $this->assertArrayHasKey('sanctum', $authConfig['guards'], 'Sanctum guard should be configured');
-        $this->assertEquals('sanctum', $authConfig['guards']['sanctum']['driver'], 'Sanctum guard should use sanctum driver');
+    // Sanctumガードが設定されていることを確認
+    expect($authConfig['guards'])->toHaveKey('sanctum', 'Sanctum guard should be configured');
+    expect($authConfig['guards']['sanctum']['driver'])->toBe('sanctum', 'Sanctum guard should use sanctum driver');
 
-        // APIガードもSanctumに設定されていることを確認
-        $this->assertArrayHasKey('api', $authConfig['guards'], 'API guard should be configured');
-        $this->assertEquals('sanctum', $authConfig['guards']['api']['driver'], 'API guard should use sanctum driver');
-    }
+    // APIガードもSanctumに設定されていることを確認
+    expect($authConfig['guards'])->toHaveKey('api', 'API guard should be configured');
+    expect($authConfig['guards']['api']['driver'])->toBe('sanctum', 'API guard should use sanctum driver');
+});
 
-    /**
-     * UserモデルにHasApiTokensトレイトが追加されていることをテスト
-     */
-    public function test_user_model_has_api_tokens_trait(): void
-    {
-        $user = new User;
+/**
+ * UserモデルにHasApiTokensトレイトが追加されていることをテスト
+ */
+it('user_model_has_api_tokens_trait', function () {
+    $user = new User;
 
-        // HasApiTokensトレイトのメソッドが使用可能であることを確認
-        $this->assertTrue(method_exists($user, 'createToken'), 'User model should have createToken method from HasApiTokens');
-        $this->assertTrue(method_exists($user, 'tokens'), 'User model should have tokens relationship from HasApiTokens');
-    }
+    // HasApiTokensトレイトのメソッドが使用可能であることを確認
+    expect($user)->toHaveMethod('createToken', 'User model should have createToken method from HasApiTokens');
+    expect($user)->toHaveMethod('tokens', 'User model should have tokens relationship from HasApiTokens');
+});
 
-    /**
-     * APIトークン認証の基本動作をテスト
-     */
-    public function test_api_token_authentication_works(): void
-    {
-        // テストユーザーを作成
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+/**
+ * APIトークン認証の基本動作をテスト
+ */
+it('api_token_authentication_works', function () {
+    // テストユーザーを作成
+    $user = User::factory()->create([
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+    ]);
 
-        // APIトークンを作成
-        $token = $user->createToken('test-token');
+    // APIトークンを作成
+    $token = $user->createToken('test-token');
 
-        // トークンを使ってAPIエンドポイントにアクセス
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token->plainTextToken,
-        ])->getJson('/api/user');
+    // トークンを使ってAPIエンドポイントにアクセス
+    $response = $this->withHeaders([
+        'Authorization' => 'Bearer '.$token->plainTextToken,
+    ])->getJson('/api/user');
 
-        $response->assertStatus(200);
-        $response->assertJson([
-            'id' => $user->id,
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-    }
+    $response->assertStatus(200);
+    $response->assertJson([
+        'id' => $user->id,
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+    ]);
+});
 
-    /**
-     * 認証なしでは401エラーになることをテスト
-     */
-    public function test_api_requires_authentication(): void
-    {
-        $response = $this->getJson('/api/user');
-        $response->assertStatus(401);
-        $response->assertJson(['message' => 'Unauthenticated.']);
-    }
+/**
+ * 認証なしでは401エラーになることをテスト
+ */
+it('api_requires_authentication', function () {
+    $response = $this->getJson('/api/user');
+    $response->assertStatus(401);
+    $response->assertJson(['message' => 'Unauthenticated.']);
+});
 
-    /**
-     * 無効なトークンでは401エラーになることをテスト
-     */
-    public function test_invalid_token_returns_401(): void
-    {
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer invalid-token-12345',
-        ])->getJson('/api/user');
+/**
+ * 無効なトークンでは401エラーになることをテスト
+ */
+it('invalid_token_returns_401', function () {
+    $response = $this->withHeaders([
+        'Authorization' => 'Bearer invalid-token-12345',
+    ])->getJson('/api/user');
 
-        $response->assertStatus(401);
-        $response->assertJson(['message' => 'Unauthenticated.']);
-    }
+    $response->assertStatus(401);
+    $response->assertJson(['message' => 'Unauthenticated.']);
+});
 
-    /**
-     * セッションベース認証設定が削除されていないことを確認（後方互換性）
-     */
-    public function test_web_guard_still_exists_for_compatibility(): void
-    {
-        $authConfig = config('auth');
+/**
+ * セッションベース認証設定が削除されていないことを確認（後方互換性）
+ */
+it('web_guard_still_exists_for_compatibility', function () {
+    $authConfig = config('auth');
 
-        // webガードは後方互換性のため残されていることを確認
-        $this->assertArrayHasKey('web', $authConfig['guards'], 'Web guard should exist for compatibility');
-        $this->assertEquals('session', $authConfig['guards']['web']['driver'], 'Web guard should use session driver');
-    }
+    // webガードは後方互換性のため残されていることを確認
+    expect($authConfig['guards'])->toHaveKey('web', 'Web guard should exist for compatibility');
+    expect($authConfig['guards']['web']['driver'])->toBe('session', 'Web guard should use session driver');
+});
 
-    /**
-     * トークンの有効期限設定が適切であることをテスト
-     */
-    public function test_token_expiration_configuration(): void
-    {
-        // Sanctum設定を確認
-        $sanctumConfig = config('sanctum');
+/**
+ * トークンの有効期限設定が適切であることをテスト
+ */
+it('token_expiration_configuration', function () {
+    // Sanctum設定を確認
+    $sanctumConfig = config('sanctum');
 
-        // 設定ファイルが存在することを確認
-        $this->assertIsArray($sanctumConfig, 'Sanctum configuration should be available');
+    // 設定ファイルが存在することを確認
+    expect($sanctumConfig)->toBeArray('Sanctum configuration should be available');
 
-        // デフォルトの有効期限設定を確認（null = 無期限、または適切な数値）
-        $expiration = $sanctumConfig['expiration'] ?? null;
-        $this->assertTrue(
-            is_null($expiration) || is_numeric($expiration),
-            'Token expiration should be null (no expiration) or numeric value'
-        );
-    }
-}
+    // デフォルトの有効期限設定を確認（null = 無期限、または適切な数値）
+    $expiration = $sanctumConfig['expiration'] ?? null;
+    expect(is_null($expiration) || is_numeric($expiration))->toBeTrue('Token expiration should be null (no expiration) or numeric value');
+});

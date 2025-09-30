@@ -1,74 +1,65 @@
 <?php
 
-namespace Tests\Feature;
+declare(strict_types=1);
 
-use Tests\TestCase;
+it('composer_dump_autoload_optimizes_successfully', function () {
+    $output = [];
+    $returnCode = null;
 
-class AutoloaderOptimizationTest extends TestCase
-{
-    public function test_composer_dump_autoload_optimizes_successfully(): void
-    {
-        $output = [];
-        $returnCode = null;
+    exec('cd '.base_path().' && composer dump-autoload --optimize 2>&1', $output, $returnCode);
 
-        exec('cd '.base_path().' && composer dump-autoload --optimize 2>&1', $output, $returnCode);
+    expect($returnCode)->toBe(0, 'Composer dump-autoload should succeed: '.implode("\n", $output));
 
-        $this->assertEquals(0, $returnCode, 'Composer dump-autoload should succeed: '.implode("\n", $output));
+    // オートローダーファイルの存在確認
+    expect(base_path('vendor/autoload.php'))->toBeFile('Autoloader should exist');
+    expect(base_path('vendor/composer/autoload_classmap.php'))->toBeFile('Classmap should be generated');
+});
 
-        // オートローダーファイルの存在確認
-        $this->assertFileExists(base_path('vendor/autoload.php'), 'Autoloader should exist');
-        $this->assertFileExists(base_path('vendor/composer/autoload_classmap.php'), 'Classmap should be generated');
-    }
+it('dependency_count_baseline', function () {
+    $composerLock = json_decode(file_get_contents(base_path('composer.lock')), true);
 
-    public function test_dependency_count_baseline(): void
-    {
-        $composerLock = json_decode(file_get_contents(base_path('composer.lock')), true);
+    $totalPackages = count($composerLock['packages'] ?? []);
+    $devPackages = count($composerLock['packages-dev'] ?? []);
 
-        $totalPackages = count($composerLock['packages'] ?? []);
-        $devPackages = count($composerLock['packages-dev'] ?? []);
+    // ベースライン記録（実際の値は実行時に確認）
+    expect($totalPackages)->toBeGreaterThan(0, 'Should have production packages');
+    expect($devPackages)->toBeGreaterThan(0, 'Should have development packages');
 
-        // ベースライン記録（実際の値は実行時に確認）
-        $this->assertGreaterThan(0, $totalPackages, 'Should have production packages');
-        $this->assertGreaterThan(0, $devPackages, 'Should have development packages');
+    // 依存関係数をコンソールに出力（手動確認用）
+    echo "Current dependency baseline:\n";
+    echo "Production packages: $totalPackages\n";
+    echo "Development packages: $devPackages\n";
+    echo 'Total packages: '.($totalPackages + $devPackages)."\n";
+});
 
-        // 依存関係数をコンソールに出力（手動確認用）
-        echo "Current dependency baseline:\n";
-        echo "Production packages: $totalPackages\n";
-        echo "Development packages: $devPackages\n";
-        echo 'Total packages: '.($totalPackages + $devPackages)."\n";
-    }
+it('application_performance_baseline', function () {
+    $startTime = microtime(true);
 
-    public function test_application_performance_baseline(): void
-    {
-        $startTime = microtime(true);
+    // アプリケーション起動テスト
+    $response = $this->get('/up');
 
-        // アプリケーション起動テスト
-        $response = $this->get('/up');
+    $bootTime = (microtime(true) - $startTime) * 1000; // ms
 
-        $bootTime = (microtime(true) - $startTime) * 1000; // ms
+    $response->assertStatus(200);
 
-        $response->assertStatus(200);
+    // 起動時間をコンソールに出力（ベースライン記録用）
+    echo "Application boot time baseline: {$bootTime}ms\n";
 
-        // 起動時間をコンソールに出力（ベースライン記録用）
-        echo "Application boot time baseline: {$bootTime}ms\n";
+    expect($bootTime)->toBeLessThan(5000, 'Boot time should be under 5 seconds');
+});
 
-        $this->assertLessThan(5000, $bootTime, 'Boot time should be under 5 seconds');
-    }
+it('memory_usage_baseline', function () {
+    $startMemory = memory_get_usage();
 
-    public function test_memory_usage_baseline(): void
-    {
-        $startMemory = memory_get_usage();
+    // 基本的なアプリケーション操作
+    $response = $this->get('/up');
+    $response->assertStatus(200);
 
-        // 基本的なアプリケーション操作
-        $response = $this->get('/up');
-        $response->assertStatus(200);
+    $endMemory = memory_get_usage();
+    $memoryUsed = ($endMemory - $startMemory) / 1024 / 1024; // MB
 
-        $endMemory = memory_get_usage();
-        $memoryUsed = ($endMemory - $startMemory) / 1024 / 1024; // MB
+    echo "Memory usage baseline: {$memoryUsed}MB\n";
+    echo 'Peak memory usage: '.(memory_get_peak_usage() / 1024 / 1024)."MB\n";
 
-        echo "Memory usage baseline: {$memoryUsed}MB\n";
-        echo 'Peak memory usage: '.(memory_get_peak_usage() / 1024 / 1024)."MB\n";
-
-        $this->assertLessThan(128, memory_get_peak_usage() / 1024 / 1024, 'Peak memory should be under 128MB');
-    }
-}
+    expect(memory_get_peak_usage() / 1024 / 1024)->toBeLessThan(128, 'Peak memory should be under 128MB');
+});
