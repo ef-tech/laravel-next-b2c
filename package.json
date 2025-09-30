@@ -25,11 +25,11 @@
   },
   "lint-staged": {
     "frontend/admin-app/**/*.{js,jsx,ts,tsx}": [
-      "cd frontend/admin-app && eslint --fix --max-warnings=0",
+      "eslint --fix --max-warnings=0",
       "prettier --write"
     ],
     "frontend/user-app/**/*.{js,jsx,ts,tsx}": [
-      "cd frontend/user-app && eslint --fix --max-warnings=0",
+      "eslint --fix --max-warnings=0",
       "prettier --write"
     ],
     "frontend/**/*.{css,md,json}": [
