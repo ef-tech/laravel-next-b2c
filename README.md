@@ -443,13 +443,56 @@ cd backend/laravel-api
 
 #### Laravel（バックエンド）
 
+##### 品質チェック統合コマンド
+
 ```bash
 cd backend/laravel-api
 
-# コードフォーマット
-./vendor/bin/sail composer pint
-# ./vendor/bin/pint                   # ネイティブ
+# 全体品質チェック（Pint + Larastan）
+composer quality              # フォーマットチェック + 静的解析
+composer quality:fix          # フォーマット自動修正 + 静的解析
 
+# 個別コマンド
+composer pint                 # コードフォーマット自動修正
+composer pint:test            # フォーマットチェックのみ（修正なし）
+composer pint:dirty           # Git変更ファイルのみフォーマット
+composer stan                 # 静的解析（PHPStan Level 8）
+composer stan:baseline        # ベースライン生成（既存エラー記録）
+```
+
+##### コードフォーマット（Laravel Pint）
+
+```bash
+# 基本的な使い方
+./vendor/bin/pint                    # 全ファイル自動フォーマット
+./vendor/bin/pint --test             # チェックのみ（修正なし）
+./vendor/bin/pint --dirty            # Git変更ファイルのみ
+./vendor/bin/pint app/Models/User.php # 特定ファイル
+
+# Docker環境
+./vendor/bin/sail composer pint
+```
+
+##### 静的解析（Larastan/PHPStan Level 8）
+
+```bash
+# 基本的な使い方
+./vendor/bin/phpstan analyse          # 静的解析実行
+./vendor/bin/phpstan analyse --memory-limit=2G  # メモリ制限指定
+
+# ベースライン管理（既存エラーの記録）
+./vendor/bin/phpstan analyse --generate-baseline
+# → phpstan-baseline.neon に既存エラーを記録
+# → 新規コードのみ品質チェック対象になる
+
+# Docker環境
+./vendor/bin/sail composer stan
+./vendor/bin/sail composer stan:baseline
+```
+
+##### テスト実行
+
+```bash
 # テスト実行
 ./vendor/bin/sail artisan test
 # php artisan test                    # ネイティブ
@@ -482,13 +525,54 @@ npm run lint && npx tsc --noEmit && npm run build
 
 ```bash
 # プロジェクト全体の品質チェック
-cd backend/laravel-api && ./vendor/bin/sail composer pint
+cd backend/laravel-api && composer quality
 cd ../../frontend/admin-app && npm run lint
 cd ../user-app && npm run lint
 
 # テストスイート実行
 cd ../../backend/laravel-api && ./vendor/bin/sail artisan test
 ```
+
+#### 自動品質チェック（Git Hooks）
+
+このプロジェクトでは、husky + lint-stagedによる自動品質チェックが設定済みです。
+
+##### Pre-commit（コミット前）
+変更されたファイルのみを自動チェック：
+
+- **PHPファイル**: Laravel Pintで自動フォーマット
+- **TypeScript/JSXファイル**: ESLint + Prettierで自動修正
+- **CSS/JSON/MDファイル**: Prettierで自動フォーマット
+
+```bash
+git add .
+git commit -m "Fix: 🐛 バグ修正"
+# → 自動的にlint-stagedが実行され、変更ファイルのみフォーマット
+```
+
+##### Pre-push（プッシュ前）
+全体品質チェックを自動実行：
+
+- **Laravel品質チェック**: `composer quality`（Pint + Larastan）
+- エラーがある場合はプッシュが中断される
+
+```bash
+git push
+# → 自動的にcomposer qualityが実行
+# → エラーがあればプッシュ中断、修正後に再実行
+```
+
+##### Git Hooksのスキップ（緊急時のみ）
+
+```bash
+# Pre-commitをスキップ
+git commit --no-verify -m "WIP: 一時保存"
+
+# Pre-pushをスキップ
+git push --no-verify
+```
+
+**注意**: `--no-verify`は緊急時のみ使用してください。通常は品質チェックを通過させることを推奨します。
 
 ## ⚙️ 環境設定
 
@@ -685,7 +769,74 @@ npm ci
 
 </details>
 
-#### 4. OS固有の問題
+#### 4. コード品質関連
+
+<details>
+<summary>🚨 PHPStan/Larastan メモリ不足エラー</summary>
+
+```bash
+# メモリ制限を増やす
+composer stan -- --memory-limit=4G
+
+# または phpstan.neon に設定追加
+# parameters:
+#     memory_limit: 4G
+```
+
+</details>
+
+<details>
+<summary>🚨 PHPStan ベースラインが読み込まれない</summary>
+
+```bash
+# phpstan.neon（.distではなく）を作成
+cp backend/laravel-api/phpstan.neon.dist backend/laravel-api/phpstan.neon
+
+# ベースライン読み込み確認
+# includes:
+#   - phpstan-baseline.neon
+
+# .gitignoreでphpstan.neonを除外
+echo "/phpstan.neon" >> backend/laravel-api/.gitignore
+```
+
+</details>
+
+<details>
+<summary>🚨 Laravel Pint フォーマットエラー</summary>
+
+```bash
+# Pintキャッシュクリア
+rm -rf backend/laravel-api/storage/framework/cache/pint
+
+# 設定ファイル検証
+cat backend/laravel-api/pint.json
+
+# 特定ファイルのみフォーマット
+./vendor/bin/pint app/Models/User.php
+```
+
+</details>
+
+<details>
+<summary>🚨 Git Hooks が実行されない</summary>
+
+```bash
+# husky再インストール
+npm install
+npx husky install
+
+# フック実行権限確認
+chmod +x .husky/pre-commit
+chmod +x .husky/pre-push
+
+# huskyバージョン確認
+npm list husky
+```
+
+</details>
+
+#### 5. OS固有の問題
 
 <details>
 <summary>🍎 macOS での問題</summary>

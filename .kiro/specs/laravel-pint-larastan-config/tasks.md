@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Laravel Pint設定ファイルの作成と動作確認
+- [x] 1. Laravel Pint設定ファイルの作成と動作確認
 - [x] 1.1 Pint設定ファイルを作成
   - Laravel公式プリセットを基本設定として使用
   - カスタムルール（ordered_imports、single_quote）を追加
@@ -13,7 +13,7 @@
   - Git差分のあるファイルのみをフォーマット
   - _Requirements: 1.4, 1.5, 1.6_
 
-- [ ] 2. Larastan静的解析設定ファイルの作成と動作確認
+- [x] 2. Larastan静的解析設定ファイルの作成と動作確認
 - [x] 2.1 PHPStan設定ファイルを作成
   - レベル8の厳格な型チェックを有効化
   - 並列処理設定（jobSize: 20、maximumNumberOfProcesses: 32）を追加
@@ -32,7 +32,7 @@
   - ベースライン生成コマンドの動作を検証
   - _Requirements: 2.7_
 
-- [ ] 3. Composer Scripts統合
+- [x] 3. Composer Scripts統合
 - [x] 3.1 品質チェックコマンドを追加
   - Pint test + PHPStan解析を順次実行するqualityコマンドを追加
   - Pint + PHPStan解析を順次実行するquality:fixコマンドを追加
@@ -45,7 +45,7 @@
   - PHPStan関連コマンドにメモリ制限オプション（--memory-limit=2G）を自動適用
   - _Requirements: 3.4, 3.5, 3.6_
 
-- [ ] 4. Git Hooks強化
+- [x] 4. Git Hooks強化
 - [x] 4.1 Pre-commitフックを更新
   - 変更されたPHPファイルのみをPintでチェックする機能を追加
   - フォーマットエラー検出時にコミットを中断する動作を実装
@@ -57,7 +57,7 @@
   - 品質チェック失敗時にプッシュを中断する動作を実装
   - _Requirements: 4.3, 4.4_
 
-- [ ] 5. CI/CD統合
+- [x] 5. CI/CD統合
 - [x] 5.1 GitHub Actionsワークフローを作成
   - PHP品質チェックステップを追加
   - composer qualityコマンドを実行する設定を追加
@@ -88,13 +88,13 @@
   - _Requirements: 6.3, 6.4, 6.5_
 
 - [ ] 7. 段階的ロールアウトの準備
-- [ ] 7.1 ベースライン生成と動作確認
+- [x] 7.1 ベースライン生成と動作確認
   - 既存コードで大量のエラーが検出された場合のベースライン生成を実行
   - ベースラインにより既存エラーが記録され、新規エラーのみが検出されることを確認
   - phpstan-baseline.neonファイルが正しく生成されることを確認
   - _Requirements: 7.1, 7.2_
 
-- [ ] 7.2 チーム運用ドキュメントを作成
+- [x] 7.2 チーム運用ドキュメントを作成
   - ツールの使用方法を記載
   - トラブルシューティングガイドを作成
   - ベストプラクティスを文書化
