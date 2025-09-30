@@ -27,19 +27,19 @@
   - 型エラー検出機能を確認
   - _Requirements: 2.5, 2.6_
 
-- [ ] 2.3 ベースライン生成機能を準備
+- [x] 2.3 ベースライン生成機能を準備
   - 既存コードのエラーをベースラインに記録する機能を確認
   - ベースライン生成コマンドの動作を検証
   - _Requirements: 2.7_
 
 - [ ] 3. Composer Scripts統合
-- [ ] 3.1 品質チェックコマンドを追加
+- [x] 3.1 品質チェックコマンドを追加
   - Pint test + PHPStan解析を順次実行するqualityコマンドを追加
   - Pint + PHPStan解析を順次実行するquality:fixコマンドを追加
   - 失敗時に終了コード1を返す動作を確認
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 3.2 個別品質チェックコマンドを追加
+- [x] 3.2 個別品質チェックコマンドを追加
   - Pint実行コマンド（pint、pint:test、pint:dirty）を追加
   - PHPStan実行コマンド（stan、stan:baseline）を追加
   - PHPStan関連コマンドにメモリ制限オプション（--memory-limit=2G）を自動適用

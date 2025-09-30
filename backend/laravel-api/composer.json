@@ -58,6 +58,29 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "quality": [
+            "@pint:test",
+            "@stan"
+        ],
+        "quality:fix": [
+            "@pint",
+            "@stan"
+        ],
+        "pint": [
+            "./vendor/bin/pint"
+        ],
+        "pint:test": [
+            "./vendor/bin/pint --test"
+        ],
+        "pint:dirty": [
+            "./vendor/bin/pint --dirty"
+        ],
+        "stan": [
+            "./vendor/bin/phpstan analyse --memory-limit=2G"
+        ],
+        "stan:baseline": [
+            "./vendor/bin/phpstan analyse --memory-limit=2G --generate-baseline"
         ]
     },
     "extra": {
