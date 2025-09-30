@@ -49,9 +49,12 @@ laravel-api/
 │   ├── web.php          # Web画面ルート
 │   └── console.php      # コンソールルート
 ├── storage/             # ストレージ (ログ、キャッシュ、アップロード)
-├── tests/               # テストスイート
+├── tests/               # テストスイート (Pest 4)
 │   ├── Feature/         # 機能テスト
-│   └── Unit/            # ユニットテスト
+│   ├── Unit/            # ユニットテスト
+│   ├── Arch/            # アーキテクチャテスト
+│   ├── Pest.php         # Pest設定・ヘルパー
+│   └── TestCase.php     # 基底テストクラス
 ├── vendor/              # Composer依存関係
 ├── compose.yaml         # Docker Compose設定
 ├── composer.json        # PHP依存関係管理
@@ -59,6 +62,7 @@ laravel-api/
 ├── vite.config.js       # Vite設定
 ├── pint.json            # Laravel Pint設定 (コードフォーマッター)
 ├── phpstan.neon         # PHPStan/Larastan設定 (静的解析 Level 8)
+├── phpunit.xml          # Pest設定ファイル（Pest用phpunit.xml）
 └── .env                 # 環境設定
 ```
 

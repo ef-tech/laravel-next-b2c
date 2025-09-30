@@ -15,11 +15,11 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **モダンな技術スタック**: Next.js 15.5 + React 19 + Laravel 12 + TypeScript
 - **完全なDockerサポート**: Laravel Sailによる開発環境の迅速なセットアップ
 - **ステートレスAPI設計**: Laravel Sanctumトークン認証による水平スケーリング対応
-- **包括的テストスイート**: 90+テストケースによる品質保証
+- **モダンテストフレームワーク**: Pest 4による包括的テストスイート（12+テストケース）
 - **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備
 - **開発者エクスペリエンス**: Turbopack、Tailwind CSS v4、ESLintの統合開発環境
 - **モノレポ統一コード品質管理**: ESLint 9 + Prettier設定、husky + lint-staged導入による自動品質チェック
-- **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Git Hooks + CI/CD統合による包括的コード品質保証
+- **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Pest 4 + Git Hooks + CI/CD統合による包括的コード品質保証
 
 ## ターゲットユースケース
 - **B2Cアプリケーション開発**: EC、SaaS、メディアサイトなどの顧客向けサービス
