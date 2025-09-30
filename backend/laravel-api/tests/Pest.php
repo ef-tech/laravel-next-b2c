@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -19,17 +18,6 @@ use Tests\TestCase;
 */
 
 uses(TestCase::class)->in('Feature', 'Unit', 'Architecture');
-
-/*
-|--------------------------------------------------------------------------
-| Database Refresh
-|--------------------------------------------------------------------------
-|
-| Automatically refresh the database for all Feature tests.
-|
-*/
-
-uses(RefreshDatabase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
