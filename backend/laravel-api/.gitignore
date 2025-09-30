@@ -1,2 +1,5 @@
 # Laravel specific (root .gitignore handles common patterns)
 # Only include patterns that are specific to this Laravel instance
+
+# PHPStan
+/phpstan.neon

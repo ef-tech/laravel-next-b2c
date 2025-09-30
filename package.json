@@ -34,6 +34,9 @@
     ],
     "frontend/**/*.{css,md,json}": [
       "prettier --write"
+    ],
+    "backend/laravel-api/**/*.php": [
+      "cd backend/laravel-api && ./vendor/bin/pint"
     ]
   }
 }
