@@ -35,6 +35,7 @@ class MeasurePerformanceBaseline extends Command
 
         // 結果をファイルに保存
         $outputPath = $this->option('output');
+        assert(is_string($outputPath));
         $fullPath = base_path($outputPath);
 
         // ディレクトリが存在しない場合は作成
@@ -43,7 +44,9 @@ class MeasurePerformanceBaseline extends Command
             File::makeDirectory($directory, 0755, true);
         }
 
-        File::put($fullPath, json_encode($baseline, JSON_PRETTY_PRINT));
+        $jsonContent = json_encode($baseline, JSON_PRETTY_PRINT);
+        assert($jsonContent !== false);
+        File::put($fullPath, $jsonContent);
 
         $this->info("Performance baseline saved to: {$outputPath}");
         $this->displayResults($baseline);
@@ -51,6 +54,9 @@ class MeasurePerformanceBaseline extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @return array{boot_time_ms: float, memory_usage_mb: float, memory_peak_mb: float, memory_delta_mb: float}
+     */
     private function singleMeasurement(): array
     {
         // メモリ使用量測定（開始時）
@@ -98,11 +104,17 @@ class MeasurePerformanceBaseline extends Command
         app('auth');
     }
 
+    /**
+     * @param array<int, array{boot_time_ms: float, memory_usage_mb: float, memory_peak_mb: float, memory_delta_mb: float}> $measurements
+     * @return array<string, array{min: float, max: float, avg: float, median: float}>
+     */
     private function calculateStatistics(array $measurements): array
     {
         $bootTimes = array_column($measurements, 'boot_time_ms');
         $memoryUsages = array_column($measurements, 'memory_usage_mb');
         $memoryPeaks = array_column($measurements, 'memory_peak_mb');
+
+        assert(count($bootTimes) > 0 && count($memoryUsages) > 0 && count($memoryPeaks) > 0);
 
         return [
             'boot_time_ms' => [
@@ -126,23 +138,30 @@ class MeasurePerformanceBaseline extends Command
         ];
     }
 
+    /**
+     * @param array<int|string, float> $values
+     */
     private function median(array $values): float
     {
         sort($values);
         $count = count($values);
-        $middle = floor(($count - 1) / 2);
+        $middle = (int) floor(($count - 1) / 2);
 
         if ($count % 2) {
-            return $values[$middle];
+            return (float) $values[$middle];
         } else {
-            return ($values[$middle] + $values[$middle + 1]) / 2;
+            return ((float) $values[$middle] + (float) $values[$middle + 1]) / 2;
         }
     }
 
+    /**
+     * @return array{production: int, development: int, total: int, packages: array{production: list<int|string>, development: list<int|string>}}
+     */
     private function countDependencies(): array
     {
         $composerPath = base_path('composer.json');
         $composerContent = json_decode(File::get($composerPath), true);
+        assert(is_array($composerContent));
 
         $productionCount = count($composerContent['require'] ?? []);
         $devCount = count($composerContent['require-dev'] ?? []);
@@ -158,6 +177,9 @@ class MeasurePerformanceBaseline extends Command
         ];
     }
 
+    /**
+     * @param array<string, mixed> $baseline
+     */
     private function displayResults(array $baseline): void
     {
         $this->table(['Metric', 'Min', 'Max', 'Average', 'Median'], [
@@ -185,6 +207,7 @@ class MeasurePerformanceBaseline extends Command
         ]);
 
         $deps = $baseline['dependencies'];
+        assert(is_array($deps));
         $this->info("Dependencies: {$deps['production']} production, {$deps['development']} development, {$deps['total']} total");
     }
 }
