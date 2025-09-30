@@ -60,7 +60,7 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "./vendor/bin/pest --no-coverage"
+            "./vendor/bin/pest"
         ],
         "test-coverage": [
             "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=80"

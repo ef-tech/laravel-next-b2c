@@ -110,7 +110,7 @@ jobs:
           CACHE_STORE: array
 
       - name: Run Pest Tests (Shard ${{ matrix.shard }})
-        run: ./vendor/bin/pest --no-coverage --shard=${{ matrix.shard }}/4
+        run: ./vendor/bin/pest --shard=${{ matrix.shard }}/4
         working-directory: backend/laravel-api
         env:
           DB_CONNECTION: pgsql
