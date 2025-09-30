@@ -22,7 +22,10 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.3"
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-arch": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "phpunit/phpunit": "^12.3"
     },
     "autoload": {
         "psr-4": {
@@ -57,7 +60,28 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php artisan test"
+            "./vendor/bin/pest"
+        ],
+        "test-pest": [
+            "@php artisan config:clear --ansi",
+            "./vendor/bin/pest"
+        ],
+        "test-phpunit": [
+            "@php artisan config:clear --ansi",
+            "./vendor/bin/phpunit"
+        ],
+        "test-all": [
+            "@test-phpunit",
+            "@test-pest"
+        ],
+        "test-coverage": [
+            "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=80"
+        ],
+        "test-parallel": [
+            "./vendor/bin/pest --parallel"
+        ],
+        "test-shard": [
+            "./vendor/bin/pest --shard=1/4"
         ],
         "quality": [
             "@pint:test",

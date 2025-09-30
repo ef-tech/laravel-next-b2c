@@ -1,0 +1,163 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite: [pest, phpunit, integration]
+        shard: [1, 2, 3, 4]
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sail
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testing
+        ports:
+          - 13432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:alpine
+        ports:
+          - 13379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, redis
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        working-directory: backend/laravel-api
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: backend/laravel-api
+
+      - name: Copy .env
+        run: cp .env.example .env
+        working-directory: backend/laravel-api
+
+      - name: Generate application key
+        run: php artisan key:generate
+        working-directory: backend/laravel-api
+
+      - name: Set up test environment
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+        working-directory: backend/laravel-api
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 13432
+          DB_DATABASE: testing
+          DB_USERNAME: sail
+          DB_PASSWORD: password
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 13379
+
+      - name: Run Pest Tests (Shard ${{ matrix.shard }})
+        if: matrix.test-suite == 'pest'
+        run: ./vendor/bin/pest --shard=${{ matrix.shard }}/4 --coverage --min=80
+        working-directory: backend/laravel-api
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 13432
+          DB_DATABASE: testing
+          DB_USERNAME: sail
+          DB_PASSWORD: password
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 13379
+          XDEBUG_MODE: coverage
+
+      - name: Run PHPUnit Tests
+        if: matrix.test-suite == 'phpunit'
+        run: ./vendor/bin/phpunit
+        working-directory: backend/laravel-api
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 13432
+          DB_DATABASE: testing
+          DB_USERNAME: sail
+          DB_PASSWORD: password
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 13379
+
+      - name: Run Integration Tests (Pest + PHPUnit)
+        if: matrix.test-suite == 'integration' && matrix.shard == 1
+        run: |
+          ./vendor/bin/phpunit
+          ./vendor/bin/pest
+        working-directory: backend/laravel-api
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 13432
+          DB_DATABASE: testing
+          DB_USERNAME: sail
+          DB_PASSWORD: password
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 13379
+
+      - name: Upload Coverage to Codecov
+        if: matrix.test-suite == 'pest' && matrix.shard == 1
+        uses: codecov/codecov-action@v3
+        with:
+          files: backend/laravel-api/coverage.xml
+          flags: pest
+          name: pest-coverage
+          fail_ci_if_error: false
+
+      - name: Archive test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.test-suite }}-${{ matrix.shard }}
+          path: |
+            backend/laravel-api/coverage-html/
+            backend/laravel-api/coverage.xml
+          retention-days: 7
