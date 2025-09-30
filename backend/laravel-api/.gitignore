@@ -3,6 +3,3 @@
 
 # PHPStan
 /phpstan.neon
-
-# Pest migration backup files
-*.bak
