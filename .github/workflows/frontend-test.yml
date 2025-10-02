@@ -64,7 +64,7 @@ jobs:
             ${{ runner.os }}-npm-
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Install ${{ matrix.app }} dependencies
         run: npm ci
