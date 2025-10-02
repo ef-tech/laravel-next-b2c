@@ -164,8 +164,8 @@
   - commandで`npm install && npx playwright install --with-deps && npm run test:ci`を実行
   - _要件: 7.2, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10_
 
-- [ ] 8. GitHub Actions CI/CDワークフローファイルを準備する（初期構築時は無効化）
-- [ ] 8.1 E2Eテストワークフローファイルを.disabledとして作成する
+- [x] 8. GitHub Actions CI/CDワークフローファイルを準備する（初期構築時は無効化）
+- [x] 8.1 E2Eテストワークフローファイルを.disabledとして作成する
   - `.github/workflows/e2e-tests.yml.disabled`を作成（GitHub Actions無料枠対策）
   - ワークフロー名を"E2E Tests"に設定
   - トリガーをworkflow_dispatch（手動実行）およびpush（path制限付き）に設定
@@ -177,14 +177,14 @@
   - fail-fast: falseを設定
   - _要件: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8（トリガー条件を制限）_
 
-- [ ] 8.2 ワークフローステップを実装する（チェックアウト、Node.jsセットアップ、Docker起動、サービス待機）
+- [x] 8.2 ワークフローステップを実装する（チェックアウト、Node.jsセットアップ、Docker起動、サービス待機）
   - actions/checkout@v4でリポジトリをチェックアウト
   - actions/setup-node@v4でNode.js 20をセットアップ
   - docker-compose up -d --buildでサービスを起動
   - npx wait-onでhttp://localhost:3000、http://localhost:3001、http://localhost:8000/upの起動を待機
   - _要件: 8.9, 8.10, 8.11, 8.12_
 
-- [ ] 8.3 E2Eテスト実行とアーティファクトアップロードを実装する
+- [x] 8.3 E2Eテスト実行とアーティファクトアップロードを実装する
   - e2eディレクトリでnpm ciを実行
   - e2eディレクトリでnpx playwright install --with-depsを実行
   - e2eディレクトリでnpx playwright test --shard=${{ matrix.shard }}/4を実行
