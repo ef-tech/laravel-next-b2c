@@ -17,7 +17,7 @@
 
 ---
 
-- [ ] 1. E2Eテスト基盤のディレクトリ構造とPlaywright環境を構築する
+- [x] 1. E2Eテスト基盤のディレクトリ構造とPlaywright環境を構築する
 - [x] 1.1 プロジェクトルートにe2eディレクトリを作成し、npm環境を初期化する
   - プロジェクトルートに`e2e/`ディレクトリを作成
   - `e2e/package.json`を作成し、プロジェクト名を"e2e"、private: trueに設定
@@ -33,7 +33,7 @@
   - `e2e/storage/.gitignore`を作成し、認証状態ファイル（*.json）をGit管理対象外に設定
   - _要件: 1.1, 1.3_
 
-- [ ] 2. Playwright設定ファイルを作成し、モノレポ対応のプロジェクト構成を定義する
+- [x] 2. Playwright設定ファイルを作成し、モノレポ対応のプロジェクト構成を定義する
 - [x] 2.1 playwright.config.tsの基本設定を実装する
   - `e2e/playwright.config.ts`を作成し、defineConfigをインポート
   - dotenv/configをインポートして環境変数を読み込む
@@ -56,7 +56,7 @@
   - 両プロジェクトにDesktop Chromeデバイス設定を適用
   - _要件: 2.8, 2.9, 2.10_
 
-- [ ] 3. Laravel Sanctum認証統合ヘルパーを実装する
+- [x] 3. Laravel Sanctum認証統合ヘルパーを実装する
 - [x] 3.1 sanctumLogin関数を実装し、CSRF取得とトークン処理を行う
   - `e2e/helpers/sanctum.ts`を作成
   - APIRequestContextを受け取るsanctumLogin関数を定義
@@ -75,7 +75,7 @@
   - api.storageState()でstorageStateオブジェクトを取得して返却
   - _要件: 3.5, 3.6, 3.7, 3.8_
 
-- [ ] 4. Global Setup認証処理を実装し、テスト実行前に認証状態を準備する
+- [x] 4. Global Setup認証処理を実装し、テスト実行前に認証状態を準備する
 - [x] 4.1 globalSetup関数を実装し、環境変数からAPIベースURLを取得する
   - `e2e/fixtures/global-setup.ts`を作成
   - @playwright/testからrequest、FullConfigをインポート
@@ -100,7 +100,7 @@
   - APIRequestContextを破棄
   - _要件: 4.8, 4.9, 4.10, 4.11_
 
-- [ ] 5. Page Object Modelパターンを実装し、再利用可能なページクラスを作成する
+- [x] 5. Page Object Modelパターンを実装し、再利用可能なページクラスを作成する
 - [x] 5.1 AdminLoginPageクラスを実装する
   - `e2e/projects/admin/pages/LoginPage.ts`を作成
   - @playwright/testからPage、expectをインポート
@@ -118,7 +118,7 @@
   - TypeScript型定義を使用
   - _要件: 5.1, 5.9_
 
-- [ ] 6. テストサンプルを作成し、E2Eテストの実装パターンを示す
+- [x] 6. テストサンプルを作成し、E2Eテストの実装パターンを示す
 - [x] 6.1 管理者ログインテストを作成する
   - `e2e/projects/admin/tests/login.spec.ts`を作成
   - @playwright/testからtest、expectをインポート
