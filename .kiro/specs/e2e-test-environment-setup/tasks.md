@@ -18,14 +18,14 @@
 ---
 
 - [ ] 1. E2Eテスト基盤のディレクトリ構造とPlaywright環境を構築する
-- [ ] 1.1 プロジェクトルートにe2eディレクトリを作成し、npm環境を初期化する
+- [x] 1.1 プロジェクトルートにe2eディレクトリを作成し、npm環境を初期化する
   - プロジェクトルートに`e2e/`ディレクトリを作成
   - `e2e/package.json`を作成し、プロジェクト名を"e2e"、private: trueに設定
   - Playwright 1.47.2、TypeScript 5.6.2、dotenv 16.4.5をdevDependenciesとしてインストール
   - npmスクリプト（test、test:ui、test:debug、test:ci、test:admin、test:user、codegen:admin、codegen:user、report）を定義
   - _要件: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 1.2 TypeScript設定ファイルとディレクトリ構造を作成する
+- [x] 1.2 TypeScript設定ファイルとディレクトリ構造を作成する
   - `e2e/tsconfig.json`を作成し、Playwright型定義をサポートするTypeScript設定を定義
   - `e2e/projects/admin/pages/`、`e2e/projects/admin/tests/`ディレクトリを作成
   - `e2e/projects/user/tests/`ディレクトリを作成
@@ -34,7 +34,7 @@
   - _要件: 1.1, 1.3_
 
 - [ ] 2. Playwright設定ファイルを作成し、モノレポ対応のプロジェクト構成を定義する
-- [ ] 2.1 playwright.config.tsの基本設定を実装する
+- [x] 2.1 playwright.config.tsの基本設定を実装する
   - `e2e/playwright.config.ts`を作成し、defineConfigをインポート
   - dotenv/configをインポートして環境変数を読み込む
   - testDirを`./projects`に設定
@@ -44,12 +44,12 @@
   - retries設定（CI環境: 2、ローカル: 0）
   - _要件: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 2.2 レポーター設定とデフォルトuse設定を実装する
+- [x] 2.2 レポーター設定とデフォルトuse設定を実装する
   - reporter配列に['list']、['html', { open: 'never', outputFolder: 'reports/html' }]、['junit', { outputFile: 'reports/junit.xml' }]を設定
   - use設定でtrace: 'retain-on-failure'、screenshot: 'only-on-failure'、video: 'retain-on-failure'、ignoreHTTPSErrors: trueを設定
   - _要件: 2.6, 2.7_
 
-- [ ] 2.3 setupプロジェクトとadmin/userプロジェクトを定義する
+- [x] 2.3 setupプロジェクトとadmin/userプロジェクトを定義する
   - setupプロジェクトを作成し、testMatchで`/global\.setup\.ts/`を指定
   - admin-chromiumプロジェクトを作成し、testDir: './projects/admin/tests'、baseURL: process.env.E2E_ADMIN_URL ?? 'http://localhost:3001'、storageState: 'storage/admin.json'、dependencies: ['setup']を設定
   - user-chromiumプロジェクトを作成し、testDir: './projects/user/tests'、baseURL: process.env.E2E_USER_URL ?? 'http://localhost:3000'、storageState: 'storage/user.json'、dependencies: ['setup']を設定
@@ -57,7 +57,7 @@
   - _要件: 2.8, 2.9, 2.10_
 
 - [ ] 3. Laravel Sanctum認証統合ヘルパーを実装する
-- [ ] 3.1 sanctumLogin関数を実装し、CSRF取得とトークン処理を行う
+- [x] 3.1 sanctumLogin関数を実装し、CSRF取得とトークン処理を行う
   - `e2e/helpers/sanctum.ts`を作成
   - APIRequestContextを受け取るsanctumLogin関数を定義
   - `/sanctum/csrf-cookie`エンドポイントにGETリクエストを送信（X-Requested-With: XMLHttpRequestヘッダー）
@@ -65,7 +65,7 @@
   - storageStateからXSRF-TOKENクッキーを取得し、decodeURIComponentでデコード
   - _要件: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 3.2 ログインAPI実行と認証確認を実装する
+- [x] 3.2 ログインAPI実行と認証確認を実装する
   - デコード済みXSRF-TOKENを使用して`/login`エンドポイントにPOSTリクエストを送信
   - リクエストヘッダーにX-Requested-With: XMLHttpRequest、X-XSRF-TOKEN: token、Content-Type: application/jsonを設定
   - リクエストボディにemail、passwordを含む
@@ -76,7 +76,7 @@
   - _要件: 3.5, 3.6, 3.7, 3.8_
 
 - [ ] 4. Global Setup認証処理を実装し、テスト実行前に認証状態を準備する
-- [ ] 4.1 globalSetup関数を実装し、環境変数からAPIベースURLを取得する
+- [x] 4.1 globalSetup関数を実装し、環境変数からAPIベースURLを取得する
   - `e2e/fixtures/global-setup.ts`を作成
   - @playwright/testからrequest、FullConfigをインポート
   - sanctum.tsからsanctumLogin関数をインポート
@@ -86,14 +86,14 @@
   - `e2e/storage/`ディレクトリを再帰的に作成
   - _要件: 4.1, 4.2, 4.3_
 
-- [ ] 4.2 Admin認証処理を実装し、認証状態を保存する
+- [x] 4.2 Admin認証処理を実装し、認証状態を保存する
   - APIベースURLでAPIRequestContextを作成
   - process.env.E2E_ADMIN_EMAIL、process.env.E2E_ADMIN_PASSWORDを使用してsanctumLogin関数を呼び出す
   - 返却されたstorageStateを`storage/admin.json`にJSON形式で保存
   - APIRequestContextを破棄
   - _要件: 4.4, 4.5, 4.6, 4.7_
 
-- [ ] 4.3 User認証処理を実装し、認証状態を保存する
+- [x] 4.3 User認証処理を実装し、認証状態を保存する
   - APIベースURLで新しいAPIRequestContextを作成
   - process.env.E2E_USER_EMAIL、process.env.E2E_USER_PASSWORDを使用してsanctumLogin関数を呼び出す
   - 返却されたstorageStateを`storage/user.json`にJSON形式で保存
