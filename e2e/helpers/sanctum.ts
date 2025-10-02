@@ -5,20 +5,21 @@ import type { APIRequestContext } from '@playwright/test';
  *
  * Handles CSRF token retrieval and login with Sanctum authentication
  *
- * @param api - Playwright APIRequestContext instance
- * @param baseURL - API base URL (e.g., 'http://localhost:8000')
+ * Note: Assumes APIRequestContext is created with baseURL set.
+ * All URLs are relative to the baseURL of the context.
+ *
+ * @param api - Playwright APIRequestContext instance (with baseURL configured)
  * @param email - User email for authentication
  * @param password - User password for authentication
  * @returns Authentication state object with cookies and session
  */
 export async function sanctumLogin(
   api: APIRequestContext,
-  baseURL: string,
   email: string,
   password: string
 ) {
   // Step 1: Get CSRF cookie from Laravel Sanctum
-  const csrfResponse = await api.get(`${baseURL}/sanctum/csrf-cookie`, {
+  const csrfResponse = await api.get('/sanctum/csrf-cookie', {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },
@@ -43,7 +44,7 @@ export async function sanctumLogin(
   const token = decodeURIComponent(xsrfCookie.value);
 
   // Step 3: Execute login with CSRF token
-  const loginResponse = await api.post(`${baseURL}/login`, {
+  const loginResponse = await api.post('/login', {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
       'X-XSRF-TOKEN': token,
@@ -62,7 +63,7 @@ export async function sanctumLogin(
   }
 
   // Step 4: Verify authentication status
-  const userResponse = await api.get(`${baseURL}/api/user`, {
+  const userResponse = await api.get('/api/user', {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },

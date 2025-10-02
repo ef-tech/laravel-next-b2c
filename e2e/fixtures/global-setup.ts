@@ -28,7 +28,6 @@ async function globalSetup(config: FullConfig) {
   try {
     const adminStorageState = await sanctumLogin(
       adminApi,
-      apiBaseURL,
       process.env.E2E_ADMIN_EMAIL!,
       process.env.E2E_ADMIN_PASSWORD!
     );
@@ -50,7 +49,6 @@ async function globalSetup(config: FullConfig) {
   try {
     const userStorageState = await sanctumLogin(
       userApi,
-      apiBaseURL,
       process.env.E2E_USER_EMAIL!,
       process.env.E2E_USER_PASSWORD!
     );
