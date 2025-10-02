@@ -16,6 +16,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **完全なDockerサポート**: Laravel Sailによる開発環境の迅速なセットアップ
 - **ステートレスAPI設計**: Laravel Sanctumトークン認証による水平スケーリング対応
 - **モダンテストフレームワーク**: Pest 4による包括的テストスイート（12+テストケース）
+- **フロントエンドテスト環境**: Jest 29 + Testing Library 16完全実装（カバレッジ94.73%達成）
 - **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備
 - **開発者エクスペリエンス**: Turbopack、Tailwind CSS v4、ESLintの統合開発環境
 - **モノレポ統一コード品質管理**: ESLint 9 + Prettier設定、husky + lint-staged導入による自動品質チェック

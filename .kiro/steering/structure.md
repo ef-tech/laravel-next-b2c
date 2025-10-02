@@ -74,34 +74,50 @@ laravel-api/
 │   ├── app/             # App Router (Next.js 13+)
 │   │   ├── globals.css  # グローバルスタイル
 │   │   ├── layout.tsx   # ルートレイアウト
-│   │   └── page.tsx     # ホームページ
+│   │   ├── page.tsx     # ホームページ
+│   │   └── actions.ts   # Server Actions
 │   ├── components/      # 再利用可能コンポーネント
+│   │   └── **/*.test.tsx # コンポーネントテスト
 │   ├── lib/             # ユーティリティ・ヘルパー
+│   │   └── **/*.test.ts  # ライブラリテスト
 │   ├── hooks/           # カスタムReactフック
+│   │   └── **/*.test.ts  # フックテスト
 │   ├── types/           # TypeScript型定義
 │   └── utils/           # 汎用ユーティリティ
 ├── public/              # 静的ファイル
+├── coverage/            # テストカバレッジレポート
 ├── node_modules/        # Node.js依存関係
 ├── package.json         # フロントエンド依存関係管理
 ├── tsconfig.json        # TypeScript設定
+├── jest.config.js       # Jest設定（プロジェクト固有）
 ├── tailwind.config.js   # Tailwind CSS設定
-├── next.config.ts       # Next.js設定
+├── next.config.ts       # Next.js設定（outputFileTracingRoot設定）
 └── eslint.config.mjs    # ESLint 9設定 (flat config形式)
 ```
 
-### モノレポルート構成 (コード品質管理)
+### モノレポルート構成 (コード品質管理・テスト)
 ```
 laravel-next-b2c/
 ├── package.json         # ワークスペース定義、共通スクリプト
 │                        # workspaces: ["frontend/admin-app", "frontend/user-app"]
 │                        # lint-staged設定を含む
+├── jest.base.js         # モノレポ共通Jest設定
+├── jest.config.js       # プロジェクト統括Jest設定
+├── jest.setup.ts        # グローバルテストセットアップ
+├── test-utils/          # 共通テストユーティリティ
+│   ├── render.tsx       # カスタムrender関数
+│   ├── router.ts        # Next.js Router モック設定
+│   └── env.ts           # 環境変数モック
+├── coverage/            # 統合カバレッジレポート
 ├── .husky/              # Gitフック自動化
 │   └── pre-commit       # コミット前にlint-staged実行
 └── node_modules/        # 共通devDependencies
     ├── eslint           # ESLint 9
     ├── prettier         # Prettier 3
     ├── husky            # Gitフック管理
-    └── lint-staged      # ステージファイルlint
+    ├── lint-staged      # ステージファイルlint
+    ├── jest             # Jest 29
+    └── @testing-library # React Testing Library 16
 ```
 
 ## コード構成パターン
@@ -196,7 +212,10 @@ import { clsx } from 'clsx'
 1. **API First**: バックエンドAPIを先行開発
 2. **コンポーネント駆動**: フロントエンドの再利用可能設計
 3. **型安全性**: TypeScript活用による開発時エラー防止
-4. **テスト駆動**: PHPUnit、Jest/Testing Libraryによる品質保証
+4. **テスト駆動**:
+   - バックエンド: Pest 4による包括的テスト（12+テストケース）
+   - フロントエンド: Jest 29 + Testing Library 16（カバレッジ94.73%）
+   - テストサンプル: Client Component、Server Actions、Custom Hooks、API Fetch
 5. **環境分離**: 開発、ステージング、本番環境の明確な分離
 6. **品質管理の自動化**:
    - Git Hooks (pre-commit: lint-staged, pre-push: composer quality)

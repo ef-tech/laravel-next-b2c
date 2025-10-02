@@ -38,6 +38,15 @@
 - **Admin App** (`frontend/admin-app/`): 管理者向けダッシュボード
 - **User App** (`frontend/user-app/`): エンドユーザー向けアプリケーション
 
+### テスト環境
+- **Jest**: ^29.7.0 (テストランナー、モノレポ対応)
+- **React Testing Library**: ^16.3.0 (React 19対応)
+- **@testing-library/jest-dom**: ^6.9.1 (DOM matcher拡張)
+- **jest-environment-jsdom**: ^29.7.0 (DOM環境シミュレーション)
+- **MSW**: ^2.11.3 (APIモック、global.fetch対応)
+- **next-router-mock**: ^0.9.13 (Next.js Router モック)
+- **テスト構成**: モノレポ共通設定（jest.base.js）+ プロジェクト統括設定（jest.config.js）
+
 ## バックエンド技術 - 🏆 API専用最適化済み
 ### 言語・フレームワーク
 - **PHP**: ^8.4 (最新のPHP機能対応)
@@ -186,6 +195,13 @@ npm run lint:fix      # 全ワークスペースでlint自動修正
 npm run format        # Prettier実行
 npm run format:check  # Prettierチェックのみ
 npm run type-check    # TypeScriptチェック
+
+# テスト実行 (Jest + Testing Library)
+npm test              # 全テスト実行
+npm run test:watch    # ウォッチモード
+npm run test:coverage # カバレッジレポート生成
+npm run test:admin    # Admin Appのみテスト
+npm run test:user     # User Appのみテスト
 ```
 
 ### Docker環境
