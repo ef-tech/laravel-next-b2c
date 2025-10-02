@@ -10,8 +10,8 @@
     "test:ci": "playwright test --shard=${SHARD_INDEX:-1}/${SHARD_TOTAL:-1}",
     "test:admin": "playwright test --project=admin-chromium",
     "test:user": "playwright test --project=user-chromium",
-    "codegen:admin": "playwright codegen http://localhost:3001",
-    "codegen:user": "playwright codegen http://localhost:3000",
+    "codegen:admin": "playwright codegen http://localhost:13002",
+    "codegen:user": "playwright codegen http://localhost:13001",
     "report": "playwright show-report reports/html"
   },
   "keywords": [
