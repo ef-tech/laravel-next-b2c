@@ -1,0 +1,121 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'frontend/**'
+      - 'test-utils/**'
+      - 'jest.base.js'
+      - 'jest.config.js'
+      - 'jest.setup.ts'
+      - 'tsconfig.test.json'
+      - '.github/workflows/frontend-test.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - 'test-utils/**'
+      - 'jest.base.js'
+      - 'jest.config.js'
+      - 'jest.setup.ts'
+      - 'tsconfig.test.json'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x, 20.x]
+        app: [admin-app, user-app]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.npm-cache-dir.outputs.dir }}
+            node_modules
+            frontend/${{ matrix.app }}/node_modules
+          key: ${{ runner.os }}-npm-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-${{ matrix.node-version }}-
+            ${{ runner.os }}-npm-
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install ${{ matrix.app }} dependencies
+        run: npm ci
+        working-directory: frontend/${{ matrix.app }}
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage --watchAll=false --maxWorkers=2
+        working-directory: frontend/${{ matrix.app }}
+        env:
+          CI: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./frontend/${{ matrix.app }}/coverage/lcov.info
+          flags: ${{ matrix.app }}-node${{ matrix.node-version }}
+          name: ${{ matrix.app }}-node${{ matrix.node-version }}
+          fail_ci_if_error: false
+
+      - name: Archive coverage results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.app }}-node${{ matrix.node-version }}
+          path: frontend/${{ matrix.app }}/coverage/
+          retention-days: 7
+
+  coverage-report:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download coverage artifacts (admin-app-node20.x)
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-admin-app-node20.x
+          path: coverage-admin-app
+
+      - name: Download coverage artifacts (user-app-node20.x)
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-user-app-node20.x
+          path: coverage-user-app
+
+      - name: Report coverage to PR
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          lcov-file: |
+            coverage-admin-app/lcov.info
+            coverage-user-app/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          delete-old-comments: true

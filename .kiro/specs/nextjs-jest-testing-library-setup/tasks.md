@@ -241,26 +241,29 @@
 
 ## フェーズ4: CI/CD統合（Week 4）
 
-- [ ] 14. GitHub Actions CI/CD設定を構築する
-- [ ] 14.1 フロントエンドテストワークフローを作成する
+- [x] 14. GitHub Actions CI/CD設定を構築する
+- [x] 14.1 フロントエンドテストワークフローを作成する
   - .github/workflows/frontend-test.ymlを作成
-  - トリガー設定（push: main/develop, frontend/**、pull_request: main, frontend/**）
+  - トリガー設定（push: main/develop + frontend/**パス、pull_request: main + frontend/**パス）
   - strategy.matrix設定（node-version: 18.x/20.x、app: admin-app/user-app）
+  - npm キャッシュ設定追加
   - _Requirements: 8.1, 8.2_
 
-- [ ] 14.2 テストジョブステップを定義する
+- [x] 14.2 テストジョブステップを定義する
   - actions/checkout@v4でコードチェックアウト
   - actions/setup-node@v4でNode.js環境セットアップ
   - ルートでnpm ciを実行して依存関係インストール
   - 各アプリでnpm ciを実行して依存関係インストール
   - npm test -- --coverage --watchAll=false --maxWorkers=2でテスト実行
-  - codecov/codecov-action@v3でカバレッジアップロード
+  - codecov/codecov-action@v3でカバレッジアップロード（flags/name設定）
+  - actions/upload-artifact@v4でカバレッジアーカイブ
   - _Requirements: 8.3_
 
-- [ ] 14.3 カバレッジレポートジョブを定義する
-  - coverage-reportジョブをtestジョブ完了後に実行（needs: test）
-  - actions/download-artifact@v3でカバレッジファイルダウンロード
+- [x] 14.3 カバレッジレポートジョブを定義する
+  - coverage-reportジョブをtestジョブ完了後に実行（needs: test、PR時のみ）
+  - actions/download-artifact@v3でadmin-app/user-appカバレッジダウンロード
   - romeovs/lcov-reporter-action@v0.3.1でPRコメント生成
+  - delete-old-comments: true設定
   - _Requirements: 8.4_
 
 - [ ] 15. CI/CD動作検証を実施する
