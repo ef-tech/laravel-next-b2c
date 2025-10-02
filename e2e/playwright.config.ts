@@ -19,6 +19,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   workers: process.env.CI ? 4 : undefined,
   retries: process.env.CI ? 2 : 0,
+  globalSetup: require.resolve('./fixtures/global-setup'),
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'reports/html' }],

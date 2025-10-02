@@ -138,7 +138,7 @@
   - ProductsPageの各メソッドを使用してCRUD操作を実行
   - _要件: 6.8, 6.10_
 
-- [ ] 6.3 ユーザーアプリAPI統合テストを作成する
+- [x] 6.3 ユーザーアプリAPI統合テストを作成する
   - `e2e/projects/user/tests/api-integration.spec.ts`を作成
   - test.describe('API Integration')でテストスイートをグループ化
   - API GETリクエストテスト（商品一覧取得→画面表示確認）を定義
@@ -221,8 +221,8 @@
   - GlobalSetupで認証状態を事前作成することで各テストケースの認証時間が削減されることを確認
   - _要件: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7_
 
-- [ ] 12. 環境変数管理を実装し、ローカル・Docker・CI環境での実行を保証する
-- [ ] 12.1 環境変数設定とエラーハンドリングを実装する
+- [x] 12. 環境変数管理を実装し、ローカル・Docker・CI環境での実行を保証する
+- [x] 12.1 環境変数設定とエラーハンドリングを実装する
   - ローカル環境のデフォルト環境変数（E2E_ADMIN_URL: http://localhost:3001、E2E_USER_URL: http://localhost:3000、E2E_API_URL: http://localhost:8000）を設定
   - Docker環境の環境変数（E2E_ADMIN_URL: http://admin-app:3000、E2E_USER_URL: http://user-app:3000、E2E_API_URL: http://laravel-api:80）を設定
   - CI環境の環境変数をGitHub Actionsワークフローで定義

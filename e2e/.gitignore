@@ -1,0 +1,12 @@
+# Environment variables
+.env
+
+# Playwright generated files
+/test-results/
+/playwright-report/
+/reports/
+/playwright/.cache/
+
+# Storage (authentication state files)
+# Already covered by storage/.gitignore but listed here for clarity
+/storage/*.json
