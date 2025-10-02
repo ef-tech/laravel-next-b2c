@@ -165,39 +165,49 @@ Playwright 1.47.2を採用したE2Eテスト環境を導入することで、以
     - `npx playwright install --with-deps`
     - `npm run test:ci`
 
-### Requirement 8: CI/CDパイプラインの構築
+### Requirement 8: CI/CDワークフローの構築
 
-**Objective:** 開発者として、GitHub ActionsでE2Eテストを自動実行できるようにすることで、Pull Request時の品質保証を自動化する
+**Objective:** 開発者として、GitHub ActionsでE2Eテストを手動実行またはpath制限付き自動実行できるようにすることで、必要時の品質保証と無料枠コスト削減を両立する
+
+**GitHub Actions無料枠対策**: 初期構築時はワークフローを`.github/workflows/e2e-tests.yml.disabled`として配置し、ローカル/Docker環境での検証に注力する。運用時は必要に応じてリネームして有効化する。
 
 #### Acceptance Criteria
 
-1. WHEN 開発者がワークフローを作成する THEN E2Eテスト環境 SHALL `.github/workflows/e2e-tests.yml`にワークフロー定義を配置する
+1. WHEN 開発者がワークフローを作成する THEN E2Eテスト環境 SHALL `.github/workflows/e2e-tests.yml.disabled`にワークフロー定義を配置する（GitHub Actions無料枠対策）
 2. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL ワークフロー名を`E2E Tests`に設定する
-3. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL トリガーを`push`（mainとdevelopブランチ）と`pull_request`（mainブランチ）に設定する
-4. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL ジョブ名を`e2e-tests`に設定する
-5. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL `runs-on: ubuntu-latest`で実行する
-6. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL `timeout-minutes: 60`を設定する
-7. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL strategyのmatrixで`shard: [1, 2, 3, 4]`を定義する
-8. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL `fail-fast: false`を設定する
-9. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `actions/checkout@v4`でリポジトリをチェックアウトする
-10. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `actions/setup-node@v4`でNode.js 20をセットアップする
-11. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `docker-compose up -d --build`でサービスを起動する
-12. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `npx wait-on`で以下のサービスの起動を待機する：
+3. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL トリガーを`workflow_dispatch`（手動実行）と`push`（path制限付き）に設定する
+4. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL workflow_dispatch inputsに`shard_count`（デフォルト: '4'）を定義する
+5. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL push triggerでmainブランチのみ対象とする（developブランチを除外してコスト削減）
+6. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL push triggerのpathsで以下を指定する：
+   - `frontend/**`
+   - `backend/laravel-api/app/**`
+   - `backend/laravel-api/routes/**`
+   - `e2e/**`
+   - `.github/workflows/e2e-tests.yml`
+7. WHERE e2e-tests.yml THE E2Eテスト環境 SHALL ジョブ名を`e2e-tests`に設定する
+8. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL `runs-on: ubuntu-latest`で実行する
+9. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL `timeout-minutes: 60`を設定する
+10. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL strategyのmatrixで`shard: [1, 2, 3, 4]`を定義する
+11. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL `fail-fast: false`を設定する
+12. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `actions/checkout@v4`でリポジトリをチェックアウトする
+13. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `actions/setup-node@v4`でNode.js 20をセットアップする
+14. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `docker-compose up -d --build`でサービスを起動する
+15. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `npx wait-on`で以下のサービスの起動を待機する：
     - `http://localhost:3000`
     - `http://localhost:3001`
     - `http://localhost:8000/up`
-13. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `e2e`ディレクトリで`npm ci`を実行する
-14. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `e2e`ディレクトリで`npx playwright install --with-deps`を実行する
-15. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `e2e`ディレクトリで`npx playwright test --shard=${{ matrix.shard }}/4`を実行する
-16. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL 以下の環境変数を設定する：
+16. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `e2e`ディレクトリで`npm ci`を実行する
+17. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `e2e`ディレクトリで`npx playwright install --with-deps`を実行する
+18. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `e2e`ディレクトリで`npx playwright test --shard=${{ matrix.shard }}/4`を実行する
+19. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL 以下の環境変数を設定する：
     - `E2E_ADMIN_URL: http://localhost:3001`
     - `E2E_USER_URL: http://localhost:3000`
     - `E2E_API_URL: http://localhost:8000`
-17. WHEN テスト実行が完了する THEN E2Eテスト環境 SHALL `actions/upload-artifact@v4`でテストレポートをアップロードする
-18. IF テスト実行ステップが失敗する THEN E2Eテスト環境 SHALL アーティファクトアップロードを実行する（`if: always()`）
-19. WHERE アーティファクトアップロード THE E2Eテスト環境 SHALL アーティファクト名を`playwright-report-${{ matrix.shard }}`に設定する
-20. WHERE アーティファクトアップロード THE E2Eテスト環境 SHALL パスを`e2e/reports/`に設定する
-21. WHERE アーティファクトアップロード THE E2Eテスト環境 SHALL retention-daysを30日に設定する
+20. WHEN テスト実行が完了する THEN E2Eテスト環境 SHALL `actions/upload-artifact@v4`でテストレポートをアップロードする
+21. IF テスト実行ステップが失敗する THEN E2Eテスト環境 SHALL アーティファクトアップロードを実行する（`if: always()`）
+22. WHERE アーティファクトアップロード THE E2Eテスト環境 SHALL アーティファクト名を`playwright-report-${{ matrix.shard }}`に設定する
+23. WHERE アーティファクトアップロード THE E2Eテスト環境 SHALL パスを`e2e/reports/`に設定する
+24. WHERE アーティファクトアップロード THE E2Eテスト環境 SHALL retention-daysを30日に設定する
 
 ### Requirement 9: テストデータ管理戦略
 

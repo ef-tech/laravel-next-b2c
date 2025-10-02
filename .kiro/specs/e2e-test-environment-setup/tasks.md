@@ -2,7 +2,18 @@
 
 ## 概要
 
-本タスクリストは、Playwright 1.47.2を基盤としたE2Eテスト環境の実装手順を定義する。モノレポ構成（admin-app/user-app）に対応し、Laravel Sanctum認証統合、Page Object Model、Docker Compose + CI/CD統合を含む包括的なE2Eテスト基盤を段階的に構築する。
+本タスクリストは、Playwright 1.47.2を基盤としたE2Eテスト環境の実装手順を定義する。モノレポ構成（admin-app/user-app）に対応し、Laravel Sanctum認証統合、Page Object Model、Docker Compose統合を含むE2Eテスト基盤を段階的に構築する。
+
+## GitHub Actions 無料枠対策方針
+
+**初期構築フェーズ**: CI/CDワークフローは `.github/workflows/e2e-tests.yml.disabled` として実装し、ローカル/Docker環境での動作確認に注力する。
+
+**運用フェーズ**: 必要時にワークフローを手動有効化（リネーム）し、トリガー条件を制限して実行する。
+
+**コスト削減戦略**:
+- ワークフローは手動トリガー（workflow_dispatch）を優先
+- path制限でE2E関連ファイル変更時のみ実行
+- 無料枠消費を最小化しつつ、必要時の品質保証を実現
 
 ---
 
@@ -153,16 +164,18 @@
   - commandで`npm install && npx playwright install --with-deps && npm run test:ci`を実行
   - _要件: 7.2, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10_
 
-- [ ] 8. GitHub Actions CI/CDパイプラインを構築し、Pull Request時の自動E2Eテストを実現する
-- [ ] 8.1 E2Eテストワークフローファイルを作成する
-  - `.github/workflows/e2e-tests.yml`を作成
+- [ ] 8. GitHub Actions CI/CDワークフローファイルを準備する（初期構築時は無効化）
+- [ ] 8.1 E2Eテストワークフローファイルを.disabledとして作成する
+  - `.github/workflows/e2e-tests.yml.disabled`を作成（GitHub Actions無料枠対策）
   - ワークフロー名を"E2E Tests"に設定
-  - トリガーをpush（mainとdevelopブランチ）、pull_request（mainブランチ）に設定
+  - トリガーをworkflow_dispatch（手動実行）およびpush（path制限付き）に設定
+  - path制限: 'frontend/**', 'backend/laravel-api/app/**', 'backend/laravel-api/routes/**', 'e2e/**', '.github/workflows/e2e-tests.yml'
+  - workflow_dispatchにshard_count入力（デフォルト: '4'）を追加
   - ジョブ名をe2e-testsに設定
   - runs-on: ubuntu-latest、timeout-minutes: 60を設定
   - strategyのmatrixでshard: [1, 2, 3, 4]を定義
   - fail-fast: falseを設定
-  - _要件: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8_
+  - _要件: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8（トリガー条件を制限）_
 
 - [ ] 8.2 ワークフローステップを実装する（チェックアウト、Node.jsセットアップ、Docker起動、サービス待機）
   - actions/checkout@v4でリポジトリをチェックアウト
@@ -233,17 +246,24 @@
   - Docker環境の環境変数が正しく適用されることを確認
   - _要件: 全要件のDocker環境検証_
 
-- [ ] 14. CI/CDパイプライン動作を検証し、ドキュメントを整備する
-- [ ] 14.1 GitHub ActionsでE2Eテストワークフローが成功することを確認する
-  - Pull Request作成時にE2Eテストワークフローが自動実行されることを確認
+- [ ] 14. ワークフロー動作検証とドキュメント整備を行う
+- [ ] 14.1 GitHub Actionsワークフローの手動実行を検証する（オプション）
+  - `.github/workflows/e2e-tests.yml.disabled`を`.github/workflows/e2e-tests.yml`にリネーム
+  - GitHub Actions UIから手動実行（workflow_dispatch）でワークフローをトリガー
   - 4シャード並列実行が正常動作することを確認
   - アーティファクトにテストレポートがアップロードされることを確認
   - テスト成功時にワークフローが成功ステータスになることを確認
-  - _要件: 全要件のCI/CD環境検証_
+  - 検証完了後、`.github/workflows/e2e-tests.yml.disabled`に戻す（GitHub Actions無料枠対策）
+  - _要件: 全要件のCI/CD環境検証（オプション）_
 
 - [ ] 14.2 開発者向けドキュメントを作成する
-  - `e2e/README.md`を作成し、セットアップ手順、テスト実行方法、トラブルシューティングを記載
+  - `e2e/README.md`を作成し、以下を記載:
+    - セットアップ手順（ローカル/Docker環境）
+    - テスト実行方法（npm run test、test:admin、test:user）
+    - GitHub Actionsワークフロー有効化手順（リネーム方法）
+    - トリガー条件とコスト削減戦略の説明
+    - トラブルシューティング
   - プロジェクトルートの`README.md`にE2Eテストセクションを追加
-  - 環境変数の設定例を.env.exampleとして提供
-  - 新規参加者がREADMEのみでE2Eテストを実行できることを確認
+  - `e2e/.env.example`を作成し、環境変数の設定例を提供
+  - 新規参加者がREADMEのみでローカル/Docker環境でE2Eテストを実行できることを確認
   - _要件: 全要件の文書化_

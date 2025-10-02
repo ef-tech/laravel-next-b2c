@@ -759,27 +759,37 @@ services:
 #### GitHubActionsWorkflow
 
 **Responsibility & Boundaries**
-- **Primary Responsibility**: GitHub ActionsでのE2Eテスト自動実行（シャーディング並列化、アーティファクトアップロード）
+- **Primary Responsibility**: GitHub ActionsでのE2Eテスト手動実行（workflow_dispatch）およびpath制限付き自動実行（シャーディング並列化、アーティファクトアップロード）
 - **Domain Boundary**: CI/CDドメイン
-- **Data Ownership**: `.github/workflows/e2e-tests.yml`
+- **Data Ownership**: `.github/workflows/e2e-tests.yml.disabled`（GitHub Actions無料枠対策として初期構築時は無効化）
 - **Transaction Boundary**: 全シャードの成功を持ってワークフロー成功とする
 
 **Dependencies**
-- **Inbound**: GitHub Events（push、pull_request）
+- **Inbound**: GitHub Events（workflow_dispatch手動実行、push with path制限）
 - **Outbound**: Docker Compose、Playwright Test Runner、GitHub Artifacts
 - **External**: actions/checkout@v4、actions/setup-node@v4、actions/upload-artifact@v4
 
 **Contract Definition**
 
-**Workflow Definition** (`.github/workflows/e2e-tests.yml`):
+**Workflow Definition** (`.github/workflows/e2e-tests.yml.disabled`):
 ```yaml
 name: E2E Tests
 
 on:
+  workflow_dispatch:  # 手動実行（GitHub Actions無料枠対策）
+    inputs:
+      shard_count:
+        description: 'Number of shards (1-8)'
+        required: true
+        default: '4'
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
+    branches: [main]  # developブランチを除外してコスト削減
+    paths:  # E2E関連ファイル変更時のみ実行
+      - 'frontend/**'
+      - 'backend/laravel-api/app/**'
+      - 'backend/laravel-api/routes/**'
+      - 'e2e/**'
+      - '.github/workflows/e2e-tests.yml'
 
 jobs:
   e2e-tests:
@@ -831,6 +841,11 @@ jobs:
           path: e2e/reports/
           retention-days: 30
 ```
+
+**GitHub Actions無料枠対策**:
+- **初期構築時**: `.disabled`拡張子により自動実行を抑制、ローカル/Docker環境での検証に注力
+- **運用時**: 必要時にリネームして有効化、手動トリガー（workflow_dispatch）を優先
+- **コスト削減**: path制限でE2E関連ファイル変更時のみ実行、developブランチを除外
 
 - **Preconditions**: リポジトリがチェックアウト済み、Docker Composeが利用可能
 - **Postconditions**: 全シャードのテスト結果がアーティファクトとしてアップロードされる
@@ -1208,18 +1223,19 @@ graph LR
 - `npm run test:admin`、`npm run test:user`でテストが成功する
 - HTMLレポート（`npm run report`）でテスト結果を確認できる
 
-#### Phase 3: Docker ComposとCI/CD統合（1週間）
+#### Phase 3: Docker Compose統合とCI/CDワークフロー準備（1週間）
 
-**目標**: Docker環境でのE2Eテスト実行、GitHub Actionsワークフロー構築
+**目標**: Docker環境でのE2Eテスト実行、GitHub Actionsワークフローファイル作成（初期構築時は無効化）
 
 **成果物**:
 - `compose.yaml`に`e2e-tests`サービス追加
-- `.github/workflows/e2e-tests.yml`
+- `.github/workflows/e2e-tests.yml.disabled`（GitHub Actions無料枠対策）
 - `e2e/docker/Dockerfile.e2e`（カスタムイメージが必要な場合）
 
 **検証基準**:
 - `docker-compose up e2e-tests`でDocker環境テストが成功する
-- GitHub ActionsでPull Request時にE2Eテストが自動実行される
+- ワークフローファイルに手動トリガー（workflow_dispatch）とpath制限を実装
+- `.disabled`拡張子により、初期構築時はGitHub Actions実行を抑制
 
 #### Phase 4: ドキュメント整備（3日）
 
@@ -1260,9 +1276,9 @@ graph LR
 
 **Phase 3完了時**:
 - [ ] Docker環境で全テストが成功する
-- [ ] GitHub ActionsでE2Eテストワークフローが実行される
-- [ ] シャーディング4並列でテストが実行される
-- [ ] アーティファクトにテストレポートがアップロードされる
+- [ ] `.github/workflows/e2e-tests.yml.disabled`が作成され、手動トリガーとpath制限を実装
+- [ ] （オプション）ワークフローを手動有効化し、シャーディング4並列実行を検証
+- [ ] （オプション）アーティファクトにテストレポートがアップロードされることを検証
 
 **Phase 4完了時**:
 - [ ] README.mdに基づき、新規開発者がE2Eテストを実行できる
