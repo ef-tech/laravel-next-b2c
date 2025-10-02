@@ -34,6 +34,12 @@ E2E_USER_EMAIL=user@example.com
 E2E_USER_PASSWORD=password
 ```
 
+**ポート設定について:**
+- **ローカル開発**: Laravel Sailを使用するため、APIはポート `13000` を使用
+- **CI環境**: `php artisan serve` を使用する場合、ポート `8000` を使用可能
+- 環境変数 `E2E_API_URL` で柔軟に切り替え可能
+```
+
 ### 3. アプリケーションの起動
 
 E2Eテスト実行前に、以下のサービスが起動している必要があります:
@@ -138,6 +144,12 @@ e2e/
 - エラーハンドリング
 - 認証済みリダイレクト
 - **TODO**: `/login`ページ実装後に有効化
+- **要件**: 以下の `data-testid` 属性をフロントエンドに実装
+  - `login-form` - ログインフォーム
+  - `email` - メールアドレス入力フィールド
+  - `password` - パスワード入力フィールド
+  - `submit` - 送信ボタン
+  - `error-message` - エラーメッセージ表示エリア
 
 **Products CRUD Test** (`projects/admin/tests/products-crud.spec.ts`) - スキップ中
 - 商品一覧表示
@@ -146,6 +158,15 @@ e2e/
 - 商品削除
 - 完全CRUDサイクル
 - **TODO**: `/products`ページ実装後に有効化
+- **要件**: 以下の `data-testid` 属性をフロントエンドに実装
+  - `products-list` - 商品一覧コンテナ
+  - `product-card` - 商品カード
+  - `product-name` - 商品名
+  - `product-price` - 商品価格
+  - `product-description` - 商品説明
+  - `create-product` - 新規作成ボタン
+  - `edit-product` - 編集ボタン
+  - `delete-product` - 削除ボタン
 
 **API Integration Test** (`projects/user/tests/api-integration.spec.ts`) - スキップ中
 - 商品一覧API取得・表示
@@ -155,10 +176,53 @@ e2e/
 - ローディング状態確認
 - 商品検索機能
 - **TODO**: APIエンドポイント実装後に有効化
+- **要件**: 以下の `data-testid` 属性をフロントエンドに実装
+  - `products-list` - 商品一覧コンテナ
+  - `product-card` - 商品カード
+  - `empty-state` - 空状態表示
+  - `contact-name` - お問い合わせ名前フィールド
+  - `contact-email` - お問い合わせメールフィールド
+  - `contact-message` - お問い合わせメッセージフィールド
+  - `submit-contact` - お問い合わせ送信ボタン
+  - `success-message` - 成功メッセージ
+  - `error-message` - エラーメッセージ
+  - `loading` - ローディングインディケーター
+  - `search-input` - 検索入力フィールド
+  - `search-button` - 検索ボタン
 
 ## 認証の仕組み
 
-### Global Setup
+### ⚠️ 現在の状態（認証無効化）
+
+**重要**: 現在、Laravel APIの認証エンドポイントが未実装のため、認証機能は一時的に無効化されています。
+
+- `playwright.config.ts` の `globalSetup` と `storageState` がコメントアウト状態
+- 認証なしでアクセス可能なページ（ホームページなど）のテストのみ実行可能
+
+#### 有効化手順（Laravel認証API実装後）
+
+1. Laravel側で以下のエンドポイントを実装:
+   - `/sanctum/csrf-cookie` - CSRFトークン取得
+   - `/api/login` - ログインAPI
+   - `/api/user` - 認証確認API
+   - `/api/logout` - ログアウトAPI
+
+2. `e2e/playwright.config.ts` の認証設定を有効化:
+   ```typescript
+   // コメントアウトを解除
+   globalSetup: require.resolve('./fixtures/global-setup'),
+
+   // 各プロジェクトのstorageStateも有効化
+   storageState: 'storage/admin.json',  // admin-chromium
+   storageState: 'storage/user.json',   // user-chromium
+   ```
+
+3. スキップ中のテストを有効化:
+   - `login.spec.ts` の `.skip` 削除
+   - `products-crud.spec.ts` の `.skip` 削除
+   - `api-integration.spec.ts` の `.skip` 削除
+
+### Global Setup（実装済み・無効化中）
 
 テスト実行前に`fixtures/global-setup.ts`が自動実行され:
 
@@ -166,13 +230,13 @@ e2e/
 2. 認証状態を`storage/admin.json`, `storage/user.json`に保存
 3. 各テストでこの認証状態を読み込み、ログイン済みでテスト開始
 
-### Sanctum認証フロー
+### Sanctum認証フロー（実装済み・無効化中）
 
 `helpers/sanctum.ts`が以下を実行:
 
 1. `/sanctum/csrf-cookie`でCSRFトークン取得
 2. XSRF-TOKENクッキーをデコード
-3. `/login`にPOSTリクエスト（CSRF token付き）
+3. `/api/login`にPOSTリクエスト（CSRF token付き）
 4. `/api/user`で認証状態確認
 5. 認証済みstorageStateを返却
 
