@@ -6,7 +6,7 @@
     "frontend/user-app"
   ],
   "scripts": {
-    "prepare": "husky",
+    "prepare": "[ -n \"$CI\" ] || husky",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

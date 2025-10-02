@@ -28,9 +28,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    env:
-      HUSKY: 0
-
     strategy:
       fail-fast: false
       matrix:
@@ -64,10 +61,10 @@ jobs:
             ${{ runner.os }}-npm-
 
       - name: Install root dependencies
-        run: npm ci --ignore-scripts
+        run: npm ci
 
       - name: Install ${{ matrix.app }} dependencies
-        run: npm ci --ignore-scripts
+        run: npm ci
         working-directory: frontend/${{ matrix.app }}
 
       - name: Run tests with coverage
