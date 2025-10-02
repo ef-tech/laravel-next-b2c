@@ -32,6 +32,7 @@ export default [
       "**/dist/**",
       "**/*.min.*",
       "**/next-env.d.ts",
+      "**/jest.config.js",
     ],
   },
 
