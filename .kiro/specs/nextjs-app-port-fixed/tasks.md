@@ -2,21 +2,21 @@
 
 ## フロントエンドアプリケーション設定更新
 
-- [ ] 1. User Appの起動ポート設定を更新する
-- [ ] 1.1 User Appのnpm scriptsにポート指定を追加する
+- [x] 1. User Appの起動ポート設定を更新する
+- [x] 1.1 User Appのnpm scriptsにポート指定を追加する
   - dev scriptに`--port 13001`フラグを追加
   - start scriptに`--port 13001`フラグを追加
   - 既存の`--turbopack`フラグを維持
   - _Requirements: 1.1, 1.2, 1.6_
 
-- [ ] 1.2 User Appの起動確認とHMR動作検証を実施する
+- [x] 1.2 User Appの起動確認とHMR動作検証を実施する
   - ポート13001での起動を確認
   - ブラウザでアクセス可能なことを確認
   - ソースコード変更時のHMR自動反映を確認
   - _Requirements: 1.1, 4.2, 4.4_
 
-- [ ] 2. Admin Appの起動ポート設定を更新する
-- [ ] 2.1 Admin Appのnpm scriptsにポート指定を追加する
+- [x] 2. Admin Appの起動ポート設定を更新する
+- [x] 2.1 Admin Appのnpm scriptsにポート指定を追加する
   - dev scriptに`--port 13002`フラグを追加
   - start scriptに`--port 13002`フラグを追加
   - 既存の`--turbopack`フラグを維持
@@ -38,27 +38,27 @@
 
 ## E2Eテスト環境設定更新
 
-- [ ] 3. E2E環境変数ファイルを更新する
-- [ ] 3.1 E2E環境変数テンプレートを更新する
+- [x] 3. E2E環境変数ファイルを更新する
+- [x] 3.1 E2E環境変数テンプレートを更新する
   - .env.exampleのE2E_ADMIN_URLをポート13002に変更
   - .env.exampleのE2E_USER_URLをポート13001に変更
   - E2E_API_URLは13000のまま維持
   - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 3.2 E2E環境変数ファイルを更新する（存在する場合）
+- [x] 3.2 E2E環境変数ファイルを更新する（存在する場合）
   - .envのE2E_ADMIN_URLをポート13002に変更
   - .envのE2E_USER_URLをポート13001に変更
   - E2E_API_URLは13000のまま維持
   - _Requirements: 2.1, 2.2_
 
-- [ ] 4. Playwright設定ファイルを更新する
-- [ ] 4.1 Playwrightのadmin-chromiumプロジェクト設定を更新する
+- [x] 4. Playwright設定ファイルを更新する
+- [x] 4.1 Playwrightのadmin-chromiumプロジェクト設定を更新する
   - baseURLのデフォルト値を`'http://localhost:13002'`に変更
   - 環境変数フォールバックパターンを維持
   - デバイス設定とtestDir設定を維持
   - _Requirements: 2.4_
 
-- [ ] 4.2 Playwrightのuser-chromiumプロジェクト設定を更新する
+- [x] 4.2 Playwrightのuser-chromiumプロジェクト設定を更新する
   - baseURLのデフォルト値を`'http://localhost:13001'`に変更
   - 環境変数フォールバックパターンを維持
   - デバイス設定とtestDir設定を維持
@@ -75,8 +75,8 @@
 
 ## バックエンドCORS設定更新
 
-- [ ] 5. Laravel CORS設定を更新する
-- [ ] 5.1 CORS allowed_originsに新ポートを追加する
+- [x] 5. Laravel CORS設定を更新する
+- [x] 5.1 CORS allowed_originsに新ポートを追加する
   - `http://localhost:13001`をallowed_originsに追加
   - `http://localhost:13002`をallowed_originsに追加
   - `http://127.0.0.1:13001`をallowed_originsに追加

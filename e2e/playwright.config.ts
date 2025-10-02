@@ -43,7 +43,7 @@ export default defineConfig({
       testDir: './projects/admin/tests',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: process.env.E2E_ADMIN_URL ?? 'http://localhost:3001',
+        baseURL: process.env.E2E_ADMIN_URL ?? 'http://localhost:13002',
         // storageState: 'storage/admin.json', // Disabled: Enable once globalSetup is enabled
       },
       // dependencies: ['setup'], // Disabled: no setup project
@@ -53,7 +53,7 @@ export default defineConfig({
       testDir: './projects/user/tests',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: process.env.E2E_USER_URL ?? 'http://localhost:3000',
+        baseURL: process.env.E2E_USER_URL ?? 'http://localhost:13001',
         // storageState: 'storage/user.json', // Disabled: Enable once globalSetup is enabled
       },
       // dependencies: ['setup'], // Disabled: no setup project
