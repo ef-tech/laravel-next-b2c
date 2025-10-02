@@ -28,6 +28,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      HUSKY: 0
+
     strategy:
       fail-fast: false
       matrix:
