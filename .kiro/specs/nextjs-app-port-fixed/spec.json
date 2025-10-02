@@ -1,0 +1,87 @@
+{
+  "feature_name": "nextjs-app-port-fixed",
+  "created_at": "2025-10-03T00:00:00Z",
+  "updated_at": "2025-10-02T18:40:30Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 60,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/60",
+    "title": "Next.js アプリ（user-app と admin-app） の起動ポートを 13001 と 13002 に変更（固定）する",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": ["Laravel API", "CORS"],
+      "frontend": ["Next.js", "user-app", "admin-app", "Turbopack"],
+      "infrastructure": ["Docker", "CI/CD", "GitHub Actions"],
+      "tools": ["Playwright", "E2E Testing", "npm", "curl"]
+    },
+    "requirements_hints": [
+      "user-appをポート13001に固定",
+      "admin-appをポート13002に固定",
+      "すべての開発環境（ローカル/Docker/CI/E2E）で一貫性を担保",
+      "E2EテストでbaseURL指定を安定化",
+      "CORS設定の確認・更新",
+      "ドキュメント整備により開発者のオンボーディングを円滑化"
+    ],
+    "project_structure": [
+      "frontend/admin-app/package.json",
+      "frontend/user-app/package.json",
+      "e2e/.env",
+      "e2e/.env.example",
+      "e2e/playwright.config.ts",
+      "backend/laravel-api/config/cors.php",
+      "README.md",
+      ".github/workflows/e2e-tests.yml.disabled"
+    ],
+    "services": {
+      "user-app": {
+        "port": "13001"
+      },
+      "admin-app": {
+        "port": "13002"
+      },
+      "laravel-api": {
+        "port": "13000"
+      }
+    },
+    "todo_items": [
+      "admin-app package.json scripts更新（dev/start）",
+      "user-app package.json scripts更新（dev/start）",
+      "E2E .env ファイル更新（E2E_ADMIN_URL/E2E_USER_URL）",
+      "E2E .env.example 更新",
+      "playwright.config.ts baseURL更新（admin/user）",
+      "Laravel CORS設定確認・更新（config/cors.php）",
+      "admin-app ローカル起動確認（http://localhost:13002）",
+      "user-app ローカル起動確認（http://localhost:13001）",
+      "HMR（Hot Module Replacement）動作確認",
+      "TypeScript型チェック（npm run type-check）",
+      "Lintチェック（npm run lint）",
+      "プロダクションビルド成功確認（npm run build）",
+      "CORS通信確認（curl OPTIONS リクエスト）",
+      "E2Eテスト全通過（npx playwright test）",
+      "README.md 開発サーバーURL更新",
+      "E2Eテストガイド更新（.env設定例）",
+      "トラブルシューティングガイド追加（ポート競合対処法）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}

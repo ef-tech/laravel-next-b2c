@@ -23,6 +23,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `phpunit-to-pest-complete-migration` - Laravel の PHPUnit テストを Pest テストに完全移行する
 - `nextjs-jest-testing-library-setup` - Next.js Jest + Testing Library設定とテストサンプル作成（フロントエンドテスト環境整備）
 - `e2e-test-environment-setup` - E2Eテスト環境基盤設定（Playwright + モノレポ対応 + CI/CD統合）
+- `nextjs-app-port-fixed` - Next.jsアプリポート固定化（user-app: 13001, admin-app: 13002）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
