@@ -8,11 +8,11 @@
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
     "test:ci": "playwright test --shard=${SHARD_INDEX:-1}/${SHARD_TOTAL:-1}",
-    "test:admin": "playwright test --project=admin",
-    "test:user": "playwright test --project=user",
+    "test:admin": "playwright test --project=admin-chromium",
+    "test:user": "playwright test --project=user-chromium",
     "codegen:admin": "playwright codegen http://localhost:3001",
     "codegen:user": "playwright codegen http://localhost:3000",
-    "report": "playwright show-report"
+    "report": "playwright show-report reports/html"
   },
   "keywords": [
     "e2e",
