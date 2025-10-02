@@ -73,15 +73,6 @@ jobs:
         env:
           CI: true
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./frontend/${{ matrix.app }}/coverage/lcov.info
-          flags: ${{ matrix.app }}-node${{ matrix.node-version }}
-          name: ${{ matrix.app }}-node${{ matrix.node-version }}
-          fail_ci_if_error: false
-
       - name: Archive coverage results
         if: always()
         uses: actions/upload-artifact@v4
@@ -89,33 +80,3 @@ jobs:
           name: coverage-${{ matrix.app }}-node${{ matrix.node-version }}
           path: frontend/${{ matrix.app }}/coverage/
           retention-days: 7
-
-  coverage-report:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download coverage artifacts (admin-app-node20.x)
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-admin-app-node20.x
-          path: coverage-admin-app
-
-      - name: Download coverage artifacts (user-app-node20.x)
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-user-app-node20.x
-          path: coverage-user-app
-
-      - name: Report coverage to PR
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        with:
-          lcov-file: |
-            coverage-admin-app/lcov.info
-            coverage-user-app/lcov.info
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          delete-old-comments: true
