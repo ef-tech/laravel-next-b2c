@@ -9,7 +9,7 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!(msw|@mswjs|until-async|.*\\.mjs$))'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx,js,jsx}',
     '!src/**/*.d.ts',

@@ -7,6 +7,20 @@ import React from 'react';
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
+// BroadcastChannel Polyfill for MSW
+if (typeof global.BroadcastChannel === 'undefined') {
+  global.BroadcastChannel = class BroadcastChannel {
+    constructor(public name: string) {}
+    postMessage() {}
+    close() {}
+    addEventListener() {}
+    removeEventListener() {}
+    dispatchEvent() {
+      return true;
+    }
+  } as any;
+}
+
 // Next.js Image Mock
 jest.mock('next/image', () => ({
   __esModule: true,
@@ -27,25 +41,6 @@ jest.mock('next/font/local', () => ({
 // Next.js Navigation Mock
 jest.mock('next/navigation', () => require('next-router-mock'));
 
-// MSW Setup
-let server: any;
-let http: any;
-let HttpResponse: any;
-
-try {
-  const msw = require('msw/node');
-  const mswCore = require('msw');
-  server = msw.setupServer();
-  http = mswCore.http;
-  HttpResponse = mswCore.HttpResponse;
-
-  beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
-  afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
-} catch (error) {
-  // MSW not available, skip setup
-}
-
 // Console Error Suppression
 const originalError = console.error;
 beforeAll(() => {
@@ -54,6 +49,3 @@ beforeAll(() => {
     originalError(...args);
   });
 });
-
-// Export MSW utilities for tests
-export { http, HttpResponse };
