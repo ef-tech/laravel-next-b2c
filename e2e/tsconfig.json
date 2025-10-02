@@ -13,8 +13,7 @@
     "baseUrl": ".",
     "paths": {
       "@fixtures/*": ["./fixtures/*"],
-      "@helpers/*": ["./helpers/*"],
-      "@pages/*": ["./projects/*/pages/*"]
+      "@helpers/*": ["./helpers/*"]
     }
   },
   "include": [

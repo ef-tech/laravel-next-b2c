@@ -16,7 +16,7 @@ import 'dotenv/config';
  * authenticated sessions across all tests.
  */
 async function globalSetup(config: FullConfig) {
-  const apiBaseURL = process.env.E2E_API_URL ?? 'http://localhost:8000';
+  const apiBaseURL = process.env.E2E_API_URL ?? 'http://localhost:13000';
 
   // Ensure storage directory exists
   const storageDir = path.join(__dirname, '..', 'storage');

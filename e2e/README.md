@@ -25,7 +25,7 @@ cp .env.example .env
 ```env
 E2E_ADMIN_URL=http://localhost:3001
 E2E_USER_URL=http://localhost:3000
-E2E_API_URL=http://localhost:8000
+E2E_API_URL=http://localhost:13000
 
 E2E_ADMIN_EMAIL=admin@example.com
 E2E_ADMIN_PASSWORD=password
@@ -38,7 +38,7 @@ E2E_USER_PASSWORD=password
 
 E2Eテスト実行前に、以下のサービスが起動している必要があります:
 
-- **Laravel API** (http://localhost:8000)
+- **Laravel API** (http://localhost:13000)
 - **Admin App** (http://localhost:3001)
 - **User App** (http://localhost:3000)
 
@@ -175,7 +175,7 @@ npm run codegen:user
 
 1. **アプリケーションが起動しているか確認**
    ```bash
-   curl http://localhost:8000/up
+   curl http://localhost:13000/up
    curl http://localhost:3000
    curl http://localhost:3001
    ```
