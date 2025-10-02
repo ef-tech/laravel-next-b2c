@@ -19,7 +19,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   workers: process.env.CI ? 4 : undefined,
   retries: process.env.CI ? 2 : 0,
-  // globalSetup: require.resolve('./fixtures/global-setup'), // Disabled: Laravel auth endpoints not implemented
+  // globalSetup: require.resolve('./fixtures/global-setup'), // Disabled: Enable once Laravel auth endpoints (/api/login, /api/user) are implemented
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'reports/html' }],
@@ -44,7 +44,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: process.env.E2E_ADMIN_URL ?? 'http://localhost:3001',
-        // storageState: 'storage/admin.json', // Disabled: auth not available
+        // storageState: 'storage/admin.json', // Disabled: Enable once globalSetup is enabled
       },
       // dependencies: ['setup'], // Disabled: no setup project
     },
@@ -54,7 +54,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: process.env.E2E_USER_URL ?? 'http://localhost:3000',
-        // storageState: 'storage/user.json', // Disabled: auth not available
+        // storageState: 'storage/user.json', // Disabled: Enable once globalSetup is enabled
       },
       // dependencies: ['setup'], // Disabled: no setup project
     },
