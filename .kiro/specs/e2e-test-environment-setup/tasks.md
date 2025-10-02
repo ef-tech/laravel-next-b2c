@@ -101,7 +101,7 @@
   - _要件: 4.8, 4.9, 4.10, 4.11_
 
 - [ ] 5. Page Object Modelパターンを実装し、再利用可能なページクラスを作成する
-- [ ] 5.1 AdminLoginPageクラスを実装する
+- [x] 5.1 AdminLoginPageクラスを実装する
   - `e2e/projects/admin/pages/LoginPage.ts`を作成
   - @playwright/testからPage、expectをインポート
   - AdminLoginPageクラスを定義し、constructorでPageオブジェクトを受け取る
@@ -110,7 +110,7 @@
   - TypeScript型定義を使用し、Pageオブジェクトの型安全性を保証
   - _要件: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9_
 
-- [ ] 5.2 ProductsPageクラスを実装する
+- [x] 5.2 ProductsPageクラスを実装する
   - `e2e/projects/admin/pages/ProductsPage.ts`を作成
   - ProductsPageクラスを定義し、constructorでPageオブジェクトを受け取る
   - goto()メソッドを実装し、商品一覧ページにナビゲート
@@ -119,7 +119,7 @@
   - _要件: 5.1, 5.9_
 
 - [ ] 6. テストサンプルを作成し、E2Eテストの実装パターンを示す
-- [ ] 6.1 管理者ログインテストを作成する
+- [x] 6.1 管理者ログインテストを作成する
   - `e2e/projects/admin/tests/login.spec.ts`を作成
   - @playwright/testからtest、expectをインポート
   - AdminLoginPageをインポート
@@ -130,7 +130,7 @@
   - `data-testid="dashboard"`要素が表示されることを検証
   - _要件: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.10_
 
-- [ ] 6.2 商品CRUD操作テストを作成する
+- [x] 6.2 商品CRUD操作テストを作成する
   - `e2e/projects/admin/tests/products-crud.spec.ts`を作成
   - ProductsPageをインポート
   - test.describe('Products CRUD')でテストスイートをグループ化
