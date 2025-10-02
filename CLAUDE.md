@@ -21,6 +21,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `laravel-pint-larastan-config` - Laravel用Laravel Pint・Larastan設定（PHP品質管理システム強化）
 - `laravel-pest-migration` - Laravel PHPUnit を Pest 4に移行（テストフレームワーク移行とサンプル作成）
 - `phpunit-to-pest-complete-migration` - Laravel の PHPUnit テストを Pest テストに完全移行する
+- `nextjs-jest-testing-library-setup` - Next.js Jest + Testing Library設定とテストサンプル作成（フロントエンドテスト環境整備）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

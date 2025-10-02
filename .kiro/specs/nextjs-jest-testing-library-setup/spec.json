@@ -1,0 +1,104 @@
+{
+  "feature_name": "nextjs-jest-testing-library-setup",
+  "created_at": "2025-10-01T06:00:00Z",
+  "updated_at": "2025-10-01T06:10:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 11,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/11",
+    "title": "Next.js Jest + Testing Library 設定とテストサンプル作成",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "frontend": "Next.js 15.5.4, React 19.1.0, TypeScript 5",
+      "testing": "Jest 29, React Testing Library 16, MSW 2, next-router-mock 0.9",
+      "build_tools": "Turbopack",
+      "quality": "ESLint 9, Prettier"
+    },
+    "requirements_hints": [
+      "Jest 29とReact Testing Libraryによる自動テスト環境構築",
+      "モノレポ共通設定（jest.base.js, jest.setup.ts）の構築",
+      "App Router対応テストサンプル（Client Component、Server Actions、カスタムフック）",
+      "MSWによるAPIモック戦略の確立",
+      "TypeScript統合とテストユーティリティ共有",
+      "CI/CD設定の更新（GitHub Actions）",
+      "カバレッジレポート生成と閾値80%設定"
+    ],
+    "project_structure": [
+      "/package.json - モノレポルート設定（workspaces管理）",
+      "/jest.base.js - ルート共通Jest設定",
+      "/jest.config.js - ルートJest統括設定",
+      "/jest.setup.ts - 共通セットアップファイル",
+      "/tsconfig.test.json - TypeScriptテスト設定",
+      "/test-utils/render.tsx - カスタムレンダリング関数",
+      "/test-utils/env.ts - 環境変数モック",
+      "/test-utils/router.ts - Next.js Routerモック拡張",
+      "frontend/admin-app/jest.config.js - Admin Appテスト設定",
+      "frontend/user-app/jest.config.js - User Appテスト設定",
+      "frontend/admin-app/src/components/Button/Button.test.tsx - Componentテストサンプル",
+      "frontend/admin-app/src/app/actions.test.ts - Server Actionsテストサンプル",
+      "frontend/admin-app/src/hooks/useAuth.test.ts - カスタムフックテストサンプル",
+      "frontend/admin-app/src/lib/api.test.ts - API Fetchテスト（MSW使用）",
+      "frontend/TESTING_GUIDE.md - テスト記述ガイドライン",
+      "frontend/TESTING_TROUBLESHOOTING.md - トラブルシューティングガイド",
+      ".github/workflows/frontend-test.yml - CI/CD設定"
+    ],
+    "services": {
+      "admin-app": {
+        "port": "3000",
+        "description": "管理者向けアプリケーション"
+      },
+      "user-app": {
+        "port": "3001",
+        "description": "エンドユーザー向けアプリケーション"
+      }
+    },
+    "todo_items": [
+      "ルート package.json 作成（workspaces設定）",
+      "Jest 29とRTL依存関係のインストール",
+      "jest.base.js 作成",
+      "jest.config.js（ルート統括）作成",
+      "jest.setup.ts 作成",
+      "frontend/admin-app/jest.config.js 作成",
+      "frontend/user-app/jest.config.js 作成",
+      "各アプリの package.json スクリプト更新",
+      "tsconfig.test.json 作成",
+      "Client Componentテストサンプル作成",
+      "Server Actionsテストサンプル作成",
+      "カスタムフックテストサンプル作成",
+      "API Fetchテスト（MSW使用）作成",
+      "/test-utils/render.tsx 作成",
+      "/test-utils/env.ts 作成",
+      "/test-utils/router.ts 作成",
+      "テスト記述ガイドライン作成",
+      "トラブルシューティングガイド作成",
+      ".github/workflows/frontend-test.yml 作成",
+      "カバレッジレポート連携設定",
+      "npm test 実行成功（ルート）",
+      "npm test:admin 実行成功",
+      "npm test:user 実行成功",
+      "npm test:coverage 実行成功",
+      "CI/CD全パイプライン成功"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
