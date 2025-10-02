@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["jest", "@testing-library/jest-dom", "node"],
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "frontend/**/src/**/*.test.ts",
+    "frontend/**/src/**/*.test.tsx",
+    "jest.setup.ts",
+    "test-utils/**/*.ts",
+    "test-utils/**/*.tsx"
+  ]
+}
