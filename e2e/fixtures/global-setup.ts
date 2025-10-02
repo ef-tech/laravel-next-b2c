@@ -16,6 +16,22 @@ import 'dotenv/config';
  * authenticated sessions across all tests.
  */
 async function globalSetup(config: FullConfig) {
+  // Validate required environment variables
+  const requiredEnvVars = [
+    'E2E_ADMIN_EMAIL',
+    'E2E_ADMIN_PASSWORD',
+    'E2E_USER_EMAIL',
+    'E2E_USER_PASSWORD',
+  ];
+
+  const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars.join(', ')}\n` +
+        'Please ensure .env file is configured with E2E authentication credentials.'
+    );
+  }
+
   const apiBaseURL = process.env.E2E_API_URL ?? 'http://localhost:13000';
 
   // Ensure storage directory exists
