@@ -159,35 +159,35 @@ use: {
 - **獲得**: 設定の柔軟性、環境差異への対応、デフォルト動作の保証
 - **犠牲**: 設定箇所の増加（.envとconfig.ts）
 
-#### Decision 3: CORS設定の明示的ポート追加方式
+#### Decision 3: CORS設定のポート置き換え方式
 
-**Decision**: 既存のallowed_origins配列に新ポートを追加し、旧ポートは削除しない
+**Decision**: allowed_origins配列を新ポートのみに置き換え、旧ポートは削除
 
-**Context**: Laravel CORS設定の変更は既存開発者への影響を最小化する必要がある
+**Context**: リリース前のプロジェクトであり、単独開発のため後方互換性は不要
 
 **Alternatives**:
-1. **ワイルドカード**: `allowed_origins => ['*']`
-2. **置き換え**: 旧ポート削除、新ポートのみ
-3. **追加保持**: 新旧両ポート併存（採用）
+1. **ワイルドカード**: `allowed_origins => ['*']`（セキュリティリスクあり）
+2. **置き換え**: 旧ポート削除、新ポートのみ（採用）
+3. **追加保持**: 新旧両ポート併存（不要な冗長性）
 
 **Selected Approach**:
 ```php
 'allowed_origins' => [
-    'http://localhost:13001',   // user-app (新)
-    'http://localhost:13002',   // admin-app (新)
-    'http://localhost:3000',    // user-app (旧・互換性維持)
-    'http://localhost:3001',    // admin-app (旧・互換性維持)
+    'http://localhost:13001',   // user-app
+    'http://localhost:13002',   // admin-app
+    'http://127.0.0.1:13001',   // user-app (127.0.0.1)
+    'http://127.0.0.1:13002',   // admin-app (127.0.0.1)
 ],
 ```
 
 **Rationale**:
-- 段階的移行による既存開発者環境への影響最小化
-- ロールバック時の即座の復旧可能性
-- 新旧環境の共存期間確保
+- クリーンな設定ファイル維持
+- 不要な設定の排除
+- 明確なポート指定（13000番台統一）
 
 **Trade-offs**:
-- **獲得**: 後方互換性、段階的移行、ロールバック容易性
-- **犠牲**: 設定の冗長性（将来的に旧ポート削除が必要）
+- **獲得**: シンプルな設定、将来の保守性向上
+- **犠牲**: なし（リリース前・単独開発のため互換性不要）
 
 ---
 
@@ -432,29 +432,25 @@ projects: [
 
 ```php
 'allowed_origins' => [
-    'http://localhost:13001',   // user-app (新)
-    'http://localhost:13002',   // admin-app (新)
-    'http://localhost:3000',    // user-app (旧・互換性)
-    'http://localhost:3001',    // admin-app (旧・互換性)
-    'http://127.0.0.1:13001',
-    'http://127.0.0.1:13002',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
+    'http://localhost:13001',   // user-app
+    'http://localhost:13002',   // admin-app
+    'http://127.0.0.1:13001',   // user-app (127.0.0.1)
+    'http://127.0.0.1:13002',   // admin-app (127.0.0.1)
 ],
 ```
 
 **変更内容**:
-- **新ポート追加**: `http://localhost:13001`, `http://localhost:13002`, `http://127.0.0.1:13001`, `http://127.0.0.1:13002`
-- **旧ポート保持**: `http://localhost:3000`, `http://localhost:3001`（後方互換性）
+- **ポート置き換え**: 旧ポート（3000, 3001）を削除し、新ポート（13001, 13002）のみに統一
+- **127.0.0.1対応**: localhost と 127.0.0.1 両方のアクセスをサポート
 
 **Preconditions**: Laravel APIが起動していること
-**Postconditions**: 新旧両ポートからのCORSリクエストが許可される
+**Postconditions**: 新ポート（13001, 13002）からのCORSリクエストのみが許可される
 **Invariants**: 他のCORS設定（allowed_methods, allowed_headers等）の不変性
 
 **Integration Strategy**:
-- **Modification Approach**: 既存allowed_origins配列に新ポートを追加（非破壊的変更）
-- **Backward Compatibility**: 旧ポート（3000, 3001）を保持し、既存開発者環境への影響を回避
-- **Migration Path**: 全開発者が新ポートに移行後、旧ポートを削除（別タスク）
+- **Modification Approach**: 既存allowed_origins配列を新ポートのみに置き換え
+- **Backward Compatibility**: 不要（リリース前・単独開発のため）
+- **Migration Path**: なし（一括移行）
 
 ---
 

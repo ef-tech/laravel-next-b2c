@@ -76,12 +76,12 @@
 ## バックエンドCORS設定更新
 
 - [x] 5. Laravel CORS設定を更新する
-- [x] 5.1 CORS allowed_originsに新ポートを追加する
-  - `http://localhost:13001`をallowed_originsに追加
-  - `http://localhost:13002`をallowed_originsに追加
-  - `http://127.0.0.1:13001`をallowed_originsに追加
-  - `http://127.0.0.1:13002`をallowed_originsに追加
-  - 既存ポート（3000, 3001）を後方互換性のため保持
+- [x] 5.1 CORS allowed_originsを新ポートに置き換える
+  - `http://localhost:13001`をallowed_originsに設定
+  - `http://localhost:13002`をallowed_originsに設定
+  - `http://127.0.0.1:13001`をallowed_originsに設定
+  - `http://127.0.0.1:13002`をallowed_originsに設定
+  - 旧ポート（3000, 3001）を削除（リリース前のため互換性不要）
   - _Requirements: 3.1, 3.2_
 
 - [ ] 5.2 CORS通信テストを実施する
