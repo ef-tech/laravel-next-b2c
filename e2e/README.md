@@ -114,26 +114,47 @@ e2e/
 
 ### テストサンプル
 
-#### Admin Login Test (`projects/admin/tests/login.spec.ts`)
+#### ✅ 実装済み・実行可能
+
+**Admin App Home Page** (`projects/admin/tests/home.spec.ts`)
+- ホームページ読み込み確認
+- Next.jsデフォルトコンテンツ表示確認
+- 外部リンク動作確認
+- フッターナビゲーション確認
+- レスポンシブレイアウト確認
+
+**User App Home Page** (`projects/user/tests/home.spec.ts`)
+- ホームページ読み込み確認
+- Next.jsデフォルトコンテンツ表示確認
+- 外部リンク動作確認
+- フッターナビゲーション確認
+- レスポンシブレイアウト確認
+
+#### ⏭️ 未実装（実装待ち）
+
+**Admin Login Test** (`projects/admin/tests/login.spec.ts`) - スキップ中
 - ログインフォーム表示確認
 - 正常ログイン
 - エラーハンドリング
 - 認証済みリダイレクト
+- **TODO**: `/login`ページ実装後に有効化
 
-#### Products CRUD Test (`projects/admin/tests/products-crud.spec.ts`)
+**Products CRUD Test** (`projects/admin/tests/products-crud.spec.ts`) - スキップ中
 - 商品一覧表示
 - 商品新規作成
 - 商品編集
 - 商品削除
 - 完全CRUDサイクル
+- **TODO**: `/products`ページ実装後に有効化
 
-#### API Integration Test (`projects/user/tests/api-integration.spec.ts`)
+**API Integration Test** (`projects/user/tests/api-integration.spec.ts`) - スキップ中
 - 商品一覧API取得・表示
 - お問い合わせフォーム送信
 - 商品詳細取得
 - APIエラーハンドリング
 - ローディング状態確認
 - 商品検索機能
+- **TODO**: APIエンドポイント実装後に有効化
 
 ## 認証の仕組み
 
