@@ -1,9 +1,10 @@
-import { saveUser } from "./actions";
-import { revalidatePath } from "next/cache";
-
+// jest.mock は import より前に配置する必要がある（Jestがhoistする）
 jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));
+
+import { saveUser } from "./actions";
+import { revalidatePath } from "next/cache";
 
 describe("Server Actions", () => {
   beforeEach(() => {

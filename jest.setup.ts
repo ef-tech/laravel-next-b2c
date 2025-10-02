@@ -7,20 +7,6 @@ import React from 'react';
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
-// BroadcastChannel Polyfill for MSW
-if (typeof global.BroadcastChannel === 'undefined') {
-  global.BroadcastChannel = class BroadcastChannel {
-    constructor(public name: string) {}
-    postMessage() {}
-    close() {}
-    addEventListener() {}
-    removeEventListener() {}
-    dispatchEvent() {
-      return true;
-    }
-  } as any;
-}
-
 // Next.js Image Mock
 jest.mock('next/image', () => ({
   __esModule: true,
