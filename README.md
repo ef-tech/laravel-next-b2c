@@ -350,13 +350,13 @@ cd backend/laravel-api
 # 依存関係インストール
 composer install
 
-# キー生成とマイグレーション (Docker環境)
-./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate
-./vendor/bin/sail artisan db:seed
+# キー生成とマイグレーション
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
 
-# 開発サーバー起動 (Docker環境 - sail up で自動起動)
-./vendor/bin/sail up -d
+# 開発サーバー起動
+php artisan serve --port=13000
 ```
 
 </details>
