@@ -141,15 +141,15 @@
 
 ## フェーズ2: テストサンプル作成（Week 2）
 
-- [ ] 7. Client Componentテストサンプルを作成する
-- [ ] 7.1 テスト対象のButtonコンポーネントを作成する
+- [x] 7. Client Componentテストサンプルを作成する
+- [x] 7.1 テスト対象のButtonコンポーネントを作成する
   - frontend/admin-app/src/components/Button/Button.tsxを作成
   - children、onClick、variant、hrefプロパティを定義
   - Link使用時のナビゲーション機能を実装
   - primary/secondaryバリアント切り替え機能を実装
   - _Requirements: 4.1_
 
-- [ ] 7.2 Buttonコンポーネントのテストを作成する
+- [x] 7.2 Buttonコンポーネントのテストを作成する
   - frontend/admin-app/src/components/Button/Button.test.tsxを作成
   - render/screen/fireEventをtest-utilsからimport
   - 正しいテキストでレンダリングされることをテスト
@@ -158,30 +158,30 @@
   - variantプロパティで異なるスタイルがレンダリングされることをテスト
   - _Requirements: 4.1_
 
-- [ ] 8. Server Actionsテストサンプルを作成する
-- [ ] 8.1 テスト対象のServer Actionsを作成する
+- [x] 8. Server Actionsテストサンプルを作成する
+- [x] 8.1 テスト対象のServer Actionsを作成する
   - frontend/admin-app/src/app/actions.tsを作成
   - 'use server'ディレクティブを追加
   - saveUser関数を実装（ユーザーデータ保存とrevalidatePath呼び出し）
   - バリデーションエラーハンドリング機能を実装
   - _Requirements: 4.2_
 
-- [ ] 8.2 Server Actionsのテストを作成する
+- [x] 8.2 Server Actionsのテストを作成する
   - frontend/admin-app/src/app/actions.test.tsを作成
   - next/cacheのrevalidatePathをjest.mockでモック
   - saveUserが正常にユーザーを保存してrevalidatePathを呼ぶことをテスト
   - バリデーションエラー時に適切なエラーレスポンスを返すことをテスト
   - _Requirements: 4.2_
 
-- [ ] 9. カスタムフックテストサンプルを作成する
-- [ ] 9.1 テスト対象のuseAuthフックを作成する
+- [x] 9. カスタムフックテストサンプルを作成する
+- [x] 9.1 テスト対象のuseAuthフックを作成する
   - frontend/admin-app/src/hooks/useAuth.tsを作成
   - useSearchParamsを使用したクエリパラメータ取得機能を実装
   - 非同期ユーザーデータフェッチ機能を実装
   - ローディング状態管理を実装
   - _Requirements: 4.3_
 
-- [ ] 9.2 useAuthフックのテストを作成する
+- [x] 9.2 useAuthフックのテストを作成する
   - frontend/admin-app/src/hooks/useAuth.test.tsを作成
   - renderHook/waitForをimport
   - useSearchParamsをjest.mockでモック
@@ -189,54 +189,53 @@
   - マウント時にユーザーデータをフェッチすることをテスト（waitFor使用）
   - _Requirements: 4.3_
 
-- [ ] 10. API Fetchテストサンプルを作成する（MSW使用）
-- [ ] 10.1 テスト対象のAPI関数を作成する
+- [x] 10. API Fetchテストサンプルを作成する（fetch mock使用）
+- [x] 10.1 テスト対象のAPI関数を作成する
   - frontend/admin-app/src/lib/api.tsを作成
   - fetchUsers関数を実装（ユーザー一覧取得API呼び出し）
   - エラーハンドリング機能を実装
   - _Requirements: 4.4_
 
-- [ ] 10.2 API関数のテストを作成する（MSW使用）
+- [x] 10.2 API関数のテストを作成する（fetch mock使用）
   - frontend/admin-app/src/lib/api.test.tsを作成
-  - msw（http/HttpResponse）をimport
-  - jest.setupのserverインスタンスをimport
+  - global.fetchをjest.fnでモック（MSW ESM互換性問題のため代替）
   - 成功レスポンスをモックしてユーザー一覧が取得できることをテスト
   - エラーレスポンス（4xx/5xx）をモックして適切にエラーハンドリングされることをテスト
   - _Requirements: 4.4_
 
-- [ ] 11. テストサンプル実行検証を実施する
-- [ ] 11.1 個別テストサンプルの実行を検証する
+- [x] 11. テストサンプル実行検証を実施する
+- [x] 11.1 個別テストサンプルの実行を検証する
   - Button.test.tsxを単独実行して成功確認
   - actions.test.tsを単独実行して成功確認
   - useAuth.test.tsを単独実行して成功確認
   - api.test.tsを単独実行して成功確認
   - _Requirements: 9.2_
 
-- [ ] 11.2 admin-app全体のテスト実行を検証する
+- [x] 11.2 admin-app全体のテスト実行を検証する
   - npm test:adminコマンドで4種のテストが全て実行されることを確認
-  - 全テストが成功することを確認
+  - 全テストが成功することを確認（10 tests passed）
   - displayName: 'admin-app'がテスト結果に表示されることを確認
   - _Requirements: 9.2_
 
 ## フェーズ3: ドキュメント整備（Week 3）
 
-- [ ] 12. テスト記述ガイドラインを作成する
-- [ ] 12.1 テスト記述ガイドライン文書を作成する
+- [x] 12. テスト記述ガイドラインを作成する
+- [x] 12.1 テスト記述ガイドライン文書を作成する
   - frontend/TESTING_GUIDE.mdを作成
   - テストファイル命名規則を記載（*.test.{ts,tsx}）
   - Arrange-Act-Assertパターンの説明を記載
-  - モック使用ガイドライン（jest.mock/MSW使用シーン）を記載
+  - モック使用ガイドライン（jest.mock/fetch mock使用シーン）を記載
   - スナップショットテスト運用ルール（慎重な使用推奨）を記載
   - test-utilsの使用方法を記載
   - 4種のテストサンプルへの参照リンクを記載
   - _Requirements: 7.1_
 
-- [ ] 13. トラブルシューティングガイドを作成する
-- [ ] 13.1 トラブルシューティングガイド文書を作成する
+- [x] 13. トラブルシューティングガイドを作成する
+- [x] 13.1 トラブルシューティングガイド文書を作成する
   - frontend/TESTING_TROUBLESHOOTING.mdを作成
   - よくあるエラーと対処法を記載（モック設定忘れ、非同期未待機等）
   - 非同期テストのデバッグ方法を記載（waitFor/act警告対応）
-  - モック関連の問題対処法を記載（jest.mock実行順序、MSWハンドラー設定）
+  - モック関連の問題対処法を記載（jest.mock実行順序、fetch mock設定）
   - CI/CD失敗時の対応を記載（Node.jsバージョン、メモリ不足、カバレッジ未達）
   - _Requirements: 7.2_
 
