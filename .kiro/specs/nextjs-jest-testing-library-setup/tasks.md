@@ -2,13 +2,13 @@
 
 ## フェーズ1: 基盤構築（Week 1）
 
-- [ ] 1. テストフレームワークの依存関係をインストールする
-- [ ] 1.1 モノレポルート設定とワークスペース定義を追加する
+- [x] 1. テストフレームワークの依存関係をインストールする
+- [x] 1.1 モノレポルート設定とワークスペース定義を追加する
   - ルートpackage.jsonにworkspaces配列を追加（admin-app/user-appを指定）
   - private: trueフィールドを設定してモノレポルートの公開を防止
   - _Requirements: 1.1_
 
-- [ ] 1.2 Jest 29とReact Testing Libraryの依存関係をインストールする
+- [x] 1.2 Jest 29とReact Testing Libraryの依存関係をインストールする
   - jest 29、jest-environment-jsdom 29をdevDependenciesに追加
   - @testing-library/react 16、@testing-library/jest-dom 6、@testing-library/user-event 14を追加
   - @types/jest 29をTypeScript型定義に追加
@@ -16,7 +16,7 @@
   - identity-obj-proxyをCSSモック用に追加
   - _Requirements: 1.1_
 
-- [ ] 1.3 ルートpackage.jsonにテストスクリプトを定義する
+- [x] 1.3 ルートpackage.jsonにテストスクリプトを定義する
   - test: ルート全体テスト実行スクリプト
   - test:watch: ウォッチモード実行スクリプト
   - test:coverage: カバレッジ生成スクリプト
@@ -24,8 +24,8 @@
   - test:user: user-app専用テスト実行スクリプト
   - _Requirements: 1.2, 1.3, 1.4_
 
-- [ ] 2. Jest設定ファイルを構築する（モノレポ共通設定）
-- [ ] 2.1 共通Jest設定ファイルを作成する
+- [x] 2. Jest設定ファイルを構築する（モノレポ共通設定）
+- [x] 2.1 共通Jest設定ファイルを作成する
   - jest.base.jsをルートに作成
   - testEnvironment: 'jsdom'を設定
   - setupFilesAfterEnv: jest.setup.tsを指定
@@ -36,13 +36,13 @@
   - coverageThreshold: 全メトリクス80%を設定
   - _Requirements: 2.1, 10.1_
 
-- [ ] 2.2 ルートJest統括設定ファイルを作成する
+- [x] 2.2 ルートJest統括設定ファイルを作成する
   - jest.config.jsをルートに作成
   - projects配列にadmin-app/user-appのパスを指定
   - collectCoverageFrom: フロントエンド全体のカバレッジ対象を定義
   - _Requirements: 2.2_
 
-- [ ] 2.3 Admin AppのJest設定ファイルを作成する
+- [x] 2.3 Admin AppのJest設定ファイルを作成する
   - frontend/admin-app/jest.config.jsを作成
   - next/jestのcreateJestConfigを使用してNext.js設定を自動適用
   - jest.base.jsを継承して共通設定を適用
@@ -52,7 +52,7 @@
   - moduleNameMapper: @/パスエイリアスを設定
   - _Requirements: 2.3_
 
-- [ ] 2.4 User AppのJest設定ファイルを作成する
+- [x] 2.4 User AppのJest設定ファイルを作成する
   - frontend/user-app/jest.config.jsを作成
   - next/jestのcreateJestConfigを使用してNext.js設定を自動適用
   - jest.base.jsを継承して共通設定を適用
@@ -62,31 +62,31 @@
   - moduleNameMapper: @/パスエイリアスを設定
   - _Requirements: 2.4_
 
-- [ ] 2.5 各フロントエンドアプリのpackage.jsonテストスクリプトを更新する
+- [x] 2.5 各フロントエンドアプリのpackage.jsonテストスクリプトを更新する
   - admin-app/user-appのpackage.jsonにtestスクリプトを追加
   - test:watchスクリプトをウォッチモード用に追加
   - test:coverageスクリプトをカバレッジ生成用に追加
   - _Requirements: 1.2, 1.3, 1.4_
 
-- [ ] 3. Jest共通セットアップファイルを作成する
-- [ ] 3.1 共通セットアップファイルの基盤を構築する
+- [x] 3. Jest共通セットアップファイルを作成する
+- [x] 3.1 共通セットアップファイルの基盤を構築する
   - jest.setup.tsをルートに作成
   - @testing-library/jest-domをimportしてカスタムマッチャーを有効化
   - whatwg-fetchをimportしてfetch Polyfillを有効化
   - TextEncoder/TextDecoderのPolyfillを設定
   - _Requirements: 3.1_
 
-- [ ] 3.2 Next.js Image/Fontモックを設定する
+- [x] 3.2 Next.js Image/Fontモックを設定する
   - next/imageをjest.mockで代替実装に置換（<img>タグレンダリング）
   - next/font/localをjest.mockで代替実装に置換（className: ''を返す）
   - _Requirements: 3.2, 3.3_
 
-- [ ] 3.3 Next.js Navigationモックを設定する
+- [x] 3.3 Next.js Navigationモックを設定する
   - next/navigationをjest.mockでnext-router-mockに置換
   - App Router対応のuseRouter/useSearchParams/usePathnameモックを有効化
   - _Requirements: 3.4_
 
-- [ ] 3.4 MSW（Mock Service Worker）を設定する
+- [x] 3.4 MSW（Mock Service Worker）を設定する
   - msw/nodeからsetupServerをimport
   - setupServerインスタンスを作成（初期ハンドラーなし）
   - beforeAllフックでserver.listen（onUnhandledRequest: 'warn'）を実行
@@ -95,29 +95,29 @@
   - console.errorのReact警告を抑制するモックを追加
   - _Requirements: 3.5_
 
-- [ ] 4. テストユーティリティを整備する
-- [ ] 4.1 環境変数モックユーティリティを作成する
+- [x] 4. テストユーティリティを整備する
+- [x] 4.1 環境変数モックユーティリティを作成する
   - test-utils/env.tsを作成
   - setEnv関数を実装（process.envに環境変数を設定）
   - resetEnv関数を実装（process.envを元の状態に復元）
   - originalEnv変数で初期状態を保持
   - _Requirements: 5.1_
 
-- [ ] 4.2 Next.js Routerモック拡張ユーティリティを作成する
+- [x] 4.2 Next.js Routerモック拡張ユーティリティを作成する
   - test-utils/router.tsを作成
   - setupRouter関数を実装（pathname/query設定用）
   - next-router-mockのsetCurrentUrl/pushを使用した実装
   - _Requirements: 5.2_
 
-- [ ] 4.3 カスタムレンダリング関数を作成する
+- [x] 4.3 カスタムレンダリング関数を作成する
   - test-utils/render.tsxを作成
   - カスタムrender関数を実装（将来的なProvider追加用の拡張ポイント）
   - @testing-library/reactの全エクスポートを再エクスポート
   - RenderOptions拡張用のCustomRenderOptions型を定義
   - _Requirements: 5.3_
 
-- [ ] 5. TypeScript統合設定を構築する
-- [ ] 5.1 テストファイル用TypeScript設定を作成する
+- [x] 5. TypeScript統合設定を構築する
+- [x] 5.1 テストファイル用TypeScript設定を作成する
   - tsconfig.test.jsonをルートに作成
   - tsconfig.jsonを継承してベース設定を適用
   - types配列にjest/@testing-library/jest-dom/nodeを追加
@@ -126,15 +126,15 @@
   - jest.setup.ts、test-utils/**/*.tsをincludeに追加
   - _Requirements: 6.1, 6.2_
 
-- [ ] 6. 基盤動作確認テストを実施する
-- [ ] 6.1 空テストファイルで設定検証を実施する
+- [x] 6. 基盤動作確認テストを実施する
+- [x] 6.1 空テストファイルで設定検証を実施する
   - frontend/admin-app/src/dummy.test.tsを作成（基本的なdescribe/itのみ）
   - npm testコマンドで全設定ファイルの読み込みを検証
   - jest.setup.tsの実行を検証
   - 設定エラーがないことを確認
   - _Requirements: 9.1_
 
-- [ ] 6.2 基盤動作確認後にダミーファイルを削除する
+- [x] 6.2 基盤動作確認後にダミーファイルを削除する
   - dummy.test.tsを削除
   - 基盤が正常動作することを確認済みとマーク
   - _Requirements: フェーズ1完了_
