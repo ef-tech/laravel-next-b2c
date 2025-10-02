@@ -17,6 +17,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **ステートレスAPI設計**: Laravel Sanctumトークン認証による水平スケーリング対応
 - **モダンテストフレームワーク**: Pest 4による包括的テストスイート（12+テストケース）
 - **フロントエンドテスト環境**: Jest 29 + Testing Library 16完全実装（カバレッジ94.73%達成）
+- **E2Eテスト環境**: Playwright 1.47.2 + Laravel Sanctum認証統合、Page Object Modelパターン採用
 - **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備
 - **開発者エクスペリエンス**: Turbopack、Tailwind CSS v4、ESLintの統合開発環境
 - **モノレポ統一コード品質管理**: ESLint 9 + Prettier設定、husky + lint-staged導入による自動品質チェック
@@ -39,6 +40,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **本番環境対応**: Dockerベースの構成とステートレス設計による環境差異の最小化
 - **移行容易性**: 詳細ドキュメントによる他プロジェクトへの最適化手法適用可能
 - **品質管理の自動化**: Git Hooks + CI/CDによる自動品質チェック、人的エラー削減
+- **完全なテスト戦略**: ユニット（Jest/Pest）→統合（Testing Library）→E2E（Playwright）の3層テスト体制
 
 ## アーキテクチャ上の特徴
 - **API専用最適化**: Web機能削除によるステートレス設計とパフォーマンス最大化

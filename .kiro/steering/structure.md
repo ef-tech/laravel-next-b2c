@@ -8,6 +8,7 @@ laravel-next-b2c/
 ├── frontend/            # フロントエンド層
 │   ├── admin-app/       # 管理者向けアプリケーション
 │   └── user-app/        # エンドユーザー向けアプリケーション
+├── e2e/                 # E2Eテスト環境 (Playwright)
 ├── .github/             # GitHub設定
 │   └── workflows/       # GitHub Actionsワークフロー (CI/CD)
 ├── .claude/             # Claude Code設定・コマンド
@@ -120,6 +121,40 @@ laravel-next-b2c/
     └── @testing-library # React Testing Library 16
 ```
 
+## E2Eテスト構造 (`e2e/`)
+### Playwright E2Eテスト構成
+```
+e2e/
+├── fixtures/            # テストフィクスチャ
+│   └── global-setup.ts  # グローバルセットアップ（Sanctum認証）
+├── helpers/             # テストヘルパー関数
+│   └── sanctum.ts       # Laravel Sanctum認証ヘルパー
+├── projects/            # プロジェクト別テスト
+│   ├── admin/           # Admin Appテスト
+│   │   ├── pages/       # Page Object Model (POM)
+│   │   │   ├── LoginPage.ts     # ログインページオブジェクト
+│   │   │   └── ProductsPage.ts  # 商品ページオブジェクト
+│   │   └── tests/       # テストケース
+│   │       ├── home.spec.ts          # ホームページテスト
+│   │       ├── login.spec.ts         # ログインテスト（未実装スキップ中）
+│   │       └── products-crud.spec.ts # 商品CRUD操作テスト（未実装スキップ中）
+│   └── user/            # User Appテスト
+│       ├── pages/       # Page Object Model
+│       └── tests/       # テストケース
+│           ├── home.spec.ts              # ホームページテスト
+│           └── api-integration.spec.ts   # API統合テスト（未実装スキップ中）
+├── storage/             # 認証状態ファイル（自動生成）
+│   ├── admin.json       # Admin認証状態
+│   └── user.json        # User認証状態
+├── reports/             # テストレポート（自動生成）
+├── test-results/        # テスト実行結果（自動生成）
+├── playwright.config.ts # Playwright設定
+├── package.json         # E2E依存関係
+├── tsconfig.json        # TypeScript設定
+├── .env                 # E2E環境変数（gitignore済み）
+└── .env.example         # E2E環境変数テンプレート
+```
+
 ## コード構成パターン
 ### 命名規約
 - **ディレクトリ**: kebab-case (`admin-app`, `user-app`)
@@ -215,9 +250,15 @@ import { clsx } from 'clsx'
 4. **テスト駆動**:
    - バックエンド: Pest 4による包括的テスト（12+テストケース）
    - フロントエンド: Jest 29 + Testing Library 16（カバレッジ94.73%）
+   - E2E: Playwright 1.47.2によるエンドツーエンドテスト
    - テストサンプル: Client Component、Server Actions、Custom Hooks、API Fetch
+   - Page Object Model: E2Eテストの保守性向上パターン
 5. **環境分離**: 開発、ステージング、本番環境の明確な分離
 6. **品質管理の自動化**:
    - Git Hooks (pre-commit: lint-staged, pre-push: composer quality)
    - CI/CD (GitHub Actions: Pull Request時の自動品質チェック)
    - 開発時の継続的品質保証
+7. **E2E認証統合**:
+   - Laravel Sanctum認証のE2Eテスト対応
+   - Global Setup による認証状態の事前生成
+   - 環境変数による柔軟なテスト環境設定

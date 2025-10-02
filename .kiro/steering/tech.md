@@ -47,6 +47,14 @@
 - **next-router-mock**: ^0.9.13 (Next.js Router モック)
 - **テスト構成**: モノレポ共通設定（jest.base.js）+ プロジェクト統括設定（jest.config.js）
 
+### E2Eテスト環境
+- **Playwright**: ^1.47.2 (E2Eテストフレームワーク、クロスブラウザ対応)
+- **テストプロジェクト構成**: Admin App / User App 分離実行
+- **認証統合**: Laravel Sanctum認証対応（global-setup実装済み）
+- **Page Object Model**: 保守性の高いテスト設計パターン採用
+- **並列実行**: Shard機能によるCI/CD最適化（4並列デフォルト）
+- **環境変数管理**: `.env`ファイルによる柔軟なURL/認証情報設定
+
 ## バックエンド技術 - 🏆 API専用最適化済み
 ### 言語・フレームワーク
 - **PHP**: ^8.4 (最新のPHP機能対応)
@@ -204,6 +212,31 @@ npm run test:admin    # Admin Appのみテスト
 npm run test:user     # User Appのみテスト
 ```
 
+### E2Eテスト (Playwright)
+```bash
+# e2eディレクトリで実行
+cd e2e
+
+# セットアップ（初回のみ）
+npm install
+npx playwright install chromium
+
+# テスト実行
+npm test              # 全E2Eテスト実行
+npm run test:ui       # UIモードで実行（デバッグ推奨）
+npm run test:debug    # デバッグモード
+npm run test:admin    # Admin Appテストのみ
+npm run test:user     # User Appテストのみ
+npm run report        # HTMLレポート表示
+
+# CI/CD環境
+npm run test:ci       # CI環境用実行（headless）
+
+# コード生成（Codegen）
+npm run codegen:admin # Admin App用テスト自動生成
+npm run codegen:user  # User App用テスト自動生成
+```
+
 ### Docker環境
 ```bash
 # 環境起動・停止
@@ -227,6 +260,19 @@ FORWARD_MAILPIT_PORT=11025        # Mailpit SMTP
 FORWARD_MAILPIT_DASHBOARD_PORT=13025  # Mailpit UI
 FORWARD_MINIO_PORT=13900          # MinIO API
 FORWARD_MINIO_CONSOLE_PORT=13010  # MinIO Console
+```
+
+### E2Eテスト環境変数 (e2e/.env)
+```env
+E2E_ADMIN_URL=http://localhost:3001   # Admin App URL
+E2E_USER_URL=http://localhost:3000    # User App URL
+E2E_API_URL=http://localhost:13000    # Laravel API URL
+
+E2E_ADMIN_EMAIL=admin@example.com     # 管理者メールアドレス
+E2E_ADMIN_PASSWORD=password           # 管理者パスワード
+
+E2E_USER_EMAIL=user@example.com       # ユーザーメールアドレス
+E2E_USER_PASSWORD=password            # ユーザーパスワード
 ```
 
 ### 主要設定
