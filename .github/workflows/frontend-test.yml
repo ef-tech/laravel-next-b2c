@@ -67,7 +67,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install ${{ matrix.app }} dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
         working-directory: frontend/${{ matrix.app }}
 
       - name: Run tests with coverage
