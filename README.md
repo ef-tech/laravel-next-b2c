@@ -271,12 +271,90 @@ curl http://localhost:13002
 
 ## 🔧 環境構築
 
-### Docker環境でのセットアップ
+### Docker環境でのセットアップ（推奨）
 
-Laravel Sailを使用した開発環境はコンテナ化されており、依存関係の管理が簡単です。
+統合Docker Compose環境により、全サービスを一度に起動できます。
 
 <details>
 <summary>📖 詳細な環境構築手順を表示</summary>
+
+#### ステップ1: 環境変数設定
+
+```bash
+# リポジトリルートで環境変数ファイルを作成
+cp .env.example .env
+
+# Laravel API専用の環境変数も設定（Docker内部で使用）
+cp backend/laravel-api/.env.example backend/laravel-api/.env
+```
+
+#### ステップ2: Docker Compose で全サービス起動
+
+```bash
+# リポジトリルートから全サービスビルド＆起動
+docker compose up -d --build
+
+# 起動確認
+docker compose ps
+```
+
+**起動されるサービス**:
+- ✅ Laravel API (ポート: 13000)
+- ✅ Admin App (ポート: 13002)
+- ✅ User App (ポート: 13001)
+- ✅ PostgreSQL (ポート: 13432)
+- ✅ Redis (ポート: 13379)
+- ✅ Mailpit (SMTP: 11025, UI: 13025)
+- ✅ MinIO (API: 13900, Console: 13010)
+
+#### ステップ3: Laravel初期化（初回のみ）
+
+```bash
+# Laravel APIコンテナ内でコマンド実行
+docker compose exec laravel-api php artisan key:generate
+docker compose exec laravel-api php artisan migrate
+docker compose exec laravel-api php artisan db:seed
+```
+
+#### ステップ4: 動作確認
+
+```bash
+# API疎通確認
+curl http://localhost:13000/up
+
+# フロントエンド確認
+curl http://localhost:13002  # Admin App
+curl http://localhost:13001  # User App
+```
+
+#### E2Eテスト実行（オプション）
+
+```bash
+# E2Eテストサービス実行（全サービス起動後）
+docker compose run --rm e2e-tests
+```
+
+#### 停止・再起動
+
+```bash
+# 全サービス停止
+docker compose down
+
+# ボリューム含めて完全削除
+docker compose down -v
+
+# 再起動
+docker compose up -d
+```
+
+</details>
+
+### Laravel Sail環境でのセットアップ（従来方式）
+
+Laravel Sailを使用した個別起動も可能です。
+
+<details>
+<summary>📖 Laravel Sail セットアップ手順を表示</summary>
 
 #### ステップ1: Laravel API環境準備
 
@@ -375,19 +453,39 @@ php artisan serve --port=13000
 
 ### 開発サーバーの管理
 
-#### 全サービス同時起動
+#### 全サービス同時起動（Docker Compose推奨）
 
 ```bash
-# Docker環境（推奨）
-cd backend/laravel-api
-./vendor/bin/sail up -d
+# リポジトリルートから全サービス起動
+docker compose up -d
 
-# フロントエンド起動（複数ターミナル）
-cd frontend/admin-app && npm run dev &
-cd frontend/user-app && npm run dev &
+# ログ確認
+docker compose logs -f
+
+# 特定サービスのログ確認
+docker compose logs -f admin-app
+docker compose logs -f user-app
+docker compose logs -f laravel-api
 ```
 
-#### 個別サービス制御
+#### 個別サービス制御（Docker Compose）
+
+```bash
+# 特定サービスのみ起動
+docker compose up -d laravel-api
+docker compose up -d admin-app
+docker compose up -d user-app
+
+# サービス再起動
+docker compose restart admin-app
+docker compose restart user-app
+
+# サービス停止
+docker compose stop admin-app
+docker compose stop user-app
+```
+
+#### Laravel Sail環境（従来方式）
 
 ```bash
 # Laravel API
@@ -395,11 +493,11 @@ cd backend/laravel-api
 ./vendor/bin/sail up laravel.test -d   # Docker
 # php artisan serve --port=13000      # ネイティブ
 
-# Admin App
+# Admin App（別ターミナル）
 cd frontend/admin-app
 npm run dev                           # ポート: 13002
 
-# User App
+# User App（別ターミナル）
 cd frontend/user-app
 npm run dev                           # ポート: 13001
 ```

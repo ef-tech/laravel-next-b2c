@@ -252,6 +252,8 @@ npm run codegen:user  # User App用テスト自動生成
 
 ## 環境変数設定
 ### ポート設定 (カスタマイズ済み)
+
+#### バックエンドポート (backend/laravel-api/.env)
 ```env
 APP_PORT=13000                    # Laravel アプリケーション
 FORWARD_REDIS_PORT=13379          # Redis
@@ -262,10 +264,27 @@ FORWARD_MINIO_PORT=13900          # MinIO API
 FORWARD_MINIO_CONSOLE_PORT=13010  # MinIO Console
 ```
 
+#### フロントエンドポート (package.jsonで固定)
+```bash
+# User App: http://localhost:13001
+# - frontend/user-app/package.json の dev/start スクリプトで --port 13001 指定
+# - ポート競合回避のため標準3000番から変更
+
+# Admin App: http://localhost:13002
+# - frontend/admin-app/package.json の dev/start スクリプトで --port 13002 指定
+# - ポート競合回避のため標準3000番から変更
+```
+
+**ポートカスタマイズの理由**:
+- **13000番台統一**: 複数プロジェクト並行開発時のポート競合回避
+- **固定ポート**: チーム開発での環境統一、E2Eテスト安定性向上
+- **デフォルトポート回避**: 他のNext.js/Laravelプロジェクトとの同時実行可能
+```
+
 ### E2Eテスト環境変数 (e2e/.env)
 ```env
-E2E_ADMIN_URL=http://localhost:3001   # Admin App URL
-E2E_USER_URL=http://localhost:3000    # User App URL
+E2E_ADMIN_URL=http://localhost:13002  # Admin App URL (固定ポート)
+E2E_USER_URL=http://localhost:13001   # User App URL (固定ポート)
 E2E_API_URL=http://localhost:13000    # Laravel API URL
 
 E2E_ADMIN_EMAIL=admin@example.com     # 管理者メールアドレス

@@ -1,0 +1,95 @@
+# ============================================
+# モノレポ用 .dockerignore
+# build context: リポジトリルート
+# ============================================
+
+# ============================================
+# Frontend - Next.js
+# ============================================
+# Dependencies
+frontend/*/node_modules
+frontend/*/.next
+frontend/*/out
+frontend/*/coverage
+frontend/*/*.tsbuildinfo
+frontend/*/.env.local
+frontend/*/.env.development.local
+frontend/*/.env.test.local
+frontend/*/.env.production.local
+
+# ============================================
+# Backend - Laravel
+# ============================================
+backend/*/vendor
+backend/*/node_modules
+backend/*/storage/logs/*
+backend/*/storage/framework/cache/*
+backend/*/storage/framework/sessions/*
+backend/*/storage/framework/views/*
+backend/*/bootstrap/cache/*
+backend/*/.env
+backend/*/.env.backup
+backend/*/.phpunit.result.cache
+
+# ============================================
+# E2E Tests - Playwright
+# ============================================
+e2e/node_modules
+e2e/test-results
+e2e/playwright-report
+e2e/storage
+e2e/reports
+e2e/.env
+
+# ============================================
+# VCS
+# ============================================
+.git
+.gitignore
+.gitattributes
+.github
+
+# ============================================
+# IDE
+# ============================================
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Documentation (ビルドに不要)
+# ============================================
+*.md
+!backend/*/README.md
+!frontend/*/README.md
+
+# ============================================
+# Kiro/Claude (開発支援ツール)
+# ============================================
+.kiro
+.claude
+
+# ============================================
+# Docker自身
+# ============================================
+docker-compose.yml
+docker-compose.override.yml
+.dockerignore
+Dockerfile
+**/Dockerfile
+
+# ============================================
+# Logs
+# ============================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

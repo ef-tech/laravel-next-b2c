@@ -1,0 +1,110 @@
+{
+  "feature_name": "nextjs-app-dockerfile",
+  "created_at": "2025-10-03T00:00:00Z",
+  "updated_at": "2025-10-04T15:30:00Z",
+  "language": "ja",
+  "phase": "implementation-verified",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 14,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/14",
+    "title": "Next.js アプリ用 Dockerfile 作成",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel API (Docker Sail対応済み)",
+      "frontend": "Next.js 15.5 + React 19 (Admin App, User App)",
+      "infrastructure": "Docker, Docker Compose",
+      "tools": "Playwright (E2Eテスト), Node.js 20 Alpine"
+    },
+    "requirements_hints": [
+      "Admin App/User AppのDockerfile作成（Next.js 15.5 + React 19）",
+      "統合docker-compose.yml作成（モノレポ対応）",
+      "Next.js standalone output設定",
+      "環境変数管理（.env連携）",
+      "E2E Docker実行検証（e2e-testsサービス統合）",
+      "ドキュメント整備（Docker実行手順）"
+    ],
+    "project_structure": [
+      "frontend/admin-app/Dockerfile",
+      "frontend/user-app/Dockerfile",
+      "docker-compose.yml",
+      "frontend/admin-app/next.config.ts",
+      "frontend/user-app/next.config.ts",
+      ".env.example",
+      "README.md"
+    ],
+    "services": {
+      "laravel-api": {
+        "port": "13000"
+      },
+      "admin-app": {
+        "port": "3001"
+      },
+      "user-app": {
+        "port": "3000"
+      },
+      "e2e-tests": {
+        "depends_on": ["admin-app", "user-app", "laravel-api"]
+      }
+    },
+    "todo_items": [
+      "admin-app/Dockerfile作成",
+      "user-app/Dockerfile作成",
+      "next.config.ts standalone設定",
+      ".dockerignore作成",
+      "docker-compose.yml作成（ルート配置）",
+      "Laravel APIサービス統合",
+      "フロントエンドサービス追加",
+      "e2e-testsサービス統合",
+      ".env.example更新",
+      "環境変数の動作確認",
+      "docker-compose up成功",
+      "Admin App起動確認（http://localhost:3001）",
+      "User App起動確認（http://localhost:3000）",
+      "Laravel API起動確認（http://localhost:13000/up）",
+      "E2Eテスト実行成功（docker-compose run e2e-tests）",
+      "README.mdにDocker実行手順追加",
+      "トラブルシューティング追記"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true,
+  "verification_results": {
+    "docker_build_performance": {
+      "initial_build_time": "2m05s",
+      "cached_build_time": "14s",
+      "meets_targets": true
+    },
+    "docker_image_size": {
+      "admin_app": "318MB",
+      "user_app": "318MB",
+      "standalone_size": "59MB",
+      "compression_ratio": "12%"
+    },
+    "e2e_tests": {
+      "total_tests": 4,
+      "passed": 4,
+      "skipped": 2,
+      "status": "success"
+    },
+    "all_services_running": true,
+    "all_requirements_met": true
+  }
+}

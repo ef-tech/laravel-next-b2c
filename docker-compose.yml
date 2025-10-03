@@ -1,0 +1,230 @@
+services:
+  # ============================================
+  # Laravel API サービス
+  # ============================================
+  laravel-api:
+    build:
+      context: ./backend/laravel-api/docker/8.4
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP:-1000}'
+        APP_PORT: '${APP_PORT:-13000}'
+    image: sail-8.4/app
+    container_name: laravel-api
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '${APP_PORT:-13000}:${APP_PORT:-13000}'
+    environment:
+      WWWUSER: '${WWWUSER:-1000}'
+      APP_PORT: '${APP_PORT:-13000}'
+      LARAVEL_SAIL: 1
+      XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}/backend/laravel-api'
+    volumes:
+      - './backend/laravel-api:/var/www/html'
+    networks:
+      - app-network
+    depends_on:
+      - pgsql
+      - redis
+      - mailpit
+      - minio
+    working_dir: /var/www/html
+
+  # ============================================
+  # Admin App (Next.js)
+  # ============================================
+  admin-app:
+    build:
+      context: .
+      dockerfile: ./frontend/admin-app/Dockerfile
+    container_name: admin-app
+    ports:
+      - '13002:13002'
+    environment:
+      NODE_ENV: production
+      PORT: 13002
+      HOSTNAME: '0.0.0.0'
+      NEXT_PUBLIC_API_URL: 'http://laravel-api:13000'
+    networks:
+      - app-network
+    depends_on:
+      - laravel-api
+    # Hot Reload対応（開発環境用）
+    # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
+    # volumes:
+    #   - './frontend/admin-app:/app/frontend/admin-app'
+    #   - '/app/frontend/admin-app/node_modules'
+    #   - '/app/frontend/admin-app/.next'
+
+  # ============================================
+  # User App (Next.js)
+  # ============================================
+  user-app:
+    build:
+      context: .
+      dockerfile: ./frontend/user-app/Dockerfile
+    container_name: user-app
+    ports:
+      - '13001:13001'
+    environment:
+      NODE_ENV: production
+      PORT: 13001
+      HOSTNAME: '0.0.0.0'
+      NEXT_PUBLIC_API_URL: 'http://laravel-api:13000'
+    networks:
+      - app-network
+    depends_on:
+      - laravel-api
+    # Hot Reload対応（開発環境用）
+    # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
+    # volumes:
+    #   - './frontend/user-app:/app/frontend/user-app'
+    #   - '/app/frontend/user-app/node_modules'
+    #   - '/app/frontend/user-app/.next'
+
+  # ============================================
+  # E2E Tests (Playwright)
+  # ============================================
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.47.2-jammy
+    container_name: e2e-tests
+    working_dir: /app
+    environment:
+      E2E_ADMIN_URL: 'http://admin-app:13002'
+      E2E_USER_URL: 'http://user-app:13001'
+      E2E_API_URL: 'http://laravel-api:13000'
+      E2E_ADMIN_EMAIL: '${E2E_ADMIN_EMAIL:-admin@example.com}'
+      E2E_ADMIN_PASSWORD: '${E2E_ADMIN_PASSWORD:-password}'
+      E2E_USER_EMAIL: '${E2E_USER_EMAIL:-user@example.com}'
+      E2E_USER_PASSWORD: '${E2E_USER_PASSWORD:-password}'
+    volumes:
+      - './e2e:/app'
+    networks:
+      - app-network
+    depends_on:
+      - admin-app
+      - user-app
+      - laravel-api
+    shm_size: '1gb'
+    command: >
+      sh -c "
+        npm install &&
+        npx playwright install --with-deps &&
+        npm run test:ci
+      "
+    profiles:
+      - e2e
+
+  # ============================================
+  # PostgreSQL 17
+  # ============================================
+  pgsql:
+    image: 'postgres:17-alpine'
+    container_name: pgsql
+    ports:
+      - '${FORWARD_DB_PORT:-13432}:${FORWARD_DB_PORT:-13432}'
+    command: 'postgres -p ${FORWARD_DB_PORT:-13432}'
+    environment:
+      PGPASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_DB: '${DB_DATABASE:-laravel}'
+      POSTGRES_USER: '${DB_USERNAME:-sail}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - 'sail-pgsql:/var/lib/postgresql/data'
+      - './backend/laravel-api/vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+    networks:
+      - app-network
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - '-q'
+        - '-d'
+        - '${DB_DATABASE:-laravel}'
+        - '-U'
+        - '${DB_USERNAME:-sail}'
+      retries: 3
+      timeout: 5s
+
+  # ============================================
+  # Redis
+  # ============================================
+  redis:
+    image: 'redis:alpine'
+    container_name: redis
+    ports:
+      - '${FORWARD_REDIS_PORT:-13379}:${FORWARD_REDIS_PORT:-13379}'
+    command: 'redis-server --port ${FORWARD_REDIS_PORT:-13379}'
+    volumes:
+      - 'sail-redis:/data'
+    networks:
+      - app-network
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      retries: 3
+      timeout: 5s
+
+  # ============================================
+  # Mailpit (開発用メールサーバー)
+  # ============================================
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    container_name: mailpit
+    ports:
+      - '${FORWARD_MAILPIT_PORT:-11025}:${FORWARD_MAILPIT_PORT:-11025}'
+      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-13025}:${FORWARD_MAILPIT_DASHBOARD_PORT:-13025}'
+    environment:
+      MP_SMTP_BIND_ADDR: ':${FORWARD_MAILPIT_PORT:-11025}'
+      MP_UI_BIND_ADDR: ':${FORWARD_MAILPIT_DASHBOARD_PORT:-13025}'
+    networks:
+      - app-network
+
+  # ============================================
+  # MinIO (S3互換オブジェクトストレージ)
+  # ============================================
+  minio:
+    image: 'minio/minio:latest'
+    container_name: minio
+    ports:
+      - '${FORWARD_MINIO_PORT:-13900}:${FORWARD_MINIO_PORT:-13900}'
+      - '${FORWARD_MINIO_CONSOLE_PORT:-13010}:${FORWARD_MINIO_CONSOLE_PORT:-13010}'
+    environment:
+      MINIO_ROOT_USER: sail
+      MINIO_ROOT_PASSWORD: password
+    volumes:
+      - 'sail-minio:/data'
+    networks:
+      - app-network
+    command: 'minio server /data --address ":${FORWARD_MINIO_PORT:-13900}" --console-address ":${FORWARD_MINIO_CONSOLE_PORT:-13010}"'
+    healthcheck:
+      test:
+        - CMD
+        - mc
+        - ready
+        - local
+      retries: 3
+      timeout: 5s
+
+# ============================================
+# ネットワーク設定
+# ============================================
+networks:
+  app-network:
+    driver: bridge
+
+# ============================================
+# ボリューム設定
+# ============================================
+volumes:
+  sail-pgsql:
+    driver: local
+  sail-redis:
+    driver: local
+  sail-minio:
+    driver: local
