@@ -65,11 +65,11 @@ RUN chown -R nextjs:nodejs /app
 # nextjsユーザーに切り替え
 USER nextjs
 
-# ポート3001公開（Admin App専用ポート）
-EXPOSE 3001
+# ポート13002公開（Admin App専用ポート）
+EXPOSE 13002
 
 # 環境変数設定（ポート、ホスト名）
-ENV PORT=3001
+ENV PORT=13002
 ENV HOSTNAME="0.0.0.0"
 
 # Next.jsサーバー起動
