@@ -300,8 +300,8 @@ docker compose ps
 
 **起動されるサービス**:
 - ✅ Laravel API (ポート: 13000)
-- ✅ Admin App (ポート: 3001)
-- ✅ User App (ポート: 3000)
+- ✅ Admin App (ポート: 13002)
+- ✅ User App (ポート: 13001)
 - ✅ PostgreSQL (ポート: 13432)
 - ✅ Redis (ポート: 13379)
 - ✅ Mailpit (SMTP: 11025, UI: 13025)
