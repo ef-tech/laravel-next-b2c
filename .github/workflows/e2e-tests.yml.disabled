@@ -1,3 +1,19 @@
+# E2E Tests Workflow (Disabled)
+#
+# このワークフローを有効化する場合:
+# 1. ファイル名から .disabled を削除: mv e2e-tests.yml.disabled e2e-tests.yml
+# 2. GitHub Secrets を設定: E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD, E2E_USER_EMAIL, E2E_USER_PASSWORD
+# 3. ポート設定が正しいことを確認 (下記参照)
+#
+# ⚠️ 重要: ポート設定
+# - User App: 13001 (package.json で --port 13001 設定済み)
+# - Admin App: 13002 (package.json で --port 13002 設定済み)
+# - Laravel API: 13000 (APP_PORT環境変数で指定)
+#
+# Next.js のポート指定方法:
+# - 開発: npm run dev (package.json で --port 指定済み)
+# - 本番: npm start (package.json で --port 指定済み、ビルド後も同じポート使用)
+
 name: E2E Tests
 
 on:
@@ -63,26 +79,26 @@ jobs:
 
       - name: Start services
         run: |
-          # Start Laravel API
+          # Start Laravel API (ポート13000)
           cd backend/laravel-api
-          php artisan serve --host=0.0.0.0 --port=8000 &
+          APP_PORT=13000 php artisan serve --host=0.0.0.0 --port=13000 &
 
-          # Start Admin App
-          cd frontend/admin-app
+          # Start Admin App (ポート13002 - package.json で --port 13002 設定済み)
+          cd ../../frontend/admin-app
           npm run build
-          npm start -- -p 3001 &
+          npm start &
 
-          # Start User App
-          cd frontend/user-app
+          # Start User App (ポート13001 - package.json で --port 13001 設定済み)
+          cd ../user-app
           npm run build
-          npm start -- -p 3000 &
+          npm start &
 
       - name: Wait for services to be ready
         run: |
           npx wait-on \
-            http://localhost:3000 \
-            http://localhost:3001 \
-            http://localhost:8000/up \
+            http://localhost:13001 \
+            http://localhost:13002 \
+            http://localhost:13000/up \
             --timeout 120000
 
       - name: Install E2E dependencies
@@ -97,9 +113,9 @@ jobs:
 
       - name: Run E2E tests (Shard ${{ matrix.shard }}/4)
         env:
-          E2E_ADMIN_URL: http://localhost:3001
-          E2E_USER_URL: http://localhost:3000
-          E2E_API_URL: http://localhost:8000
+          E2E_ADMIN_URL: http://localhost:13002
+          E2E_USER_URL: http://localhost:13001
+          E2E_API_URL: http://localhost:13000
           E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
           E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}

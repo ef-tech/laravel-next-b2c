@@ -165,8 +165,8 @@ graph TB
 graph LR
     subgraph "Local Development"
         subgraph "Frontend"
-            Admin[Admin App<br/>:3000]
-            User[User App<br/>:3001]
+            Admin[Admin App<br/>:13002]
+            User[User App<br/>:13001]
         end
 
         subgraph "Backend"
@@ -250,8 +250,8 @@ cd ../user-app && npm install && npm run dev
 
 | サービス | URL | 説明 |
 |---------|-----|------|
-| **Admin App** | http://localhost:3000 | 管理者用ダッシュボード |
-| **User App** | http://localhost:3001 | エンドユーザー向けアプリ |
+| **Admin App** | http://localhost:13002 | 管理者用ダッシュボード |
+| **User App** | http://localhost:13001 | エンドユーザー向けアプリ |
 | **Laravel API** | http://localhost:13000 | RESTful API |
 | **Mailpit** | http://localhost:13025 | メール確認画面 |
 | **Redis** | localhost:13379 | キャッシュサーバー |
@@ -265,8 +265,8 @@ cd ../user-app && npm install && npm run dev
 curl http://localhost:13000/up
 
 # フロントエンド確認
-curl http://localhost:3000
-curl http://localhost:3001
+curl http://localhost:13001
+curl http://localhost:13002
 ```
 
 ## 🔧 環境構築
@@ -350,13 +350,13 @@ cd backend/laravel-api
 # 依存関係インストール
 composer install
 
-# キー生成とマイグレーション (Docker環境)
-./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate
-./vendor/bin/sail artisan db:seed
+# キー生成とマイグレーション
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
 
-# 開発サーバー起動 (Docker環境 - sail up で自動起動)
-./vendor/bin/sail up -d
+# 開発サーバー起動
+php artisan serve --port=13000
 ```
 
 </details>
@@ -366,8 +366,8 @@ composer install
 | サービス | Docker環境 | ネイティブ環境 |
 |---------|-----------|--------------|
 | Laravel API | http://localhost:13000 | http://localhost:13000 |
-| Admin App | http://localhost:3000 | http://localhost:3000 |
-| User App | http://localhost:3001 | http://localhost:3001 |
+| Admin App | http://localhost:13002 | http://localhost:13002 |
+| User App | http://localhost:13001 | http://localhost:13001 |
 | Mailpit | http://localhost:13025 | ❌ |
 | Redis | localhost:13379 | localhost:13379 |
 
@@ -397,11 +397,11 @@ cd backend/laravel-api
 
 # Admin App
 cd frontend/admin-app
-npm run dev                           # ポート: 3000
+npm run dev                           # ポート: 13002
 
 # User App
 cd frontend/user-app
-npm run dev -- --port 3001          # ポート: 3001
+npm run dev                           # ポート: 13001
 ```
 
 ### データベース操作
@@ -516,10 +516,43 @@ npx tsc --noEmit
 # ビルド確認
 npm run build
 
+# テスト実行
+npm run test
+
 # User App も同様
 cd ../user-app
-npm run lint && npx tsc --noEmit && npm run build
+npm run lint && npx tsc --noEmit && npm run build && npm run test
 ```
+
+#### E2Eテスト（Playwright）
+
+```bash
+# 環境変数設定
+cd e2e
+cp .env.example .env
+
+# .env ファイルを編集（必要に応じて）
+# E2E_ADMIN_URL=http://localhost:13002
+# E2E_USER_URL=http://localhost:13001
+# E2E_API_URL=http://localhost:13000
+
+# 依存関係インストール
+npm install
+
+# Playwright ブラウザインストール（初回のみ）
+npx playwright install --with-deps
+
+# E2Eテスト実行（アプリケーション起動後）
+npx playwright test
+
+# UIモードで実行（デバッグ用）
+npx playwright test --ui
+
+# HTMLレポート表示
+npx playwright show-report reports/html
+```
+
+**注意**: E2Eテスト実行前に、Laravel API、User App、Admin App を起動してください。
 
 #### 統合品質チェック
 
@@ -619,14 +652,15 @@ NEXT_PUBLIC_APP_ENV=development
 このプロジェクトでは、開発環境での **ポート競合を回避** し、**複数プロジェクトの同時開発** を可能にするため、意図的にカスタムポートを使用しています：
 
 **🎯 ポート設定方針**:
-- **13000番台**: メインサービス（Laravel API、管理系ツール）
+- **13000番台**: メインサービス（Laravel API、Next.js アプリ、管理系ツール）
 - **11000番台**: SMTP関連サービス
-- **3000-3001**: フロントエンドアプリ（Next.js標準）
 
 **📋 具体的なポート割り当て**:
 
 | サービス | デフォルト | カスタム | 選択理由 |
 |---------|-----------|---------|----------|
+| User App | 3000 | **13001** | 他のNext.jsプロジェクトとの競合回避 |
+| Admin App | 3001 | **13002** | 他のNext.jsプロジェクトとの競合回避 |
 | Laravel API | 8000 | **13000** | 他のLaravelプロジェクトとの競合回避 |
 | Redis | 6379 | **13379** | 既存のRedis環境との分離 |
 | PostgreSQL | 5432 | **13432** | 既存のPostgreSQL環境との分離 |
@@ -641,19 +675,17 @@ NEXT_PUBLIC_APP_ENV=development
 - 🔧 **開発効率向上**: 環境切り替え時の停止・起動作業が不要
 - 📱 **チーム開発対応**: 開発者間でのポート設定統一
 
-#### ポート変更方法
+####### ポート変更方法
 
 ```bash
 # Laravel API ポート変更
 cd backend/laravel-api
 # .env ファイルで APP_PORT=13000 を設定
 
-# Next.js ポート変更
-cd frontend/admin-app
-npm run dev -- --port 3000
-
-cd frontend/user-app
-npm run dev -- --port 3001
+# Next.js ポート変更（package.json で設定済み）
+# User App: --port 13001
+# Admin App: --port 13002
+# 変更する場合は各 package.json の dev/start スクリプトを編集
 ```
 
 ## 🔧 トラブルシューティング
@@ -709,18 +741,44 @@ composer install
 <details>
 <summary>🚨 「Port already in use」エラー</summary>
 
+**症状**:
+```
+Error: listen EADDRINUSE: address already in use :::13001
+Error: listen EADDRINUSE: address already in use :::13002
+```
+
+**原因**: 指定されたポートが既に他のプロセスで使用されています。
+
+**解決方法**:
+
 ```bash
 # ポート使用状況確認
-lsof -i :13000
-lsof -i :3000
-lsof -i :3001
+lsof -i :13000  # Laravel API
+lsof -i :13001  # User App
+lsof -i :13002  # Admin App
 
-# プロセス終了
+# 出力例:
+# COMMAND   PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+# node    12345  user   21u  IPv6  0x...      0t0  TCP *:13001 (LISTEN)
+
+# プロセス終了（個別）
 kill -9 [PID]
 
-# または .env でポート変更
+# Next.js 開発サーバーを一括停止
+pkill -f "next dev"
+
+# 再起動手順
+cd frontend/user-app && npm run dev &
+cd frontend/admin-app && npm run dev &
+
+# または .env でポート変更（Laravel API）
 # APP_PORT=13001
 ```
+
+**予防策**:
+- 開発終了時は `Ctrl+C` で正しくサーバーを停止する
+- ターミナルを閉じる前にサーバープロセスを終了する
+- `pkill -f "next dev"` で残留プロセスをクリーンアップ
 
 </details>
 
@@ -737,8 +795,8 @@ composer require fruitcake/laravel-cors
 
 # config/cors.php の設定例
 # 'allowed_origins' => [
-#     'http://localhost:3000',
-#     'http://localhost:3001',
+#     'http://localhost:13001',
+#     'http://localhost:13002',
 # ],
 
 # または開発環境では
@@ -880,8 +938,8 @@ npm --version
 
 # サービス起動確認
 curl http://localhost:13000/up
-curl http://localhost:3000
-curl http://localhost:3001
+curl http://localhost:13001
+curl http://localhost:13002
 
 # ログ確認
 cd backend/laravel-api

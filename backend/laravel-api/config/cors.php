@@ -20,10 +20,10 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'http://localhost:3000',    // Next.js フロントエンド（開発環境）
-        'http://localhost:3001',    // Next.js フロントエンド（代替ポート）
-        'http://127.0.0.1:3000',    // ローカルアクセス
-        'http://127.0.0.1:3001',    // ローカルアクセス（代替）
+        'http://localhost:13001',   // user-app
+        'http://localhost:13002',   // admin-app
+        'http://127.0.0.1:13001',   // user-app (127.0.0.1)
+        'http://127.0.0.1:13002',   // admin-app (127.0.0.1)
     ],
 
     'allowed_origins_patterns' => [],
