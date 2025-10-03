@@ -6,8 +6,8 @@
 
 ---
 
-- [ ] 1. Next.jsアプリケーションのDocker基盤構築
-- [ ] 1.1 Admin AppのDockerfile作成（マルチステージビルド）
+- [x] 1. Next.jsアプリケーションのDocker基盤構築
+- [x] 1.1 Admin AppのDockerfile作成（マルチステージビルド）
   - Node.js 20 Alpineをベースイメージとして3ステージ構成を実装（deps/builder/runner）
   - depsステージでモノレポ対応の依存関係インストール（ルート + アプリpackage.json）
   - builderステージでNext.js standaloneビルド実行（npm run build --workspace）
@@ -15,56 +15,56 @@
   - ポート3001公開、環境変数PORT/HOSTNAME設定、テレメトリ無効化
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8_
 
-- [ ] 1.2 User AppのDockerfile作成（Admin Appと同様の構成）
+- [x] 1.2 User AppのDockerfile作成（Admin Appと同様の構成）
   - Admin App Dockerfileと同一のマルチステージビルド構成を適用
   - ポート3000公開、workspace指定をfrontend/user-appに変更
   - その他設定はAdmin Appと同一（Node.js 20 Alpine、nextjsユーザー、テレメトリ無効化）
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 1.8_
 
-- [ ] 1.3 Next.js standalone output設定追加
+- [x] 1.3 Next.js standalone output設定追加
   - Admin App next.config.tsに`output: 'standalone'`設定を追加
   - User App next.config.tsに`output: 'standalone'`設定を追加
   - 既存のoutputFileTracingRoot設定を保持（モノレポ警告回避）
   - ビルド時に.next/standaloneディレクトリ生成確認
   - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
-- [ ] 1.4 Dockerビルド最適化設定作成
+- [x] 1.4 Dockerビルド最適化設定作成
   - Admin App .dockerignore作成（node_modules、.next、coverage、.env除外）
   - User App .dockerignore作成（同様の除外パターン）
   - VCS/IDE設定ファイル除外（.git、.idea、.vscode）
   - ビルドコンテキストサイズ削減とビルド時間短縮確認
   - _Requirements: 4.1, 4.2, 4.3, 10.2_
 
-- [ ] 2. Docker Compose統合設定構築
-- [ ] 2.1 リポジトリルートにdocker-compose.yml作成
+- [x] 2. Docker Compose統合設定構築
+- [x] 2.1 リポジトリルートにdocker-compose.yml作成
   - 8サービス定義（Laravel API、Admin App、User App、E2E Tests、PostgreSQL、Redis、Mailpit、MinIO）
   - app-network共通Bridgeネットワーク作成
   - sail-pgsql、sail-redis、sail-minio永続化ボリューム定義
   - _Requirements: 3.1, 3.11, 3.13_
 
-- [ ] 2.2 Laravel APIサービス統合設定
+- [x] 2.2 Laravel APIサービス統合設定
   - 既存backend/laravel-api/compose.yamlからlaravel.testサービス設定を統合
   - サービス名をlaravel-apiに変更、ポート13000公開
   - 環境変数APP_PORT=13000設定、XDEBUG設定保持
   - PostgreSQL、Redis、Mailpit、MinIOへの依存関係設定
   - _Requirements: 3.2, 3.3, 3.12_
 
-- [ ] 2.3 フロントエンドサービス設定追加
+- [x] 2.3 フロントエンドサービス設定追加
   - Admin Appサービス定義（ポート3001、NEXT_PUBLIC_API_URL環境変数）
   - User Appサービス定義（ポート3000、NEXT_PUBLIC_API_URL環境変数）
   - Hot Reload対応volumes設定（ホスト側マウント + 匿名ボリュームでnode_modules分離）
   - laravel-apiサービスへの依存関係設定
   - _Requirements: 3.4, 3.5, 3.6, 3.7, 9.1, 9.2_
 
-- [ ] 2.4 E2Eテストサービス設定追加
+- [x] 2.4 E2Eテストサービス設定追加
   - Playwright公式イメージ（mcr.microsoft.com/playwright:v1.47.2-jammy）使用
   - Docker内部URL環境変数設定（E2E_ADMIN_URL、E2E_USER_URL、E2E_API_URL）
   - admin-app、user-app、laravel-apiへの依存関係設定
   - shm_size 1gb設定、npm install + Playwrightインストール + テスト実行コマンド定義
   - _Requirements: 3.8, 3.9, 3.10, 7.1, 7.2_
 
-- [ ] 3. 環境変数管理設定
-- [ ] 3.1 ルート.env.example作成
+- [x] 3. 環境変数管理設定
+- [x] 3.1 ルート.env.example作成
   - Frontend環境変数セクション追加（NEXT_PUBLIC_API_URL=http://localhost:13000）
   - Laravel API環境変数セクション（既存設定を参照）
   - E2E Tests環境変数セクション（E2E_ADMIN_URL、E2E_USER_URL、E2E_API_URL、認証情報）
