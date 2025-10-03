@@ -116,21 +116,21 @@
   - reports/htmlディレクトリにHTMLレポートが生成されることを確認
   - _Requirements: 7.5, 7.6_
 
-- [ ] 6. ドキュメント整備
-- [ ] 6.1 README.mdにDocker環境セットアップ手順追加
+- [x] 6. ドキュメント整備
+- [x] 6.1 README.mdにDocker環境セットアップ手順追加
   - 「Docker環境でのセットアップ」セクション作成
   - 環境変数設定手順（cp .env.example .env）記載
   - 全サービス起動手順（docker-compose up -d --build）記載
   - 起動確認手順（docker-compose ps）記載
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-- [ ] 6.2 README.mdに運用手順追加
+- [x] 6.2 README.mdに運用手順追加
   - ログ確認手順（docker-compose logs -f [service-name]）記載
   - E2Eテスト実行手順（docker-compose run --rm e2e-tests）記載
   - サービス停止手順（docker-compose down）記載
   - _Requirements: 8.5, 8.6, 8.7_
 
-- [ ] 6.3 トラブルシューティングドキュメント作成
+- [x] 6.3 トラブルシューティングドキュメント作成
   - よくある問題と解決策を記載（ポート競合、ビルドエラー、ネットワーク接続エラー）
   - Dockerビルドエラー対処法（Dockerfile構文エラー、依存関係エラー、standalone出力未生成）
   - Docker Compose起動エラー対処法（ポート競合、依存サービス起動待機タイムアウト、ボリュームマウントエラー）

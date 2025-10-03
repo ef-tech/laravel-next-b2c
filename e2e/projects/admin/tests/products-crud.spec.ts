@@ -113,7 +113,7 @@ test.describe.skip('Products CRUD - Not Implemented', () => {
     expect(hasProduct).toBe(true);
 
     // READ (verify details)
-    let details = await productsPage.getProductDetails(originalName);
+    const details = await productsPage.getProductDetails(originalName);
     expect(details.name).toContain(originalName);
 
     // UPDATE
