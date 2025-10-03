@@ -292,10 +292,10 @@ cp backend/laravel-api/.env.example backend/laravel-api/.env
 
 ```bash
 # リポジトリルートから全サービスビルド＆起動
-docker-compose up -d --build
+docker compose up -d --build
 
 # 起動確認
-docker-compose ps
+docker compose ps
 ```
 
 **起動されるサービス**:
@@ -311,9 +311,9 @@ docker-compose ps
 
 ```bash
 # Laravel APIコンテナ内でコマンド実行
-docker-compose exec laravel-api php artisan key:generate
-docker-compose exec laravel-api php artisan migrate
-docker-compose exec laravel-api php artisan db:seed
+docker compose exec laravel-api php artisan key:generate
+docker compose exec laravel-api php artisan migrate
+docker compose exec laravel-api php artisan db:seed
 ```
 
 #### ステップ4: 動作確認
@@ -323,28 +323,28 @@ docker-compose exec laravel-api php artisan db:seed
 curl http://localhost:13000/up
 
 # フロントエンド確認
-curl http://localhost:3001  # Admin App
-curl http://localhost:3000  # User App
+curl http://localhost:13002  # Admin App
+curl http://localhost:13001  # User App
 ```
 
 #### E2Eテスト実行（オプション）
 
 ```bash
 # E2Eテストサービス実行（全サービス起動後）
-docker-compose run --rm e2e-tests
+docker compose run --rm e2e-tests
 ```
 
 #### 停止・再起動
 
 ```bash
 # 全サービス停止
-docker-compose down
+docker compose down
 
 # ボリューム含めて完全削除
-docker-compose down -v
+docker compose down -v
 
 # 再起動
-docker-compose up -d
+docker compose up -d
 ```
 
 </details>
@@ -457,32 +457,32 @@ php artisan serve --port=13000
 
 ```bash
 # リポジトリルートから全サービス起動
-docker-compose up -d
+docker compose up -d
 
 # ログ確認
-docker-compose logs -f
+docker compose logs -f
 
 # 特定サービスのログ確認
-docker-compose logs -f admin-app
-docker-compose logs -f user-app
-docker-compose logs -f laravel-api
+docker compose logs -f admin-app
+docker compose logs -f user-app
+docker compose logs -f laravel-api
 ```
 
 #### 個別サービス制御（Docker Compose）
 
 ```bash
 # 特定サービスのみ起動
-docker-compose up -d laravel-api
-docker-compose up -d admin-app
-docker-compose up -d user-app
+docker compose up -d laravel-api
+docker compose up -d admin-app
+docker compose up -d user-app
 
 # サービス再起動
-docker-compose restart admin-app
-docker-compose restart user-app
+docker compose restart admin-app
+docker compose restart user-app
 
 # サービス停止
-docker-compose stop admin-app
-docker-compose stop user-app
+docker compose stop admin-app
+docker compose stop user-app
 ```
 
 #### Laravel Sail環境（従来方式）
