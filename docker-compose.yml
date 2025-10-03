@@ -31,6 +31,7 @@ services:
       - redis
       - mailpit
       - minio
+    working_dir: /var/www/html
 
   # ============================================
   # Admin App (Next.js)
