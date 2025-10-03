@@ -53,10 +53,11 @@ services:
     depends_on:
       - laravel-api
     # Hot Reload対応（開発環境用）
-    volumes:
-      - './frontend/admin-app:/app/frontend/admin-app'
-      - '/app/frontend/admin-app/node_modules'
-      - '/app/frontend/admin-app/.next'
+    # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
+    # volumes:
+    #   - './frontend/admin-app:/app/frontend/admin-app'
+    #   - '/app/frontend/admin-app/node_modules'
+    #   - '/app/frontend/admin-app/.next'
 
   # ============================================
   # User App (Next.js)
@@ -78,10 +79,11 @@ services:
     depends_on:
       - laravel-api
     # Hot Reload対応（開発環境用）
-    volumes:
-      - './frontend/user-app:/app/frontend/user-app'
-      - '/app/frontend/user-app/node_modules'
-      - '/app/frontend/user-app/.next'
+    # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
+    # volumes:
+    #   - './frontend/user-app:/app/frontend/user-app'
+    #   - '/app/frontend/user-app/node_modules'
+    #   - '/app/frontend/user-app/.next'
 
   # ============================================
   # E2E Tests (Playwright)
