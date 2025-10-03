@@ -44,6 +44,9 @@ RUN npm run build --workspace=frontend/admin-app
 # ============================================
 FROM base AS runner
 
+# libc6-compat: ランタイムでglibc互換が必要なネイティブモジュール対応
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 
 # 本番環境設定
