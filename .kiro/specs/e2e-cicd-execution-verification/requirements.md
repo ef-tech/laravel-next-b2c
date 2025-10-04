@@ -1,272 +1,226 @@
 # Requirements Document
 
-## GitHub Issue Information
+## はじめに
 
-**Issue**: [#59](https://github.com/ef-tech/laravel-next-b2c/issues/59) - E2E CI/CD実行確認（GitHub Actions ワークフロー有効化）
-**Labels**: なし
-**Milestone**: なし
-**Assignees**: なし
-
-### Original Issue Description
-
-## 背景と目的
+本仕様書は、E2Eテスト環境（Issue #12, PR #58）で構築済みのPlaywright E2Eテストを、GitHub Actions CI/CDパイプラインで自動実行するための要件を定義します。
 
 ### 背景
-- E2Eテスト環境構築完了（Issue #12, PR #58）
+- E2Eテスト環境構築完了（Playwright 1.47.2、Docker対応、Sanctum認証統合）
 - GitHub Actions ワークフロー作成済み（`.github/workflows/e2e-tests.yml.disabled`）
-- **現状**: GitHub Actions無料枠対策で意図的に無効化（`.disabled`拡張子）
-- フロントエンドDocker化完了後（Issue #14）にCI/CD実行が可能に
+- 現状はGitHub Actions無料枠対策で意図的に無効化（`.disabled`拡張子）
+- フロントエンドDocker化完了後（Issue #14）にCI/CD実行が可能
 
-### 目的
-1. **CI/CDパイプライン有効化**: E2Eテストの自動実行開始
-2. **並列実行検証**: GitHub Actions Matrixによる4並列実行の動作確認
-3. **レポート生成検証**: HTML/JUnitレポート・スクリーンショット・トレース保存確認
-4. **運用開始**: PR作成時・mainブランチpush時の自動E2E実行
+### ビジネス価値
+- **品質保証の自動化**: PR作成時・mainブランチpush時の自動リグレッションテスト実施
+- **開発速度向上**: 手動テスト工数削減、迅速なフィードバックループ確立
+- **リリースリスク低減**: 本番環境デプロイ前の自動品質チェック
+- **チーム生産性向上**: 並列実行（4 shard）による実行時間短縮
 
-## カテゴリ
+### スコープ
+- ✅ GitHub Actions ワークフロー有効化
+- ✅ Docker Compose環境での全サービス起動検証
+- ✅ 並列実行（Shard）検証
+- ✅ テストレポート生成・保存検証
+- ✅ 自動トリガー検証（PR/mainブランチpush）
+- ✅ ドキュメント更新
+- ❌ Visual Regression Testing（将来対応）
+- ❌ パフォーマンステスト（将来対応）
+- ❌ クロスブラウザテスト拡張（将来対応）
 
-**CI-CD** - E2Eテスト自動実行パイプライン有効化
+---
 
-### 詳細分類
-- GitHub Actions ワークフロー有効化
-- Docker環境でのPlaywright実行検証
-- Shard（並列実行）動作確認
-- テストレポートアーティファクト保存検証
+## Requirements
 
-## スコープ
+### Requirement 1: GitHub Actions ワークフロー有効化
+**Objective:** DevOpsエンジニアとして、E2E CI/CDワークフロー有効化することで、GitHub Actions上でPlaywright E2Eテストを自動実行したい
 
-### 対象範囲（前提: Issue #14完了後）
-- ✅ `.github/workflows/e2e-tests.yml.disabled` → `.github/workflows/e2e-tests.yml` にリネーム
-- ✅ ワークフロー実行検証（手動トリガー `workflow_dispatch`）
-- ✅ Shard実行検証（4並列: shard 1/2/3/4）
-- ✅ Docker Compose起動確認（laravel-api, admin-app, user-app）
-- ✅ E2Eテスト実行成功確認
-- ✅ レポート・スクリーンショット・トレース保存確認
-- ✅ 自動トリガー検証（PR作成時、mainブランチpush時）
-- ✅ ドキュメント更新（CI/CD実行手順・トラブルシューティング）
+#### Acceptance Criteria
 
-### 対象外（将来対応）
-- ❌ Visual Regression Testing（Percy/Chromatic統合）
-- ❌ パフォーマンステスト（Lighthouse CI統合）
-- ❌ クロスブラウザテスト（Firefox, Webkit追加）
+1. WHEN `.github/workflows/e2e-tests.yml.disabled` ファイルが存在する THEN GitHub Actions ワークフロー SHALL `.disabled` 拡張子を削除してワークフローを有効化する
+2. WHEN ワークフロー有効化コミットがリポジトリにpushされる THEN GitHub Actions SHALL ワークフロー一覧に「E2E Tests」を表示する
+3. WHERE GitHub Actionsタブ内 THE ワークフロー一覧 SHALL 「E2E Tests」ワークフローを手動実行可能な状態で表示する
 
-## 仕様と手順
+---
 
-### 1. ワークフロー有効化
+### Requirement 2: Docker Compose環境での全サービス起動
+**Objective:** CI/CD環境として、Docker Composeで全サービスを自動起動することで、E2Eテスト実行環境を確立したい
 
-**ファイル**: `.github/workflows/e2e-tests.yml.disabled` → `.github/workflows/e2e-tests.yml`
+#### Acceptance Criteria
 
-```bash
-# リネーム
-mv .github/workflows/e2e-tests.yml.disabled .github/workflows/e2e-tests.yml
+1. WHEN GitHub Actionsワークフロー実行が開始される THEN CI/CD環境 SHALL `docker-compose up -d --build` コマンドでサービスをビルド・起動する
+2. WHEN Docker Composeサービス起動が完了する THEN CI/CD環境 SHALL 以下のサービスが正常起動していることを確認する:
+   - `laravel-api` (ポート 13000)
+   - `admin-app` (ポート 13002)
+   - `user-app` (ポート 13001)
+   - `pgsql` (PostgreSQL)
+   - `redis`
+3. WHEN 全サービス起動後 THEN CI/CD環境 SHALL `wait-on` コマンドで以下のエンドポイントのヘルスチェックを実行する:
+   - `http://localhost:13001` (user-app)
+   - `http://localhost:13002` (admin-app)
+   - `http://localhost:13000/up` (laravel-api ヘルスチェック)
+4. IF いずれかのサービスが120秒以内に起動しない THEN CI/CD環境 SHALL ワークフロー実行を失敗させエラーログを出力する
 
-# コミット
-git add .github/workflows/e2e-tests.yml
-git commit -m "Enable: 🚀 E2E CI/CDワークフロー有効化"
-git push
-```
+---
 
-### 2. ワークフロー構成（既存）
+### Requirement 3: Playwright E2Eテスト実行
+**Objective:** QAエンジニアとして、GitHub Actions環境でPlaywright E2Eテストを自動実行することで、リグレッションを検出したい
 
-**ファイル**: `.github/workflows/e2e-tests.yml`
-```yaml
-name: E2E Tests
+#### Acceptance Criteria
 
-on:
-  # 手動実行
-  workflow_dispatch:
+1. WHEN 全サービスのヘルスチェックが成功する THEN CI/CD環境 SHALL `e2e` ディレクトリで `npm ci` を実行して依存関係をインストールする
+2. WHEN 依存関係インストールが完了する THEN CI/CD環境 SHALL `npx playwright install --with-deps` でPlaywrightブラウザをインストールする
+3. WHEN Playwrightブラウザインストールが完了する THEN CI/CD環境 SHALL 以下の環境変数を設定してE2Eテストを実行する:
+   - `E2E_ADMIN_URL=http://localhost:13002`
+   - `E2E_USER_URL=http://localhost:13001`
+   - `E2E_API_URL=http://localhost:13000`
+4. WHEN E2Eテスト実行が完了する THEN CI/CD環境 SHALL テスト結果（成功/失敗/スキップ数）をログ出力する
+5. IF E2Eテストが失敗する THEN CI/CD環境 SHALL ワークフロー実行を失敗ステータスで終了させる
 
-  # PR作成時
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - 'frontend/**'
-      - 'backend/laravel-api/app/**'
-      - 'backend/laravel-api/routes/**'
-      - 'e2e/**'
-      - '.github/workflows/e2e-tests.yml'
+---
 
-  # mainブランチpush時
-  push:
-    branches: [main]
-    paths:
-      - 'frontend/**'
-      - 'backend/laravel-api/app/**'
-      - 'backend/laravel-api/routes/**'
-      - 'e2e/**'
+### Requirement 4: 並列実行（Shard）検証
+**Objective:** DevOpsエンジニアとして、GitHub Actions Matrixで並列実行することで、E2Eテスト実行時間を短縮したい
 
-jobs:
-  e2e-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]  # 4並列実行
+#### Acceptance Criteria
 
-    steps:
-      - uses: actions/checkout@v4
+1. WHEN GitHub Actionsワークフロー実行が開始される THEN CI/CD環境 SHALL Matrix戦略で4並列ジョブ（shard 1/2/3/4）を起動する
+2. WHEN 各shardジョブが実行される THEN CI/CD環境 SHALL `npx playwright test --shard=N/4` コマンドでテストを分割実行する（Nは1-4）
+3. WHILE 各shardジョブが実行中 THE CI/CD環境 SHALL 独立したDocker環境でテストを並列実行する
+4. WHEN すべてのshardジョブが完了する THEN CI/CD環境 SHALL 全shardの成功/失敗ステータスを集計する
+5. IF いずれかのshardジョブが失敗する THEN CI/CD環境 SHALL ワークフロー全体を失敗ステータスにする（`fail-fast: false` 設定により全shard実行後に判定）
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+---
 
-      - name: Start services
-        run: docker-compose up -d --build
+### Requirement 5: テストレポート生成・保存検証
+**Objective:** QAエンジニアとして、E2Eテスト実行結果をArtifactsとして保存することで、失敗原因の分析を可能にしたい
 
-      - name: Wait for services
-        run: |
-          npx wait-on http://localhost:13001
-          npx wait-on http://localhost:13002
-          npx wait-on http://localhost:13000/up
+#### Acceptance Criteria
 
-      - name: Install E2E dependencies
-        working-directory: e2e
-        run: npm ci
+1. WHEN E2Eテスト実行が完了する（成功・失敗問わず） THEN CI/CD環境 SHALL `actions/upload-artifact@v4` でテストレポートをアップロードする
+2. WHEN テストレポートアップロード処理が実行される THEN CI/CD環境 SHALL 以下の命名規則でArtifactを作成する:
+   - `playwright-report-1` (shard 1のレポート)
+   - `playwright-report-2` (shard 2のレポート)
+   - `playwright-report-3` (shard 3のレポート)
+   - `playwright-report-4` (shard 4のレポート)
+3. WHEN 各Artifactがアップロードされる THEN CI/CD環境 SHALL `e2e/reports/` ディレクトリの以下のファイルを含める:
+   - HTMLレポート (`index.html`)
+   - JUnitレポート (`junit.xml`)
+   - スクリーンショット（失敗時）
+   - トレースファイル（失敗時）
+4. WHERE GitHub ActionsワークフロータブのArtifactsセクション THE CI/CD環境 SHALL Artifactを30日間保持する
+5. WHEN Artifactダウンロードが実行される THEN CI/CD環境 SHALL zip形式でレポートファイル一式をダウンロード可能にする
 
-      - name: Install Playwright browsers
-        working-directory: e2e
-        run: npx playwright install --with-deps
+---
 
-      - name: Run E2E tests (Shard ${{ matrix.shard }}/4)
-        working-directory: e2e
-        run: npx playwright test --shard=${{ matrix.shard }}/4
-        env:
-          E2E_ADMIN_URL: http://localhost:13002
-          E2E_USER_URL: http://localhost:13001
-          E2E_API_URL: http://localhost:13000
+### Requirement 6: 自動トリガー検証（Pull Request）
+**Objective:** 開発者として、PR作成時にE2Eテストが自動実行されることで、コード変更の品質を事前確認したい
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report-${{ matrix.shard }}
-          path: e2e/reports/
-          retention-days: 30
-```
+#### Acceptance Criteria
 
-### 3. 動作検証手順
+1. WHEN Pull Requestが作成される AND 以下のパスに変更が含まれる THEN CI/CD環境 SHALL E2Eテストワークフローを自動実行する:
+   - `frontend/**`
+   - `backend/laravel-api/app/**`
+   - `backend/laravel-api/routes/**`
+   - `e2e/**`
+   - `.github/workflows/e2e-tests.yml`
+2. WHEN Pull Requestが更新される（新規コミットpush） AND pathsフィルター条件に一致する THEN CI/CD環境 SHALL E2Eテストワークフローを再実行する
+3. IF Pull Request変更が対象パス外（例: `README.md`のみ変更） THEN CI/CD環境 SHALL E2Eテストワークフローをスキップする
+4. WHEN E2Eテストワークフロー実行が完了する THEN CI/CD環境 SHALL Pull RequestのChecksセクションに実行結果を表示する
+5. IF E2Eテストが失敗する THEN CI/CD環境 SHALL Pull RequestのChecksにエラーステータスを表示しマージを制限する
 
-#### Step 1: 手動実行検証（workflow_dispatch）
+---
 
-1. GitHub Actionsタブを開く
-2. "E2E Tests"ワークフローを選択
-3. "Run workflow"ボタンをクリック
-4. 実行結果を確認
+### Requirement 7: 自動トリガー検証（mainブランチpush）
+**Objective:** DevOpsエンジニアとして、mainブランチへのpush時にE2Eテストを実行することで、本番リリース前の品質を保証したい
 
-#### Step 2: Shard実行検証
+#### Acceptance Criteria
 
-- 4つのジョブ（shard 1/2/3/4）が並列実行されることを確認
-- 各shardのログを確認
-- 全shardが成功することを確認
+1. WHEN mainブランチに直接pushされる AND 以下のパスに変更が含まれる THEN CI/CD環境 SHALL E2Eテストワークフローを自動実行する:
+   - `frontend/**`
+   - `backend/laravel-api/app/**`
+   - `backend/laravel-api/routes/**`
+   - `e2e/**`
+2. WHEN mainブランチへのpush後のE2Eテスト実行が完了する THEN CI/CD環境 SHALL ワークフロー実行履歴に結果を記録する
+3. IF mainブランチへのpush時のE2Eテストが失敗する THEN CI/CD環境 SHALL GitHub通知でチームメンバーに失敗を通知する
 
-#### Step 3: レポート確認
+---
 
-- Artifacts（成果物）に以下が保存されていることを確認
-  - `playwright-report-1.zip`
-  - `playwright-report-2.zip`
-  - `playwright-report-3.zip`
-  - `playwright-report-4.zip`
-- 各zipにHTML/JUnitレポート、スクリーンショット、トレースが含まれることを確認
+### Requirement 8: 手動実行（workflow_dispatch）検証
+**Objective:** DevOpsエンジニアとして、任意のタイミングでE2Eテストを手動実行することで、デバッグや検証を柔軟に行いたい
 
-#### Step 4: 自動トリガー検証
+#### Acceptance Criteria
 
-- PRを作成し、E2Eテストが自動実行されることを確認
-- mainブランチにpushし、E2Eテストが自動実行されることを確認
+1. WHERE GitHub ActionsタブのE2E Testsワークフロー THE CI/CD環境 SHALL 「Run workflow」ボタンを表示する
+2. WHEN 「Run workflow」ボタンがクリックされる THEN CI/CD環境 SHALL ブランチ選択UI（デフォルト: main）を表示する
+3. WHEN ブランチ選択後に実行が開始される THEN CI/CD環境 SHALL 選択ブランチのコードでE2Eテストを実行する
+4. WHEN 手動実行が完了する THEN CI/CD環境 SHALL 実行履歴に手動トリガーであることを記録する
 
-### 4. トラブルシューティング
+---
 
-**問題**: Docker起動失敗
+### Requirement 9: タイムアウト・エラーハンドリング
+**Objective:** DevOpsエンジニアとして、長時間実行や無限待機を防ぐことで、GitHub Actions実行コストを最適化したい
 
-```bash
-# ログ確認
-docker-compose logs laravel-api
-docker-compose logs admin-app
-docker-compose logs user-app
+#### Acceptance Criteria
 
-# サービス再起動
-docker-compose restart
-```
+1. WHEN E2Eテストワークフローが開始される THEN CI/CD環境 SHALL ジョブ実行時間を60分に制限する（`timeout-minutes: 60`）
+2. IF ワークフロー実行が60分を超過する THEN CI/CD環境 SHALL ジョブを強制終了し失敗ステータスを記録する
+3. WHEN `wait-on` コマンドでサービス起動待機が実行される AND デフォルトタイムアウト（60秒）を超過する THEN CI/CD環境 SHALL エラーを出力しワークフローを失敗させる
+4. IF Docker Composeサービス起動が失敗する THEN CI/CD環境 SHALL `docker-compose logs` 相当のエラーログを出力する
 
-**問題**: wait-onタイムアウト
+---
 
-```yaml
-# タイムアウト延長
-- name: Wait for services
-  run: |
-    npx wait-on http://localhost:13001 --timeout 120000
-    npx wait-on http://localhost:13002 --timeout 120000
-    npx wait-on http://localhost:13000/up --timeout 120000
-```
+### Requirement 10: ドキュメント更新
+**Objective:** 開発チームとして、CI/CD実行手順とトラブルシューティング情報を参照することで、運用を円滑化したい
 
-**問題**: Playwright実行失敗
+#### Acceptance Criteria
 
-```bash
-# ブラウザ再インストール
-npx playwright install --with-deps chromium
-```
+1. WHEN CI/CDワークフロー有効化が完了する THEN ドキュメント担当者 SHALL `README.md` に以下のCI/CD実行手順を追加する:
+   - 手動実行方法（workflow_dispatch）
+   - PR作成時の自動実行説明
+   - Artifactsダウンロード手順
+2. WHEN ドキュメント更新が実行される THEN ドキュメント担当者 SHALL `e2e/README.md` にCI/CD情報を追記する:
+   - Shard並列実行の説明
+   - 環境変数設定（E2E_ADMIN_URL等）
+   - CI環境での実行コマンド例
+3. WHEN トラブルシューティングセクションが作成される THEN ドキュメント担当者 SHALL 以下の問題パターンと解決方法を記載する:
+   - Docker起動失敗時のログ確認方法
+   - wait-onタイムアウト時のタイムアウト延長設定
+   - Playwright実行失敗時のブラウザ再インストール手順
 
-## 影響とリスク
+---
 
-### 影響範囲
-| 対象 | 影響度 | 内容 |
-|------|--------|------|
-| **CI/CD** | 高 | GitHub Actions実行時間・コスト増加 |
-| **開発者** | 中 | PR作成時の自動E2E実行待ち時間 |
-| **品質保証** | 高 | 自動リグレッションテスト実施 |
+## 技術的制約
 
-### リスク管理
+### GitHub Actions環境
+- **Runner**: `ubuntu-latest`
+- **Node.js**: v20（`actions/setup-node@v4`）
+- **Docker**: GitHub Actionsホストに標準搭載
+- **ネットワーク**: localhostアクセス（ポート 13000/13001/13002）
 
-#### リスク1: GitHub Actions無料枠超過
-- **対策**:
-  - pathsフィルターで不要な実行を抑制
-  - 手動トリガー（workflow_dispatch）を優先利用
-  - 並列数を調整（4 → 2に削減可能）
+### パフォーマンス目標
+- **実行時間**: 60分以内に全shard完了
+- **並列実行**: 4 shard同時実行
+- **リトライ**: Playwright設定で最大2回リトライ（フレーキーテスト対策）
 
-#### リスク2: E2E実行時間の長期化
-- **対策**:
-  - Shard並列実行（4並列）
-  - Docker Composeキャッシュ活用
-  - Playwrightブラウザキャッシュ
+### コスト管理
+- **pathsフィルター**: 不要な実行を抑制（GitHub Actions無料枠対策）
+- **Artifactsストレージ**: 30日間保持（自動削除）
+- **手動実行優先**: 開発段階ではworkflow_dispatch推奨
 
-#### リスク3: フレーキーテスト（不安定なテスト）
-- **対策**:
-  - retries設定（最大2回リトライ）
-  - 適切なwait設定
-  - スクリーンショット・トレース保存で原因調査
+---
 
-## チェックリスト
+## 前提条件
 
-### Phase 1: ワークフロー有効化（前提: Issue #14完了）
-- [ ] Issue #14完了確認（Docker環境構築完了）
-- [ ] `.disabled` 削除（ワークフロー有効化）
-- [ ] コミット・プッシュ
+- Issue #14完了（Next.js Dockerfile作成とDocker Compose統合）
+- Docker Compose環境で全サービスが正常起動すること
+- E2Eテストがローカル環境で成功すること
+- `.github/workflows/e2e-tests.yml.disabled` ファイルが存在すること
 
-### Phase 2: 手動実行検証
-- [ ] GitHub Actionsタブで手動実行
-- [ ] 4 shardすべて成功確認
-- [ ] Artifactsダウンロード・内容確認
+---
 
-### Phase 3: レポート検証
-- [ ] HTMLレポート表示確認
-- [ ] JUnitレポート形式確認
-- [ ] スクリーンショット保存確認
-- [ ] トレースファイル保存確認
+## 成功指標（DoD）
 
-### Phase 4: 自動トリガー検証
-- [ ] PR作成時の自動実行確認
-- [ ] mainブランチpush時の自動実行確認
-- [ ] pathsフィルター動作確認
-
-### Phase 5: ドキュメント更新
-- [ ] README.mdにCI/CD実行手順追加
-- [ ] e2e/README.mdにCI/CD情報追記
-- [ ] トラブルシューティング追記
-
-## 完了条件（DoD）
-
-### 必須条件（前提: Issue #14完了）
+### 必須条件
 - ✅ `.github/workflows/e2e-tests.yml` が有効化済み
 - ✅ 手動実行（workflow_dispatch）でE2Eテストが成功
 - ✅ 4並列実行（shard 1-4）がすべて成功
@@ -277,6 +231,24 @@ npx playwright install --with-deps chromium
 - ✅ 実行時間が60分以内に完了
 - ✅ フレーキーテストが発生しない（または2回目のリトライで成功）
 - ✅ README.mdにCI/CD実行手順が記載
+
+---
+
+## リスク管理
+
+### リスク1: GitHub Actions無料枠超過
+- **影響度**: 高
+- **対策**: pathsフィルター、手動トリガー優先、並列数調整（4→2）
+
+### リスク2: E2E実行時間の長期化
+- **影響度**: 中
+- **対策**: Shard並列実行、Docker Composeキャッシュ、Playwrightブラウザキャッシュ
+
+### リスク3: フレーキーテスト（不安定なテスト）
+- **影響度**: 中
+- **対策**: retries設定、適切なwait設定、スクリーンショット・トレース保存
+
+---
 
 ## 参考資料
 
@@ -289,56 +261,3 @@ npx playwright install --with-deps chromium
 - Issue #12: E2Eテスト環境基盤設定
 - Issue #14: Next.js アプリ用 Dockerfile 作成（**前提条件**）
 - PR #58: E2Eテスト環境基盤構築
-
-### 備考
-**重要**: このIssueは **Issue #14完了後** に着手してください。Docker環境が構築されていない状態ではGitHub ActionsのE2E実行が失敗します。
-
-## Extracted Information
-
-### Technology Stack
-**Backend**: Laravel API
-**Frontend**: Next.js (admin-app, user-app)
-**Infrastructure**: Docker Compose, GitHub Actions
-**Tools**: Playwright, wait-on
-
-### Project Structure
-```
-.github/workflows/e2e-tests.yml.disabled
-frontend/
-backend/laravel-api/app/
-backend/laravel-api/routes/
-e2e/
-```
-
-### Development Services Configuration
-- admin-app: ポート 13002
-- user-app: ポート 13001
-- laravel-api: ポート 13000
-
-### Requirements Hints
-Based on issue analysis:
-- CI/CDパイプライン有効化: E2Eテストの自動実行開始
-- 並列実行検証: GitHub Actions Matrixによる4並列実行の動作確認
-- レポート生成検証: HTML/JUnitレポート・スクリーンショット・トレース保存確認
-- 運用開始: PR作成時・mainブランチpush時の自動E2E実行
-
-### TODO Items from Issue
-- [ ] Issue #14完了確認（Docker環境構築完了）
-- [ ] .disabled 削除（ワークフロー有効化）
-- [ ] コミット・プッシュ
-- [ ] GitHub Actionsタブで手動実行
-- [ ] 4 shardすべて成功確認
-- [ ] Artifactsダウンロード・内容確認
-- [ ] HTMLレポート表示確認
-- [ ] JUnitレポート形式確認
-- [ ] スクリーンショット保存確認
-- [ ] トレースファイル保存確認
-- [ ] PR作成時の自動実行確認
-- [ ] mainブランチpush時の自動実行確認
-- [ ] pathsフィルター動作確認
-- [ ] README.mdにCI/CD実行手順追加
-- [ ] e2e/README.mdにCI/CD情報追記
-- [ ] トラブルシューティング追記
-
-## Requirements
-<!-- Will be generated in /kiro:spec-requirements phase -->
