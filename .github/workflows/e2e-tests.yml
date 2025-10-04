@@ -86,7 +86,9 @@ jobs:
             http://localhost:13001 \
             http://localhost:13002 \
             http://localhost:13000/up \
-            --timeout 120000
+            --timeout 300000 \
+            --interval 5000 \
+            --verbose
 
       - name: Install E2E dependencies
         run: |
