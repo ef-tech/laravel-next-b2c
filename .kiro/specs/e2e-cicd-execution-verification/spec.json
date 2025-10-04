@@ -1,0 +1,81 @@
+{
+  "feature_name": "e2e-cicd-execution-verification",
+  "created_at": "2025-10-04T14:39:00+09:00",
+  "updated_at": "2025-10-04T14:39:00+09:00",
+  "language": "ja",
+  "phase": "initialized",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 59,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/59",
+    "title": "E2E CI/CD実行確認（GitHub Actions ワークフロー有効化）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel API",
+      "frontend": "Next.js (admin-app, user-app)",
+      "infrastructure": "Docker Compose, GitHub Actions",
+      "tools": "Playwright, wait-on"
+    },
+    "requirements_hints": [
+      "CI/CDパイプライン有効化: E2Eテストの自動実行開始",
+      "並列実行検証: GitHub Actions Matrixによる4並列実行の動作確認",
+      "レポート生成検証: HTML/JUnitレポート・スクリーンショット・トレース保存確認",
+      "運用開始: PR作成時・mainブランチpush時の自動E2E実行"
+    ],
+    "project_structure": [
+      ".github/workflows/e2e-tests.yml.disabled",
+      "frontend/",
+      "backend/laravel-api/app/",
+      "backend/laravel-api/routes/",
+      "e2e/"
+    ],
+    "services": {
+      "admin-app": {
+        "port": "3001"
+      },
+      "user-app": {
+        "port": "3000"
+      },
+      "laravel-api": {
+        "port": "13000"
+      }
+    },
+    "todo_items": [
+      "Issue #14完了確認（Docker環境構築完了）",
+      ".disabled 削除（ワークフロー有効化）",
+      "コミット・プッシュ",
+      "GitHub Actionsタブで手動実行",
+      "4 shardすべて成功確認",
+      "Artifactsダウンロード・内容確認",
+      "HTMLレポート表示確認",
+      "JUnitレポート形式確認",
+      "スクリーンショット保存確認",
+      "トレースファイル保存確認",
+      "PR作成時の自動実行確認",
+      "mainブランチpush時の自動実行確認",
+      "pathsフィルター動作確認",
+      "README.mdにCI/CD実行手順追加",
+      "e2e/README.mdにCI/CD情報追記",
+      "トラブルシューティング追記"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": false,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
