@@ -29,6 +29,14 @@ on:
           - '2'
           - '4'
           - '8'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'backend/laravel-api/app/**'
+      - 'backend/laravel-api/routes/**'
+      - 'e2e/**'
+      - '.github/workflows/e2e-tests.yml'
   push:
     branches: [main]
     paths:
