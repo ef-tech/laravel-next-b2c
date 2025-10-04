@@ -77,36 +77,8 @@ jobs:
             frontend/user-app/package-lock.json
             e2e/package-lock.json
 
-      - name: Install frontend dependencies
-        run: |
-          cd frontend/admin-app && npm ci
-          cd ../user-app && npm ci
-
-      - name: Setup Laravel
-        run: |
-          cd backend/laravel-api
-          cp .env.example .env
-          composer install --no-interaction --prefer-dist --optimize-autoloader
-          php artisan key:generate
-          touch database/database.sqlite
-          php artisan migrate --force
-          php artisan db:seed --force
-
       - name: Start services
-        run: |
-          # Start Laravel API (ポート13000)
-          cd backend/laravel-api
-          APP_PORT=13000 php artisan serve --host=0.0.0.0 --port=13000 &
-
-          # Start Admin App (ポート13002 - package.json で --port 13002 設定済み)
-          cd ../../frontend/admin-app
-          npm run build
-          npm start &
-
-          # Start User App (ポート13001 - package.json で --port 13001 設定済み)
-          cd ../user-app
-          npm run build
-          npm start &
+        run: docker compose up -d --build
 
       - name: Wait for services to be ready
         run: |
