@@ -39,6 +39,8 @@ on:
       - 'frontend/**'
       - 'backend/laravel-api/app/**'
       - 'backend/laravel-api/routes/**'
+      - 'backend/laravel-api/config/**'
+      - 'backend/laravel-api/resources/**'
       - 'e2e/**'
       - '.github/workflows/e2e-tests.yml'
   push:
@@ -47,6 +49,8 @@ on:
       - 'frontend/**'
       - 'backend/laravel-api/app/**'
       - 'backend/laravel-api/routes/**'
+      - 'backend/laravel-api/config/**'
+      - 'backend/laravel-api/resources/**'
       - 'e2e/**'
       - '.github/workflows/e2e-tests.yml'
 
