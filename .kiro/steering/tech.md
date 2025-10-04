@@ -54,6 +54,7 @@
 - **Page Object Model**: 保守性の高いテスト設計パターン採用
 - **並列実行**: Shard機能によるCI/CD最適化（4並列デフォルト）
 - **環境変数管理**: `.env`ファイルによる柔軟なURL/認証情報設定
+- **CI/CD統合**: GitHub Actions自動実行（Pull Request時、約2分完了）
 
 ## バックエンド技術 - 🏆 API専用最適化済み
 ### 言語・フレームワーク
@@ -123,10 +124,21 @@ parameters:
 - **Pre-push**: `composer quality`実行 (Pint + Larastan全体チェック)
 
 #### CI/CD統合 (GitHub Actions v4)
-- **ワークフロー**: `.github/workflows/php-quality-check.yml`
-- **自動実行**: Pull Request時に品質チェック
-- **チェック内容**: Pint検証 + Larastan Level 8静的解析 + Pest テスト実行
-- **Actionsバージョン**: v4 (最新版)
+- **PHP品質チェックワークフロー**: `.github/workflows/php-quality-check.yml`
+  - **自動実行**: Pull Request時に品質チェック
+  - **チェック内容**: Pint検証 + Larastan Level 8静的解析 + Pest テスト実行
+  - **Actionsバージョン**: v4 (最新版)
+- **E2Eテストワークフロー**: `.github/workflows/e2e-tests.yml`
+  - **自動実行**: Pull Request時（frontend/**, backend/**, e2e/** 変更時）、mainブランチpush時、手動実行
+  - **実行方式**: 4 Shard並列実行（Matrix戦略）、約2分完了
+  - **タイムアウト**: 20分（最適化済み、旧60分）
+  - **パフォーマンス最適化**:
+    - Composerキャッシング（`actions/cache@v4`）
+    - 並列実行制御（`concurrency`設定でPR重複実行キャンセル）
+    - pathsフィルター（影響範囲のみ実行）
+  - **実行環境**: Docker開発モード起動（ビルド不要、高速化）
+  - **レポート**: Playwright HTML/JUnitレポート、失敗時のスクリーンショット・トレース
+  - **Artifacts**: 各Shardごとのテストレポート保存
 
 ### 📝 最適化ドキュメント体系
 **`backend/laravel-api/docs/` に包括的ドキュメントを格納**:

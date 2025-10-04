@@ -11,6 +11,8 @@ laravel-next-b2c/
 ├── e2e/                 # E2Eテスト環境 (Playwright)
 ├── .github/             # GitHub設定
 │   └── workflows/       # GitHub Actionsワークフロー (CI/CD)
+│       ├── e2e-tests.yml           # E2Eテスト自動実行（PR時・main push時）
+│       └── php-quality-check.yml   # PHP品質チェック（PR時）
 ├── .claude/             # Claude Code設定・コマンド
 ├── .kiro/               # Kiro仕様駆動開発設定
 ├── .husky/              # Gitフック管理 (husky設定)
@@ -170,7 +172,27 @@ e2e/
 ├── package.json         # E2E依存関係
 ├── tsconfig.json        # TypeScript設定
 ├── .env                 # E2E環境変数（gitignore済み）
-└── .env.example         # E2E環境変数テンプレート
+├── .env.example         # E2E環境変数テンプレート
+└── README.md            # E2Eテストガイド（セットアップ、実行方法、CI/CD統合）
+```
+
+### CI/CD E2Eテスト実行フロー
+```
+GitHub Actions (.github/workflows/e2e-tests.yml):
+1. トリガー: Pull Request / mainブランチpush / 手動実行
+2. 並列実行: 4 Shard Matrix戦略（約2分完了）
+3. セットアップ:
+   - PHP 8.4インストール
+   - Composerキャッシング（高速化）
+   - Node.js 20セットアップ
+   - npm依存関係インストール
+4. サービス起動:
+   - Laravel API: 開発モード（php artisan serve）
+   - User App: npm run dev（ポート: 13001）
+   - Admin App: npm run dev（ポート: 13002）
+5. wait-on: 全サービス起動待機（タイムアウト: 5分）
+6. Playwrightテスト実行: 各Shardごとに並列実行
+7. レポート保存: Artifacts（HTML/JUnit、スクリーンショット、トレース）
 ```
 
 ## コード構成パターン
