@@ -16,11 +16,14 @@ laravel-next-b2c/
 ├── .husky/              # Gitフック管理 (husky設定)
 ├── .idea/               # IntelliJ IDEA設定 (IDE固有、gitignore済み)
 ├── .git/                # Gitリポジトリ
+├── docker-compose.yml   # Docker Compose統合設定（全サービス一括起動）
+├── .dockerignore        # Dockerビルド除外設定（モノレポ対応）
 ├── .gitignore           # 統合ファイル除外設定 (モノレポ対応)
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
 ├── node_modules/        # 共通依存関係
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
-└── README.md            # プロジェクト概要
+├── README.md            # プロジェクト概要
+└── DOCKER_TROUBLESHOOTING.md  # Dockerトラブルシューティングガイド
 ```
 
 ## バックエンド構造 (`backend/laravel-api/`)
@@ -88,17 +91,32 @@ laravel-api/
 ├── public/              # 静的ファイル
 ├── coverage/            # テストカバレッジレポート
 ├── node_modules/        # Node.js依存関係
-├── package.json         # フロントエンド依存関係管理
+├── Dockerfile           # Next.js Dockerイメージ定義（本番ビルド最適化）
+├── package.json         # フロントエンド依存関係管理（--port固定設定）
 ├── tsconfig.json        # TypeScript設定
 ├── jest.config.js       # Jest設定（プロジェクト固有）
 ├── tailwind.config.js   # Tailwind CSS設定
-├── next.config.ts       # Next.js設定（outputFileTracingRoot設定）
+├── next.config.ts       # Next.js設定（outputFileTracingRoot設定、モノレポ対応）
 └── eslint.config.mjs    # ESLint 9設定 (flat config形式)
 ```
 
-### モノレポルート構成 (コード品質管理・テスト)
+**Docker最適化ポイント**:
+- **outputFileTracingRoot**: モノレポルート指定で依存関係トレース最適化
+- **standalone出力**: 最小限ファイルセットによる軽量Dockerイメージ
+- **マルチステージビルド**: builder → runner ステージ分離
+- **libc6-compat**: Alpine Linux上でのNext.js互換性保証
+
+### モノレポルート構成 (コード品質管理・テスト・Docker)
 ```
 laravel-next-b2c/
+├── docker-compose.yml   # Docker Compose統合設定
+│                        # - 全サービス定義 (laravel-api, admin-app, user-app, pgsql, redis, etc.)
+│                        # - ネットワーク設定
+│                        # - ボリューム管理
+│                        # - 環境変数設定
+├── .dockerignore        # Dockerビルド除外設定
+│                        # - node_modules, .next, .git等の除外
+│                        # - モノレポ対応（各サブディレクトリで有効）
 ├── package.json         # ワークスペース定義、共通スクリプト
 │                        # workspaces: ["frontend/admin-app", "frontend/user-app"]
 │                        # lint-staged設定を含む
@@ -225,6 +243,7 @@ import { clsx } from 'clsx'
 - **関心の分離**: UI層、ビジネスロジック層、データ層の明確な分離
 - **API境界**: フロントエンドとバックエンドの完全な分離
 - **アプリケーション分離**: 管理者用とユーザー用の独立開発
+- **環境分離**: Docker Compose統合による開発環境の一貫性保証
 
 ### ディレクトリ責任
 - **`backend/`**: API機能、データベース操作、ビジネスロジック
@@ -236,12 +255,18 @@ import { clsx } from 'clsx'
 ### 設定ファイル配置
 - **環境設定**: 各アプリケーションルートの `.env`
 - **ビルド設定**: 各技術スタック専用 (`package.json`, `composer.json`)
-- **Docker設定**: バックエンドに統合 (`compose.yaml`)
+- **Docker設定**:
+  - ルート: `docker-compose.yml` - 全サービス統合設定
+  - バックエンド: `backend/laravel-api/compose.yaml` - Laravel Sail設定
+  - フロントエンド: `frontend/{admin-app,user-app}/Dockerfile` - Next.js イメージ定義
+  - ルート: `.dockerignore` - ビルド除外設定
 - **開発ツール設定**: 各ディレクトリに適切な設定ファイル
 - **PHP品質管理設定**:
   - `backend/laravel-api/pint.json` - Laravel Pint設定
   - `backend/laravel-api/phpstan.neon` - Larastan/PHPStan設定
 - **CI/CD設定**: `.github/workflows/` - GitHub Actionsワークフロー
+- **Next.js最適化設定**:
+  - `frontend/{admin-app,user-app}/next.config.ts` - outputFileTracingRoot設定（モノレポ対応）
 
 ## 開発フロー指針
 1. **API First**: バックエンドAPIを先行開発

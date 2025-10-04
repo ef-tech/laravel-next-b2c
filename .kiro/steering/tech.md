@@ -139,9 +139,34 @@ parameters:
 - `laravel-pint-larastan-team-guide.md`: Laravel Pint・Larastanチーム運用ドキュメント
 
 ## 開発環境
-### Docker構成 (Laravel Sail)
+### Docker Compose構成（統合環境）
 ```yaml
 サービス構成:
+# バックエンド
+- laravel-api: Laravel 12 API (PHP 8.4) - ポート: 13000
+- pgsql: PostgreSQL 17-alpine - ポート: 13432
+- redis: Redis alpine - ポート: 13379
+- mailpit: 開発用メールサーバー - SMTP: 11025, UI: 13025
+- minio: オブジェクトストレージ - API: 13900, Console: 13010
+
+# フロントエンド
+- admin-app: Next.js 15.5 管理者アプリ - ポート: 13002
+- user-app: Next.js 15.5 ユーザーアプリ - ポート: 13001
+
+# テスト環境
+- e2e-tests: Playwright E2Eテスト (オンデマンド実行)
+```
+
+**Docker Compose統合の利点**:
+- 全サービス一括起動（`docker compose up -d`）
+- 統一されたネットワーク設定
+- サービス間通信の最適化
+- 環境変数の一元管理
+- E2Eテスト環境の完全統合
+
+### Laravel Sail構成（個別起動）
+```yaml
+Laravel Sailサービス:
 - laravel.test: メインアプリケーション (PHP 8.4)
 - redis: キャッシュサーバー
 - pgsql: PostgreSQL 17
@@ -156,6 +181,39 @@ parameters:
 - **Git**: バージョン管理
 
 ## 共通開発コマンド
+### Docker Compose（推奨 - 統合環境）
+```bash
+# リポジトリルートで実行
+
+# 全サービス起動
+docker compose up -d
+
+# ログ確認
+docker compose logs -f
+
+# 特定サービスのログ確認
+docker compose logs -f admin-app
+docker compose logs -f user-app
+docker compose logs -f laravel-api
+
+# サービス再起動
+docker compose restart admin-app
+docker compose restart user-app
+
+# 全サービス停止
+docker compose down
+
+# ボリューム含めて完全削除
+docker compose down -v
+
+# Laravel APIコマンド実行
+docker compose exec laravel-api php artisan migrate
+docker compose exec laravel-api php artisan db:seed
+
+# E2Eテスト実行（全サービス起動後）
+docker compose run --rm e2e-tests
+```
+
 ### バックエンド (Laravel)
 ```bash
 # 開発サーバー起動 (統合)
@@ -237,8 +295,11 @@ npm run codegen:admin # Admin App用テスト自動生成
 npm run codegen:user  # User App用テスト自動生成
 ```
 
-### Docker環境
+### Laravel Sail環境（個別起動）
 ```bash
+# Laravel APIディレクトリで実行
+cd backend/laravel-api
+
 # 環境起動・停止
 ./vendor/bin/sail up -d
 ./vendor/bin/sail down
@@ -264,22 +325,25 @@ FORWARD_MINIO_PORT=13900          # MinIO API
 FORWARD_MINIO_CONSOLE_PORT=13010  # MinIO Console
 ```
 
-#### フロントエンドポート (package.jsonで固定)
-```bash
+#### フロントエンドポート（固定設定）
+```env
 # User App: http://localhost:13001
 # - frontend/user-app/package.json の dev/start スクリプトで --port 13001 指定
-# - ポート競合回避のため標準3000番から変更
+# - Dockerfile: EXPOSE 13001
+# - docker-compose.yml: ports: "13001:13001"
 
 # Admin App: http://localhost:13002
 # - frontend/admin-app/package.json の dev/start スクリプトで --port 13002 指定
-# - ポート競合回避のため標準3000番から変更
+# - Dockerfile: EXPOSE 13002
+# - docker-compose.yml: ports: "13002:13002"
 ```
 
-**ポートカスタマイズの理由**:
+**ポート固定設計の利点**:
 - **13000番台統一**: 複数プロジェクト並行開発時のポート競合回避
-- **固定ポート**: チーム開発での環境統一、E2Eテスト安定性向上
+- **固定ポート**: チーム開発での環境統一、E2Eテスト安定性向上、Docker環境統一
 - **デフォルトポート回避**: 他のNext.js/Laravelプロジェクトとの同時実行可能
-```
+- **Docker統合**: コンテナポートマッピングの一貫性、環境変数不要
+- **E2Eテスト**: テストURLの固定化、環境差異の最小化
 
 ### E2Eテスト環境変数 (e2e/.env)
 ```env

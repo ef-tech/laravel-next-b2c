@@ -25,6 +25,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `e2e-test-environment-setup` - E2Eテスト環境基盤設定（Playwright + モノレポ対応 + CI/CD統合）
 - `nextjs-app-port-fixed` - Next.jsアプリポート固定化（user-app: 13001, admin-app: 13002）
 - `nextjs-app-dockerfile` - Next.js Dockerfile作成とDocker Compose統合（開発環境Docker化・E2E Docker実行対応）
+- `e2e-cicd-execution-verification` - E2E CI/CD実行確認（GitHub Actions ワークフロー有効化）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
