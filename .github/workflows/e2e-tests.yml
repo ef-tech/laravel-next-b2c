@@ -77,10 +77,37 @@ jobs:
             frontend/user-app/package-lock.json
             e2e/package-lock.json
 
-      - name: Start services (Development Mode)
+      - name: Setup Laravel
         run: |
-          # CI環境では開発モードで起動（ビルド不要、高速起動）
-          docker compose up -d
+          cd backend/laravel-api
+          cp .env.example .env
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate --force
+          php artisan db:seed --force
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend/admin-app && npm ci
+          cd ../user-app && npm ci
+
+      - name: Start services
+        run: |
+          # Start Laravel API (ポート13000)
+          cd backend/laravel-api
+          php artisan serve --host=0.0.0.0 --port=13000 &
+
+          # Start Admin App (ポート13002 - 開発モード)
+          cd ../../frontend/admin-app
+          npm run dev &
+
+          # Start User App (ポート13001 - 開発モード)
+          cd ../user-app
+          npm run dev &
+
+          # プロセス起動待機
+          sleep 10
 
       - name: Wait for services to be ready
         run: |
@@ -88,8 +115,8 @@ jobs:
             http://localhost:13001 \
             http://localhost:13002 \
             http://localhost:13000/up \
-            --timeout 180000 \
-            --interval 3000 \
+            --timeout 120000 \
+            --interval 2000 \
             --verbose
 
       - name: Install E2E dependencies
