@@ -77,8 +77,10 @@ jobs:
             frontend/user-app/package-lock.json
             e2e/package-lock.json
 
-      - name: Start services
-        run: docker compose up -d --build
+      - name: Start services (Development Mode)
+        run: |
+          # CI環境では開発モードで起動（ビルド不要、高速起動）
+          docker compose up -d
 
       - name: Wait for services to be ready
         run: |
@@ -86,8 +88,8 @@ jobs:
             http://localhost:13001 \
             http://localhost:13002 \
             http://localhost:13000/up \
-            --timeout 300000 \
-            --interval 5000 \
+            --timeout 180000 \
+            --interval 3000 \
             --verbose
 
       - name: Install E2E dependencies
