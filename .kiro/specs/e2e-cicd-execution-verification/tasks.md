@@ -3,19 +3,19 @@
 ## Phase 1: ワークフロー有効化と基本検証
 
 - [ ] 1. GitHub Actionsワークフローを有効化する
-- [ ] 1.1 ワークフローファイルのリネーム実行
+- [x] 1.1 ワークフローファイルのリネーム実行
   - `.github/workflows/e2e-tests.yml.disabled`の`.disabled`拡張子を削除
   - ワークフロー定義の内容確認（name: E2E Tests、トリガー設定確認）
   - ポート設定が13000番台統一であることを検証
   - _Requirements: 1.1, 1.2_
 
-- [ ] 1.2 ワークフロー有効化コミット作成
+- [x] 1.2 ワークフロー有効化コミット作成
   - 変更をgit add
   - コミットメッセージ作成（"Enable: 🚀 E2E CI/CDワークフロー有効化"）
   - リポジトリにpush
   - _Requirements: 1.1, 1.2_
 
-- [ ] 1.3 GitHub UIでワークフロー表示確認
+- [x] 1.3 GitHub UIでワークフロー表示確認
   - GitHub Actionsタブにアクセス
   - 「E2E Tests」ワークフローが一覧に表示されることを確認
   - 「Run workflow」ボタンが表示されることを確認
@@ -45,33 +45,33 @@
 
 ## Phase 3: 手動実行（workflow_dispatch）検証
 
-- [ ] 3. 手動トリガーでE2Eテストを実行し基本動作を検証する
-- [ ] 3.1 workflow_dispatch手動実行
+- [x] 3. 手動トリガーでE2Eテストを実行し基本動作を検証する
+- [x] 3.1 workflow_dispatch手動実行
   - GitHub Actionsタブで「Run workflow」ボタンをクリック
   - ブランチ選択UI（デフォルト: main）を確認
   - shard_count選択（デフォルト: 4）を確認
   - ワークフロー実行を開始
   - _Requirements: 8.1, 8.2_
 
-- [ ] 3.2 Matrix並列実行の動作確認
+- [x] 3.2 Matrix並列実行の動作確認
   - 4つのShardジョブ（shard 1/2/3/4）が並列起動することを確認
   - 各ShardでDocker Compose環境が独立して起動することを確認
   - 各Shardのログで`--shard=N/4`コマンド実行を確認
   - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 3.3 E2Eテスト実行結果の確認
+- [x] 3.3 E2Eテスト実行結果の確認
   - 全Shard実行完了を待機
   - 各Shardのテスト結果（成功/失敗/スキップ数）をログで確認
   - 全Shardが成功することを検証
   - _Requirements: 3.4, 4.4_
 
-- [ ] 3.4 Artifacts保存の確認
+- [x] 3.4 Artifacts保存の確認
   - GitHub ActionsのArtifactsセクションにアクセス
   - playwright-report-1/2/3/4の4つのArtifactsが保存されることを確認
   - 各Artifactをダウンロードしてzip形式であることを確認
   - _Requirements: 5.1, 5.2, 5.5_
 
-- [ ] 3.5 レポートファイル内容の検証
+- [x] 3.5 レポートファイル内容の検証
   - HTMLレポート（index.html）が含まれることを確認
   - JUnitレポート（junit.xml）が含まれることを確認
   - テスト成功時のスクリーンショット保存を確認
@@ -86,13 +86,13 @@
   - Pull Requestを作成
   - _Requirements: 6.1_
 
-- [ ] 4.2 PR自動実行の確認
+- [x] 4.2 PR自動実行の確認
   - Pull RequestのChecksセクションに「E2E Tests」が表示されることを確認
   - ワークフローが自動実行開始されることを確認
   - 4つのShardジョブが並列実行されることを確認
   - _Requirements: 6.1, 6.4_
 
-- [ ] 4.3 PR更新時の再実行確認
+- [x] 4.3 PR更新時の再実行確認
   - テスト用ブランチに新規コミットをpush
   - Pull Requestが自動更新されることを確認
   - E2Eテストワークフローが再実行されることを確認
