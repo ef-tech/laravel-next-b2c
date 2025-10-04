@@ -117,8 +117,8 @@ jobs:
 
       - name: Wait for services
         run: |
-          npx wait-on http://localhost:3000
-          npx wait-on http://localhost:3001
+          npx wait-on http://localhost:13001
+          npx wait-on http://localhost:13002
           npx wait-on http://localhost:13000/up
 
       - name: Install E2E dependencies
@@ -133,8 +133,8 @@ jobs:
         working-directory: e2e
         run: npx playwright test --shard=${{ matrix.shard }}/4
         env:
-          E2E_ADMIN_URL: http://localhost:3001
-          E2E_USER_URL: http://localhost:3000
+          E2E_ADMIN_URL: http://localhost:13002
+          E2E_USER_URL: http://localhost:13001
           E2E_API_URL: http://localhost:13000
 
       - name: Upload test results
@@ -195,8 +195,8 @@ docker-compose restart
 # タイムアウト延長
 - name: Wait for services
   run: |
-    npx wait-on http://localhost:3000 --timeout 120000
-    npx wait-on http://localhost:3001 --timeout 120000
+    npx wait-on http://localhost:13001 --timeout 120000
+    npx wait-on http://localhost:13002 --timeout 120000
     npx wait-on http://localhost:13000/up --timeout 120000
 ```
 
@@ -311,8 +311,8 @@ e2e/
 ```
 
 ### Development Services Configuration
-- admin-app: ポート 3001
-- user-app: ポート 3000
+- admin-app: ポート 13002
+- user-app: ポート 13001
 - laravel-api: ポート 13000
 
 ### Requirements Hints

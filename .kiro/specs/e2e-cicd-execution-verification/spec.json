@@ -35,10 +35,10 @@
     ],
     "services": {
       "admin-app": {
-        "port": "3001"
+        "port": "13002"
       },
       "user-app": {
-        "port": "3000"
+        "port": "13001"
       },
       "laravel-api": {
         "port": "13000"
