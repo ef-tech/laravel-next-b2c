@@ -304,40 +304,159 @@ export default defineConfig({
 
 ## CI/CD統合
 
-### GitHub Actions無料枠対策
+### ✅ GitHub Actions E2Eワークフロー（有効化済み）
 
-初期構築時は`.github/workflows/e2e-tests.yml.disabled`として作成。
+E2Eテストは `.github/workflows/e2e-tests.yml` で自動実行されます。
 
-運用時は以下の手順で有効化:
+#### ワークフロートリガー
 
-```bash
-# ワークフローを有効化
-mv .github/workflows/e2e-tests.yml.disabled .github/workflows/e2e-tests.yml
+1. **手動実行** (`workflow_dispatch`)
+   - GitHub Actionsタブから「E2E Tests」を選択
+   - 「Run workflow」ボタンをクリック
+   - Shard数を選択（1/2/4/8、デフォルト: 4）
 
-# コミット・プッシュ
-git add .github/workflows/e2e-tests.yml
-git commit -m "Enable E2E tests workflow"
-git push
-```
+2. **Pull Request作成時** (`pull_request`)
+   - mainブランチへのPR作成時に自動実行
+   - 対象パス変更時のみ実行:
+     - `frontend/**`
+     - `backend/laravel-api/app/**`
+     - `backend/laravel-api/routes/**`
+     - `e2e/**`
+     - `.github/workflows/e2e-tests.yml`
 
-### ワークフロートリガー
+3. **mainブランチpush時** (`push`)
+   - mainブランチへの直接pushまたはマージ時に自動実行
+   - 対象パス変更時のみ実行（PR時と同じ）
 
-- **手動実行** (`workflow_dispatch`): 必要時のみ実行
-- **自動実行** (`push`): E2E関連ファイル変更時のみ実行
-  - `frontend/**`
-  - `backend/laravel-api/app/**`
-  - `backend/laravel-api/routes/**`
-  - `e2e/**`
-  - `.github/workflows/e2e-tests.yml`
+#### Shard並列実行
 
-### Shard実行（並列化）
-
-GitHub Actionsでは4並列実行:
+GitHub Actionsでは **4並列実行** がデフォルト:
 
 ```yaml
 strategy:
+  fail-fast: false
   matrix:
     shard: [1, 2, 3, 4]
+```
+
+各Shardで以下のコマンドが実行されます:
+
+```bash
+npx playwright test --shard=1/4  # Shard 1
+npx playwright test --shard=2/4  # Shard 2
+npx playwright test --shard=3/4  # Shard 3
+npx playwright test --shard=4/4  # Shard 4
+```
+
+#### CI環境での実行コマンド
+
+GitHub Actionsで実行される実際のコマンド:
+
+```bash
+# 1. サービス起動（個別起動方式）
+cd backend/laravel-api
+php artisan serve --host=0.0.0.0 --port=13000 &
+
+cd frontend/admin-app
+npm run dev &  # ポート13002
+
+cd frontend/user-app
+npm run dev &  # ポート13001
+
+# 2. サービス起動待機
+npx wait-on \
+  http://localhost:13001 \
+  http://localhost:13002 \
+  http://localhost:13000/up \
+  --timeout 120000
+
+# 3. E2E依存関係インストール
+cd e2e
+npm ci
+
+# 4. Playwrightブラウザインストール
+npx playwright install --with-deps
+
+# 5. E2Eテスト実行（Shard分割）
+npx playwright test --shard=${{ matrix.shard }}/4
+```
+
+#### 環境変数（CI環境）
+
+GitHub Actionsでは以下の環境変数が自動設定されます:
+
+```bash
+E2E_ADMIN_URL=http://localhost:13002
+E2E_USER_URL=http://localhost:13001
+E2E_API_URL=http://localhost:13000
+```
+
+認証情報はGitHub Secretsで管理（現在は未設定、認証無効化中）:
+- `E2E_ADMIN_EMAIL`
+- `E2E_ADMIN_PASSWORD`
+- `E2E_USER_EMAIL`
+- `E2E_USER_PASSWORD`
+
+#### テストレポート・Artifacts
+
+GitHub Actionsでは自動的にレポートがアップロードされます:
+
+- **Artifacts名**: `playwright-report-1`, `playwright-report-2`, `playwright-report-3`, `playwright-report-4`
+- **保存期間**: 30日間
+- **内容**:
+  - HTMLレポート (`index.html`)
+  - JUnitレポート (`junit.xml`)
+  - スクリーンショット（失敗時）
+  - トレースファイル（失敗時）
+
+**Artifactsダウンロード手順**:
+1. GitHub Actionsのワークフロータブにアクセス
+2. 実行完了したワークフローを選択
+3. 下部の「Artifacts」セクションからダウンロード
+
+#### パフォーマンス
+
+- **実行時間**: 約2分（全4 Shard並列実行）
+- **タイムアウト**: 60分（ジョブレベル）
+- **wait-on待機**: 120秒タイムアウト
+
+### トラブルシューティング（CI環境）
+
+#### サービス起動失敗
+
+GitHub Actionsログで確認:
+
+```bash
+# Laravelサーバー起動確認
+http://localhost:13000/up
+
+# Next.jsアプリ起動確認
+http://localhost:13001
+http://localhost:13002
+```
+
+#### wait-onタイムアウト
+
+タイムアウト延長が必要な場合、`.github/workflows/e2e-tests.yml` を修正:
+
+```yaml
+- name: Wait for services to be ready
+  run: |
+    npx wait-on \
+      http://localhost:13001 \
+      http://localhost:13002 \
+      http://localhost:13000/up \
+      --timeout 180000  # 120秒 → 180秒に延長
+```
+
+#### Playwrightブラウザインストールエラー
+
+ワークフローで自動的に `--with-deps` フラグでインストールされます:
+
+```yaml
+- name: Install Playwright browsers
+  working-directory: e2e
+  run: npx playwright install --with-deps
 ```
 
 ## 参考資料

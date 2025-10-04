@@ -1045,6 +1045,76 @@ cd backend/laravel-api
 tail -f storage/logs/laravel.log
 ```
 
+## 🤖 CI/CD - GitHub Actions E2Eテスト
+
+### ✅ 自動E2Eテスト実行（有効化済み）
+
+GitHub ActionsでPlaywright E2Eテストが自動実行されます。
+
+#### 手動実行方法
+
+1. [GitHub Actionsタブ](https://github.com/ef-tech/laravel-next-b2c/actions)にアクセス
+2. 「E2E Tests」ワークフローを選択
+3. 「Run workflow」ボタンをクリック
+4. Shard数を選択（1/2/4/8、デフォルト: 4）
+5. 実行開始
+
+#### PR作成時の自動実行
+
+Pull Request作成時、以下のパス変更で自動的にE2Eテストが実行されます：
+
+- `frontend/**`
+- `backend/laravel-api/app/**`
+- `backend/laravel-api/routes/**`
+- `e2e/**`
+- `.github/workflows/e2e-tests.yml`
+
+**実行結果の確認**:
+1. Pull RequestのChecksタブを開く
+2. 「E2E Tests (Shard 1/4)」～「E2E Tests (Shard 4/4)」を確認
+3. 全Shard成功で✅マーク表示
+
+#### テストレポート・Artifactsダウンロード
+
+1. GitHub Actionsのワークフロータブにアクセス
+2. 実行完了したワークフローを選択
+3. 下部の「Artifacts」セクションにアクセス
+4. 以下をダウンロード:
+   - `playwright-report-1.zip`
+   - `playwright-report-2.zip`
+   - `playwright-report-3.zip`
+   - `playwright-report-4.zip`
+
+**Artifacts内容**:
+- HTMLレポート (`index.html`)
+- JUnitレポート (`junit.xml`)
+- スクリーンショット（失敗時）
+- トレースファイル（失敗時）
+
+#### 実行パフォーマンス
+
+- **実行時間**: 約2分（全4 Shard並列実行）
+- **並列数**: 4 Shard（Matrix戦略）
+- **タイムアウト**: 60分（ジョブレベル）
+
+#### トラブルシューティング
+
+##### E2Eテストが失敗する場合
+
+1. **GitHub Actionsログを確認**
+   - ワークフロー実行詳細を開く
+   - 各Shardのログを確認
+
+2. **サービス起動エラー**
+   - `Start services` ステップのログを確認
+   - Laravel/Next.js起動ログをチェック
+
+3. **wait-onタイムアウト**
+   - `Wait for services to be ready` ステップを確認
+   - タイムアウト延長が必要な場合は `.github/workflows/e2e-tests.yml` を修正
+
+詳細は `e2e/README.md` の「CI/CD統合」セクションを参照。
+
 ## 📚 開発リソース
 
 ### 公式ドキュメント
