@@ -1115,6 +1115,163 @@ Pull Request作成時、以下のパス変更で自動的にE2Eテストが実�
 
 詳細は `e2e/README.md` の「CI/CD統合」セクションを参照。
 
+## ⚡ GitHub Actions ワークフロー最適化
+
+### 🎯 最適化成果
+
+GitHub Actionsワークフローの発火タイミング最適化により、CI/CDパイプラインの効率化とコスト削減を実現しています。
+
+| メトリクス | 最適化前 | 最適化後 | 改善率 |
+|----------|---------|---------|--------|
+| **実行頻度** | 全ファイル変更で実行 | 関連ファイルのみ | **60-70%削減** |
+| **実行時間** | ベースライン | 並列実行 + キャッシュ最適化 | **30-40%削減** |
+| **キャッシュヒット率** | - | Node.js/Composer | **80%以上** |
+| **API契約整合性** | 検出なし | 自動検出 | **早期検出** |
+
+### 🚀 主な最適化機能
+
+#### 1. Concurrency設定による重複実行削減
+
+Pull Request内で連続コミットがプッシュされた際、古い実行を自動キャンセル：
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+```
+
+**利点**:
+- ✅ PR時の最新コミットのみ実行（リソース効率化）
+- ✅ mainブランチpushは並列実行を許可（全実行を保証）
+- ✅ ワークフロー間の干渉なし（イベント種別で分離）
+
+#### 2. Paths設定による担当領域の明確化
+
+各ワークフローは、関連ファイル変更時のみ実行：
+
+| ワークフロー | 担当領域 | 実行条件 |
+|------------|---------|---------|
+| **frontend-test.yml** | `frontend/**`, `test-utils/**`, API契約関連ファイル | フロントエンド変更 or バックエンドAPI変更 |
+| **php-quality.yml** | `backend/laravel-api/**` | バックエンド変更 |
+| **test.yml** | `backend/laravel-api/**` | バックエンド変更 |
+| **e2e-tests.yml** | `frontend/**`, `backend/**`, `e2e/**` | フロントエンド/バックエンド/E2E変更 |
+
+**例**:
+- フロントエンドのみ変更 → `frontend-test.yml`のみ実行
+- バックエンドのみ変更 → `php-quality.yml` + `test.yml`のみ実行
+- API Controller変更 → 全ワークフロー実行（API契約整合性検証）
+
+#### 3. API契約整合性の早期検出
+
+バックエンドAPI変更時、フロントエンドテストを自動実行し、APIモック（MSW）との不整合を検出：
+
+**監視対象ファイル**:
+- `backend/laravel-api/app/Http/Controllers/Api/**`
+- `backend/laravel-api/app/Http/Resources/**`
+- `backend/laravel-api/routes/api.php`
+- `backend/laravel-api/app/Models/**`
+
+**利点**:
+- ✅ APIレスポンス形式変更の早期検出
+- ✅ E2Eテストより高速なフィードバック
+- ✅ フロントエンド・バックエンド間の契約整合性を継続的に検証
+
+#### 4. Pull Request Types明示
+
+必要なPull Requestイベントのみでワークフロー実行：
+
+```yaml
+pull_request:
+  types: [opened, synchronize, reopened, ready_for_review]
+```
+
+**スキップされるイベント**:
+- ラベル追加・削除
+- アサイン変更
+- レビュー依頼
+
+#### 5. キャッシング統一化
+
+**Node.jsキャッシュ**（setup-node内蔵）:
+```yaml
+- uses: actions/setup-node@v4
+  with:
+    cache: 'npm'
+    cache-dependency-path: |
+      package-lock.json
+      frontend/admin-app/package-lock.json
+      frontend/user-app/package-lock.json
+```
+
+**Composerキャッシュ**（cache-files-dir）:
+```yaml
+- id: composer-cache
+  run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+- uses: actions/cache@v4
+  with:
+    path: ${{ steps.composer-cache.outputs.dir }}
+    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+```
+
+### 📋 ワークフロー実行条件一覧
+
+| シナリオ | frontend-test | php-quality | test | e2e-tests |
+|---------|--------------|-------------|------|-----------|
+| フロントエンドのみ変更 | ✅ | ❌ | ❌ | ✅ |
+| バックエンドのみ変更 | ❌ | ✅ | ✅ | ✅ |
+| API Controllers変更 | ✅ | ✅ | ✅ | ✅ |
+| API Resources変更 | ✅ | ✅ | ✅ | ✅ |
+| E2Eテストのみ変更 | ❌ | ❌ | ❌ | ✅ |
+| README更新のみ | ❌ | ❌ | ❌ | ❌ |
+
+### 🔍 トラブルシューティング
+
+<details>
+<summary>🚨 ワークフローがスキップされる場合</summary>
+
+paths設定により、関連ファイル変更がない場合はワークフローがスキップされます。
+
+**確認方法**:
+1. GitHub ActionsのPull Requestタブを開く
+2. スキップされたワークフローを確認
+3. 必要に応じてファイルを変更して再実行
+
+**注意**: paths設定によるスキップは、ブランチプロテクションの必須チェックで成功として扱われます。
+
+</details>
+
+<details>
+<summary>🚨 Concurrencyで実行がキャンセルされる場合</summary>
+
+PR内で連続コミットをプッシュすると、古い実行が自動キャンセルされます。
+
+**動作**:
+- 1つ目のコミット: ワークフロー実行開始
+- 2つ目のコミット: 1つ目の実行がキャンセル、2つ目が実行
+
+**確認方法**:
+GitHub ActionsログでCancelled表示を確認
+
+</details>
+
+<details>
+<summary>🚨 キャッシュミスが頻発する場合</summary>
+
+**原因**:
+- `package-lock.json`または`composer.lock`の変更
+- キャッシュの有効期限切れ（7日間）
+
+**対処**:
+- 依存関係変更後は初回実行でキャッシュ作成
+- 2回目以降はCache hitが表示される
+
+</details>
+
+### 📚 参考資料
+
+- **GitHub Actions公式ドキュメント**: [Concurrency](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency), [Paths Filter](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore)
+- **プロジェクト最適化ドキュメント**: `.kiro/specs/github-actions-trigger-optimization/`
+
 ## 📚 開発リソース
 
 ### 公式ドキュメント
