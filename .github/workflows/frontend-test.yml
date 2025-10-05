@@ -1,5 +1,9 @@
 name: Frontend Tests
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   push:
     branches:
@@ -12,8 +16,21 @@ on:
       - 'jest.config.js'
       - 'jest.setup.ts'
       - 'tsconfig.test.json'
+      - 'eslint.config.mjs'
+      - 'frontend/.eslint.base.mjs'
+      - '.prettierrc'
+      - '.prettierignore'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'frontend/**/package.json'
+      - 'frontend/**/package-lock.json'
+      - 'backend/laravel-api/app/Http/Controllers/Api/**'
+      - 'backend/laravel-api/app/Http/Resources/**'
+      - 'backend/laravel-api/routes/api.php'
+      - 'backend/laravel-api/app/Models/**'
       - '.github/workflows/frontend-test.yml'
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
     paths:
@@ -23,6 +40,19 @@ on:
       - 'jest.config.js'
       - 'jest.setup.ts'
       - 'tsconfig.test.json'
+      - 'eslint.config.mjs'
+      - 'frontend/.eslint.base.mjs'
+      - '.prettierrc'
+      - '.prettierignore'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'frontend/**/package.json'
+      - 'frontend/**/package-lock.json'
+      - 'backend/laravel-api/app/Http/Controllers/Api/**'
+      - 'backend/laravel-api/app/Http/Resources/**'
+      - 'backend/laravel-api/routes/api.php'
+      - 'backend/laravel-api/app/Models/**'
+      - '.github/workflows/frontend-test.yml'
 
 jobs:
   test:
@@ -43,22 +73,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ steps.npm-cache-dir.outputs.dir }}
-            node_modules
-            frontend/${{ matrix.app }}/node_modules
-          key: ${{ runner.os }}-npm-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-${{ matrix.node-version }}-
-            ${{ runner.os }}-npm-
+          cache-dependency-path: |
+            package-lock.json
+            frontend/admin-app/package-lock.json
+            frontend/user-app/package-lock.json
 
       - name: Install dependencies
         run: npm ci

@@ -9,26 +9,26 @@
   - パフォーマンス目標（30-40%実行時間削減、60-70%実行頻度削減）のベースラインを設定
   - _Requirements: 8.1, 8.2_
 
-- [ ] 2. frontend-test.ymlにconcurrency設定を追加
+- [x] 2. frontend-test.ymlにconcurrency設定を追加
   - ワークフローファイルの先頭にconcurrency設定を追加
   - groupキーに `${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}` を設定
   - cancel-in-progressに `${{ github.event_name == 'pull_request' }}` を設定
   - Pull Request時の重複実行削減機能を実装
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 3. php-quality.ymlにconcurrency設定を追加
+- [x] 3. php-quality.ymlにconcurrency設定を追加
   - frontend-test.ymlと同一のconcurrency設定を追加
   - groupキーとcancel-in-progress条件を統一
   - バックエンド品質チェックの重複実行削減を実装
   - _Requirements: 1.1, 1.2, 1.5_
 
-- [ ] 4. test.ymlにconcurrency設定を追加
+- [x] 4. test.ymlにconcurrency設定を追加
   - frontend-test.ymlと同一のconcurrency設定を追加
   - 4 Shards並列実行と併用可能なconcurrency設定を実装
   - バックエンドテストの重複実行削減を実装
   - _Requirements: 1.1, 1.2, 1.6_
 
-- [ ] 5. e2e-tests.ymlのconcurrency設定を確認
+- [x] 5. e2e-tests.ymlのconcurrency設定を確認
   - 既存のconcurrency設定が要件を満たしているか確認
   - groupキーとcancel-in-progress設定の動作を検証
   - 必要に応じて設定を調整
@@ -43,20 +43,20 @@
 
 ## Phase 2: Paths設定追加（Week 2-3）
 
-- [ ] 7. frontend-test.ymlにpaths設定を追加（基本パス）
+- [x] 7. frontend-test.ymlにpaths設定を追加（基本パス）
   - on.push.pathsとon.pull_request.pathsを追加
   - フロントエンドディレクトリ（frontend/**, test-utils/**）を指定
   - テスト設定ファイル（jest.base.js, jest.config.js, jest.setup.ts, tsconfig.test.json）を指定
   - コード品質設定ファイル（eslint.config.mjs, frontend/.eslint.base.mjs, .prettierrc, .prettierignore）を指定
   - _Requirements: 2.1, 2.5, 2.6, 2.7_
 
-- [ ] 8. frontend-test.ymlにpaths設定を追加（依存関係とワークフロー）
+- [x] 8. frontend-test.ymlにpaths設定を追加（依存関係とワークフロー）
   - 依存関係ファイル（package.json, package-lock.json, frontend/**/package.json, frontend/**/package-lock.json）を指定
   - ワークフロー自身（.github/workflows/frontend-test.yml）を指定
   - フロントエンド関連ファイル変更時のみ実行される設定を完成
   - _Requirements: 2.8, 2.9_
 
-- [ ] 9. frontend-test.ymlにAPI契約関連パスを追加
+- [x] 9. frontend-test.ymlにAPI契約関連パスを追加
   - backend/laravel-api/app/Http/Controllers/Api/** を追加
   - backend/laravel-api/app/Http/Resources/** を追加
   - backend/laravel-api/routes/api.php を追加
@@ -64,21 +64,21 @@
   - バックエンドAPI変更時のフロントエンドテスト実行を実装
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9_
 
-- [ ] 10. php-quality.ymlにpaths設定を追加
+- [x] 10. php-quality.ymlにpaths設定を追加
   - on.push.pathsとon.pull_request.pathsを追加
   - バックエンドディレクトリ（backend/laravel-api/**）を指定
   - ワークフロー自身（.github/workflows/php-quality.yml）を指定
   - バックエンド関連ファイル変更時のみ実行される設定を実装
   - _Requirements: 2.3, 2.10, 2.11_
 
-- [ ] 11. test.ymlにpaths設定を追加
+- [x] 11. test.ymlにpaths設定を追加
   - on.push.pathsとon.pull_request.pathsを追加
   - バックエンドディレクトリ（backend/laravel-api/**）を指定
   - ワークフロー自身（.github/workflows/test.yml）を指定
   - バックエンド関連ファイル変更時のみ実行される設定を実装
   - _Requirements: 2.3, 2.12, 2.13_
 
-- [ ] 12. e2e-tests.ymlのpaths設定を確認
+- [x] 12. e2e-tests.ymlのpaths設定を確認
   - 既存のpaths設定が要件を満たしているか確認
   - frontend/**, backend/laravel-api/app/**, e2e/** の設定を検証
   - 必要に応じてpaths設定を拡張
@@ -107,7 +107,7 @@
 
 ## Phase 3: Pull Request Types明示（Week 3）
 
-- [ ] 16. 全ワークフローにpull_request.types設定を追加
+- [x] 16. 全ワークフローにpull_request.types設定を追加
   - frontend-test.ymlのon.pull_request.typesに [opened, synchronize, reopened, ready_for_review] を指定
   - php-quality.ymlのon.pull_request.typesに [opened, synchronize, reopened, ready_for_review] を指定
   - test.ymlのon.pull_request.typesに [opened, synchronize, reopened, ready_for_review] を指定
@@ -122,27 +122,27 @@
 
 ## Phase 4: キャッシング統一化（Week 4）
 
-- [ ] 18. frontend-test.ymlのキャッシュ設定をsetup-node内蔵に統一
+- [x] 18. frontend-test.ymlのキャッシュ設定をsetup-node内蔵に統一
   - actions/setup-node@v4のcacheパラメータに npm を指定
   - cache-dependency-pathに package-lock.json, frontend/admin-app/package-lock.json, frontend/user-app/package-lock.json を指定
   - 既存の独自キャッシュ設定（actions/cache@v4でのnpm cache）を削除
   - setup-node内蔵キャッシュによる効率化を実装
   - _Requirements: 5.1, 5.2_
 
-- [ ] 19. php-quality.ymlのキャッシュ設定をcache-files-dirに統一
+- [x] 19. php-quality.ymlのキャッシュ設定をcache-files-dirに統一
   - composer config cache-files-dirの出力パスをキャッシュする設定を確認
   - キャッシュキーに composer.lock のハッシュ値を使用
   - restore-keysで部分一致キャッシュを設定
   - Composerキャッシュの効率化を実装
   - _Requirements: 5.3, 5.4, 5.8, 5.9_
 
-- [ ] 20. test.ymlのキャッシュ設定をcache-files-dirに統一
+- [x] 20. test.ymlのキャッシュ設定をcache-files-dirに統一
   - php-quality.ymlと同一のComposerキャッシュ設定を適用
   - キャッシュキーとrestore-keysを統一
   - Composerキャッシュの効率化を実装
   - _Requirements: 5.5, 5.8, 5.9_
 
-- [ ] 21. e2e-tests.ymlのキャッシュ設定を確認
+- [x] 21. e2e-tests.ymlのキャッシュ設定を確認
   - 既存のsetup-node内蔵キャッシュ設定を確認
   - 既存のComposer cache-files-dirキャッシュ設定を確認
   - キャッシュ設定が最適化されていることを検証
