@@ -1,8 +1,5 @@
 <?php
 
-// Test: Paths設定動作確認 - バックエンドのみ変更（API契約に関係しない）
-// 期待: php-quality.yml + test.yml + e2e-tests.yml のみ実行される
-
 return [
 
     /*
