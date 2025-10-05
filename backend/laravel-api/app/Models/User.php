@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+// Test: Paths設定動作確認 - API契約関連ファイル変更
+// 期待: 全ワークフロー（frontend-test, php-quality, test, e2e-tests）が実行される
+
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
