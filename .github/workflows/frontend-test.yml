@@ -27,7 +27,6 @@ on:
       - 'backend/laravel-api/app/Http/Controllers/Api/**'
       - 'backend/laravel-api/app/Http/Resources/**'
       - 'backend/laravel-api/routes/api.php'
-      - 'backend/laravel-api/app/Models/**'
       - '.github/workflows/frontend-test.yml'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -51,7 +50,6 @@ on:
       - 'backend/laravel-api/app/Http/Controllers/Api/**'
       - 'backend/laravel-api/app/Http/Resources/**'
       - 'backend/laravel-api/routes/api.php'
-      - 'backend/laravel-api/app/Models/**'
       - '.github/workflows/frontend-test.yml'
 
 jobs:
