@@ -34,7 +34,7 @@
   - 必要に応じて設定を調整
   - _Requirements: 1.7_
 
-- [ ] 6. Concurrency動作確認テスト
+- [x] 6. Concurrency動作確認テスト
   - 同じPRに2つのコミットを連続プッシュし、古い実行がキャンセルされることを確認
   - mainブランチへの直接プッシュで並列実行が許可されることを確認
   - GitHub ActionsログでConcurrency動作を検証
@@ -84,21 +84,21 @@
   - 必要に応じてpaths設定を拡張
   - _Requirements: 2.14_
 
-- [ ] 13. Paths Filter動作確認テスト（フロントエンドのみ変更）
+- [x] 13. Paths Filter動作確認テスト（フロントエンドのみ変更）
   - フロントエンド関連ファイルのみを変更
   - frontend-test.ymlのみが実行されることを確認
   - php-quality.ymlとtest.ymlがスキップされることを確認
   - GitHub ActionsログでPaths Filter動作を検証
   - _Requirements: 9.2_
 
-- [ ] 14. Paths Filter動作確認テスト（バックエンドのみ変更）
+- [x] 14. Paths Filter動作確認テスト（バックエンドのみ変更）
   - バックエンド関連ファイルのみを変更
   - php-quality.ymlとtest.ymlのみが実行されることを確認
   - frontend-test.ymlがスキップされることを確認（API契約関連ファイル以外）
   - GitHub ActionsログでPaths Filter動作を検証
   - _Requirements: 9.3_
 
-- [ ] 15. Paths Filter動作確認テスト（API契約変更）
+- [x] 15. Paths Filter動作確認テスト（API契約変更）
   - バックエンドAPI Resources（backend/laravel-api/app/Http/Resources/**）を変更
   - frontend-test.yml, php-quality.yml, test.yml, e2e-tests.ymlすべてが実行されることを確認
   - API契約整合性の早期検出が機能することを検証
