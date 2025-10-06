@@ -194,29 +194,29 @@
 
 ## Phase 8: ドキュメント整備
 
-- [ ] 17. アーキテクチャドキュメントを作成する
-- [ ] 17.1 アーキテクチャ概要ドキュメントを作成する
+- [x] 17. アーキテクチャドキュメントを作成する
+- [x] 17.1 アーキテクチャ概要ドキュメントを作成する
   - 4層構造の説明と依存方向ルール
   - 主要パターン（ValueObject、Entity、Repository、UseCase）の解説
   - 既存MVCとDDD層の共存戦略
   - backend/laravel-api/docs/ddd-architecture.mdに配置
   - _Requirements: 9.1_
 
-- [ ] 17.2 開発ガイドラインを作成する
+- [x] 17.2 開発ガイドラインを作成する
   - 新規機能開発時のDDD実装手順
   - コーディング規約（Carbon使用、Enum活用、配列vs Entity等）
   - 命名規則とディレクトリ配置ルール
   - backend/laravel-api/docs/ddd-development-guide.mdに配置
   - _Requirements: 9.2_
 
-- [ ] 17.3 テスト戦略ドキュメントを作成する
+- [x] 17.3 テスト戦略ドキュメントを作成する
   - 各層のテスト方針（Unit/Feature/Integration/Architecture）
   - テストヘルパー使用方法とモックパターン
   - カバレッジ目標と測定方法
   - backend/laravel-api/docs/ddd-testing-strategy.mdに配置
   - _Requirements: 9.3_
 
-- [ ] 17.4 トラブルシューティングガイドを作成する
+- [x] 17.4 トラブルシューティングガイドを作成する
   - よくあるエラーと解決方法（PSR-4オートロード、DI解決失敗等）
   - Architecture Tests失敗時の対処法
   - パフォーマンス最適化方法（Mapper変換、N+1クエリ対策等）
