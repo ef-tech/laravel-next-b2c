@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Ddd\Application\User\UseCases\RegisterUser;
 
+use Ddd\Application\Shared\Services\Events\EventBus;
+use Ddd\Application\Shared\Services\TransactionManager\TransactionManager;
 use Ddd\Domain\User\Entities\User;
 use Ddd\Domain\User\Repositories\UserRepository;
-use Ddd\Infrastructure\Services\Events\EventBus;
-use Ddd\Infrastructure\Services\TransactionManager\TransactionManager;
 use Ddd\Shared\Exceptions\EmailAlreadyExistsException;
 
 final readonly class RegisterUserUseCase

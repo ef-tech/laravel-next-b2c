@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ddd\Infrastructure\Services\Events;
+namespace Ddd\Application\Shared\Services\Events;
 
 interface EventBus
 {

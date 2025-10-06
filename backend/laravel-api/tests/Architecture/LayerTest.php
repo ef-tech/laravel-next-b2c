@@ -11,6 +11,8 @@ arch('controllers should not depend on models directly')
         'App\Http\Requests',
         'App\Http\Resources',
         'App\Actions',
+        'Ddd\Application',
+        'Ddd\Domain',
     ]);
 
 arch('models should not depend on controllers')

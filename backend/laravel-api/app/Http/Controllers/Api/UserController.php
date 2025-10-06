@@ -29,7 +29,7 @@ final class UserController extends Controller
 
         $output = $this->registerUserUseCase->execute($input);
 
-        return response()->json([
+        return new JsonResponse([
             'id' => $output->userId->value(),
         ], 201);
     }

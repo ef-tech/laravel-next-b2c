@@ -21,12 +21,12 @@ final class DddServiceProvider extends ServiceProvider
 
         // Infrastructure services (singleton)
         $this->app->singleton(
-            \Ddd\Infrastructure\Services\TransactionManager\TransactionManager::class,
+            \Ddd\Application\Shared\Services\TransactionManager\TransactionManager::class,
             \Ddd\Infrastructure\Services\TransactionManager\LaravelTransactionManager::class
         );
 
         $this->app->singleton(
-            \Ddd\Infrastructure\Services\Events\EventBus::class,
+            \Ddd\Application\Shared\Services\Events\EventBus::class,
             \Ddd\Infrastructure\Services\Events\LaravelEventBus::class
         );
     }

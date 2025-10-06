@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ddd\Infrastructure\Services\TransactionManager;
+namespace Ddd\Application\Shared\Services\TransactionManager;
 
 interface TransactionManager
 {
