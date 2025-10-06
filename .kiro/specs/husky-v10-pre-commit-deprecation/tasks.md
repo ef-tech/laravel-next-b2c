@@ -2,8 +2,8 @@
 
 ## タスク一覧
 
-- [ ] 1. pre-commitフックファイルの修正
-- [ ] 1.1 非推奨行の削除
+- [x] 1. pre-commitフックファイルの修正
+- [x] 1.1 非推奨行の削除
   - `.husky/pre-commit`ファイルを開く
   - 1行目の`#!/usr/bin/env sh`を削除
   - 2行目の`. "$(dirname -- "$0")/_/husky.sh"`を削除
@@ -11,15 +11,15 @@
   - ファイルが1行のみ（`npx lint-staged`）であることを確認
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 2. 動作確認とテスト実行
-- [ ] 2.1 ファイル内容の検証
+- [x] 2. 動作確認とテスト実行
+- [x] 2.1 ファイル内容の検証
   - `.husky/pre-commit`の内容を確認
   - shebang行が存在しないことを検証
   - husky.sh読み込み行が存在しないことを検証
   - `npx lint-staged`コマンドのみが含まれることを確認
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 2.2 lint-staged自動実行テスト
+- [x] 2.2 lint-staged自動実行テスト
   - テスト用のファイルをステージングエリアに追加
   - `git commit`コマンドを実行
   - pre-commitフックが自動起動することを確認
@@ -27,7 +27,7 @@
   - コミットが正常完了することを確認
   - _Requirements: 2.1, 2.2_
 
-- [ ] 2.3 lintエラー検出テスト
+- [x] 2.3 lintエラー検出テスト
   - 意図的にlintエラーを含むファイルを作成
   - エラーファイルをステージングエリアに追加
   - `git commit`を実行
@@ -37,35 +37,35 @@
   - テストファイルを削除またはリセット
   - _Requirements: 2.3_
 
-- [ ] 3. 互換性検証
-- [ ] 3.1 Husky v9環境での動作確認
+- [x] 3. 互換性検証
+- [x] 3.1 Husky v9環境での動作確認
   - 現在のHusky v9環境でコミットを実行
   - pre-commitフックがエラーなく動作することを確認
   - lint-stagedが正常実行されることを確認
   - _Requirements: 3.1_
 
-- [ ] 3.2 非推奨警告の不在確認
+- [x] 3.2 非推奨警告の不在確認
   - `git commit`実行時のコンソール出力を確認
   - "DEPRECATED"警告メッセージが表示されないことを検証
   - "They WILL FAIL in v10.0.0"メッセージが表示されないことを確認
   - _Requirements: 3.2_
 
-- [ ] 3.3 複数コミット連続実行テスト
+- [x] 3.3 複数コミット連続実行テスト
   - 複数の異なるファイルを段階的にコミット
   - 各コミットでpre-commitフックが正常動作することを確認
   - フロントエンド（TypeScript）とバックエンド（PHP）の両方をテスト
   - lint-stagedが期待通りのlint処理を完了することを確認
   - _Requirements: 3.3_
 
-- [ ] 4. 最終検証と完了確認
-- [ ] 4.1 統合動作テスト
+- [x] 4. 最終検証と完了確認
+- [x] 4.1 統合動作テスト
   - フロントエンドファイル（.ts, .tsx）をステージング
   - バックエンドファイル（.php）をステージング
   - 両方のlintツール（ESLint + Prettier、Laravel Pint）が実行されることを確認
   - コミットが正常完了することを確認
   - _Requirements: 2.1, 2.2_
 
-- [ ] 4.2 全要件達成確認
+- [x] 4.2 全要件達成確認
   - Requirement 1（Husky v10互換性確保）の全Acceptance Criteriaを確認
   - Requirement 2（既存機能の維持）の全Acceptance Criteriaを確認
   - Requirement 3（後方互換性検証）の全Acceptance Criteriaを確認
