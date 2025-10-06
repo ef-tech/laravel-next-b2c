@@ -1,14 +1,25 @@
 name: PHP Quality Checks
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   push:
     branches:
       - main
       - develop
+    paths:
+      - 'backend/laravel-api/**'
+      - '.github/workflows/php-quality.yml'
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
       - develop
+    paths:
+      - 'backend/laravel-api/**'
+      - '.github/workflows/php-quality.yml'
 
 jobs:
   php-quality:
@@ -26,10 +37,15 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json
           coverage: none
 
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        working-directory: backend/laravel-api
+
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
-          path: backend/laravel-api/vendor
+          path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('backend/laravel-api/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-

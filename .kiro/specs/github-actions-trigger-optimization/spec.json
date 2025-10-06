@@ -1,0 +1,84 @@
+{
+  "feature_name": "github-actions-trigger-optimization",
+  "created_at": "2025-10-06T00:00:00Z",
+  "updated_at": "2025-10-06T09:00:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 66,
+    "url": "https://github.com/ef-tech/template/issues/66",
+    "title": "GitHub Actions の発火タイミングを最適化",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": ["Laravel", "PHP 8.4", "Composer", "Pest 4"],
+      "frontend": ["Next.js", "React 19", "Jest", "Testing Library", "Node.js"],
+      "infrastructure": ["GitHub Actions", "Docker", "Docker Compose", "Ubuntu"],
+      "tools": ["Playwright", "Laravel Pint", "Larastan", "ESLint", "Prettier", "Codecov"]
+    },
+    "requirements_hints": [
+      "全ワークフローに concurrency 設定追加（PR時の最新コミット以外キャンセル）",
+      "全ワークフローに paths 設定追加（担当領域ファイル明確化 + API契約関連ファイル監視）",
+      "pull_request.types の明示（必要なイベントタイプのみ指定）",
+      "依存関係キャッシング統一化（Node.js: setup-node内蔵、Composer: cache-files-dir）",
+      "php-quality.yml と test.yml の統合検討",
+      "実行時間削減 30-40% 達成",
+      "実行頻度削減 60-70% 達成（paths設定による）",
+      "API契約整合性の早期検出（バックエンドAPI変更時のフロントエンドテスト実行）"
+    ],
+    "project_structure": [
+      ".github/workflows/frontend-test.yml",
+      ".github/workflows/php-quality.yml",
+      ".github/workflows/test.yml",
+      ".github/workflows/e2e-tests.yml",
+      "backend/laravel-api/app/Http/Controllers/Api/**",
+      "backend/laravel-api/app/Http/Resources/**",
+      "backend/laravel-api/routes/api.php",
+      "backend/laravel-api/app/Models/**",
+      "frontend/**",
+      "e2e/**",
+      "test-utils/**"
+    ],
+    "services": {
+      "GitHub Actions": {
+        "workflows": ["frontend-test", "php-quality", "test", "e2e-tests"]
+      }
+    },
+    "todo_items": [
+      "frontend-test.yml に concurrency 設定追加",
+      "php-quality.yml に concurrency 設定追加",
+      "test.yml に concurrency 設定追加",
+      "frontend-test.yml に paths 設定追加（API契約関連ファイル含む）",
+      "php-quality.yml に paths 設定追加",
+      "test.yml に paths 設定追加",
+      "e2e-tests.yml の paths 設定拡張",
+      "全ワークフローに pull_request.types 追加",
+      "frontend-test.yml のキャッシュ設定統一",
+      "php-quality.yml のキャッシュ設定統一",
+      "test.yml のキャッシュ設定統一",
+      "統合ワークフロー作成（backend-quality-tests.yml）検討",
+      "動作確認（Concurrency、Paths、API契約変更テスト）",
+      "ブランチプロテクション設定確認",
+      "ドキュメント更新（README.md、.kiro/docs/）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}
