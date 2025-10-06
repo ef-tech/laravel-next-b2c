@@ -1,9 +1,9 @@
 {
   "feature_name": "laravel-ddd-clean-architecture-solid",
   "created_at": "2025-10-06T00:00:00Z",
-  "updated_at": "2025-10-06T14:36:37Z",
+  "updated_at": "2025-10-06T14:42:55Z",
   "language": "ja",
-  "phase": "design-generated",
+  "phase": "tasks-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 69,
@@ -70,12 +70,12 @@
     },
     "design": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "tasks": {
-      "generated": false,
+      "generated": true,
       "approved": false
     }
   },
-  "ready_for_implementation": false
+  "ready_for_implementation": true
 }
