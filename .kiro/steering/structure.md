@@ -132,8 +132,10 @@ laravel-next-b2c/
 │   ├── router.ts        # Next.js Router モック設定
 │   └── env.ts           # 環境変数モック
 ├── coverage/            # 統合カバレッジレポート
-├── .husky/              # Gitフック自動化
-│   └── pre-commit       # コミット前にlint-staged実行
+├── .husky/              # Gitフック自動化 (husky v9推奨方法: 直接フック配置)
+│   ├── pre-commit       # コミット前にlint-staged実行
+│   ├── pre-push         # プッシュ前にcomposer quality実行
+│   └── _/               # レガシーフック（非推奨、互換性のため残存）
 └── node_modules/        # 共通devDependencies
     ├── eslint           # ESLint 9
     ├── prettier         # Prettier 3

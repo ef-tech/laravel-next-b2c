@@ -30,7 +30,7 @@
 
 ### コード品質管理 (モノレポ統一設定)
 - **共通設定**: ルート`package.json`でワークスペース全体を管理
-- **husky**: ^9 (Gitフック管理、pre-commit自動実行)
+- **husky**: ^9.1.7 (Gitフック管理、`.husky/`直下にフック直接配置する推奨方法に移行済み)
 - **lint-staged**: ^15 (ステージされたファイルのみlint/format実行)
 - **設定ファイル**: 各アプリに`eslint.config.mjs`（ESLint 9対応flat config）
 
@@ -119,9 +119,11 @@ parameters:
         - tests
 ```
 
-#### Git Hooks自動化 (backend/.husky/)
-- **Pre-commit**: lint-staged実行 (変更PHPファイルのみPint自動フォーマット)
-- **Pre-push**: `composer quality`実行 (Pint + Larastan全体チェック)
+#### Git Hooks自動化 (.husky/)
+- **設定場所**: ルート`.husky/`ディレクトリ（Husky v9推奨方法: 直接フック配置）
+- **Pre-commit** (`.husky/pre-commit`): lint-staged実行 (変更PHPファイルのみPint自動フォーマット、変更TSXファイルはESLint + Prettier)
+- **Pre-push** (`.husky/pre-push`): `composer quality`実行 (Pint + Larastan全体チェック)
+- **非推奨警告解消済み**: `.husky/_/`内の自動生成フックから`.husky/`直下の推奨方法に完全移行
 
 #### CI/CD統合 (GitHub Actions v4) - 発火タイミング最適化済み
 
