@@ -11,6 +11,7 @@ final readonly class LaravelTransactionManager implements TransactionManager
 {
     public function run(callable $callback): mixed
     {
+        /** @phpstan-ignore argument.type, argument.templateType */
         return DB::transaction($callback);
     }
 }
