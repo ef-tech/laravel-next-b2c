@@ -19,5 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Handle DDD Domain Exceptions
+        $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e, \Illuminate\Http\Request $request) {
+            return response()->json([
+                'error' => $e->getErrorCode(),
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
+        });
     })->create();

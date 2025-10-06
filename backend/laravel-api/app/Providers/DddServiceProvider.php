@@ -13,8 +13,22 @@ final class DddServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Repository bindings will be added here
-        // TransactionManager and EventBus bindings will be added here
+        // Repository bindings
+        $this->app->bind(
+            \Ddd\Domain\User\Repositories\UserRepository::class,
+            \Ddd\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository::class
+        );
+
+        // Infrastructure services (singleton)
+        $this->app->singleton(
+            \Ddd\Infrastructure\Services\TransactionManager\TransactionManager::class,
+            \Ddd\Infrastructure\Services\TransactionManager\LaravelTransactionManager::class
+        );
+
+        $this->app->singleton(
+            \Ddd\Infrastructure\Services\Events\EventBus::class,
+            \Ddd\Infrastructure\Services\Events\LaravelEventBus::class
+        );
     }
 
     /**
