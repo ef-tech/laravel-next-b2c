@@ -1,1 +1,0 @@
-Test file for Husky v10 pre-commit hook validation
