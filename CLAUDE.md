@@ -27,6 +27,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `nextjs-app-dockerfile` - Next.js Dockerfile作成とDocker Compose統合（開発環境Docker化・E2E Docker実行対応）
 - `e2e-cicd-execution-verification` - E2E CI/CD実行確認（GitHub Actions ワークフロー有効化）
 - `github-actions-trigger-optimization` - GitHub Actions発火タイミング最適化（concurrency/paths設定・API契約監視・実行時間削減）
+- `husky-v10-pre-commit-deprecation` - Husky v10対応（pre-commitフック非推奨警告修正）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

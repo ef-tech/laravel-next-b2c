@@ -1,0 +1,53 @@
+{
+  "feature_name": "husky-v10-pre-commit-deprecation",
+  "created_at": "2025-10-06T00:00:00Z",
+  "updated_at": "2025-10-06T09:55:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 65,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/65",
+    "title": "Husky v10対応: pre-commit フックの非推奨警告修正",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": [],
+      "frontend": [],
+      "infrastructure": [],
+      "tools": ["Husky", "Git"]
+    },
+    "requirements_hints": [
+      "`.husky/pre-commit` ファイルから非推奨の2行を削除",
+      "Husky v9で非推奨になった古い形式の削除",
+      "Husky v10で動作しなくなる予定のコード修正"
+    ],
+    "project_structure": [
+      ".husky/pre-commit"
+    ],
+    "services": {},
+    "todo_items": [
+      "`.husky/pre-commit` から `#!/usr/bin/env sh` を削除",
+      "`.husky/pre-commit` から `. \"$(dirname -- \"$0\")/_/husky.sh\"` を削除",
+      "削除後の動作確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
