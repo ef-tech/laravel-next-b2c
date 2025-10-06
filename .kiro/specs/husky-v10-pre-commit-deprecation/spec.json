@@ -1,9 +1,9 @@
 {
   "feature_name": "husky-v10-pre-commit-deprecation",
   "created_at": "2025-10-06T00:00:00Z",
-  "updated_at": "2025-10-06T09:55:00Z",
+  "updated_at": "2025-10-06T10:00:00Z",
   "language": "ja",
-  "phase": "requirements-generated",
+  "phase": "design-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 65,
@@ -38,10 +38,10 @@
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
+      "generated": true,
       "approved": false
     },
     "tasks": {
