@@ -10,9 +10,11 @@ laravel-next-b2c/
 │   └── user-app/        # エンドユーザー向けアプリケーション
 ├── e2e/                 # E2Eテスト環境 (Playwright)
 ├── .github/             # GitHub設定
-│   └── workflows/       # GitHub Actionsワークフロー (CI/CD)
-│       ├── e2e-tests.yml           # E2Eテスト自動実行（PR時・main push時）
-│       └── php-quality-check.yml   # PHP品質チェック（PR時）
+│   └── workflows/       # GitHub Actionsワークフロー (CI/CD) - 発火タイミング最適化済み
+│       ├── e2e-tests.yml          # E2Eテスト（4 Shard並列、Concurrency + Paths最適化）
+│       ├── frontend-test.yml      # フロントエンドテスト（API契約監視含む）
+│       ├── php-quality.yml        # PHP品質チェック（Pint + Larastan）
+│       └── test.yml               # PHPテスト（Pest 4、Composerキャッシュ最適化）
 ├── .claude/             # Claude Code設定・コマンド
 ├── .kiro/               # Kiro仕様駆動開発設定
 ├── .husky/              # Gitフック管理 (husky設定)

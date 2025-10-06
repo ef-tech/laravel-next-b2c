@@ -123,22 +123,60 @@ parameters:
 - **Pre-commit**: lint-staged実行 (変更PHPファイルのみPint自動フォーマット)
 - **Pre-push**: `composer quality`実行 (Pint + Larastan全体チェック)
 
-#### CI/CD統合 (GitHub Actions v4)
-- **PHP品質チェックワークフロー**: `.github/workflows/php-quality-check.yml`
-  - **自動実行**: Pull Request時に品質チェック
-  - **チェック内容**: Pint検証 + Larastan Level 8静的解析 + Pest テスト実行
-  - **Actionsバージョン**: v4 (最新版)
-- **E2Eテストワークフロー**: `.github/workflows/e2e-tests.yml`
-  - **自動実行**: Pull Request時（frontend/**, backend/**, e2e/** 変更時）、mainブランチpush時、手動実行
-  - **実行方式**: 4 Shard並列実行（Matrix戦略）、約2分完了
-  - **タイムアウト**: 20分（最適化済み、旧60分）
-  - **パフォーマンス最適化**:
-    - Composerキャッシング（`actions/cache@v4`）
-    - 並列実行制御（`concurrency`設定でPR重複実行キャンセル）
-    - pathsフィルター（影響範囲のみ実行）
-  - **実行環境**: Docker開発モード起動（ビルド不要、高速化）
-  - **レポート**: Playwright HTML/JUnitレポート、失敗時のスクリーンショット・トレース
-  - **Artifacts**: 各Shardごとのテストレポート保存
+#### CI/CD統合 (GitHub Actions v4) - 発火タイミング最適化済み
+
+**共通最適化機能**:
+- **Concurrency設定**: PR内の連続コミットで古い実行を自動キャンセル（リソース効率化）
+- **Paths Filter**: 関連ファイル変更時のみワークフロー実行（実行頻度60-70%削減）
+- **Pull Request Types明示**: 必要なイベントのみ実行（opened, synchronize, reopened, ready_for_review）
+- **キャッシング統一化**: Node.js（setup-node内蔵）、Composer（cache-files-dir）でヒット率80%以上
+
+**ワークフロー一覧**:
+
+1. **PHP品質チェック** (`.github/workflows/php-quality.yml`)
+   - **担当領域**: `backend/laravel-api/**`
+   - **自動実行**: Pull Request時（バックエンド変更時のみ）
+   - **チェック内容**: Pint検証 + Larastan Level 8静的解析
+   - **Concurrency**: `${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}`
+
+2. **PHPテスト** (`.github/workflows/test.yml`)
+   - **担当領域**: `backend/laravel-api/**`
+   - **自動実行**: Pull Request時（バックエンド変更時のみ）
+   - **テスト内容**: Pest 4テストスイート実行
+   - **キャッシング**: Composer cache-files-dir方式（最適化済み）
+
+3. **フロントエンドテスト** (`.github/workflows/frontend-test.yml`)
+   - **担当領域**: `frontend/**`, `test-utils/**` + **API契約監視**
+   - **API契約監視パス**:
+     - `backend/laravel-api/app/Http/Controllers/Api/**`
+     - `backend/laravel-api/app/Http/Resources/**`
+     - `backend/laravel-api/routes/api.php`
+   - **自動実行**: フロントエンド変更時 **または** API契約変更時
+   - **テスト内容**: Jest 29 + Testing Library 16（カバレッジ94.73%）
+   - **API契約整合性検証**: APIレスポンス形式変更を早期検出
+
+4. **E2Eテスト** (`.github/workflows/e2e-tests.yml`)
+   - **担当領域**: `frontend/**`, `backend/**`, `e2e/**`
+   - **自動実行**: Pull Request時、mainブランチpush時、手動実行
+   - **実行方式**: 4 Shard並列実行（Matrix戦略）、約2分完了
+   - **タイムアウト**: 20分（最適化済み、旧60分）
+   - **パフォーマンス最適化**:
+     - Composerキャッシング（`actions/cache@v4`）
+     - Concurrency設定（PR重複実行キャンセル）
+     - Paths Filter（影響範囲のみ実行）
+   - **実行環境**: Docker開発モード起動（ビルド不要、高速化）
+   - **レポート**: Playwright HTML/JUnitレポート、失敗時のスクリーンショット・トレース
+   - **Artifacts**: 各Shardごとのテストレポート保存
+
+**ワークフロー実行条件マトリクス**:
+| 変更内容 | frontend-test | php-quality | test | e2e-tests |
+|---------|--------------|-------------|------|-----------|
+| フロントエンドのみ | ✅ | ❌ | ❌ | ✅ |
+| バックエンドのみ | ❌ | ✅ | ✅ | ✅ |
+| API Controllers変更 | ✅ | ✅ | ✅ | ✅ |
+| API Resources変更 | ✅ | ✅ | ✅ | ✅ |
+| E2Eテストのみ | ❌ | ❌ | ❌ | ✅ |
+| README更新のみ | ❌ | ❌ | ❌ | ❌ |
 
 ### 📝 最適化ドキュメント体系
 **`backend/laravel-api/docs/` に包括的ドキュメントを格納**:
