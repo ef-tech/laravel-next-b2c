@@ -6,15 +6,15 @@ Docker Compose環境におけるNext.jsアプリケーション（Admin App / Us
 
 ## 実装タスク
 
-- [ ] 1. Admin Appヘルスチェックエンドポイント実装
-- [ ] 1.1 Admin Appヘルスチェック用API Routeファイル作成
+- [x] 1. Admin Appヘルスチェックエンドポイント実装
+- [x] 1.1 Admin Appヘルスチェック用API Routeファイル作成
   - Next.js App Router規約に従い、ヘルスチェック専用エンドポイントディレクトリを作成
   - GETリクエストハンドラを実装し、HTTPステータス200と固定JSONレスポンスを返す機能を追加
   - エンドポイントがステートレスで外部依存なしで動作することを保証
   - レスポンス形式を `{"status": "ok"}` に統一
   - _Requirements: 1.1, 1.2_
 
-- [ ] 1.2 Admin Appヘルスチェックエンドポイント単体テスト作成
+- [x] 1.2 Admin Appヘルスチェックエンドポイント単体テスト作成
   - Jestテストファイルを作成し、ヘルスチェックエンドポイントの動作を検証
   - HTTPステータス200応答を確認するテストケース実装
   - レスポンスボディが期待される形式であることを確認するテストケース実装
@@ -22,22 +22,22 @@ Docker Compose環境におけるNext.jsアプリケーション（Admin App / Us
   - 冪等性（何度実行しても同じ結果）を確認するテストケース実装
   - _Requirements: 1.1, 1.2_
 
-- [ ] 2. User Appヘルスチェックエンドポイント実装
-- [ ] 2.1 User Appヘルスチェック用API Routeファイル作成
+- [x] 2. User Appヘルスチェックエンドポイント実装
+- [x] 2.1 User Appヘルスチェック用API Routeファイル作成
   - Admin Appと同様の構造でヘルスチェックエンドポイントを作成
   - GETリクエストハンドラを実装し、Admin Appと同一のレスポンス形式を返す
   - エンドポイントがステートレスで外部依存なしで動作することを保証
   - _Requirements: 2.1, 2.2_
 
-- [ ] 2.2 User Appヘルスチェックエンドポイント単体テスト作成
+- [x] 2.2 User Appヘルスチェックエンドポイント単体テスト作成
   - Admin Appと同様のテストスイートを作成
   - HTTPステータス200応答を確認するテストケース実装
   - レスポンスボディ検証テストケース実装
   - 認証不要アクセス検証と冪等性確認テストケース実装
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3. Admin App Dockerfileヘルスチェック設定追加
-- [ ] 3.1 Admin App DockerfileにHEALTHCHECKディレクティブ追加
+- [x] 3. Admin App Dockerfileヘルスチェック設定追加
+- [x] 3.1 Admin App DockerfileにHEALTHCHECKディレクティブ追加
   - runnerステージにHEALTHCHECKディレクティブを追加
   - wgetコマンドを使用したヘルスチェックコマンドを設定（--spider, --no-verbose, --tries=1オプション使用）
   - ヘルスチェック間隔を10秒、タイムアウトを3秒、起動猶予期間を30秒、リトライ回数を3回に設定
@@ -45,8 +45,8 @@ Docker Compose環境におけるNext.jsアプリケーション（Admin App / Us
   - 失敗時に終了コード1を返すエラーハンドリング追加
   - _Requirements: 1.3, 1.4, 1.5, 1.6, 1.7, 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 4. User App Dockerfileヘルスチェック設定追加
-- [ ] 4.1 User App DockerfileにHEALTHCHECKディレクティブ追加
+- [x] 4. User App Dockerfileヘルスチェック設定追加
+- [x] 4.1 User App DockerfileにHEALTHCHECKディレクティブ追加
   - Admin Appと同様にrunnerステージにHEALTHCHECKディレクティブを追加
   - wgetコマンドを使用したヘルスチェックコマンドを設定（同一オプション構成）
   - ヘルスチェックパラメータをAdmin Appと同一に設定（間隔、タイムアウト、猶予期間、リトライ）
@@ -54,8 +54,8 @@ Docker Compose環境におけるNext.jsアプリケーション（Admin App / Us
   - 失敗時のエラーハンドリング追加
   - _Requirements: 2.3, 2.4, 2.5, 2.6, 2.7, 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 5. Docker Composeサービス依存関係最適化
-- [ ] 5.1 docker-compose.ymlのe2e-testsサービス定義更新
+- [x] 5. Docker Composeサービス依存関係最適化
+- [x] 5.1 docker-compose.ymlのe2e-testsサービス定義更新
   - E2Eテストサービスの `depends_on` 設定を拡張
   - Admin Appに対して `condition: service_healthy` を指定
   - User Appに対して `condition: service_healthy` を指定
