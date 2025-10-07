@@ -65,6 +65,21 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4]
 
+    services:
+      pgsql:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sail
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testing
+        ports:
+          - 13432:5432
+        options: >-
+          --health-cmd "pg_isready -U sail"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -73,7 +88,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, pdo, pdo_sqlite, zip
+          extensions: mbstring, pdo, pdo_pgsql, zip
           coverage: none
 
       - name: Cache Composer dependencies
@@ -100,9 +115,15 @@ jobs:
           cp .env.example .env
           composer install --no-interaction --prefer-dist --optimize-autoloader
           php artisan key:generate
-          touch database/database.sqlite
           php artisan migrate --force
           php artisan db:seed --force
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 13432
+          DB_DATABASE: testing
+          DB_USERNAME: sail
+          DB_PASSWORD: password
 
       - name: Install frontend dependencies
         run: |
@@ -113,7 +134,7 @@ jobs:
         run: |
           # Start Laravel API (ポート13000)
           cd backend/laravel-api
-          php artisan serve --host=0.0.0.0 --port=13000 &
+          DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password php artisan serve --host=0.0.0.0 --port=13000 &
 
           # Start Admin App (ポート13002 - 開発モード)
           cd ../../frontend/admin-app

@@ -139,3 +139,65 @@ jobs:
           name: test-results-shard-${{ matrix.shard }}
           path: backend/laravel-api/storage/logs/
           retention-days: 7
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite3
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        working-directory: backend/laravel-api
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/laravel-api/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: backend/laravel-api
+
+      - name: Copy .env
+        run: cp .env.example .env
+        working-directory: backend/laravel-api
+
+      - name: Generate application key
+        run: php artisan key:generate
+        working-directory: backend/laravel-api
+
+      - name: Run Tests with Coverage
+        run: XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
+        working-directory: backend/laravel-api
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+
+      - name: Generate Coverage Report
+        run: XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --coverage-html=coverage-report
+        working-directory: backend/laravel-api
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend/laravel-api/coverage-report/
+          retention-days: 30

@@ -1,0 +1,102 @@
+{
+  "feature_name": "laravel-ddd-clean-architecture-solid",
+  "created_at": "2025-10-06T00:00:00Z",
+  "updated_at": "2025-10-06T14:42:55Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 69,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/69",
+    "title": "Laravel に DDD/クリーンアーキテクチャ /SOLIDを導入する",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": ["Laravel 12", "PHP 8.4", "Eloquent ORM"],
+      "testing": ["Pest 4", "PHPStan Level 8", "Laravel Pint"],
+      "infrastructure": ["DI Container", "ServiceProvider", "Sanctum", "Queue", "Cache"],
+      "tools": ["composer", "artisan"]
+    },
+    "requirements_hints": [
+      "ddd/ディレクトリ配下の4層構造確立（Domain/Application/Infrastructure/Shared）",
+      "Repository Pattern実装（Interface定義とEloquent実装分離）",
+      "ValueObject/Entity/Aggregate Root実装",
+      "UseCase層によるトランザクション境界管理",
+      "Mapper戦略（Eloquent ↔ Domain Entity変換）",
+      "ServiceProvider設定（DI Container バインディング）",
+      "各層のテスト戦略確立（Unit/Feature/Architecture Tests）",
+      "既存コードの段階的移行戦略",
+      "開発ガイドライン・コーディング規約ドキュメント",
+      "Eloquent Modelsは app/Models/ に配置（artisan make:model標準位置維持）",
+      "DDD層でDomain Entityは ddd/Domain/ に配置（Eloquentとは別物）"
+    ],
+    "project_structure": [
+      "backend/laravel-api/app/Models/",
+      "backend/laravel-api/app/Http/Controllers/",
+      "backend/laravel-api/app/Providers/",
+      "backend/laravel-api/ddd/Domain/",
+      "backend/laravel-api/ddd/Application/",
+      "backend/laravel-api/ddd/Infrastructure/",
+      "backend/laravel-api/ddd/Shared/",
+      "tests/Unit/Ddd/Domain/",
+      "tests/Feature/Ddd/Application/",
+      "tests/Architecture/"
+    ],
+    "services": {
+      "laravel_api": {
+        "layers": ["Domain", "Application", "Infrastructure", "Shared"],
+        "testing_frameworks": ["Pest 4", "PHPStan", "Laravel Pint"]
+      }
+    },
+    "todo_items": [
+      "Phase 1: プロジェクト基盤構築（ディレクトリ構造作成、composer.json PSR-4設定、DddServiceProvider作成）",
+      "Phase 2: Domain層実装（ValueObjects、Entity/Aggregate Root、Repository Interface、Domain Services、Domain Events）",
+      "Phase 3: Infrastructure層実装（Eloquent Models、Mapper、Repository実装、TransactionManager、EventBus、DI バインディング）",
+      "Phase 4: Application層実装（DTO、UseCase、Queries、Application Exceptions）",
+      "Phase 5: Interface Adapters実装（Controller更新、Request Validation、Response変換、Exception Handler更新）",
+      "Phase 6: テスト実装（Domain Unit Tests、Application Feature Tests、Infrastructure Integration Tests、Architecture Tests、カバレッジ85%以上達成）",
+      "Phase 7: CI/CD統合（GitHub Actions更新、Architecture Tests追加、PHPStan Level 8、カバレッジレポート統合）",
+      "Phase 8: ドキュメント整備（アーキテクチャ概要、ドメインルール、開発ガイドライン、テスト戦略、トラブルシューティング）",
+      "Phase 9: 既存コード移行（移行対象API選定、1機能ずつ移行、リグレッションテスト、パフォーマンステスト、段階的リリース）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true,
+  "implementation": {
+    "started_at": "2025-10-06T14:42:55Z",
+    "completed_at": "2025-10-07T00:00:00Z",
+    "phases_completed": [
+      "Phase 1: プロジェクト基盤構築",
+      "Phase 2: Domain層実装（User集約）",
+      "Phase 3: Infrastructure層実装",
+      "Phase 4: Application層実装",
+      "Phase 5: HTTP層実装（Interface Adapters）",
+      "Phase 6: テスト実装",
+      "Phase 7: CI/CD統合",
+      "Phase 8: ドキュメント整備"
+    ],
+    "achievements": {
+      "test_coverage": "96.1%",
+      "total_tests": 47,
+      "documentation_lines": 2564,
+      "architecture_tests": "passed",
+      "phpstan_level": 8
+    }
+  }
+}
