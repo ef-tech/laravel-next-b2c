@@ -7,7 +7,7 @@ PostgreSQL 17接続設定の最適化を、既存のLaravel 12データベース
 ---
 
 - [ ] 1. PostgreSQL接続設定の最適化実装
-- [ ] 1.1 データベース接続設定の拡張
+- [x] 1.1 データベース接続設定の拡張
   - 既存のPostgreSQL接続設定にタイムアウトパラメータを追加
   - アプリケーション名の設定を追加（接続追跡用）
   - PostgreSQL GUC設定（statement_timeout、idle_in_transaction_session_timeout、lock_timeout）を環境変数経由で適用
@@ -15,7 +15,7 @@ PostgreSQL 17接続設定の最適化を、既存のLaravel 12データベース
   - 環境変数のデフォルト値フォールバックを実装
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6_
 
-- [ ] 1.2 接続設定の検証とテスト
+- [x] 1.2 接続設定の検証とテスト
   - 設定値読み込みの単体テストを作成
   - GUC設定文字列生成の単体テストを作成
   - PDO属性設定の単体テストを作成
