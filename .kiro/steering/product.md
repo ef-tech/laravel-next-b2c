@@ -11,18 +11,19 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 
 ## 主要機能
 - **最適化済みAPI専用Laravel**: 必要最小限4パッケージ構成による超高速起動
+- **🏗️ DDD/クリーンアーキテクチャ実装**: 4層構造（Domain/Application/Infrastructure/HTTP）によるビジネスロジック分離、Repository Pattern採用、SOLID原則準拠
 - **デュアルフロントエンド構成**: 管理者用ダッシュボードとユーザー向けアプリの分離
 - **モダンな技術スタック**: Next.js 15.5 + React 19 + Laravel 12 + TypeScript
 - **完全なDocker環境**: Docker Compose統合による全サービス一括起動（5分セットアップ）
 - **ステートレスAPI設計**: Laravel Sanctumトークン認証による水平スケーリング対応
-- **モダンテストフレームワーク**: Pest 4による包括的テストスイート（12+テストケース）
+- **モダンテストフレームワーク**: Pest 4による包括的テストスイート（96.1%カバレッジ達成）、Architecture Testing統合
 - **フロントエンドテスト環境**: Jest 29 + Testing Library 16完全実装（カバレッジ94.73%達成）
 - **E2Eテスト環境**: Playwright 1.47.2 + Docker実行対応、Laravel Sanctum認証統合、Page Object Modelパターン採用
 - **E2E CI/CD自動実行**: GitHub Actions統合完了、Pull Request時の自動E2Eテスト実行（4 Shard並列実行、約2分完了）
 - **CI/CDパフォーマンス最適化**: Composerキャッシング、並列実行（concurrency設定）、タイムアウト最適化（60分→20分）
 - **GitHub Actions発火最適化**: Concurrency設定による重複実行削減、Paths設定による担当領域明確化、API契約監視による整合性検証、実行頻度60-70%削減
 - **固定ポート設定**: 開発環境ポート統一（User App: 13001、Admin App: 13002、API: 13000）による複数プロジェクト並行開発対応
-- **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備
+- **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備、DDDアーキテクチャガイド・開発ガイド・テスト戦略ドキュメント統合
 - **開発者エクスペリエンス**: Turbopack、Tailwind CSS v4、ESLintの統合開発環境
 - **モノレポ統一コード品質管理**: ESLint 9 + Prettier設定、husky + lint-staged導入による自動品質チェック
 - **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Pest 4 + Git Hooks + CI/CD統合による包括的コード品質保証
@@ -50,12 +51,18 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 
 ## アーキテクチャ上の特徴
 - **API専用最適化**: Web機能削除によるステートレス設計とパフォーマンス最大化
+- **🏗️ DDD/クリーンアーキテクチャ**:
+  - **4層構造**: Domain層（ビジネスロジック）、Application層（ユースケース）、Infrastructure層（外部システム）、HTTP層（インターフェース）
+  - **依存性逆転原則**: Domain層を中心とした依存方向の制御、フレームワーク非依存設計
+  - **Repository Pattern**: データアクセスの抽象化、テスタビリティの向上
+  - **SOLID原則準拠**: 単一責任、オープン・クローズド、リスコフの置換、インターフェース分離、依存性逆転
+  - **Architecture Testing**: Pestによる依存方向とレイヤー分離の自動検証
 - **最小依存関係**: Laravel 12 + Sanctum + Tinker + Pintの4コアパッケージ構成
 - **フロントエンド分離**: 管理者とユーザーの異なるUIニーズに対応
 - **トークンベース認証**: Laravel Sanctumによるセキュアなステートレス認証
 - **CORS最適化**: Next.js フロントエンドとの完全統合設定
-- **モジュラー構成**: 各コンポーネントの独立開発・デプロイ可能
-- **包括的最適化ドキュメント**: `backend/laravel-api/docs/`に移行ガイド完備
+- **モジュラー構成**: 各コンポーネントの独立開発・デプロイ可能、既存MVCとDDD層の共存戦略
+- **包括的最適化ドキュメント**: `backend/laravel-api/docs/`に移行ガイド・DDDアーキテクチャガイド完備
 - **開発環境統一**: Docker Compose統合による全サービス一括起動・一貫した環境構築
 - **固定ポート設計**: 13000番台統一によるポート競合回避、複数プロジェクト同時実行対応
 - **Next.js最適化構成**: outputFileTracingRoot設定によるDocker Standalone最適化

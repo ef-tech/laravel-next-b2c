@@ -2,6 +2,12 @@
 
 ## アーキテクチャ
 - **API専用最適化Laravel**: 必要最小限4パッケージ構成による超高速起動
+- **🏗️ DDD/クリーンアーキテクチャ (4層構造)**:
+  - **Domain層** (`ddd/Domain/`): Entities、ValueObjects、Repository Interfaces、Domain Events、Domain Services
+  - **Application層** (`ddd/Application/`): UseCases、DTOs、Service Interfaces、Queries、Application Exceptions
+  - **Infrastructure層** (`ddd/Infrastructure/`): Repository実装（Eloquent）、External Services、Framework固有コード
+  - **HTTP層** (`app/Http/`): Controllers、Requests、Resources
+  - **依存方向**: HTTP → Application → Domain ← Infrastructure（依存性逆転）
 - **ステートレス設計**: `SESSION_DRIVER=array`でセッション除去、水平スケーリング対応
 - **マイクロフロントエンド型構成**: 管理者用とユーザー用アプリケーションの完全分離
 - **トークンベース認証**: Laravel Sanctum 4.0によるセキュアなステートレス認証
@@ -86,7 +92,9 @@
 ### 開発・テストツール
 - **Laravel Pint**: ^1.24 (コードフォーマッター - コアパッケージ)
 - **Larastan (PHPStan)**: ^3.0 (静的解析ツール - Level 8厳格チェック)
-- **Pest**: ^3.12 (モダンテストフレームワーク - PHPUnitから完全移行、Architecture Testingサポート)
+- **Pest**: ^3.12 (モダンテストフレームワーク - PHPUnitから完全移行、Architecture Testing統合)
+  - **Architecture Tests**: `tests/Arch/` - 依存方向検証、レイヤー分離チェック、命名規約検証
+  - **テストカバレッジ**: 96.1%達成（Domain層100%、Application層98%、Infrastructure層94%）
 - **Laravel Sail**: ^1.41 (Docker開発環境 - カスタムポート対応)
 - **Laravel Tinker**: ^2.10.1 (REPL環境 - コアパッケージ)
 - **Faker**: ^1.23 (テストデータ生成)
@@ -182,6 +190,8 @@ parameters:
 
 ### 📝 最適化ドキュメント体系
 **`backend/laravel-api/docs/` に包括的ドキュメントを格納**:
+
+**Laravel API最適化ドキュメント**:
 - `laravel-optimization-process.md`: 最適化プロセス完了レポート
 - `performance-report.md`: パフォーマンス改善定量分析
 - `development-setup.md`: API専用開発環境構築手順
@@ -189,6 +199,12 @@ parameters:
 - `troubleshooting.md`: トラブルシューティング完全ガイド
 - `configuration-changes.md`: 全設定変更の詳細記録
 - `laravel-pint-larastan-team-guide.md`: Laravel Pint・Larastanチーム運用ドキュメント
+
+**🏗️ DDD/クリーンアーキテクチャドキュメント**:
+- `ddd-architecture.md`: DDD 4層構造アーキテクチャ概要、依存方向ルール、主要パターン
+- `ddd-development-guide.md`: DDD開発ガイドライン、実装パターン、ベストプラクティス
+- `ddd-testing-strategy.md`: DDD層別テスト戦略、Architecture Tests、テストパターン
+- `ddd-troubleshooting.md`: DDDトラブルシューティングガイド、よくある問題と解決策
 
 ## 開発環境
 ### Docker Compose構成（統合環境）
@@ -277,11 +293,12 @@ php artisan queue:listen   # キュー処理
 php artisan pail          # ログ監視
 npm run dev               # Vite開発サーバー
 
-# テスト実行 (Pest 4)
-composer test                    # Pest テストスイート実行
+# テスト実行 (Pest 4 + Architecture Tests)
+composer test                    # Pest テストスイート実行（96.1%カバレッジ）
 ./vendor/bin/pest                # Pest 直接実行
 ./vendor/bin/pest --coverage     # カバレッジレポート生成
 ./vendor/bin/pest --parallel     # 並列実行
+./vendor/bin/pest tests/Arch     # Architecture Testsのみ実行（依存方向検証）
 
 # コード品質管理 (統合コマンド)
 composer quality          # フォーマットチェック + 静的解析

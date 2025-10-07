@@ -31,14 +31,39 @@ laravel-next-b2c/
 ```
 
 ## バックエンド構造 (`backend/laravel-api/`)
-### Laravel標準構成
+### 🏗️ DDD/クリーンアーキテクチャ + Laravel標準構成
 ```
 laravel-api/
-├── app/                 # アプリケーションコア
+├── ddd/                 # 🏗️ DDD/クリーンアーキテクチャ層 (新規)
+│   ├── Domain/          # Domain層（ビジネスロジック中核）
+│   │   └── User/        # ユーザー集約
+│   │       ├── Entities/           # エンティティ（User.php）
+│   │       ├── ValueObjects/       # 値オブジェクト（Email.php, UserId.php）
+│   │       ├── Repositories/       # Repositoryインターフェース（UserRepositoryInterface.php）
+│   │       ├── Events/             # ドメインイベント（UserRegistered.php）
+│   │       ├── Services/           # ドメインサービス
+│   │       └── Exceptions/         # ドメイン例外
+│   ├── Application/     # Application層（ユースケース）
+│   │   └── User/        # ユーザーユースケース
+│   │       ├── UseCases/           # ユースケース（RegisterUserUseCase.php）
+│   │       ├── DTOs/               # データ転送オブジェクト（RegisterUserInput.php, RegisterUserOutput.php）
+│   │       ├── Services/           # アプリケーションサービスインターフェース（TransactionManager.php, EventBus.php）
+│   │       ├── Queries/            # クエリインターフェース（UserQueryInterface.php）
+│   │       └── Exceptions/         # アプリケーション例外
+│   └── Infrastructure/  # Infrastructure層（外部システム実装）
+│       └── Persistence/ # 永続化実装
+│           ├── Eloquent/           # Eloquent Repository実装（EloquentUserRepository.php）
+│           ├── Query/              # Query実装（EloquentUserQuery.php）
+│           └── Services/           # サービス実装（LaravelTransactionManager.php, LaravelEventBus.php）
+├── app/                 # Laravel標準アプリケーション層（既存MVC共存）
 │   ├── Console/         # Artisanコマンド
-│   ├── Http/            # HTTP層 (Controllers, Middleware, Requests)
-│   ├── Models/          # Eloquentモデル
-│   └── Providers/       # サービスプロバイダー
+│   ├── Http/            # 🏗️ HTTP層（DDD統合）
+│   │   ├── Controllers/ # Controllerからユースケース呼び出し
+│   │   ├── Middleware/  # ミドルウェア
+│   │   ├── Requests/    # リクエストバリデーション
+│   │   └── Resources/   # APIリソース
+│   ├── Models/          # Eloquentモデル（Infrastructure層で使用）
+│   └── Providers/       # サービスプロバイダー（DI設定含む）
 ├── bootstrap/           # アプリケーション初期化
 ├── config/              # 設定ファイル
 ├── database/            # データベース関連
@@ -46,7 +71,12 @@ laravel-api/
 │   ├── migrations/      # マイグレーション
 │   └── seeders/         # シーダー
 ├── docker/              # Docker設定 (PHP 8.0-8.4対応)
-├── docs/                # プロジェクトドキュメント (最適化ガイド、運用手順)
+├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド）
+│   ├── ddd-architecture.md        # DDD 4層構造アーキテクチャ概要
+│   ├── ddd-development-guide.md   # DDD開発ガイドライン
+│   ├── ddd-testing-strategy.md    # DDD層別テスト戦略
+│   ├── ddd-troubleshooting.md     # DDDトラブルシューティング
+│   └── [その他最適化ドキュメント]
 ├── public/              # 公開ディレクトリ (エントリーポイント)
 ├── resources/           # リソースファイル
 │   ├── css/             # スタイルシート
@@ -57,10 +87,14 @@ laravel-api/
 │   ├── web.php          # Web画面ルート
 │   └── console.php      # コンソールルート
 ├── storage/             # ストレージ (ログ、キャッシュ、アップロード)
-├── tests/               # テストスイート (Pest 4)
-│   ├── Feature/         # 機能テスト
-│   ├── Unit/            # ユニットテスト
-│   ├── Arch/            # アーキテクチャテスト
+├── tests/               # 🏗️ テストスイート (Pest 4 + Architecture Tests: 96.1%カバレッジ)
+│   ├── Feature/         # 機能テスト（HTTP層統合テスト）
+│   ├── Unit/            # ユニットテスト（ドメインロジックテスト）
+│   ├── Arch/            # 🏗️ Architecture Tests（依存方向検証、レイヤー分離チェック）
+│   │   ├── DomainLayerTest.php         # Domain層依存チェック
+│   │   ├── ApplicationLayerTest.php    # Application層依存チェック
+│   │   ├── InfrastructureLayerTest.php # Infrastructure層実装チェック
+│   │   └── NamingConventionTest.php    # 命名規約検証
 │   ├── Pest.php         # Pest設定・ヘルパー
 │   └── TestCase.php     # 基底テストクラス
 ├── vendor/              # Composer依存関係
@@ -208,13 +242,45 @@ GitHub Actions (.github/workflows/e2e-tests.yml):
 - **定数**: SCREAMING_SNAKE_CASE (`API_BASE_URL`)
 - **型定義**: PascalCase (`UserInterface`, `ApiResponse`)
 
+**🏗️ DDD固有命名規約**:
+- **Entity**: PascalCase + `Entity`なし (`User.php`, not `UserEntity.php`)
+- **ValueObject**: PascalCase (`Email.php`, `UserId.php`)
+- **Repository Interface**: PascalCase + `RepositoryInterface` (`UserRepositoryInterface.php`)
+- **Repository実装**: `Eloquent` + 名前 + `Repository` (`EloquentUserRepository.php`)
+- **UseCase**: PascalCase + `UseCase` (`RegisterUserUseCase.php`)
+- **DTO**: 用途 + 名前 + `Input/Output` (`RegisterUserInput.php`, `RegisterUserOutput.php`)
+- **Domain Event**: 過去形 + `Event`なし (`UserRegistered.php`)
+- **Query Interface**: PascalCase + `QueryInterface` (`UserQueryInterface.php`)
+
 ### ファイル構成原則
-#### Laravel (バックエンド)
+#### 🏗️ Laravel DDD/クリーンアーキテクチャ (バックエンド)
+**4層構造の責務分離**:
+- **Domain層** (`ddd/Domain/`):
+  - 1集約1ディレクトリ（例: `ddd/Domain/User/`）
+  - Entities、ValueObjects、Repository Interfaces、Events、Services、Exceptionsをサブディレクトリで整理
+  - Laravelフレームワークに依存しない（Carbon除く）
+- **Application層** (`ddd/Application/`):
+  - 1集約1ディレクトリ（例: `ddd/Application/User/`）
+  - UseCases、DTOs、Service Interfaces、Queries、Exceptionsをサブディレクトリで整理
+  - Infrastructure層に依存しない（依存性逆転）
+- **Infrastructure層** (`ddd/Infrastructure/`):
+  - Repository実装、Query実装、Service実装をPersistence配下に配置
+  - Eloquent依存コードはここに集約
+- **HTTP層** (`app/Http/`):
+  - Controllers、Requests、Resources、Middlewareを配置
+  - Controllerはユースケース呼び出しのみ（薄いレイヤー）
+
+**依存方向ルール**:
+- HTTP → Application → Domain ← Infrastructure
+- Domain層は他の層に依存しない（中心層）
+- Infrastructure層はDomain/Application層のインターフェースを実装
+
+**既存Laravel標準構成**:
 - **1クラス1ファイル**: PSR-4標準準拠
 - **名前空間**: `App\` をルートとする階層構造
 - **Controller**: `App\Http\Controllers\` 配下
-- **Model**: `App\Models\` 配下
-- **Service**: `App\Services\` 配下 (ビジネスロジック分離)
+- **Model**: `App\Models\` 配下（Infrastructure層で使用）
+- **Service**: `App\Services\` 配下 (従来のビジネスロジック、段階的にDDD移行)
 - **Request**: `App\Http\Requests\` 配下 (バリデーション)
 
 #### Next.js (フロントエンド)
@@ -225,22 +291,48 @@ GitHub Actions (.github/workflows/e2e-tests.yml):
 - **型定義**: `types/` ディレクトリ、`.d.ts` 拡張子
 
 ## Import構成指針
-### バックエンド (Laravel API専用)
+### バックエンド (Laravel DDD + API専用)
 ```php
-// Laravel APIコア機能 (最小依存関係)
+// 🏗️ DDD層のインポート順序
+// 1. Domain層（最上位）
+use Ddd\Domain\User\Entities\User;
+use Ddd\Domain\User\ValueObjects\Email;
+use Ddd\Domain\User\ValueObjects\UserId;
+use Ddd\Domain\User\Repositories\UserRepositoryInterface;
+use Ddd\Domain\User\Events\UserRegistered;
+
+// 2. Application層（ユースケース）
+use Ddd\Application\User\UseCases\RegisterUserUseCase;
+use Ddd\Application\User\DTOs\RegisterUserInput;
+use Ddd\Application\User\DTOs\RegisterUserOutput;
+use Ddd\Application\User\Services\TransactionManager;
+use Ddd\Application\User\Queries\UserQueryInterface;
+
+// 3. Infrastructure層（実装）
+use Ddd\Infrastructure\Persistence\Eloquent\EloquentUserRepository;
+use Ddd\Infrastructure\Persistence\Query\EloquentUserQuery;
+
+// 4. Laravel APIコア機能（最小依存関係）
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;  // APIレスポンス専用
-use App\Models\User;
-use App\Services\Api\UserService;  // API専用サービス
+use App\Models\User as EloquentUser;  // EloquentモデルはInfrastructureで使用
+use App\Http\Requests\Api\RegisterUserRequest;
+use App\Http\Resources\UserResource;
 
-// Sanctum認証 (コアパッケージ)
+// 5. Sanctum認証（コアパッケージ）
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 
-// 最小必要パッケージのみ
+// 6. 最小必要パッケージのみ
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 ```
+
+**Import原則**:
+- Domain層は他の層をimportしない（Laravelフレームワーク除く）
+- Application層はDomain層のみimport
+- Infrastructure層はDomain/Application層のインターフェースを実装
+- HTTP層はApplication層のユースケースを呼び出し
 
 ### フロントエンド (Next.js 15.5 + React 19)
 ```typescript
@@ -265,14 +357,30 @@ import { clsx } from 'clsx'
 ```
 
 ## 主要アーキテクチャ原則
+### 🏗️ DDD/クリーンアーキテクチャ原則
+- **依存性逆転原則 (DIP)**: Domain層を中心とした依存方向の制御、インターフェースによる抽象化
+- **単一責任原則 (SRP)**: 各レイヤーと各クラスは単一の責務のみを持つ
+- **オープン・クローズド原則 (OCP)**: 拡張に対して開いており、変更に対して閉じている
+- **リスコフの置換原則 (LSP)**: 派生型はその基本型と置換可能
+- **インターフェース分離原則 (ISP)**: クライアントに特化したインターフェース設計
+- **4層依存ルール**: HTTP → Application → Domain ← Infrastructure
+- **Architecture Testing**: Pestによる依存方向とレイヤー分離の自動検証
+
 ### 分離の原則
-- **関心の分離**: UI層、ビジネスロジック層、データ層の明確な分離
+- **関心の分離**: UI層、ビジネスロジック層、データ層の明確な分離（DDD 4層構造）
 - **API境界**: フロントエンドとバックエンドの完全な分離
 - **アプリケーション分離**: 管理者用とユーザー用の独立開発
 - **環境分離**: Docker Compose統合による開発環境の一貫性保証
+- **既存MVCとDDD共存**: 段階的移行戦略による既存機能の保守性維持
 
 ### ディレクトリ責任
-- **`backend/`**: API機能、データベース操作、ビジネスロジック
+- **`backend/laravel-api/`**: API機能、データベース操作、ビジネスロジック
+  - **`ddd/`**: 🏗️ DDD/クリーンアーキテクチャ実装
+    - **`Domain/`**: ビジネスロジック中核（フレームワーク非依存）
+    - **`Application/`**: ユースケース実装（Infrastructure非依存）
+    - **`Infrastructure/`**: 外部システム実装（Repository、Query、Services）
+  - **`app/`**: Laravel標準構成（HTTP層、既存MVC共存）
+  - **`tests/`**: テストスイート（Feature、Unit、🏗️ Arch）
 - **`frontend/admin-app/`**: 管理者機能UI、管理画面専用コンポーネント
 - **`frontend/user-app/`**: ユーザー機能UI、顧客向けインターフェース
 - **`.claude/`**: Claude Code設定、コマンド定義
@@ -295,21 +403,34 @@ import { clsx } from 'clsx'
   - `frontend/{admin-app,user-app}/next.config.ts` - outputFileTracingRoot設定（モノレポ対応）
 
 ## 開発フロー指針
-1. **API First**: バックエンドAPIを先行開発
-2. **コンポーネント駆動**: フロントエンドの再利用可能設計
-3. **型安全性**: TypeScript活用による開発時エラー防止
-4. **テスト駆動**:
-   - バックエンド: Pest 4による包括的テスト（12+テストケース）
+1. **🏗️ DDD/クリーンアーキテクチャ開発フロー**:
+   - **Domain First**: ビジネスロジックをDomain層で先行実装（Entity、ValueObject、Repository Interface）
+   - **UseCase実装**: Application層でユースケース実装（DTO、UseCase）
+   - **Infrastructure実装**: Repository/Query実装（EloquentベースのConcrete実装）
+   - **HTTP統合**: Controller からユースケース呼び出し（薄いHTTP層）
+   - **Architecture Testing**: Pestによる依存方向の自動検証
+2. **API First**: バックエンドAPIを先行開発
+3. **コンポーネント駆動**: フロントエンドの再利用可能設計
+4. **型安全性**: TypeScript活用による開発時エラー防止
+5. **テスト駆動（96.1%カバレッジ達成）**:
+   - バックエンド: Pest 4による包括的テスト
+     - Unit Tests: Domain層ロジックテスト（Domain層100%カバレッジ）
+     - Feature Tests: Application層統合テスト（Application層98%カバレッジ）
+     - 🏗️ Architecture Tests: 依存方向検証、レイヤー分離チェック、命名規約検証
    - フロントエンド: Jest 29 + Testing Library 16（カバレッジ94.73%）
    - E2E: Playwright 1.47.2によるエンドツーエンドテスト
    - テストサンプル: Client Component、Server Actions、Custom Hooks、API Fetch
    - Page Object Model: E2Eテストの保守性向上パターン
-5. **環境分離**: 開発、ステージング、本番環境の明確な分離
-6. **品質管理の自動化**:
+6. **環境分離**: 開発、ステージング、本番環境の明確な分離
+7. **品質管理の自動化**:
    - Git Hooks (pre-commit: lint-staged, pre-push: composer quality)
-   - CI/CD (GitHub Actions: Pull Request時の自動品質チェック)
+   - CI/CD (GitHub Actions: Pull Request時の自動品質チェック + Architecture Tests)
    - 開発時の継続的品質保証
-7. **E2E認証統合**:
+8. **E2E認証統合**:
    - Laravel Sanctum認証のE2Eテスト対応
    - Global Setup による認証状態の事前生成
    - 環境変数による柔軟なテスト環境設定
+9. **既存MVCとDDD共存戦略**:
+   - 段階的移行アプローチ（新機能はDDD、既存機能は徐々に移行）
+   - 共存期間の明確な責務分離
+   - リファクタリング優先順位の設定
