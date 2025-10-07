@@ -1,0 +1,75 @@
+{
+  "feature_name": "docker-compose-healthcheck",
+  "created_at": "2025-10-07T00:00:00Z",
+  "updated_at": "2025-10-07T10:35:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 63,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/63",
+    "title": "Docker Composeヘルスチェック追加（Next.jsアプリ・サービス間依存関係最適化）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel API",
+      "frontend": "Next.js (Admin App / User App)",
+      "infrastructure": "Docker Compose, Alpine Linux",
+      "tools": "wget, curl"
+    },
+    "requirements_hints": [
+      "E2Eテスト安定性向上（Connection refusedエラー防止）",
+      "サービス間依存関係の明確化（healthyステータス確認）",
+      "運用性向上（docker compose psでの健全性可視化）",
+      "ヘルスチェックエンドポイントの実装（/api/health）",
+      "DockerfileへのHEALTHCHECK設定追加",
+      "docker-compose.ymlのdepends_on最適化（service_healthy条件）"
+    ],
+    "project_structure": [
+      "frontend/admin-app/src/app/api/health/route.ts",
+      "frontend/user-app/src/app/api/health/route.ts",
+      "frontend/admin-app/Dockerfile",
+      "frontend/user-app/Dockerfile",
+      "docker-compose.yml"
+    ],
+    "services": {
+      "admin-app": {
+        "port": "13002"
+      },
+      "user-app": {
+        "port": "13001"
+      },
+      "laravel-api": {
+        "type": "API backend"
+      },
+      "e2e-tests": {
+        "depends_on": ["admin-app", "user-app", "laravel-api"]
+      }
+    },
+    "todo_items": [
+      "Next.jsアプリにヘルスチェックエンドポイント追加（/api/health）",
+      "Dockerfileにヘルスチェック設定追加（wget --spider使用）",
+      "docker-compose.ymlでdepends_on最適化（service_healthy条件）",
+      "ヘルスチェックパラメータ設定（interval, timeout, start-period, retries）",
+      "E2Eテストの依存関係テスト実行"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
