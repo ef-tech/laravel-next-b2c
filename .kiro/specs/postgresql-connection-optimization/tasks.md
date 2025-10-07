@@ -45,12 +45,12 @@ PostgreSQL 17接続設定の最適化を、既存のLaravel 12データベース
   - PostgreSQL 17のバージョン情報を取得して確認
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 3.2 Docker環境でのタイムアウト設定確認
+- [x] 3.2 Docker環境でのタイムアウト設定確認
   - statement_timeout設定値の確認（SHOW statement_timeout）
   - 環境変数で指定したタイムアウト値が正しく適用されていることを確認
   - _Requirements: 4.5_
 
-- [ ] 3.3 Docker環境でのマイグレーション確認
+- [x] 3.3 Docker環境でのマイグレーション確認
   - migrate:fresh --seedの実行確認
   - migrate:statusの実行確認
   - マイグレーション実行が正常に完了することを確認
