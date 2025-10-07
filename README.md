@@ -98,6 +98,7 @@ Laravel APIの最適化に関する詳細ドキュメントは `backend/laravel-
 - **`laravel-optimization-process.md`**: 最適化プロセス完了レポート
 - **`performance-report.md`**: パフォーマンス改善定量分析
 - **`development-setup.md`**: API専用開発環境構築手順
+- **`database-connection.md`**: PostgreSQL接続設定ガイド（環境別設定・タイムアウト・トラブルシューティング）
 - **`migration-guide.md`**: 他プロジェクトへの移行ガイド
 - **`troubleshooting.md`**: トラブルシューティング完全ガイド
 - **`configuration-changes.md`**: 全設定変更の詳細記録
@@ -503,6 +504,38 @@ npm run dev                           # ポート: 13001
 ```
 
 ### データベース操作
+
+#### PostgreSQL接続設定
+
+デフォルトはSQLiteですが、PostgreSQL 17に切り替え可能です。
+
+**クイックスタート:**
+
+```bash
+# 1. .envファイルでPostgreSQL設定を有効化
+cd backend/laravel-api
+cp .env.example .env
+
+# 2. PostgreSQL設定のコメントを解除（Docker環境の場合）
+# .envファイル内で以下を編集:
+DB_CONNECTION=pgsql
+DB_HOST=pgsql
+DB_PORT=5432
+
+# 3. PostgreSQLコンテナ起動
+./vendor/bin/sail up -d
+
+# 4. マイグレーション実行
+./vendor/bin/sail artisan migrate:fresh --seed
+```
+
+**環境別接続設定の詳細:**
+- Docker環境: `DB_HOST=pgsql`, `DB_PORT=5432`
+- ネイティブ環境: `DB_HOST=127.0.0.1`, `DB_PORT=13432`
+- 本番環境: SSL設定必須（`DB_SSLMODE=verify-full`）
+
+詳細な接続設定、タイムアウト設定、トラブルシューティングは以下を参照:
+👉 **[PostgreSQL接続設定ガイド](backend/laravel-api/docs/database-connection.md)**
 
 #### マイグレーションとシード
 
