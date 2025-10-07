@@ -18,8 +18,9 @@ test('pgsql接続設定が正しく読み込まれる', function () {
         'sslmode',
         'connect_timeout',
         'application_name',
-        'options',
-        'pdo_options',
+        'statement_timeout',
+        'idle_in_transaction_session_timeout',
+        'lock_timeout',
     ]);
 });
 
@@ -41,37 +42,21 @@ test('環境変数のデフォルト値フォールバックが動作する', fu
 });
 
 /**
- * GUC設定文字列が正しい形式で生成されることを確認
+ * タイムアウト設定が正しく読み込まれることを確認
+ * 注: GUC設定はDatabaseServiceProviderのConnectionEstablishedイベントで設定
  */
-test('GUC設定文字列が正しい形式で生成される', function () {
+test('タイムアウト設定が正しく読み込まれる', function () {
     $config = config('database.connections.pgsql');
 
-    expect($config)->toHaveKey('options');
-    expect($config['options'])->toBeString();
+    // タイムアウト設定値の確認
+    expect($config['statement_timeout'])->toBeInt();
+    expect($config['idle_in_transaction_session_timeout'])->toBeInt();
+    expect($config['lock_timeout'])->toBeInt();
 
-    // GUC設定の形式確認（-c parameter=value形式）
-    expect($config['options'])->toContain('statement_timeout');
-    expect($config['options'])->toContain('idle_in_transaction_session_timeout');
-    expect($config['options'])->toContain('lock_timeout');
-    expect($config['options'])->toContain('-c');
-});
-
-/**
- * PDO属性設定が正しく構築されることを確認
- */
-test('PDO属性設定が正しく構築される', function () {
-    // pdo_pgsql拡張が有効な場合のみテスト
-    if (! extension_loaded('pdo_pgsql')) {
-        test()->markTestSkipped('pdo_pgsql extension is not loaded');
-    }
-
-    $config = config('database.connections.pgsql');
-
-    expect($config)->toHaveKey('pdo_options');
-    expect($config['pdo_options'])->toBeArray();
-    expect($config['pdo_options'])->toHaveKey(PDO::ATTR_EMULATE_PREPARES);
-    expect($config['pdo_options'])->toHaveKey(PDO::ATTR_ERRMODE);
-    expect($config['pdo_options'][PDO::ATTR_ERRMODE])->toBe(PDO::ERRMODE_EXCEPTION);
+    // デフォルト値の確認
+    expect($config['statement_timeout'])->toBe(60000);
+    expect($config['idle_in_transaction_session_timeout'])->toBe(60000);
+    expect($config['lock_timeout'])->toBe(0);
 });
 
 /**

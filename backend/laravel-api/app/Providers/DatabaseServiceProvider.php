@@ -24,9 +24,10 @@ class DatabaseServiceProvider extends ServiceProvider
         // PostgreSQL接続時にタイムアウト設定を適用
         Event::listen(ConnectionEstablished::class, function ($event) {
             if ($event->connection->getDriverName() === 'pgsql') {
-                $statementTimeout = (int) env('DB_STATEMENT_TIMEOUT', 60000);
-                $idleTxTimeout = (int) env('DB_IDLE_TX_TIMEOUT', 60000);
-                $lockTimeout = (int) env('DB_LOCK_TIMEOUT', 0);
+                $config = config('database.connections.pgsql');
+                $statementTimeout = (int) ($config['statement_timeout'] ?? 60000);
+                $idleTxTimeout = (int) ($config['idle_in_transaction_session_timeout'] ?? 60000);
+                $lockTimeout = (int) ($config['lock_timeout'] ?? 0);
 
                 $event->connection->statement("SET statement_timeout = {$statementTimeout}");
                 $event->connection->statement("SET idle_in_transaction_session_timeout = {$idleTxTimeout}");

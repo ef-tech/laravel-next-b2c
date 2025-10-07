@@ -98,6 +98,9 @@ return [
             'sslmode' => env('DB_SSLMODE', 'prefer'),
             'connect_timeout' => (int) env('DB_CONNECT_TIMEOUT', 5),
             'application_name' => env('DB_APP_NAME', 'laravel-next-b2c-api'),
+            'statement_timeout' => (int) env('DB_STATEMENT_TIMEOUT', 60000),
+            'idle_in_transaction_session_timeout' => (int) env('DB_IDLE_TX_TIMEOUT', 60000),
+            'lock_timeout' => (int) env('DB_LOCK_TIMEOUT', 0),
         ],
 
         'sqlsrv' => [
