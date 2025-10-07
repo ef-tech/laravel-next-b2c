@@ -105,9 +105,12 @@ services:
     networks:
       - app-network
     depends_on:
-      - admin-app
-      - user-app
-      - laravel-api
+      admin-app:
+        condition: service_healthy
+      user-app:
+        condition: service_healthy
+      laravel-api:
+        condition: service_started
     shm_size: '1gb'
     command: >
       sh -c "

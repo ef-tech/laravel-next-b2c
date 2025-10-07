@@ -71,6 +71,14 @@ USER nextjs
 # ポート13001公開（User App専用ポート）
 EXPOSE 13001
 
+# ヘルスチェック設定
+# - interval: 10秒間隔でヘルスチェック実行
+# - timeout: 3秒以内に応答必須
+# - start-period: 起動後30秒間は失敗を無視（起動猶予期間）
+# - retries: 3回連続失敗でunhealthy判定
+HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:13001/api/health || exit 1
+
 # 環境変数設定（ポート、ホスト名）
 ENV PORT=13001
 ENV HOSTNAME="0.0.0.0"

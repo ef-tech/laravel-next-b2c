@@ -29,6 +29,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `github-actions-trigger-optimization` - GitHub Actions発火タイミング最適化（concurrency/paths設定・API契約監視・実行時間削減）
 - `husky-v10-pre-commit-deprecation` - Husky v9推奨方法対応（`.husky/`直下にフック直接配置、非推奨警告解消）
 - `laravel-ddd-clean-architecture-solid` - Laravel DDD/クリーンアーキテクチャ/SOLID導入（4層構造・Repository Pattern・テスト戦略・段階的移行）
+- `docker-compose-healthcheck` - Docker Composeヘルスチェック追加（Next.jsアプリ・サービス間依存関係最適化）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

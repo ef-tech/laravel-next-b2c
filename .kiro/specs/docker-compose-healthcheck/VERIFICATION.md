@@ -1,0 +1,206 @@
+# Docker Composeヘルスチェック - 検証手順書
+
+## 概要
+
+本ドキュメントは、Docker Composeヘルスチェック機能の実装完了後の検証手順を示します。
+TDD方式で実装されたコードと、Dockerfile、docker-compose.ymlの設定変更を検証します。
+
+## ✅ 実装内容確認
+
+### 1. ヘルスチェックエンドポイント実装
+- **Admin App**: `frontend/admin-app/src/app/api/health/route.ts`
+- **User App**: `frontend/user-app/src/app/api/health/route.ts`
+- **レスポンス**: `{"status": "ok"}` (HTTPステータス200)
+- **テスト**: Jest 5テストケース実装済み（Admin App）
+
+### 2. Dockerfile HEALTHCHECK設定
+- **設定パラメータ**:
+  - `interval=10s`: 10秒ごとにヘルスチェック実行
+  - `timeout=3s`: 3秒でタイムアウト
+  - `start-period=30s`: 起動後30秒間は失敗を無視
+  - `retries=3`: 3回連続失敗でunhealthy判定
+- **実行コマンド**: `wget --no-verbose --tries=1 --spider http://localhost:{PORT}/api/health`
+
+### 3. docker-compose.yml依存関係最適化
+- **e2e-tests依存設定**:
+  - `admin-app: condition: service_healthy`
+  - `user-app: condition: service_healthy`
+  - `laravel-api: condition: service_started`
+
+## 🔍 検証手順
+
+### ステップ1: Dockerイメージビルド
+
+```bash
+# イメージを再ビルド
+docker compose build admin-app user-app
+```
+
+**注意**: Next.jsビルドに3-5分かかる場合があります。
+
+### ステップ2: Admin Appヘルスチェック確認
+
+```bash
+# Admin Appコンテナ起動
+docker compose up -d admin-app
+
+# 起動期間待機（30秒 + 余裕5秒）
+sleep 35
+
+# ヘルスチェックステータス確認
+docker inspect admin-app --format='{{.State.Health.Status}}'
+# 期待値: "healthy"
+
+# ヘルスチェック詳細情報表示（要jq）
+docker inspect admin-app --format='{{json .State.Health}}' | jq
+```
+
+### ステップ3: User Appヘルスチェック確認
+
+```bash
+# User Appコンテナ起動
+docker compose up -d user-app
+
+# 起動期間待機
+sleep 35
+
+# ヘルスチェックステータス確認
+docker inspect user-app --format='{{.State.Health.Status}}'
+# 期待値: "healthy"
+```
+
+### ステップ4: ヘルスチェック可視化確認
+
+```bash
+# docker compose ps でヘルスステータス表示確認
+docker compose ps
+
+# 期待値例:
+# NAME        IMAGE                              STATUS
+# admin-app   laravel-next-b2c-admin-app         Up 2 minutes (healthy)
+# user-app    laravel-next-b2c-user-app          Up 2 minutes (healthy)
+```
+
+### ステップ5: E2Eテスト依存関係最適化確認
+
+```bash
+# 全依存サービス起動＋E2Eテスト依存最適化検証
+docker compose up --build
+
+# E2Eテスト起動時にadmin-app/user-appがhealthy状態になるまで待機
+# コンテナログに以下のような待機メッセージが表示される:
+# "Waiting for admin-app to become healthy..."
+# "Waiting for user-app to become healthy..."
+# "All dependencies are healthy, starting E2E tests..."
+```
+
+### ステップ6: unhealthyステータス確認（障害シミュレーション）
+
+```bash
+# ヘルスチェックエンドポイントを一時的に削除して起動
+# （エンドポイントが存在しない場合にunhealthyになることを確認）
+
+git stash
+git checkout HEAD~1  # 1つ前のコミット（エンドポイント実装前）
+
+docker compose build admin-app
+docker compose up -d admin-app
+
+# 40秒待機（start-period 30秒 + リトライ3回×10秒）
+sleep 45
+
+# unhealthyステータス確認
+docker inspect admin-app --format='{{.State.Health.Status}}'
+# 期待値: "unhealthy"
+
+# 元のコードに戻す
+git checkout -
+git stash pop
+```
+
+### ステップ7: パフォーマンス影響確認
+
+```bash
+# リソース使用量確認
+docker stats admin-app user-app --no-stream
+
+# 期待値:
+# - CPU使用率: < 1% （ヘルスチェック実行時も低負荷）
+# - メモリ使用率: < 1% （ヘルスチェック実行時も低負荷）
+```
+
+### ステップ8: ヘルスチェックエンドポイント直接確認
+
+```bash
+# コンテナ内部から直接エンドポイントを呼び出し
+docker compose exec admin-app wget -O- http://localhost:13002/api/health
+# 期待値: {"status":"ok"}
+
+docker compose exec user-app wget -O- http://localhost:13001/api/health
+# 期待値: {"status":"ok"}
+```
+
+## ❓ よくあるトラブルシューティング
+
+### Q1: ヘルスチェックが"starting"のまま変わらない
+
+**原因**: 起動期間待機（30秒）中、もしくはNext.js起動処理中
+
+**対処**:
+```bash
+# ログを確認
+docker compose logs admin-app
+
+# 60秒待機してから再確認
+sleep 60
+docker inspect admin-app --format='{{.State.Health.Status}}'
+```
+
+### Q2: ヘルスチェックが"unhealthy"になる
+
+**原因1**: `/api/health`エンドポイントが正しく作成されていない
+```bash
+# エンドポイント実装ファイル存在確認
+ls -la frontend/admin-app/src/app/api/health/
+```
+
+**原因2**: Next.jsプロセスが起動していない
+```bash
+# コンテナログ確認
+docker compose logs admin-app | tail -50
+```
+
+### Q3: E2Eテスト依存サービスが起動しない
+
+**原因**: Admin AppもしくはUser Appがunhealthy状態
+
+**対処**:
+```bash
+# 各サービスのヘルスステータス確認
+docker compose ps
+
+# unhealthyなサービスのログ確認
+docker compose logs <service-name>
+```
+
+## ✅ 成功基準
+
+- ✅ Admin App: healthy状態到達（30秒以内）
+- ✅ User App: healthy状態到達（30秒以内）
+- ✅ `docker compose ps`で"(healthy)"表示
+- ✅ E2Eテスト依存サービスがhealthy状態確認後に起動
+- ✅ ヘルスチェックエンドポイントが`{"status":"ok"}`を返す
+- ✅ CPU/メモリ使用率が1%未満
+
+## 📝 今後の拡張
+
+1. **本番環境対応**: KubernetesでHEALTHCHECK設定を活用
+2. **監視統合**: Prometheus、Datadogでヘルスメトリクスをダッシュボード化
+3. **詳細ヘルスチェック**: データベース接続、外部API接続状況も確認
+
+## 📚 関連ドキュメント
+
+- `requirements.md`: 要件定義書
+- `design.md`: 技術設計書
+- `tasks.md`: タスク一覧
+- `spec.json`: 仕様メタデータ
