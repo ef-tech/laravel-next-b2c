@@ -38,7 +38,7 @@ PostgreSQL 17接続設定の最適化を、既存のLaravel 12データベース
   - _Requirements: 2.1_
 
 - [ ] 3. Docker環境での接続検証
-- [ ] 3.1 Docker環境での基本接続確認
+- [x] 3.1 Docker環境での基本接続確認
   - PostgreSQLコンテナの起動とヘルスチェック状態を確認
   - pg_isreadyコマンドで接続受付可能状態を確認
   - Laravel API内からPDO接続オブジェクトの取得を確認

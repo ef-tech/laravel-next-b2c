@@ -98,16 +98,6 @@ return [
             'sslmode' => env('DB_SSLMODE', 'prefer'),
             'connect_timeout' => (int) env('DB_CONNECT_TIMEOUT', 5),
             'application_name' => env('DB_APP_NAME', 'laravel-next-b2c-api'),
-            'options' => sprintf(
-                '-c statement_timeout=%d -c idle_in_transaction_session_timeout=%d -c lock_timeout=%d',
-                (int) env('DB_STATEMENT_TIMEOUT', 60000),
-                (int) env('DB_IDLE_TX_TIMEOUT', 60000),
-                (int) env('DB_LOCK_TIMEOUT', 0)
-            ),
-            'pdo_options' => extension_loaded('pdo_pgsql') ? array_filter([
-                PDO::ATTR_EMULATE_PREPARES => filter_var(env('DB_EMULATE_PREPARES', true), FILTER_VALIDATE_BOOLEAN),
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]) : [],
         ],
 
         'sqlsrv' => [
