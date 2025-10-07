@@ -20,7 +20,7 @@ laravel-next-b2c/
 ├── .husky/              # Gitフック管理 (husky設定)
 ├── .idea/               # IntelliJ IDEA設定 (IDE固有、gitignore済み)
 ├── .git/                # Gitリポジトリ
-├── docker-compose.yml   # Docker Compose統合設定（全サービス一括起動）
+├── docker-compose.yml   # Docker Compose統合設定（全サービス一括起動、ヘルスチェック統合）
 ├── .dockerignore        # Dockerビルド除外設定（モノレポ対応）
 ├── .gitignore           # 統合ファイル除外設定 (モノレポ対応)
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
@@ -71,11 +71,12 @@ laravel-api/
 │   ├── migrations/      # マイグレーション
 │   └── seeders/         # シーダー
 ├── docker/              # Docker設定 (PHP 8.0-8.4対応)
-├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド）
+├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証）
 │   ├── ddd-architecture.md        # DDD 4層構造アーキテクチャ概要
 │   ├── ddd-development-guide.md   # DDD開発ガイドライン
 │   ├── ddd-testing-strategy.md    # DDD層別テスト戦略
 │   ├── ddd-troubleshooting.md     # DDDトラブルシューティング
+│   ├── VERIFICATION.md            # Dockerヘルスチェック検証手順ドキュメント
 │   └── [その他最適化ドキュメント]
 ├── public/              # 公開ディレクトリ (エントリーポイント)
 ├── resources/           # リソースファイル
@@ -149,6 +150,9 @@ laravel-api/
 laravel-next-b2c/
 ├── docker-compose.yml   # Docker Compose統合設定
 │                        # - 全サービス定義 (laravel-api, admin-app, user-app, pgsql, redis, etc.)
+│                        # - ヘルスチェック機能統合 (全サービスの起動状態監視)
+│                        # - 依存関係の自動管理 (depends_on: service_healthy)
+│                        # - IPv4明示対応 (localhost→127.0.0.1)
 │                        # - ネットワーク設定
 │                        # - ボリューム管理
 │                        # - 環境変数設定
@@ -371,6 +375,7 @@ import { clsx } from 'clsx'
 - **API境界**: フロントエンドとバックエンドの完全な分離
 - **アプリケーション分離**: 管理者用とユーザー用の独立開発
 - **環境分離**: Docker Compose統合による開発環境の一貫性保証
+- **インフラ信頼性**: Dockerヘルスチェック機能による起動保証と障害検知
 - **既存MVCとDDD共存**: 段階的移行戦略による既存機能の保守性維持
 
 ### ディレクトリ責任
@@ -390,10 +395,11 @@ import { clsx } from 'clsx'
 - **環境設定**: 各アプリケーションルートの `.env`
 - **ビルド設定**: 各技術スタック専用 (`package.json`, `composer.json`)
 - **Docker設定**:
-  - ルート: `docker-compose.yml` - 全サービス統合設定
+  - ルート: `docker-compose.yml` - 全サービス統合設定（ヘルスチェック統合、依存関係管理）
   - バックエンド: `backend/laravel-api/compose.yaml` - Laravel Sail設定
   - フロントエンド: `frontend/{admin-app,user-app}/Dockerfile` - Next.js イメージ定義
   - ルート: `.dockerignore` - ビルド除外設定
+  - ドキュメント: `backend/laravel-api/docs/VERIFICATION.md` - Dockerヘルスチェック検証手順
 - **開発ツール設定**: 各ディレクトリに適切な設定ファイル
 - **PHP品質管理設定**:
   - `backend/laravel-api/pint.json` - Laravel Pint設定

@@ -212,17 +212,27 @@ parameters:
 サービス構成:
 # バックエンド
 - laravel-api: Laravel 12 API (PHP 8.4) - ポート: 13000
+  - healthcheck: curl http://127.0.0.1:13000/api/health (5秒間隔)
 - pgsql: PostgreSQL 17-alpine - ポート: 13432
+  - healthcheck: pg_isready -U sail (5秒間隔)
 - redis: Redis alpine - ポート: 13379
+  - healthcheck: redis-cli ping (5秒間隔)
 - mailpit: 開発用メールサーバー - SMTP: 11025, UI: 13025
+  - healthcheck: wget --spider http://127.0.0.1:8025 (10秒間隔)
 - minio: オブジェクトストレージ - API: 13900, Console: 13010
+  - healthcheck: curl http://127.0.0.1:9000/minio/health/live (10秒間隔)
 
 # フロントエンド
 - admin-app: Next.js 15.5 管理者アプリ - ポート: 13002
+  - healthcheck: curl http://127.0.0.1:13002/api/health (10秒間隔)
+  - depends_on: laravel-api (healthy)
 - user-app: Next.js 15.5 ユーザーアプリ - ポート: 13001
+  - healthcheck: curl http://127.0.0.1:13001/api/health (10秒間隔)
+  - depends_on: laravel-api (healthy)
 
 # テスト環境
 - e2e-tests: Playwright E2Eテスト (オンデマンド実行)
+  - depends_on: admin-app, user-app, laravel-api (全てhealthy)
 ```
 
 **Docker Compose統合の利点**:
@@ -231,6 +241,13 @@ parameters:
 - サービス間通信の最適化
 - 環境変数の一元管理
 - E2Eテスト環境の完全統合
+
+**ヘルスチェック機能統合**:
+- 全サービスのヘルスチェック機能による起動状態監視
+- `docker compose ps`でリアルタイム状態確認（healthy/unhealthy表示）
+- 依存関係の自動管理（depends_on: service_healthy）による起動順序制御
+- IPv4明示対応（localhost→127.0.0.1）によるDNS解決問題の回避
+- サービス障害の早期検知と自動再起動対応
 
 ### Laravel Sail構成（個別起動）
 ```yaml
@@ -255,6 +272,19 @@ Laravel Sailサービス:
 
 # 全サービス起動
 docker compose up -d
+
+# サービス状態確認（ヘルスチェック含む）
+docker compose ps
+# 出力例:
+# NAME         STATUS        HEALTH
+# laravel-api  Up 2 minutes  healthy
+# admin-app    Up 2 minutes  healthy
+# user-app     Up 2 minutes  healthy
+# pgsql        Up 2 minutes  healthy
+# redis        Up 2 minutes  healthy
+
+# ヘルスチェック詳細確認
+docker inspect --format='{{json .State.Health}}' <container-name>
 
 # ログ確認
 docker compose logs -f
