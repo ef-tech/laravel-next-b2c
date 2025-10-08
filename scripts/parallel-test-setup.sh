@@ -44,14 +44,10 @@ echo "📋 並列テスト用データベースを作成します..."
 for i in $(seq 1 $PROCESSES); do
     DB_NAME="testing_$i"
 
-    # データベース存在確認
-    if docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
-        echo "   ♻️  データベース再利用: $DB_NAME (既に存在します)"
-        # 既存のデータベースを削除して再作成
-        docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -c "DROP DATABASE $DB_NAME;" >/dev/null 2>&1
-    fi
-
     echo "   データベース作成中: $DB_NAME"
+
+    # 既存データベースを削除して再作成（IF EXISTS で安全に）
+    docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;" >/dev/null 2>&1
 
     # データベース作成
     docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -c "CREATE DATABASE $DB_NAME OWNER sail;" >/dev/null 2>&1
