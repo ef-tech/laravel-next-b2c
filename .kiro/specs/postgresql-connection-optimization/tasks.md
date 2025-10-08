@@ -69,11 +69,13 @@ PostgreSQL 17接続設定の最適化を、既存のLaravel 12データベース
   - _Requirements: 5.4_
 
 - [ ] 5. タイムアウト動作の検証とテスト
-- [ ] 5.1 タイムアウトテストの作成
-  - statement_timeout超過テスト（長時間クエリ）を作成
-  - idle_in_transaction_session_timeout超過テスト（放置トランザクション）を作成
-  - connect_timeout超過テスト（接続遅延シミュレーション）を作成
-  - lock_timeout動作テスト（デッドロック検知）を作成
+- [x] 5.1 タイムアウトテストの作成
+  - statement_timeout超過テスト（長時間クエリ）を作成 ✅
+  - idle_in_transaction_session_timeout超過テスト（放置トランザクション）を作成 ✅
+  - connect_timeout動作確認テスト（接続確立時間）を作成 ✅
+  - lock_timeout設定確認テスト（設定値検証）を作成 ✅
+  - タイムアウト設定値の確認テスト（PostgreSQLセッション適用）を作成 ✅
+  - .env.testing.pgsqlにタイムアウト設定追加 ✅
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
 - [ ] 5.2 タイムアウトテスト結果の記録

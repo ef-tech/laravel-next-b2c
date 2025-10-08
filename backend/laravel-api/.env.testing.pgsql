@@ -12,6 +12,15 @@ DB_DATABASE=testing
 DB_USERNAME=sail
 DB_PASSWORD=password
 
+# PostgreSQLタイムアウト設定（テスト用に短縮）
+DB_STATEMENT_TIMEOUT=5000        # 5秒（テスト高速化のため短縮）
+DB_IDLE_TX_TIMEOUT=5000          # 5秒
+DB_LOCK_TIMEOUT=0                # デッドロック即座検知
+DB_CONNECT_TIMEOUT=5             # 5秒
+
+# PostgreSQLアプリケーション名
+DB_APP_NAME=laravel-next-b2c-api-test
+
 # 最適化設定
 BCRYPT_ROUNDS=4
 CACHE_STORE=array
