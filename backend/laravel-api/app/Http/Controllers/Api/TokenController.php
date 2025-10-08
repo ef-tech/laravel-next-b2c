@@ -30,7 +30,7 @@ class TokenController extends Controller
         return response()->json([
             'token' => $newToken->plainTextToken,
             'name' => $newToken->accessToken->name,
-            'created_at' => $newToken->accessToken->created_at->toISOString(),
+            'created_at' => $newToken->accessToken->created_at?->toISOString() ?? now()->toISOString(),
         ], 201);
     }
 
@@ -46,7 +46,7 @@ class TokenController extends Controller
             return [
                 'id' => $token->id,
                 'name' => $token->name,
-                'created_at' => $token->created_at->toISOString(),
+                'created_at' => $token->created_at?->toISOString() ?? now()->toISOString(),
                 'last_used_at' => $token->last_used_at?->toISOString(),
             ];
         });

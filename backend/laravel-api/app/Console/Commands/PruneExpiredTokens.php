@@ -32,9 +32,10 @@ class PruneExpiredTokens extends Command
         $cutoffDate = now()->subDays($days);
 
         // Delete tokens that haven't been used for the specified number of days
-        $deletedCount = PersonalAccessToken::where(function ($query) use ($cutoffDate) {
+        /** @var int $deletedCount */
+        $deletedCount = PersonalAccessToken::where(function ($query) use ($cutoffDate): void {
             $query->where('last_used_at', '<', $cutoffDate)
-                ->orWhere(function ($q) use ($cutoffDate) {
+                ->orWhere(function ($q) use ($cutoffDate): void {
                     $q->whereNull('last_used_at')
                         ->where('created_at', '<', $cutoffDate);
                 });

@@ -11,6 +11,7 @@ parameters:
         - storage
         - bootstrap/cache
         - database/migrations
+        - app/Console/Commands
     parallel:
         jobSize: 20
         maximumNumberOfProcesses: 32
