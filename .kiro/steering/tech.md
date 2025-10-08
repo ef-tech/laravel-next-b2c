@@ -82,12 +82,17 @@
 
 ### データベース・ストレージ
 - **PostgreSQL**: 17-alpine (主データベース - ステートレス設計対応)
+  - **接続最適化**: タイムアウト設定（connect_timeout/statement_timeout）、PDOオプション最適化
+  - **環境別設定**: Docker/Native/Production環境に応じた接続パラメータ最適化
+  - **信頼性向上**: ServiceProvider方式によるタイムアウト設定、エラーハンドリング強化
 - **Redis**: alpine (キャッシュ管理 - セッションストレージ不使用)
 - **MinIO**: オブジェクトストレージ (S3互換)
 
 **最適化ポイント**:
 - セッションストレージをRedisから除去、キャッシュのみ使用
 - ステートレス設計によりDBコネクション最適化
+- PostgreSQL接続タイムアウト設定（デフォルト: 接続5秒、ステートメント30秒）
+- PDOオプション最適化（エミュレーション無効、エラーモード例外設定）
 
 ### 開発・テストツール
 - **Laravel Pint**: ^1.24 (コードフォーマッター - コアパッケージ)
@@ -195,6 +200,7 @@ parameters:
 - `laravel-optimization-process.md`: 最適化プロセス完了レポート
 - `performance-report.md`: パフォーマンス改善定量分析
 - `development-setup.md`: API専用開発環境構築手順
+- `database-connection.md`: PostgreSQL接続設定ガイド（環境別設定・タイムアウト最適化・トラブルシューティング）
 - `migration-guide.md`: 他プロジェクトへの移行ガイド
 - `troubleshooting.md`: トラブルシューティング完全ガイド
 - `configuration-changes.md`: 全設定変更の詳細記録
@@ -330,6 +336,17 @@ composer test                    # Pest テストスイート実行（96.1%カ�
 ./vendor/bin/pest --parallel     # 並列実行
 ./vendor/bin/pest tests/Arch     # Architecture Testsのみ実行（依存方向検証）
 
+# テストインフラ管理 (Makefile - プロジェクトルートから実行)
+make quick-test                  # 高速SQLiteテスト
+make test-pgsql                  # PostgreSQLテスト（本番同等）
+make test-parallel               # 並列テスト実行
+make test-coverage               # カバレッジレポート生成
+make ci-test                     # CI/CD相当の完全テスト
+make test-switch-sqlite          # SQLite環境に切り替え
+make test-switch-pgsql           # PostgreSQL環境に切り替え
+make test-setup                  # 並列テスト環境構築
+make test-cleanup                # テスト環境クリーンアップ
+
 # コード品質管理 (統合コマンド)
 composer quality          # フォーマットチェック + 静的解析
 composer quality:fix      # フォーマット自動修正 + 静的解析
@@ -459,6 +476,14 @@ E2E_USER_PASSWORD=password            # ユーザーパスワード
 
 ### 主要設定
 - **Database**: SQLite (開発用デフォルト) / PostgreSQL (Docker環境)
+  - **PostgreSQL接続設定** (`.env`):
+    - `DB_CONNECTION=pgsql`
+    - `DB_HOST=pgsql` (Docker) / `DB_HOST=127.0.0.1` (Native)
+    - `DB_PORT=13432` (統一ポート)
+    - `DB_CONNECT_TIMEOUT=5` (接続タイムアウト: 5秒)
+    - `DB_STATEMENT_TIMEOUT=30000` (ステートメントタイムアウト: 30秒)
+    - `DB_SSLMODE=prefer` (開発) / `DB_SSLMODE=verify-full` (本番)
+  - **環境別テンプレート**: `backend/laravel-api/.env.docker`, `.env.native`, `.env.production`
 - **Cache**: Database (デフォルト) / Redis (Docker環境)
 - **Queue**: Database / Redis
 - **Mail**: ログ出力 / Mailpit (開発環境)

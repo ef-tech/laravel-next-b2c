@@ -16,6 +16,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **モダンな技術スタック**: Next.js 15.5 + React 19 + Laravel 12 + TypeScript
 - **完全なDocker環境**: Docker Compose統合による全サービス一括起動（5分セットアップ）、ヘルスチェック機能統合
 - **ステートレスAPI設計**: Laravel Sanctumトークン認証による水平スケーリング対応
+- **PostgreSQL接続最適化**: タイムアウト設定・環境別設定・信頼性向上（接続5秒、ステートメント30秒）
 - **モダンテストフレームワーク**: Pest 4による包括的テストスイート（96.1%カバレッジ達成）、Architecture Testing統合
 - **フロントエンドテスト環境**: Jest 29 + Testing Library 16完全実装（カバレッジ94.73%達成）
 - **E2Eテスト環境**: Playwright 1.47.2 + Docker実行対応、Laravel Sanctum認証統合、Page Object Modelパターン採用
@@ -67,6 +68,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **包括的最適化ドキュメント**: `backend/laravel-api/docs/`に移行ガイド・DDDアーキテクチャガイド完備
 - **開発環境統一**: Docker Compose統合による全サービス一括起動・一貫した環境構築
 - **Dockerヘルスチェック統合**: 全サービス（Laravel API、Next.js apps、PostgreSQL、Redis）のヘルスチェック機能、`docker compose ps`によるリアルタイム状態確認、IPv4明示対応（localhost→127.0.0.1）
+- **PostgreSQL接続最適化**: ServiceProvider方式によるタイムアウト設定、環境別設定テンプレート（Docker/Native/Production）、エラーハンドリング強化
 - **固定ポート設計**: 13000番台統一によるポート競合回避、複数プロジェクト同時実行対応
 - **Next.js最適化構成**: outputFileTracingRoot設定によるDocker Standalone最適化
 

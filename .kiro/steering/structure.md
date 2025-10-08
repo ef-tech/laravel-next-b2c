@@ -76,6 +76,7 @@ laravel-api/
 │   ├── ddd-development-guide.md   # DDD開発ガイドライン
 │   ├── ddd-testing-strategy.md    # DDD層別テスト戦略
 │   ├── ddd-troubleshooting.md     # DDDトラブルシューティング
+│   ├── database-connection.md     # PostgreSQL接続設定ガイド（環境別設定・タイムアウト最適化・トラブルシューティング）
 │   ├── VERIFICATION.md            # Dockerヘルスチェック検証手順ドキュメント
 │   └── [その他最適化ドキュメント]
 ├── public/              # 公開ディレクトリ (エントリーポイント)
