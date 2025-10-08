@@ -1,29 +1,29 @@
 # Implementation Plan
 
-## Phase 1: 設定ファイル準備と基盤整備
+## Phase 1: 設定ファイル準備と基盤整備 ✅
 
-- [ ] 1. テスト専用データベース接続設定の追加
-- [ ] 1.1 PostgreSQLテスト専用接続設定の実装
+- [x] 1. テスト専用データベース接続設定の追加
+- [x] 1.1 PostgreSQLテスト専用接続設定の実装
   - `config/database.php`の`connections`配列に`pgsql_testing`接続を追加
   - 環境変数`DB_TEST_*`を使用し、未設定時は`DB_*`にフォールバック
   - デフォルトデータベース名を`app_test`に設定
   - PostgreSQL接続最適化設定（`connect_timeout`、`sslmode`、`statement_timeout`等）を継承
   - _Requirements: 1.1, 1.3, 1.4, 1.5, 1.7_
 
-- [ ] 1.2 並列テスト用管理系接続設定の実装
+- [x] 1.2 並列テスト用管理系接続設定の実装
   - `config/database.php`の`connections`配列に`pgsql_system`接続を追加
   - 管理系データベース（`postgres`）に接続する設定
   - DB作成・削除操作用の権限設定を含める
   - _Requirements: 1.2, 1.6_
 
-- [ ] 2. 環境別テスト設定ファイルの作成
-- [ ] 2.1 SQLiteテスト環境設定ファイルの作成
+- [x] 2. 環境別テスト設定ファイルの作成
+- [x] 2.1 SQLiteテスト環境設定ファイルの作成
   - `.env.testing.sqlite`ファイルを`backend/laravel-api/`に作成
   - `DB_CONNECTION=sqlite`、`DB_DATABASE=:memory:`を設定
   - 共通テスト設定（`CACHE_STORE=array`、`QUEUE_CONNECTION=sync`、`MAIL_MAILER=array`）を含める
   - _Requirements: 2.1, 2.3, 2.5, 2.8_
 
-- [ ] 2.2 PostgreSQLテスト環境設定ファイルの作成
+- [x] 2.2 PostgreSQLテスト環境設定ファイルの作成
   - `.env.testing.pgsql`ファイルを`backend/laravel-api/`に作成
   - `DB_CONNECTION=pgsql_testing`を設定
   - Docker環境用のホスト設定（`DB_TEST_HOST=pgsql`）とポート（`DB_TEST_PORT=13432`）を設定
@@ -31,94 +31,95 @@
   - 共通テスト設定を含める
   - _Requirements: 2.2, 2.4, 2.5, 2.6, 2.7, 2.8_
 
-- [ ] 2.3 環境設定テンプレートファイルの作成
+- [x] 2.3 環境設定テンプレートファイルの作成
   - `.env.testing.sqlite.example`と`.env.testing.pgsql.example`をテンプレートとして作成
   - パスワード等の機密情報は空白にして提供
   - `.gitignore`に`.env.testing.sqlite`と`.env.testing.pgsql`を追加（テンプレートは除外）
   - _Requirements: 10.4_
 
-- [ ] 3. 既存設定との互換性確認
-- [ ] 3.1 phpunit.xml設定の検証
+- [x] 3. 既存設定との互換性確認
+- [x] 3.1 phpunit.xml設定の検証
   - `phpunit.xml`のデフォルト設定（`DB_CONNECTION=sqlite`、`DB_DATABASE=:memory:`）が維持されていることを確認
   - 既存のSQLite in-memory設定に影響がないことを検証
   - _Requirements: 9.1, 9.2_
 
-- [ ] 3.2 既存PostgreSQL接続設定の保護
+- [x] 3.2 既存PostgreSQL接続設定の保護
   - 既存の`pgsql`接続設定が変更されていないことを確認
   - テスト用接続設定が本番/開発接続に影響しないことを検証
   - _Requirements: 9.4_
 
-## Phase 2: 自動化スクリプトの改善
+## Phase 2: 自動化スクリプトの改善 ✅
 
-- [ ] 4. テスト環境切り替えスクリプトの改善
-- [ ] 4.1 環境切り替え機能の強化
+- [x] 4. テスト環境切り替えスクリプトの改善
+- [x] 4.1 環境切り替え機能の強化
   - 既存の`scripts/switch-test-env.sh`に`php artisan config:clear`実行を追加
   - 引数チェック機能の強化（`sqlite`/`pgsql`のみ受け付け、デフォルトは`sqlite`）
   - 設定ファイル存在確認とエラーハンドリング強化
   - 成功メッセージの詳細化（接続情報表示を含む）
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 4.2 スクリプト実行権限の設定
+- [x] 4.2 スクリプト実行権限の設定
   - `chmod +x scripts/switch-test-env.sh`で実行権限を付与
   - スクリプト配置場所が`scripts/switch-test-env.sh`であることを確認
   - _Requirements: 3.7, 3.8_
 
-- [ ] 5. 並列テスト用データベース管理スクリプトの改善
-- [ ] 5.1 並列テスト環境セットアップスクリプトの改善
-  - 既存の`scripts/parallel-test-setup.sh`のDB命名規則を統一（`app_test_N` → `testing_N`）
+- [x] 5. 並列テスト用データベース管理スクリプトの改善
+- [x] 5.1 並列テスト環境セットアップスクリプトの改善
+  - 既存の`scripts/parallel-test-setup.sh`のDB接続設定を`pgsql_testing`に変更
+  - 環境変数を`DB_TEST_*`に統一
   - PostgreSQLコンテナ起動確認機能を追加（未起動時はインタラクティブプロンプト）
   - 並列数分のDB作成ループ実装（既存DBを削除後に新規作成）
   - 各DB作成時の成功メッセージ表示
   - Laravel Sail環境での実行を保証
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.7, 4.8_
 
-- [ ] 5.2 並列テスト環境クリーンアップスクリプトの改善
+- [x] 5.2 並列テスト環境クリーンアップスクリプトの改善
   - 既存の`scripts/parallel-test-cleanup.sh`のDB命名規則を統一
   - 並列数分のDB削除ループ実装
   - 各DB削除時の確認メッセージ表示
   - PostgreSQLコンテナ未起動時のエラーハンドリング追加
   - _Requirements: 4.5, 4.6, 4.7_
 
-- [ ] 5.3 並列テストスクリプト実行権限の設定
+- [x] 5.3 並列テストスクリプト実行権限の設定
   - `chmod +x scripts/parallel-test-setup.sh`で実行権限を付与
   - `chmod +x scripts/parallel-test-cleanup.sh`で実行権限を付与
   - _Requirements: 4.9_
 
-## Phase 3: Makefile統合による運用標準化
+## Phase 3: Makefile統合による運用標準化 ✅
 
-- [ ] 6. Makefileターゲットの追加・改善
-- [ ] 6.1 高速テストターゲットの実装
+- [x] 6. Makefileターゲットの追加・改善
+- [x] 6.1 高速テストターゲットの実装
   - `quick-test`ターゲット: SQLite環境でPestテストを実行
   - 適切なワーキングディレクトリ（`backend/laravel-api`）で実行
   - _Requirements: 5.1, 5.11_
 
-- [ ] 6.2 PostgreSQLテストターゲットの実装
+- [x] 6.2 PostgreSQLテストターゲットの実装
   - `test-pgsql`ターゲット: Docker起動確認 → PostgreSQL環境切り替え → Pestテスト実行
   - Docker環境チェック機能を統合（`docker compose ps pgsql | grep -q "Up"`）
   - _Requirements: 5.2, 5.11_
 
-- [ ] 6.3 並列テストターゲットの実装
+- [x] 6.3 並列テストターゲットの実装
   - `test-parallel`ターゲット: 並列環境セットアップ → Pest並列実行 → クリーンアップ
   - 3つのステップを順次実行する統合フロー
   - _Requirements: 5.3, 5.11_
 
-- [ ] 6.4 環境切り替えターゲットの実装
+- [x] 6.4 環境切り替えターゲットの実装
   - `test-switch-sqlite`ターゲット: SQLite環境に切り替え
   - `test-switch-pgsql`ターゲット: PostgreSQL環境に切り替え
   - `switch-test-env.sh`スクリプトを呼び出し
   - _Requirements: 5.4, 5.5_
 
-- [ ] 6.5 並列テスト環境管理ターゲットの実装
+- [x] 6.5 並列テスト環境管理ターゲットの実装
   - `test-setup`ターゲット: 並列テスト環境セットアップスクリプト実行
   - `test-cleanup`ターゲット: 並列テスト環境クリーンアップスクリプト実行
   - _Requirements: 5.6, 5.7_
 
-- [ ] 6.6 カバレッジ・CI統合ターゲットの実装
+- [x] 6.6 カバレッジ・CI統合ターゲットの実装
   - `test-coverage`ターゲット: テストカバレッジレポート生成
   - `ci-test`ターゲット: CI/CD相当の完全テスト（PostgreSQL切り替え → 並列実行 → カバレッジ生成）
   - _Requirements: 5.8, 5.9_
 
-- [ ] 6.7 Makefileプロジェクトルート配置の確認
+- [x] 6.7 Makefileプロジェクトルート配置の確認
   - Makefileが`laravel-next-b2c/`（プロジェクトルート）に配置されていることを確認
   - 各ターゲットが適切なワーキングディレクトリで実行されることを検証
   - _Requirements: 5.10, 5.11_
