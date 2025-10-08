@@ -22,23 +22,19 @@ help: ## ヘルプを表示
 test: ## デフォルトテスト実行（SQLite）
 	cd $(LARAVEL_DIR) && ./vendor/bin/pest
 
-test-sqlite: ## SQLiteでテスト実行（高速）
-	cd $(LARAVEL_DIR) && DB_CONNECTION=sqlite DB_DATABASE=:memory: ./vendor/bin/pest
+quick-test: ## SQLite高速テスト（開発用）
+	cd $(LARAVEL_DIR) && ./vendor/bin/pest
 
-test-pgsql: ## PostgreSQLでテスト実行（本番同等）
+test-pgsql: ## PostgreSQL本番同等テスト
 	@echo "🐳 Docker環境を確認中..."
 	@docker compose ps pgsql | grep -q "Up" || (echo "❌ PostgreSQLが起動していません。'make docker-up' を実行してください。" && exit 1)
-	cd $(LARAVEL_DIR) && \
-		DB_CONNECTION=pgsql \
-		DB_HOST=127.0.0.1 \
-		DB_PORT=13432 \
-		DB_DATABASE=testing \
-		DB_USERNAME=sail \
-		DB_PASSWORD=password \
-		./vendor/bin/pest
+	./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
+	cd $(LARAVEL_DIR) && ./vendor/bin/pest
 
-test-parallel: ## 並列テスト実行
+test-parallel: ## 並列テスト実行（セットアップ→実行→クリーンアップ）
+	./$(SCRIPTS_DIR)/parallel-test-setup.sh 4
 	cd $(LARAVEL_DIR) && ./vendor/bin/pest --parallel
+	./$(SCRIPTS_DIR)/parallel-test-cleanup.sh 4
 
 test-coverage: ## カバレッジ付きテスト実行
 	cd $(LARAVEL_DIR) && XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
@@ -61,6 +57,9 @@ test-switch-sqlite: ## テスト環境をSQLiteに切り替え
 
 test-switch-pgsql: ## テスト環境をPostgreSQLに切り替え
 	./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
+
+test-db-check: ## テスト用データベース存在確認
+	./$(SCRIPTS_DIR)/check-test-db.sh
 
 # =============================================================================
 # Docker管理コマンド
@@ -94,23 +93,15 @@ lint-fix: ## コードスタイル自動修正（Pint）
 # 統合ワークフロー
 # =============================================================================
 
-ci-test: ## CI/CD相当のテスト実行
+ci-test: ## CI/CD相当の完全テスト（PostgreSQL並列実行+カバレッジ）
 	@echo "🚀 CI/CD相当のテスト実行を開始します..."
-	@echo "1️⃣ コード品質チェック..."
-	$(MAKE) lint
-	@echo "2️⃣ SQLiteテスト実行..."
-	$(MAKE) test-sqlite
-	@echo "3️⃣ PostgreSQLテスト実行..."
-	$(MAKE) test-pgsql
-	@echo "4️⃣ 並列テスト実行..."
+	@echo "1️⃣ PostgreSQL環境に切り替え..."
+	$(MAKE) test-switch-pgsql
+	@echo "2️⃣ 並列テスト実行..."
 	$(MAKE) test-parallel
-	@echo "5️⃣ カバレッジチェック..."
+	@echo "3️⃣ カバレッジチェック..."
 	$(MAKE) test-coverage
 	@echo "✅ すべてのテストが完了しました！"
-
-quick-test: ## 高速テスト（開発用）
-	@echo "⚡ 高速テストを実行します..."
-	$(MAKE) test-sqlite
 
 full-test: ## フルテスト（PR前推奨）
 	@echo "🔥 フルテストを実行します..."

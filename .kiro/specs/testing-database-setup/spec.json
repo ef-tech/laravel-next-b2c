@@ -1,0 +1,95 @@
+{
+  "feature_name": "testing-database-setup",
+  "created_at": "2025-10-08T10:35:00+09:00",
+  "updated_at": "2025-10-08T15:45:00+09:00",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 19,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/19",
+    "title": "テスト用 DB 設定",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, Pest 4, PostgreSQL 17, SQLite",
+      "frontend": "",
+      "infrastructure": "Docker, Laravel Sail, PostgreSQL",
+      "tools": "GitHub Actions, Makefile"
+    },
+    "requirements_hints": [
+      "SQLite in-memoryによる高速テスト実行（日常開発用）",
+      "PostgreSQL本番同等環境でのテスト実行（互換性保証）",
+      "テスト用DBと本番/開発DBの完全分離",
+      "GitHub Actionsでの並列PostgreSQLテスト実行",
+      "環境切り替えとテスト実行の自動化・標準化"
+    ],
+    "project_structure": [
+      "config/database.php",
+      "phpunit.xml",
+      ".env.testing.sqlite",
+      ".env.testing.pgsql",
+      "scripts/switch-test-env.sh",
+      "scripts/parallel-test-setup.sh",
+      "scripts/parallel-test-cleanup.sh",
+      "docs/TESTING_DATABASE_WORKFLOW.md",
+      ".github/workflows/test.yml"
+    ],
+    "services": {
+      "PostgreSQL": {
+        "port": "13432",
+        "database": "app_test",
+        "parallel_databases": "app_test_1, app_test_2, app_test_3, app_test_4"
+      }
+    },
+    "todo_items": [
+      "config/database.php: テスト用接続設定追加",
+      ".env.testing.sqlite 作成",
+      ".env.testing.pgsql 作成",
+      "phpunit.xml: 既存SQLite設定確認（変更なし）",
+      "PostgreSQLコンテナ起動確認",
+      "テスト用DB app_test 作成",
+      "scripts/switch-test-env.sh 作成・実行権限付与",
+      "scripts/parallel-test-setup.sh 作成・実行権限付与",
+      "scripts/parallel-test-cleanup.sh 作成・実行権限付与",
+      "Makefile作成・動作確認",
+      "SQLite環境テスト実行成功",
+      "PostgreSQL環境テスト実行成功",
+      "並列テスト実行成功",
+      ".github/workflows/test.yml 更新",
+      "GitHub Actions実行成功確認",
+      "docs/TESTING_DATABASE_WORKFLOW.md 作成",
+      "README.md テスト実行セクション更新"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    },
+    "implementation": {
+      "completed": true,
+      "verified": true
+    }
+  },
+  "ready_for_implementation": true,
+  "implementation_summary": {
+    "total_commits": 9,
+    "phases_completed": 8,
+    "tests_passed": 52,
+    "tests_skipped": 6,
+    "code_quality": "PASS (64 files)",
+    "documentation": "Complete (TESTING_DATABASE_WORKFLOW.md + README.md)"
+  }
+}

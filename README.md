@@ -623,15 +623,49 @@ composer stan:baseline        # ベースライン生成（既存エラー記録
 
 ##### テスト実行（Pest 4）
 
+**🚀 推奨: Makefileターゲット（プロジェクトルートから実行）**
+
 ```bash
-# 基本テスト実行（SQLite・高速）
+# 日常開発フロー
+make quick-test           # SQLite高速テスト（~2秒）
+make test-pgsql          # PostgreSQL本番同等テスト（~5-10秒）
+make ci-test             # CI/CD相当の完全テスト（~20-30秒）
+
+# 環境切り替え
+make test-switch-sqlite  # SQLite環境に切り替え
+make test-switch-pgsql   # PostgreSQL環境に切り替え
+
+# 並列テスト
+make test-parallel       # 並列テスト実行（4 Shard）
+make test-coverage       # カバレッジレポート生成
+
+# テスト環境管理
+make test-db-check       # テスト用DB存在確認
+make test-setup          # 並列テスト環境構築
+make test-cleanup        # テスト環境クリーンアップ
+
+# Docker管理
+make docker-up           # Docker環境起動
+make docker-down         # Docker環境停止
+make health              # 環境ヘルスチェック
+```
+
+**📖 詳細な運用ガイド:**
+`backend/laravel-api/docs/TESTING_DATABASE_WORKFLOW.md` を参照
+
+**🔧 直接実行（backend/laravel-api/ディレクトリから）**
+
+```bash
+# SQLite高速テスト
 ./vendor/bin/pest
 
-# PostgreSQL使用（本番同等）
-DB_CONNECTION=pgsql \
-DB_HOST=127.0.0.1 \
-DB_PORT=13432 \
-DB_DATABASE=testing \
+# PostgreSQL本番同等テスト
+DB_CONNECTION=pgsql_testing \
+DB_TEST_HOST=pgsql \
+DB_TEST_PORT=13432 \
+DB_TEST_DATABASE=app_test \
+DB_TEST_USERNAME=sail \
+DB_TEST_PASSWORD=password \
 ./vendor/bin/pest
 
 # 並列テスト実行（高速化）
@@ -647,25 +681,12 @@ XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
 ./vendor/bin/sail exec laravel-api ./vendor/bin/pest
 ```
 
-**🔧 テスト環境管理**
-```bash
-# プロジェクトルートから便利コマンド実行
-make quick-test           # 高速SQLiteテスト
-make test-pgsql          # PostgreSQLテスト
-make test-parallel       # 並列テスト
-make test-coverage       # カバレッジテスト
-make ci-test             # CI/CD相当の完全テスト
+**💡 推奨テストフロー:**
+1. **日常開発**: `make quick-test` (SQLite・2秒)
+2. **機能完成時**: `make test-pgsql` (PostgreSQL・5-10秒)
+3. **PR前**: `make ci-test` (完全テスト・20-30秒)
 
-# テスト環境切り替え
-make test-switch-sqlite  # SQLite環境
-make test-switch-pgsql   # PostgreSQL環境
-
-# 並列テスト用DB管理
-make test-setup          # 並列テスト環境構築  
-make test-cleanup        # 環境クリーンアップ
-```
-
-**📋 詳細ドキュメント**: [テスト用DB設定ワークフロー](docs/TESTING_DATABASE_WORKFLOW.md)
+**📋 詳細ドキュメント**: [テスト用DB設定ワークフロー](backend/laravel-api/docs/TESTING_DATABASE_WORKFLOW.md)
 
 #### Next.js（フロントエンド）
 
