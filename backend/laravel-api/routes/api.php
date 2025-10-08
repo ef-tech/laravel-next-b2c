@@ -7,10 +7,14 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/users', [UserController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
 
-// Protected routes
-Route::middleware('auth:sanctum')->group(function () {
+// Login with rate limiting (5 attempts per minute)
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Protected routes with rate limiting (60 requests per minute)
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
