@@ -58,6 +58,9 @@ test-switch-sqlite: ## テスト環境をSQLiteに切り替え
 test-switch-pgsql: ## テスト環境をPostgreSQLに切り替え
 	./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
 
+test-db-check: ## テスト用データベース存在確認
+	./$(SCRIPTS_DIR)/check-test-db.sh
+
 # =============================================================================
 # Docker管理コマンド
 # =============================================================================

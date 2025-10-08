@@ -43,14 +43,25 @@ echo ""
 echo "📋 並列テスト用データベースを作成します..."
 for i in $(seq 1 $PROCESSES); do
     DB_NAME="testing_$i"
+
+    # データベース存在確認
+    if docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
+        echo "   ♻️  データベース再利用: $DB_NAME (既に存在します)"
+        # 既存のデータベースを削除して再作成
+        docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -c "DROP DATABASE $DB_NAME;" >/dev/null 2>&1
+    fi
+
     echo "   データベース作成中: $DB_NAME"
-    
-    # データベースが存在する場合は削除
-    docker compose exec -T pgsql dropdb -U sail --if-exists "$DB_NAME" 2>/dev/null || true
-    
+
     # データベース作成
-    docker compose exec -T pgsql createdb -U sail "$DB_NAME"
-    
+    docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -c "CREATE DATABASE $DB_NAME OWNER sail;" >/dev/null 2>&1
+
+    if [ $? -ne 0 ]; then
+        echo "   ❌ データベース作成に失敗しました: $DB_NAME"
+        echo "   💡 PostgreSQLログを確認してください: docker compose logs pgsql"
+        exit 1
+    fi
+
     # マイグレーション実行
     DB_CONNECTION=pgsql_testing \
     DB_TEST_HOST=pgsql \
@@ -59,7 +70,7 @@ for i in $(seq 1 $PROCESSES); do
     DB_TEST_USERNAME=sail \
     DB_TEST_PASSWORD=password \
     php artisan migrate --force --quiet
-    
+
     echo "   ✅ $DB_NAME セットアップ完了"
 done
 
