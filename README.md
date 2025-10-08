@@ -98,6 +98,7 @@ Laravel APIの最適化に関する詳細ドキュメントは `backend/laravel-
 - **`laravel-optimization-process.md`**: 最適化プロセス完了レポート
 - **`performance-report.md`**: パフォーマンス改善定量分析
 - **`development-setup.md`**: API専用開発環境構築手順
+- **`database-connection.md`**: PostgreSQL接続設定ガイド（環境別設定・タイムアウト・トラブルシューティング）
 - **`migration-guide.md`**: 他プロジェクトへの移行ガイド
 - **`troubleshooting.md`**: トラブルシューティング完全ガイド
 - **`configuration-changes.md`**: 全設定変更の詳細記録
@@ -504,6 +505,38 @@ npm run dev                           # ポート: 13001
 
 ### データベース操作
 
+#### PostgreSQL接続設定
+
+デフォルトはSQLiteですが、PostgreSQL 17に切り替え可能です。
+
+**クイックスタート:**
+
+```bash
+# 1. .envファイルでPostgreSQL設定を有効化
+cd backend/laravel-api
+cp .env.example .env
+
+# 2. PostgreSQL設定のコメントを解除（Docker環境の場合）
+# .envファイル内で以下を編集:
+DB_CONNECTION=pgsql
+DB_HOST=pgsql
+DB_PORT=13432
+
+# 3. PostgreSQLコンテナ起動
+./vendor/bin/sail up -d
+
+# 4. マイグレーション実行
+./vendor/bin/sail artisan migrate:fresh --seed
+```
+
+**環境別接続設定の詳細:**
+- Docker環境: `DB_HOST=pgsql`, `DB_PORT=13432`（内部・外部とも統一）
+- ネイティブ環境: `DB_HOST=127.0.0.1`, `DB_PORT=13432`
+- 本番環境: SSL設定必須（`DB_SSLMODE=verify-full`）
+
+詳細な接続設定、タイムアウト設定、トラブルシューティングは以下を参照:
+👉 **[PostgreSQL接続設定ガイド](backend/laravel-api/docs/database-connection.md)**
+
 #### マイグレーションとシード
 
 ```bash
@@ -588,16 +621,51 @@ composer stan:baseline        # ベースライン生成（既存エラー記録
 ./vendor/bin/sail composer stan:baseline
 ```
 
-##### テスト実行
+##### テスト実行（Pest 4）
 
 ```bash
-# テスト実行
-./vendor/bin/sail artisan test
-# php artisan test                    # ネイティブ
+# 基本テスト実行（SQLite・高速）
+./vendor/bin/pest
 
-# テストカバレッジ
-./vendor/bin/sail artisan test --coverage
+# PostgreSQL使用（本番同等）
+DB_CONNECTION=pgsql \
+DB_HOST=127.0.0.1 \
+DB_PORT=13432 \
+DB_DATABASE=testing \
+./vendor/bin/pest
+
+# 並列テスト実行（高速化）
+./vendor/bin/pest --parallel
+
+# カバレッジ付きテスト
+XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
+
+# 特定テストファイル実行
+./vendor/bin/pest tests/Feature/Auth/LoginTest.php
+
+# Docker環境
+./vendor/bin/sail exec laravel-api ./vendor/bin/pest
 ```
+
+**🔧 テスト環境管理**
+```bash
+# プロジェクトルートから便利コマンド実行
+make quick-test           # 高速SQLiteテスト
+make test-pgsql          # PostgreSQLテスト
+make test-parallel       # 並列テスト
+make test-coverage       # カバレッジテスト
+make ci-test             # CI/CD相当の完全テスト
+
+# テスト環境切り替え
+make test-switch-sqlite  # SQLite環境
+make test-switch-pgsql   # PostgreSQL環境
+
+# 並列テスト用DB管理
+make test-setup          # 並列テスト環境構築  
+make test-cleanup        # 環境クリーンアップ
+```
+
+**📋 詳細ドキュメント**: [テスト用DB設定ワークフロー](docs/TESTING_DATABASE_WORKFLOW.md)
 
 #### Next.js（フロントエンド）
 

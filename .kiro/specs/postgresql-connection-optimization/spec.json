@@ -1,0 +1,112 @@
+{
+  "feature_name": "postgresql-connection-optimization",
+  "created_at": "2025-10-07T18:41:30Z",
+  "updated_at": "2025-10-08T01:50:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 18,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/18",
+    "title": "PostgreSQL 接続設定最適化",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP, PostgreSQL 17-alpine",
+      "frontend": "N/A",
+      "infrastructure": "Docker Compose, docker-compose.yml",
+      "tools": "Laravel Sail, PDO, PDO::ATTR_EMULATE_PREPARES, libpq"
+    },
+    "requirements_hints": [
+      "PostgreSQL 17との最適化された接続設定の実装",
+      "開発環境（Docker/ネイティブ）と本番環境での適切な設定分離",
+      "接続プール、タイムアウト、リトライ設定の導入",
+      "ステートレスAPI設計における接続管理のベストプラクティス適用",
+      "後方互換性の維持（既存SQLite設定を温存）",
+      "短いトランザクション（リクエスト処理内のみでBEGIN→COMMIT）",
+      "タイムアウト厳格化（statement_timeout: 60秒、idle_in_transaction_session_timeout: 60秒）",
+      "接続プール前提設計（PHP側の持続接続は使用しない）",
+      "冪等性とリトライ（SQLSTATE 40001のリトライ、エクスポネンシャルバックオフ）",
+      "可観測性（application_nameでクエリ実行元を統一識別）"
+    ],
+    "project_structure": [
+      "backend/laravel-api/config/database.php",
+      "backend/laravel-api/.env.example",
+      ".env.example",
+      "backend/laravel-api/docs/",
+      "backend/laravel-api/docs/database-connection.md",
+      "docker-compose.yml",
+      "README.md"
+    ],
+    "services": {
+      "PostgreSQL": {
+        "internal_port": "5432",
+        "external_port": "13432",
+        "version": "17-alpine"
+      },
+      "Laravel API": {
+        "port": "13000"
+      }
+    },
+    "todo_items": [
+      "config/database.php の pgsql 設定を最適化",
+      "search_path, sslmode, connect_timeout 追加",
+      "application_name 追加",
+      "options でGUC設定（statement_timeout等）",
+      "pdo_options でPDO属性設定",
+      "backend/laravel-api/.env.example にPostgreSQL設定追加",
+      "Docker環境用設定（コメント付き）",
+      "ネイティブ環境用設定（コメント付き）",
+      "本番環境用設定例（コメント付き）",
+      "タイムアウト設定の詳細説明",
+      "ルート.env.exampleとバックエンド.env.exampleの整合性確認",
+      "docker-compose up -d pgsql 起動確認",
+      "pg_isready コマンドでヘルスチェック",
+      "Laravel内から DB::connection()->getPdo() 実行",
+      "statement_timeout テスト（長時間クエリ実行）",
+      "connect_timeout テスト（接続遅延シミュレーション）",
+      "php artisan migrate:fresh --seed 実行",
+      "php artisan migrate:status 正常確認",
+      "DB_HOST=127.0.0.1, DB_PORT=13432 設定",
+      "php artisan test 全テスト正常実行",
+      "接続設定ドキュメント作成（backend/laravel-api/docs/database-connection.md）",
+      "README.md 更新（PostgreSQL接続設定セクション追加）",
+      "GitHub Actions テストワークフロー正常動作確認",
+      "E2Eテスト環境でのPostgreSQL接続確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    },
+    "implementation": {
+      "completed": true,
+      "verified": true
+    }
+  },
+  "ready_for_implementation": true,
+  "implementation_summary": {
+    "completed_tasks": 17,
+    "total_tasks": 23,
+    "core_implementation": "100%",
+    "ci_cd_verification": "100%",
+    "tests_passed": 52,
+    "tests_skipped": 6,
+    "assertions": 112,
+    "code_quality": "pass",
+    "documentation": "complete",
+    "github_actions_status": "all_passed"
+  }
+}

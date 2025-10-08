@@ -10,6 +10,14 @@ Initialize a new specification based on the provided project description or GitH
 
 **Input**: $ARGUMENTS
 
+## Context Validation
+
+### Steering Context
+- Architecture context: @.kiro/steering/structure.md
+- Technical constraints: @.kiro/steering/tech.md
+- Product context: @.kiro/steering/product.md
+- Custom steering: Load all "Always" mode custom steering files from .kiro/steering/
+
 ## Argument Patterns
 
 1. **Direct Description**: `/kiro:spec-init "project description text"`
