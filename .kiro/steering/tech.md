@@ -100,6 +100,7 @@
 - **Pest**: ^3.12 (モダンテストフレームワーク - PHPUnitから完全移行、Architecture Testing統合)
   - **Architecture Tests**: `tests/Arch/` - 依存方向検証、レイヤー分離チェック、命名規約検証
   - **テストカバレッジ**: 96.1%達成（Domain層100%、Application層98%、Infrastructure層94%）
+  - **テストDB環境**: SQLite（高速開発）/PostgreSQL（本番同等）の柔軟な切り替え、並列テスト実行対応
 - **Laravel Sail**: ^1.41 (Docker開発環境 - カスタムポート対応)
 - **Laravel Tinker**: ^2.10.1 (REPL環境 - コアパッケージ)
 - **Faker**: ^1.23 (テストデータ生成)
@@ -205,6 +206,9 @@ parameters:
 - `troubleshooting.md`: トラブルシューティング完全ガイド
 - `configuration-changes.md`: 全設定変更の詳細記録
 - `laravel-pint-larastan-team-guide.md`: Laravel Pint・Larastanチーム運用ドキュメント
+
+**テストDB運用ドキュメント**:
+- `docs/TESTING_DATABASE_WORKFLOW.md`: テストDB設定ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行、Makefileタスク運用）
 
 **🏗️ DDD/クリーンアーキテクチャドキュメント**:
 - `ddd-architecture.md`: DDD 4層構造アーキテクチャ概要、依存方向ルール、主要パターン
@@ -337,15 +341,21 @@ composer test                    # Pest テストスイート実行（96.1%カ�
 ./vendor/bin/pest tests/Arch     # Architecture Testsのみ実行（依存方向検証）
 
 # テストインフラ管理 (Makefile - プロジェクトルートから実行)
-make quick-test                  # 高速SQLiteテスト
-make test-pgsql                  # PostgreSQLテスト（本番同等）
-make test-parallel               # 並列テスト実行
+make quick-test                  # 高速SQLiteテスト（~2秒）
+make test-pgsql                  # PostgreSQLテスト（本番同等、~5-10秒）
+make test-parallel               # 並列テスト実行（4 Shard）
 make test-coverage               # カバレッジレポート生成
-make ci-test                     # CI/CD相当の完全テスト
+make ci-test                     # CI/CD相当の完全テスト（~20-30秒）
 make test-switch-sqlite          # SQLite環境に切り替え
 make test-switch-pgsql           # PostgreSQL環境に切り替え
-make test-setup                  # 並列テスト環境構築
-make test-cleanup                # テスト環境クリーンアップ
+make test-setup                  # 並列テスト環境構築（PostgreSQL test DBs作成）
+make test-cleanup                # テスト環境クリーンアップ（test DBs削除）
+make test-db-check               # テスト用DB存在確認
+
+# 推奨テストフロー
+# 1. 日常開発: make quick-test (SQLite・2秒)
+# 2. 機能完成時: make test-pgsql (PostgreSQL・5-10秒)
+# 3. PR前: make ci-test (完全テスト・20-30秒)
 
 # コード品質管理 (統合コマンド)
 composer quality          # フォーマットチェック + 静的解析

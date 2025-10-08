@@ -18,6 +18,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **ステートレスAPI設計**: Laravel Sanctumトークン認証による水平スケーリング対応
 - **PostgreSQL接続最適化**: タイムアウト設定・環境別設定・信頼性向上（接続5秒、ステートメント30秒）
 - **モダンテストフレームワーク**: Pest 4による包括的テストスイート（96.1%カバレッジ達成）、Architecture Testing統合
+- **テストDB環境切り替え**: SQLite（高速開発）/PostgreSQL（本番同等）の柔軟な切り替え、並列テスト実行（4 Shard）、Makefileタスク統合
 - **フロントエンドテスト環境**: Jest 29 + Testing Library 16完全実装（カバレッジ94.73%達成）
 - **E2Eテスト環境**: Playwright 1.47.2 + Docker実行対応、Laravel Sanctum認証統合、Page Object Modelパターン採用
 - **E2E CI/CD自動実行**: GitHub Actions統合完了、Pull Request時の自動E2Eテスト実行（4 Shard並列実行、約2分完了）
@@ -48,7 +49,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **本番環境対応**: Dockerベースの構成とステートレス設計による環境差異の最小化
 - **移行容易性**: 詳細ドキュメントによる他プロジェクトへの最適化手法適用可能
 - **品質管理の自動化**: Git Hooks + CI/CDによる自動品質チェック、人的エラー削減
-- **完全なテスト戦略**: ユニット（Jest/Pest）→統合（Testing Library）→E2E（Playwright + Docker）の3層テスト体制
+- **完全なテスト戦略**: ユニット（Jest/Pest）→統合（Testing Library）→E2E（Playwright + Docker）の3層テスト体制、テストDB環境管理（SQLite/PostgreSQL切り替え、並列実行）
 - **高速CI/CDパイプライン**: Composerキャッシング、並列実行最適化、タイムアウト短縮による開発効率向上
 - **インテリジェントCI/CD**: Paths設定による必要最小限のワークフロー実行、Concurrencyによる重複実行自動キャンセル、API契約変更の早期検出
 

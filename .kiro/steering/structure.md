@@ -23,6 +23,7 @@ laravel-next-b2c/
 ├── docker-compose.yml   # Docker Compose統合設定（全サービス一括起動、ヘルスチェック統合）
 ├── .dockerignore        # Dockerビルド除外設定（モノレポ対応）
 ├── .gitignore           # 統合ファイル除外設定 (モノレポ対応)
+├── Makefile             # テストインフラ管理タスク（quick-test, test-pgsql, test-parallel, test-setup, etc.）
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
 ├── node_modules/        # 共通依存関係
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
@@ -71,13 +72,14 @@ laravel-api/
 │   ├── migrations/      # マイグレーション
 │   └── seeders/         # シーダー
 ├── docker/              # Docker設定 (PHP 8.0-8.4対応)
-├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証）
+├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証 + テストDB運用）
 │   ├── ddd-architecture.md        # DDD 4層構造アーキテクチャ概要
 │   ├── ddd-development-guide.md   # DDD開発ガイドライン
 │   ├── ddd-testing-strategy.md    # DDD層別テスト戦略
 │   ├── ddd-troubleshooting.md     # DDDトラブルシューティング
 │   ├── database-connection.md     # PostgreSQL接続設定ガイド（環境別設定・タイムアウト最適化・トラブルシューティング）
 │   ├── VERIFICATION.md            # Dockerヘルスチェック検証手順ドキュメント
+│   ├── TESTING_DATABASE_WORKFLOW.md  # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
 │   └── [その他最適化ドキュメント]
 ├── public/              # 公開ディレクトリ (エントリーポイント)
 ├── resources/           # リソースファイル
@@ -401,6 +403,10 @@ import { clsx } from 'clsx'
   - フロントエンド: `frontend/{admin-app,user-app}/Dockerfile` - Next.js イメージ定義
   - ルート: `.dockerignore` - ビルド除外設定
   - ドキュメント: `backend/laravel-api/docs/VERIFICATION.md` - Dockerヘルスチェック検証手順
+- **テストインフラ設定**:
+  - ルート: `Makefile` - テストDB管理タスク（quick-test, test-pgsql, test-parallel, test-setup等）
+  - ルート: `scripts/` - テスト環境切り替え・並列テストスクリプト
+  - ドキュメント: `docs/TESTING_DATABASE_WORKFLOW.md` - テストDB運用ワークフローガイド
 - **開発ツール設定**: 各ディレクトリに適切な設定ファイル
 - **PHP品質管理設定**:
   - `backend/laravel-api/pint.json` - Laravel Pint設定
@@ -424,10 +430,12 @@ import { clsx } from 'clsx'
      - Unit Tests: Domain層ロジックテスト（Domain層100%カバレッジ）
      - Feature Tests: Application層統合テスト（Application層98%カバレッジ）
      - 🏗️ Architecture Tests: 依存方向検証、レイヤー分離チェック、命名規約検証
+     - テストDB環境: SQLite（高速開発）/PostgreSQL（本番同等）の柔軟な切り替え、並列テスト実行（4 Shard）
    - フロントエンド: Jest 29 + Testing Library 16（カバレッジ94.73%）
    - E2E: Playwright 1.47.2によるエンドツーエンドテスト
    - テストサンプル: Client Component、Server Actions、Custom Hooks、API Fetch
    - Page Object Model: E2Eテストの保守性向上パターン
+   - Makefileタスク: テストインフラ管理の標準化（quick-test, test-pgsql, ci-test）
 6. **環境分離**: 開発、ステージング、本番環境の明確な分離
 7. **品質管理の自動化**:
    - Git Hooks (pre-commit: lint-staged, pre-push: composer quality)
