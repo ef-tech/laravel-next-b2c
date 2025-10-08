@@ -52,12 +52,12 @@ for i in $(seq 1 $PROCESSES); do
     docker compose exec -T pgsql createdb -U sail "$DB_NAME"
     
     # マイグレーション実行
-    DB_CONNECTION=pgsql \
-    DB_HOST=127.0.0.1 \
-    DB_PORT=13432 \
-    DB_DATABASE="$DB_NAME" \
-    DB_USERNAME=sail \
-    DB_PASSWORD=password \
+    DB_CONNECTION=pgsql_testing \
+    DB_TEST_HOST=pgsql \
+    DB_TEST_PORT=13432 \
+    DB_TEST_DATABASE="$DB_NAME" \
+    DB_TEST_USERNAME=sail \
+    DB_TEST_PASSWORD=password \
     php artisan migrate --force --quiet
     
     echo "   ✅ $DB_NAME セットアップ完了"

@@ -30,6 +30,7 @@ case "$1" in
             echo "   - 実行コマンド: ./vendor/bin/pest"
         else
             echo "❌ SQLite設定ファイルが見つかりません: $LARAVEL_DIR/.env.testing.sqlite"
+            echo "   💡 .env.testing.sqlite.example をコピーして作成してください"
             exit 1
         fi
         ;;
@@ -37,14 +38,16 @@ case "$1" in
         if [ -f "$LARAVEL_DIR/.env.testing.pgsql" ]; then
             cp "$LARAVEL_DIR/.env.testing.pgsql" "$LARAVEL_DIR/.env.testing"
             echo "✅ PostgreSQLテスト環境に切り替えました"
-            echo "   - データベース: PostgreSQL"
-            echo "   - ホスト: 127.0.0.1:13432"
-            echo "   - 実行コマンド: ./vendor/bin/pest --env=testing"
+            echo "   - データベース: PostgreSQL (pgsql_testing)"
+            echo "   - ホスト: pgsql:13432"
+            echo "   - DB名: app_test"
+            echo "   - 実行コマンド: ./vendor/bin/pest"
             echo ""
             echo "📋 Docker環境の起動が必要です:"
             echo "   docker compose up -d pgsql"
         else
             echo "❌ PostgreSQL設定ファイルが見つかりません: $LARAVEL_DIR/.env.testing.pgsql"
+            echo "   💡 .env.testing.pgsql.example をコピーして作成してください"
             exit 1
         fi
         ;;
@@ -54,6 +57,11 @@ case "$1" in
         exit 1
         ;;
 esac
+
+# 設定キャッシュクリア
+echo ""
+echo "🧹 設定キャッシュをクリアしています..."
+cd "$LARAVEL_DIR" && php artisan config:clear > /dev/null 2>&1
 
 echo ""
 echo "🔄 設定を確認してください:"
