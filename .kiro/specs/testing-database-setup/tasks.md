@@ -124,57 +124,57 @@
   - 各ターゲットが適切なワーキングディレクトリで実行されることを検証
   - _Requirements: 5.10, 5.11_
 
-## Phase 4: Docker環境でのテスト用DB提供
+## Phase 4: Docker環境でのテスト用DB提供 ✅
 
-- [ ] 7. Docker環境でのテストデータベース準備
-- [ ] 7.1 PostgreSQLコンテナでのテスト用DB作成
+- [x] 7. Docker環境でのテストデータベース準備
+- [x] 7.1 PostgreSQLコンテナでのテスト用DB作成
   - Laravel Sail環境でPostgreSQLコンテナが起動していることを確認
   - `./vendor/bin/sail psql`コマンドでテスト用DB `app_test`を作成
   - DB所有者を`sail`ユーザーに設定
   - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] 7.2 テスト用DB存在確認機能の実装
+- [x] 7.2 テスト用DB存在確認機能の実装
   - PostgreSQL `\l`コマンドで`app_test`が表示されることを確認
   - DB存在確認スクリプトまたはMakefileターゲットの追加（オプション）
   - _Requirements: 6.4_
 
-- [ ] 7.3 Docker環境エラーハンドリングの実装
+- [x] 7.3 Docker環境エラーハンドリングの実装
   - PostgreSQLコンテナ未起動時の明確なエラーメッセージ表示
   - ポート`13432`でホストに公開されていることを確認
   - _Requirements: 6.5, 6.6_
 
-## Phase 5: CI/CD並列PostgreSQLテスト実行
+## Phase 5: CI/CD並列PostgreSQLテスト実行 ✅
 
-- [ ] 8. GitHub Actions並列PostgreSQLテストジョブの追加
-- [ ] 8.1 PostgreSQL Serviceコンテナの設定
+- [x] 8. GitHub Actions並列PostgreSQLテストジョブの追加
+- [x] 8.1 PostgreSQL Serviceコンテナの設定
   - `.github/workflows/test.yml`にPostgreSQL 17 Serviceコンテナを追加
   - ヘルスチェック機能（`pg_isready -U sail`）を設定
   - ポート`13432:5432`のマッピング設定
   - _Requirements: 7.3, 7.4_
 
-- [ ] 8.2 4並列Matrixジョブの実装
+- [x] 8.2 4並列Matrixジョブの実装
   - `strategy.matrix.shard: [1, 2, 3, 4]`で4並列実行設定
   - 各Shardで独立したテスト用DB（`testing_1`〜`testing_4`）を作成
   - DB作成ステップ: `PGPASSWORD=password psql -h 127.0.0.1 -U sail -d postgres -c 'CREATE DATABASE testing_${{ matrix.shard }};'`
   - _Requirements: 7.1, 7.2, 7.5_
 
-- [ ] 8.3 並列テスト実行環境変数の設定
+- [x] 8.3 並列テスト実行環境変数の設定
   - 環境変数`DB_CONNECTION=pgsql_testing`を設定
   - 環境変数`DB_TEST_DATABASE=testing_${{ matrix.shard }}`を設定
   - その他のPostgreSQL接続環境変数（`DB_TEST_HOST`、`DB_TEST_PORT`、認証情報）を設定
   - _Requirements: 7.6, 7.7_
 
-- [ ] 8.4 Pest Shardテスト実行の実装
+- [x] 8.4 Pest Shardテスト実行の実装
   - `./vendor/bin/pest --shard=${{ matrix.shard }}/4`コマンドで各Shard実行
   - マイグレーション実行ステップの追加（各Shard用DB）
   - _Requirements: 7.8_
 
-- [ ] 8.5 ワークフロートリガー設定の最適化
+- [x] 8.5 ワークフロートリガー設定の最適化
   - `paths`フィルターでバックエンドファイル変更時のみ実行（`backend/laravel-api/**`）
   - Pull Request作成時の自動実行設定
   - _Requirements: 7.9, 7.1_
 
-- [ ] 8.6 ワークフロー配置とファイル名の確認
+- [x] 8.6 ワークフロー配置とファイル名の確認
   - ワークフローファイルが`.github/workflows/test.yml`に配置されていることを確認
   - 既存のテストジョブと共存できることを検証
   - _Requirements: 7.10_
