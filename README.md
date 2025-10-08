@@ -520,7 +520,7 @@ cp .env.example .env
 # .envファイル内で以下を編集:
 DB_CONNECTION=pgsql
 DB_HOST=pgsql
-DB_PORT=5432
+DB_PORT=13432
 
 # 3. PostgreSQLコンテナ起動
 ./vendor/bin/sail up -d
@@ -530,7 +530,7 @@ DB_PORT=5432
 ```
 
 **環境別接続設定の詳細:**
-- Docker環境: `DB_HOST=pgsql`, `DB_PORT=5432`
+- Docker環境: `DB_HOST=pgsql`, `DB_PORT=13432`（内部・外部とも統一）
 - ネイティブ環境: `DB_HOST=127.0.0.1`, `DB_PORT=13432`
 - 本番環境: SSL設定必須（`DB_SSLMODE=verify-full`）
 

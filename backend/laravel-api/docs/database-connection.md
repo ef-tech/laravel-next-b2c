@@ -36,7 +36,7 @@ Docker Compose使用時の推奨設定です。
 # .env
 DB_CONNECTION=pgsql
 DB_HOST=pgsql                    # Docker内: service名
-DB_PORT=5432                     # Docker内: 5432
+DB_PORT=13432                    # Docker内: 13432（内部・外部とも統一）
 DB_DATABASE=laravel
 DB_USERNAME=sail
 DB_PASSWORD=secret

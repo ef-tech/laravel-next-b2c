@@ -133,21 +133,51 @@ test('lock_timeout設定が正しく適用されている', function () {
  * 期待動作:
  * - statement_timeout, idle_in_transaction_session_timeout, lock_timeout が
  *   環境変数の値と一致している
+ *
+ * 注: PostgreSQLは値を人間が読みやすい形式（例: 60000ms → 1min）に変換して返す場合があります
  */
 test('タイムアウト設定値がPostgreSQLセッションに正しく適用されている', function () {
     $expectedStatementTimeout = (int) config('database.connections.pgsql.statement_timeout', 60000);
     $expectedIdleTxTimeout = (int) config('database.connections.pgsql.idle_in_transaction_session_timeout', 60000);
     $expectedLockTimeout = (int) config('database.connections.pgsql.lock_timeout', 0);
 
+    // PostgreSQLは値を人間が読みやすい形式に変換するため、ミリ秒単位で比較
+    $convertToMs = function (string $value): int {
+        // '0' の場合
+        if ($value === '0') {
+            return 0;
+        }
+
+        // 'Xmin' の場合（例: 1min）
+        if (preg_match('/^(\d+)min$/', $value, $matches)) {
+            return (int) $matches[1] * 60 * 1000;
+        }
+
+        // 'Xs' の場合（例: 5s）
+        if (preg_match('/^(\d+)s$/', $value, $matches)) {
+            return (int) $matches[1] * 1000;
+        }
+
+        // 'Xms' の場合（例: 60000ms）
+        if (preg_match('/^(\d+)ms$/', $value, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return 0;
+    };
+
     // statement_timeout確認
     $result = DB::select('SHOW statement_timeout');
-    expect($result[0]->statement_timeout ?? '')->toBe("{$expectedStatementTimeout}ms");
+    $actualMs = $convertToMs($result[0]->statement_timeout ?? '0');
+    expect($actualMs)->toBe($expectedStatementTimeout);
 
     // idle_in_transaction_session_timeout確認
     $result = DB::select('SHOW idle_in_transaction_session_timeout');
-    expect($result[0]->idle_in_transaction_session_timeout ?? '')->toBe("{$expectedIdleTxTimeout}ms");
+    $actualMs = $convertToMs($result[0]->idle_in_transaction_session_timeout ?? '0');
+    expect($actualMs)->toBe($expectedIdleTxTimeout);
 
     // lock_timeout確認
     $result = DB::select('SHOW lock_timeout');
-    expect($result[0]->lock_timeout ?? '')->toBe($expectedLockTimeout === 0 ? '0' : "{$expectedLockTimeout}ms");
+    $actualMs = $convertToMs($result[0]->lock_timeout ?? '0');
+    expect($actualMs)->toBe($expectedLockTimeout);
 })->skip(fn () => config('database.default') !== 'pgsql', 'PostgreSQL接続が必要');
