@@ -92,16 +92,20 @@ jobs:
         run: php artisan key:generate
         working-directory: backend/laravel-api
 
+      - name: Create shard test database
+        run: PGPASSWORD=password psql -h 127.0.0.1 -p 13432 -U sail -d postgres -c "CREATE DATABASE testing_${{ matrix.shard }} OWNER sail;"
+        working-directory: backend/laravel-api
+
       - name: Run database migrations
         run: php artisan migrate --force
         working-directory: backend/laravel-api
         env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 13432
-          DB_DATABASE: testing
-          DB_USERNAME: sail
-          DB_PASSWORD: password
+          DB_CONNECTION: pgsql_testing
+          DB_TEST_HOST: 127.0.0.1
+          DB_TEST_PORT: 13432
+          DB_TEST_DATABASE: testing_${{ matrix.shard }}
+          DB_TEST_USERNAME: sail
+          DB_TEST_PASSWORD: password
 
       - name: Set up test environment
         run: |
@@ -109,12 +113,12 @@ jobs:
           php artisan cache:clear
         working-directory: backend/laravel-api
         env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 13432
-          DB_DATABASE: testing
-          DB_USERNAME: sail
-          DB_PASSWORD: password
+          DB_CONNECTION: pgsql_testing
+          DB_TEST_HOST: 127.0.0.1
+          DB_TEST_PORT: 13432
+          DB_TEST_DATABASE: testing_${{ matrix.shard }}
+          DB_TEST_USERNAME: sail
+          DB_TEST_PASSWORD: password
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 13379
           CACHE_STORE: array
@@ -123,12 +127,12 @@ jobs:
         run: ./vendor/bin/pest --shard=${{ matrix.shard }}/4
         working-directory: backend/laravel-api
         env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 13432
-          DB_DATABASE: testing
-          DB_USERNAME: sail
-          DB_PASSWORD: password
+          DB_CONNECTION: pgsql_testing
+          DB_TEST_HOST: 127.0.0.1
+          DB_TEST_PORT: 13432
+          DB_TEST_DATABASE: testing_${{ matrix.shard }}
+          DB_TEST_USERNAME: sail
+          DB_TEST_PASSWORD: password
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 13379
 
