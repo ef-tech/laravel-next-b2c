@@ -360,11 +360,67 @@ foreach ($queries as $query) {
 
 ### タイムアウト動作確認
 
+#### 手動テスト（Tinker）
+
 ```bash
 ./vendor/bin/sail artisan tinker
 >>> DB::select('SELECT pg_sleep(61)'); // 60秒タイムアウトを超過
 # 期待: SQLSTATE[57014] エラー
 ```
+
+#### 自動テスト（Pest）
+
+**SQLite環境（デフォルト）:**
+
+```bash
+# PostgreSQLタイムアウトテストは自動的にスキップされます
+./vendor/bin/pest tests/Feature/Database/PostgresTimeoutTest.php
+
+# 出力例:
+# WARN  Tests\Feature\Database\PostgresTimeoutTest
+#   - statement_timeout超過で適切なエラーが発生する → PostgreSQL接続が必要
+#   - (他5件も同様にスキップ)
+# Tests:    6 skipped (0 assertions)
+```
+
+**PostgreSQL環境（テスト実行）:**
+
+PostgreSQL接続を使用してタイムアウトテストを実行する場合:
+
+```bash
+# 1. PostgreSQLコンテナが起動していることを確認
+docker-compose ps pgsql
+
+# 2. .env.testing.pgsqlを使用してテスト実行
+cp .env.testing.pgsql .env.testing
+./vendor/bin/pest tests/Feature/Database/PostgresTimeoutTest.php
+
+# 期待される結果:
+# PASS  Tests\Feature\Database\PostgresTimeoutTest
+#   ✓ statement_timeout超過で適切なエラーが発生する
+#   ✓ statement_timeout未超過のクエリは正常実行される
+#   ✓ connect_timeoutの範囲内で接続が確立される
+#   ✓ lock_timeout設定が正しく適用されている
+#   ✓ タイムアウト設定値がPostgreSQLセッションに正しく適用されている
+# Tests:    5 passed (1 skipped)
+# Duration: ~7s
+```
+
+**テスト内容:**
+
+| テスト名 | 検証内容 | 実行時間 |
+|---------|---------|---------|
+| `statement_timeout超過で適切なエラーが発生する` | 6秒スリープでタイムアウトエラー確認 | ~6s |
+| `statement_timeout未超過のクエリは正常実行される` | 1秒スリープで正常実行確認 | ~1s |
+| `idle_in_transaction_session_timeout超過` | 6秒アイドルトランザクションでエラー確認 | スキップ推奨 |
+| `connect_timeoutの範囲内で接続が確立される` | 接続確立時間が5秒以内であることを確認 | <1s |
+| `lock_timeout設定が正しく適用されている` | `SHOW lock_timeout`で設定値確認 | <1s |
+| `タイムアウト設定値がPostgreSQLセッションに正しく適用されている` | 全タイムアウト設定値の確認 | <1s |
+
+**注意事項:**
+- `idle_in_transaction_session_timeout`テストは実行時間が長いため、デフォルトでスキップされます
+- テスト環境では`DB_STATEMENT_TIMEOUT=5000`（5秒）に短縮しています
+- 本番環境では`DB_STATEMENT_TIMEOUT=60000`（60秒）を推奨
 
 ## 推奨監視項目
 
