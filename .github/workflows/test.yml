@@ -93,7 +93,7 @@ jobs:
         working-directory: backend/laravel-api
 
       - name: Create shard test database
-        run: PGPASSWORD=password psql -h 127.0.0.1 -p 13432 -U sail -d postgres -c "CREATE DATABASE testing_${{ matrix.shard }} OWNER sail;"
+        run: PGPASSWORD=password psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 13432 -U sail -d postgres -c "CREATE DATABASE testing_${{ matrix.shard }} OWNER sail;"
         working-directory: backend/laravel-api
 
       - name: Run database migrations
