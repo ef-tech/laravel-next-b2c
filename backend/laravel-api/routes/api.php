@@ -1,11 +1,26 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TokenController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Public routes
 Route::post('/users', [UserController::class, 'register']);
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Login with rate limiting (5 attempts per minute)
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Protected routes with rate limiting (60 requests per minute)
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+
+    // Token management
+    Route::post('/tokens', [TokenController::class, 'store']);
+    Route::get('/tokens', [TokenController::class, 'index']);
+    Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
+    Route::delete('/tokens', [TokenController::class, 'destroyAll']);
+});

@@ -30,7 +30,7 @@ return [
     |
     */
 
-    'guard' => ['api'],
+    'guard' => ['web'],
 
     /*
     |--------------------------------------------------------------------------
@@ -41,9 +41,15 @@ return [
     | considered expired. This will override any values set in the token's
     | "expires_at" attribute, but first-party sessions are not affected.
     |
+    | Development: null (unlimited) - 開発環境では無期限トークン
+    | Production: 10080 (7 days) - 本番環境では7日間の有効期限を推奨
+    |
+    | Note: 本番環境では以下の環境変数を設定してください:
+    | SANCTUM_EXPIRATION=10080
+    |
     */
 
-    'expiration' => null,
+    'expiration' => env('SANCTUM_EXPIRATION', null),
 
     /*
     |--------------------------------------------------------------------------

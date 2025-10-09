@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'sanctum'),
+        'guard' => env('AUTH_GUARD', 'api'),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
@@ -41,11 +41,11 @@ return [
             'provider' => 'users',
         ],
 
-        'sanctum' => [
-            'driver' => 'sanctum',
-            'provider' => 'users',
-        ],
-
+        // Note: This 'api' guard uses the 'sanctum' driver, but in routes/api.php,
+        // we use 'auth:sanctum' middleware instead. 'auth:sanctum' is a special
+        // middleware alias provided by Laravel Sanctum that combines
+        // EnsureFrontendRequestsAreStateful and Authenticate middlewares.
+        // It's different from using 'auth:api' guard.
         'api' => [
             'driver' => 'sanctum',
             'provider' => 'users',
