@@ -58,21 +58,35 @@ laravel-api/
 │           └── Services/           # サービス実装（LaravelTransactionManager.php, LaravelEventBus.php）
 ├── app/                 # Laravel標準アプリケーション層（既存MVC共存）
 │   ├── Console/         # Artisanコマンド
+│   │   └── Commands/    # カスタムコマンド
+│   │       └── PruneExpiredTokens.php  # 🔐 期限切れトークン削除コマンド（tokens:prune）
 │   ├── Http/            # 🏗️ HTTP層（DDD統合）
 │   │   ├── Controllers/ # Controllerからユースケース呼び出し
+│   │   │   ├── Auth/    # 🔐 認証コントローラー
+│   │   │   │   ├── LoginController.php     # ログイン処理（POST /api/login, POST /api/logout）
+│   │   │   │   ├── MeController.php        # 認証ユーザー情報（GET /api/me）
+│   │   │   │   └── TokenController.php     # トークン管理（GET /api/tokens, POST /api/tokens/{id}/revoke）
 │   │   ├── Middleware/  # ミドルウェア
+│   │   │   └── Authenticate.php  # 🔐 Sanctum認証ミドルウェア（auth:sanctum）
 │   │   ├── Requests/    # リクエストバリデーション
+│   │   │   └── Auth/    # 🔐 認証リクエスト
+│   │   │       └── LoginRequest.php  # ログインバリデーション（email, password必須）
 │   │   └── Resources/   # APIリソース
+│   │       └── UserResource.php  # ユーザーAPIレスポンス
 │   ├── Models/          # Eloquentモデル（Infrastructure層で使用）
+│   │   └── User.php     # 🔐 Userモデル（HasApiTokens trait使用）
 │   └── Providers/       # サービスプロバイダー（DI設定含む）
 ├── bootstrap/           # アプリケーション初期化
 ├── config/              # 設定ファイル
+│   ├── sanctum.php      # 🔐 Sanctum認証設定（stateful_domains, expiration等）
+│   └── auth.php         # 認証設定（guards: sanctum）
 ├── database/            # データベース関連
 │   ├── factories/       # モデルファクトリー
 │   ├── migrations/      # マイグレーション
+│   │   └── 2019_12_14_000001_create_personal_access_tokens_table.php  # 🔐 Sanctumトークンテーブル
 │   └── seeders/         # シーダー
 ├── docker/              # Docker設定 (PHP 8.0-8.4対応)
-├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証 + テストDB運用）
+├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証 + テストDB運用 + 認証）
 │   ├── ddd-architecture.md        # DDD 4層構造アーキテクチャ概要
 │   ├── ddd-development-guide.md   # DDD開発ガイドライン
 │   ├── ddd-testing-strategy.md    # DDD層別テスト戦略
@@ -80,6 +94,7 @@ laravel-api/
 │   ├── database-connection.md     # PostgreSQL接続設定ガイド（環境別設定・タイムアウト最適化・トラブルシューティング）
 │   ├── VERIFICATION.md            # Dockerヘルスチェック検証手順ドキュメント
 │   ├── TESTING_DATABASE_WORKFLOW.md  # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
+│   ├── sanctum-authentication-guide.md  # 🔐 Sanctum認証ガイド（エンドポイント、トークン管理、セキュリティ設定、トラブルシューティング）
 │   └── [その他最適化ドキュメント]
 ├── public/              # 公開ディレクトリ (エントリーポイント)
 ├── resources/           # リソースファイル
@@ -88,11 +103,23 @@ laravel-api/
 │   └── views/           # Bladeテンプレート
 ├── routes/              # ルート定義
 │   ├── api.php          # API専用ルート
+│   │                    # 🔐 認証エンドポイント:
+│   │                    #   - POST /api/login (LoginController@login)
+│   │                    #   - POST /api/logout (LoginController@logout, auth:sanctum)
+│   │                    #   - GET /api/me (MeController@show, auth:sanctum)
+│   │                    #   - GET /api/tokens (TokenController@index, auth:sanctum)
+│   │                    #   - POST /api/tokens/{id}/revoke (TokenController@revoke, auth:sanctum)
+│   │                    #   - POST /api/tokens/refresh (TokenController@refresh, auth:sanctum)
 │   ├── web.php          # Web画面ルート
 │   └── console.php      # コンソールルート
+│                        # 🔐 Scheduled Tasks:
+│                        #   - tokens:prune (PruneExpiredTokens, 毎日実行)
 ├── storage/             # ストレージ (ログ、キャッシュ、アップロード)
 ├── tests/               # 🏗️ テストスイート (Pest 4 + Architecture Tests: 96.1%カバレッジ)
 │   ├── Feature/         # 機能テスト（HTTP層統合テスト）
+│   │   └── Auth/        # 🔐 認証機能テスト
+│   │       ├── LoginTest.php          # ログイン・ログアウトテスト（12テスト）
+│   │       └── TokenManagementTest.php # トークン管理テスト（一覧取得、無効化、更新）
 │   ├── Unit/            # ユニットテスト（ドメインロジックテスト）
 │   ├── Arch/            # 🏗️ Architecture Tests（依存方向検証、レイヤー分離チェック）
 │   │   ├── DomainLayerTest.php         # Domain層依存チェック
@@ -327,8 +354,9 @@ use App\Http\Requests\Api\RegisterUserRequest;
 use App\Http\Resources\UserResource;
 
 // 5. Sanctum認証（コアパッケージ）
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\HasApiTokens;           // Personal Access Tokens trait
+use Laravel\Sanctum\PersonalAccessToken;    // トークンモデル
+use Illuminate\Support\Facades\Auth;        // 認証ファサード
 
 // 6. 最小必要パッケージのみ
 use Illuminate\Support\Facades\DB;
@@ -354,12 +382,18 @@ import { notFound } from 'next/navigation'
 
 // 内部モジュール (相対パス避ける)
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/hooks/useAuth'        // Sanctumトークン認証対応
+import { useAuth } from '@/hooks/useAuth'        // 🔐 Sanctumトークン認証カスタムフック
 import type { User, ApiResponse } from '@/types/api'  // APIレスポンス型
 
-// API通信 (Laravel API専用最適化対応)
+// API通信 (Laravel API専用最適化対応 + 🔐 Sanctum認証統合)
 import axios from 'axios'
 import { apiClient } from '@/lib/api-client'     // Sanctum認証統合
+// 🔐 Sanctum認証APIエンドポイント:
+// - POST /api/login: { email, password } → { token, user }
+// - POST /api/logout: Authorization Bearer token
+// - GET /api/me: Authorization Bearer token → user
+// - GET /api/tokens: Authorization Bearer token → tokens[]
+// - POST /api/tokens/{id}/revoke: Authorization Bearer token
 import { clsx } from 'clsx'
 ```
 

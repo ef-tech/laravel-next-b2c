@@ -15,7 +15,11 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **デュアルフロントエンド構成**: 管理者用ダッシュボードとユーザー向けアプリの分離
 - **モダンな技術スタック**: Next.js 15.5 + React 19 + Laravel 12 + TypeScript
 - **完全なDocker環境**: Docker Compose統合による全サービス一括起動（5分セットアップ）、ヘルスチェック機能統合
-- **ステートレスAPI設計**: Laravel Sanctumトークン認証による水平スケーリング対応
+- **🔐 Laravel Sanctum認証基盤**: ステートレストークン認証による水平スケーリング対応
+  - **認証エンドポイント**: Login/Logout、パスワードリセット対応
+  - **トークン管理**: 発行、一覧取得、取り消し、更新機能
+  - **セキュリティ強化**: トークン有効期限設定、自動期限切れトークン削除（日次スケジュール実行）
+  - **統合認証ガード**: Sanctum middleware統合、API保護機能
 - **PostgreSQL接続最適化**: タイムアウト設定・環境別設定・信頼性向上（接続5秒、ステートメント30秒）
 - **モダンテストフレームワーク**: Pest 4による包括的テストスイート（96.1%カバレッジ達成）、Architecture Testing統合
 - **テストDB環境切り替え**: SQLite（高速開発）/PostgreSQL（本番同等）の柔軟な切り替え、並列テスト実行（4 Shard）、Makefileタスク統合
@@ -63,7 +67,13 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **Architecture Testing**: Pestによる依存方向とレイヤー分離の自動検証
 - **最小依存関係**: Laravel 12 + Sanctum + Tinker + Pintの4コアパッケージ構成
 - **フロントエンド分離**: 管理者とユーザーの異なるUIニーズに対応
-- **トークンベース認証**: Laravel Sanctumによるセキュアなステートレス認証
+- **🔐 Laravel Sanctumトークンベース認証**:
+  - **ステートレス設計**: セッション不使用、水平スケーリング対応
+  - **Personal Access Tokens**: UUIDベーストークン、有効期限管理
+  - **認証エンドポイント**: `/api/login`, `/api/logout`, `/api/me`, `/api/tokens/*`
+  - **トークンライフサイクル管理**: 自動期限切れ削除（Scheduled Tasks統合）、手動取り消し機能
+  - **セキュリティベストプラクティス**: `auth:sanctum` middleware、CSRF保護、レート制限対応
+  - **PHPStan Level 8準拠**: 型安全性保証、静的解析合格
 - **CORS最適化**: Next.js フロントエンドとの完全統合設定
 - **モジュラー構成**: 各コンポーネントの独立開発・デプロイ可能、既存MVCとDDD層の共存戦略
 - **包括的最適化ドキュメント**: `backend/laravel-api/docs/`に移行ガイド・DDDアーキテクチャガイド完備

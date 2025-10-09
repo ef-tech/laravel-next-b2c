@@ -80,6 +80,42 @@
 - **APIルート専用**: `routes/api.php`に集約、RESTful設計
 - **CORS最適化**: Next.jsフロントエンドとの完全統合
 
+### 🔐 Laravel Sanctum認証システム詳細
+**認証エンドポイント** (`routes/api.php`):
+- **POST `/api/login`**: メール・パスワードによるログイン、Personal Access Token発行
+- **POST `/api/logout`**: トークン無効化、ログアウト処理
+- **GET `/api/me`**: 認証ユーザー情報取得（`auth:sanctum` middleware保護）
+- **GET `/api/tokens`**: 発行済みトークン一覧取得
+- **POST `/api/tokens/{id}/revoke`**: 特定トークン無効化
+- **POST `/api/tokens/refresh`**: トークン更新（新規トークン発行）
+
+**トークン管理機能**:
+- **Personal Access Tokens**: UUIDベーストークン（`personal_access_tokens`テーブル）
+- **有効期限管理**: `SANCTUM_EXPIRATION` 環境変数で設定可能（デフォルト: 60日）
+- **自動期限切れ削除**: `tokens:prune` コマンドをScheduler統合（毎日実行）
+- **Token Abilities**: 権限管理機能（`*` = 全権限）
+- **Last Used At**: トークン最終使用日時記録
+
+**セキュリティ設定**:
+- **Middleware**: `auth:sanctum` による認証保護
+- **CSRF保護**: SPA用CSRF設定（`config/sanctum.php`）
+- **Stateful Domains**: `localhost:13001`, `localhost:13002`（開発環境）
+- **レート制限**: API保護設定
+- **PHPStan Level 8準拠**: 型安全性保証、静的解析合格
+
+**Scheduled Tasks統合**:
+```php
+// app/Console/Kernel.php
+$schedule->command('tokens:prune')->daily();
+```
+
+**環境変数**:
+```env
+SANCTUM_STATEFUL_DOMAINS=localhost:13001,localhost:13002
+SESSION_DRIVER=array  # ステートレス設計
+SANCTUM_EXPIRATION=60 # トークン有効期限（日数）
+```
+
 ### データベース・ストレージ
 - **PostgreSQL**: 17-alpine (主データベース - ステートレス設計対応)
   - **接続最適化**: タイムアウト設定（connect_timeout/statement_timeout）、PDOオプション最適化
