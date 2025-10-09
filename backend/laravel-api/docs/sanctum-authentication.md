@@ -54,6 +54,13 @@ return [
 ],
 ```
 
+**認証ガードに関する重要な注意**:
+- routes/api.phpでは`auth:sanctum`ミドルウェアを使用しています
+- `auth:sanctum`はSanctumパッケージが提供する特別なミドルウェアエイリアスです
+- config/auth.phpの`api`ガード（`driver: sanctum`）とは**別物**です
+- `auth:sanctum`は`\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful`と`Authenticate`の組み合わせで、Personal Access Tokensとセッションベース認証の両方をサポートします
+- 本プロジェクトではステートレスAPI専用のため、Personal Access Tokensのみを使用しています
+
 ### 3. マイグレーション実行
 
 ```bash

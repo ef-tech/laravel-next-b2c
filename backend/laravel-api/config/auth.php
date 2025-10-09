@@ -41,6 +41,11 @@ return [
             'provider' => 'users',
         ],
 
+        // Note: This 'api' guard uses the 'sanctum' driver, but in routes/api.php,
+        // we use 'auth:sanctum' middleware instead. 'auth:sanctum' is a special
+        // middleware alias provided by Laravel Sanctum that combines
+        // EnsureFrontendRequestsAreStateful and Authenticate middlewares.
+        // It's different from using 'auth:api' guard.
         'api' => [
             'driver' => 'sanctum',
             'provider' => 'users',
