@@ -11,6 +11,9 @@ parameters:
         - storage
         - bootstrap/cache
         - database/migrations
+        # Console Commands are excluded because they may require database connections
+        # during static analysis (e.g., PruneExpiredTokens uses Eloquent models).
+        # This is a permanent exclusion as Commands should be tested via Feature tests.
         - app/Console/Commands
     parallel:
         jobSize: 20

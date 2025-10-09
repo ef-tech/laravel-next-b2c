@@ -27,10 +27,13 @@ class TokenController extends Controller
         $tokenName = $request->input('name', 'API Token');
         $newToken = $user->createToken($tokenName);
 
+        /** @var \Carbon\Carbon $createdAt */
+        $createdAt = $newToken->accessToken->created_at;
+
         return response()->json([
             'token' => $newToken->plainTextToken,
             'name' => $newToken->accessToken->name,
-            'created_at' => $newToken->accessToken->created_at->toISOString(),
+            'created_at' => $createdAt->toISOString(),
         ], 201);
     }
 
@@ -43,10 +46,13 @@ class TokenController extends Controller
         $user = Auth::user();
 
         $tokens = $user->tokens()->get()->map(function ($token) {
+            /** @var \Carbon\Carbon $createdAt */
+            $createdAt = $token->created_at;
+
             return [
                 'id' => $token->id,
                 'name' => $token->name,
-                'created_at' => $token->created_at->toISOString(),
+                'created_at' => $createdAt->toISOString(),
                 'last_used_at' => $token->last_used_at?->toISOString(),
             ];
         });
