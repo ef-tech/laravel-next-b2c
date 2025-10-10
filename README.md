@@ -1004,6 +1004,24 @@ docker compose logs laravel-api | grep "Server running"
 - `Dockerfile`の`ARG`はビルド時の値なので、イメージ再ビルドが必須です
 - `backend/laravel-api/`ディレクトリと、プロジェクトルートの両方の`compose.yaml`で設定を統一しています
 
+**完全クリーンアップ（推奨）**:
+
+既存のコンテナ・イメージ・ボリュームをすべて削除してクリーンな状態から再構築する場合：
+
+```bash
+# 1. 全サービス停止＆コンテナ・ボリューム削除
+docker compose down -v
+
+# 2. Laravel APIイメージ削除（キャッシュ影響を完全に排除）
+docker rmi sail-8.4/app
+
+# 3. クリーンビルド＆起動
+docker compose up -d --build
+
+# 4. ポート確認
+docker compose logs laravel-api | grep "Server running"
+```
+
 **関連Issue**: #76
 
 </details>
