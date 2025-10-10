@@ -9,6 +9,10 @@ if [ ! -z "$WWWUSER" ]; then
     usermod -u $WWWUSER sail
 fi
 
+# Set SUPERVISOR_PHP_COMMAND dynamically to allow runtime APP_PORT changes
+# This enables port configuration without rebuilding the Docker image
+export SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=${APP_PORT:-13000}"
+
 if [ ! -d /.composer ]; then
     mkdir /.composer
 fi
