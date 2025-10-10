@@ -252,12 +252,21 @@ parameters:
 - `ddd-testing-strategy.md`: DDD層別テスト戦略、Architecture Tests、テストパターン
 - `ddd-troubleshooting.md`: DDDトラブルシューティングガイド、よくある問題と解決策
 
+**Dockerトラブルシューティング**:
+- `DOCKER_TROUBLESHOOTING.md`: Dockerトラブルシューティング完全ガイド
+  - **ポート設定問題**: APP_PORT設定、ポート80で起動する問題の解決方法
+  - **イメージ再ビルド**: Dockerfileビルド引数変更時の再ビルド手順
+  - **完全クリーンアップ**: コンテナ・イメージ・ボリューム削除手順
+  - **プロジェクト固有イメージ命名**: laravel-next-b2c/app による他プロジェクトとの競合回避
+
 ## 開発環境
 ### Docker Compose構成（統合環境）
 ```yaml
 サービス構成:
 # バックエンド
 - laravel-api: Laravel 12 API (PHP 8.4) - ポート: 13000
+  - イメージ名: laravel-next-b2c/app（プロジェクト固有、他プロジェクトとの競合回避）
+  - APP_PORTデフォルト値: 13000（Dockerfile最適化済み、ランタイム変更可能）
   - healthcheck: curl http://127.0.0.1:13000/api/health (5秒間隔)
 - pgsql: PostgreSQL 17-alpine - ポート: 13432
   - healthcheck: pg_isready -U sail (5秒間隔)
@@ -287,6 +296,7 @@ parameters:
 - サービス間通信の最適化
 - 環境変数の一元管理
 - E2Eテスト環境の完全統合
+- プロジェクト固有Dockerイメージ命名（laravel-next-b2c/app）による他プロジェクトとの競合回避
 
 **ヘルスチェック機能統合**:
 - 全サービスのヘルスチェック機能による起動状態監視
@@ -479,6 +489,9 @@ cd backend/laravel-api
 #### バックエンドポート (backend/laravel-api/.env)
 ```env
 APP_PORT=13000                    # Laravel アプリケーション
+                                  # - Dockerfileデフォルト値: 13000（最適化済み、旧80から変更）
+                                  # - ランタイム変更可能（再ビルド不要）
+                                  # - compose.yamlで環境変数として設定
 FORWARD_REDIS_PORT=13379          # Redis
 FORWARD_DB_PORT=13432             # PostgreSQL
 FORWARD_MAILPIT_PORT=11025        # Mailpit SMTP
@@ -506,6 +519,8 @@ FORWARD_MINIO_CONSOLE_PORT=13010  # MinIO Console
 - **デフォルトポート回避**: 他のNext.js/Laravelプロジェクトとの同時実行可能
 - **Docker統合**: コンテナポートマッピングの一貫性、環境変数不要
 - **E2Eテスト**: テストURLの固定化、環境差異の最小化
+- **Dockerfileデフォルト値最適化**: APP_PORT=13000（旧80から変更、ランタイム変更可能）
+- **プロジェクト固有イメージ**: laravel-next-b2c/app（他プロジェクトとの競合回避）
 
 ### E2Eテスト環境変数 (e2e/.env)
 ```env

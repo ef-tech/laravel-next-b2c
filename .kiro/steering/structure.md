@@ -20,7 +20,7 @@ laravel-next-b2c/
 ├── .husky/              # Gitフック管理 (husky設定)
 ├── .idea/               # IntelliJ IDEA設定 (IDE固有、gitignore済み)
 ├── .git/                # Gitリポジトリ
-├── docker-compose.yml   # Docker Compose統合設定（全サービス一括起動、ヘルスチェック統合）
+├── docker-compose.yml   # Docker Compose統合設定（全サービス一括起動、ヘルスチェック統合、プロジェクト固有イメージ命名）
 ├── .dockerignore        # Dockerビルド除外設定（モノレポ対応）
 ├── .gitignore           # 統合ファイル除外設定 (モノレポ対応)
 ├── Makefile             # テストインフラ管理タスク（quick-test, test-pgsql, test-parallel, test-setup, etc.）
@@ -28,7 +28,7 @@ laravel-next-b2c/
 ├── node_modules/        # 共通依存関係
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
 ├── README.md            # プロジェクト概要
-└── DOCKER_TROUBLESHOOTING.md  # Dockerトラブルシューティングガイド
+└── DOCKER_TROUBLESHOOTING.md  # Dockerトラブルシューティング完全ガイド（APP_PORTポート設定問題、イメージ再ビルド、完全クリーンアップ手順）
 ```
 
 ## バックエンド構造 (`backend/laravel-api/`)
@@ -85,8 +85,8 @@ laravel-api/
 │   ├── migrations/      # マイグレーション
 │   │   └── 2019_12_14_000001_create_personal_access_tokens_table.php  # 🔐 Sanctumトークンテーブル
 │   └── seeders/         # シーダー
-├── docker/              # Docker設定 (PHP 8.0-8.4対応)
-├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証 + テストDB運用 + 認証）
+├── docker/              # Docker設定 (PHP 8.0-8.4対応、APP_PORTデフォルト13000最適化済み)
+├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証 + テストDB運用 + 認証 + Docker）
 │   ├── ddd-architecture.md        # DDD 4層構造アーキテクチャ概要
 │   ├── ddd-development-guide.md   # DDD開発ガイドライン
 │   ├── ddd-testing-strategy.md    # DDD層別テスト戦略
@@ -95,6 +95,7 @@ laravel-api/
 │   ├── VERIFICATION.md            # Dockerヘルスチェック検証手順ドキュメント
 │   ├── TESTING_DATABASE_WORKFLOW.md  # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
 │   ├── sanctum-authentication-guide.md  # 🔐 Sanctum認証ガイド（エンドポイント、トークン管理、セキュリティ設定、トラブルシューティング）
+│   ├── DOCKER_TROUBLESHOOTING.md  # Dockerトラブルシューティング（APP_PORTポート設定、イメージ再ビルド、完全クリーンアップ）
 │   └── [その他最適化ドキュメント]
 ├── public/              # 公開ディレクトリ (エントリーポイント)
 ├── resources/           # リソースファイル
@@ -180,6 +181,8 @@ laravel-api/
 laravel-next-b2c/
 ├── docker-compose.yml   # Docker Compose統合設定
 │                        # - 全サービス定義 (laravel-api, admin-app, user-app, pgsql, redis, etc.)
+│                        # - プロジェクト固有イメージ命名 (laravel-next-b2c/app、他プロジェクトとの競合回避)
+│                        # - APP_PORTデフォルト値最適化 (Dockerfile: 13000、ランタイム変更可能)
 │                        # - ヘルスチェック機能統合 (全サービスの起動状態監視)
 │                        # - 依存関係の自動管理 (depends_on: service_healthy)
 │                        # - IPv4明示対応 (localhost→127.0.0.1)
@@ -432,11 +435,13 @@ import { clsx } from 'clsx'
 - **環境設定**: 各アプリケーションルートの `.env`
 - **ビルド設定**: 各技術スタック専用 (`package.json`, `composer.json`)
 - **Docker設定**:
-  - ルート: `docker-compose.yml` - 全サービス統合設定（ヘルスチェック統合、依存関係管理）
+  - ルート: `docker-compose.yml` - 全サービス統合設定（ヘルスチェック統合、依存関係管理、プロジェクト固有イメージ命名）
   - バックエンド: `backend/laravel-api/compose.yaml` - Laravel Sail設定
+  - バックエンド: `backend/laravel-api/docker/8.4/Dockerfile` - Laravel APIイメージ定義（APP_PORT=13000デフォルト最適化済み）
   - フロントエンド: `frontend/{admin-app,user-app}/Dockerfile` - Next.js イメージ定義
   - ルート: `.dockerignore` - ビルド除外設定
   - ドキュメント: `backend/laravel-api/docs/VERIFICATION.md` - Dockerヘルスチェック検証手順
+  - ドキュメント: `DOCKER_TROUBLESHOOTING.md` - Dockerトラブルシューティング完全ガイド（APP_PORTポート設定、イメージ再ビルド、完全クリーンアップ）
 - **テストインフラ設定**:
   - ルート: `Makefile` - テストDB管理タスク（quick-test, test-pgsql, test-parallel, test-setup等）
   - ルート: `scripts/` - テスト環境切り替え・並列テストスクリプト

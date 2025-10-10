@@ -14,7 +14,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **🏗️ DDD/クリーンアーキテクチャ実装**: 4層構造（Domain/Application/Infrastructure/HTTP）によるビジネスロジック分離、Repository Pattern採用、SOLID原則準拠
 - **デュアルフロントエンド構成**: 管理者用ダッシュボードとユーザー向けアプリの分離
 - **モダンな技術スタック**: Next.js 15.5 + React 19 + Laravel 12 + TypeScript
-- **完全なDocker環境**: Docker Compose統合による全サービス一括起動（5分セットアップ）、ヘルスチェック機能統合
+- **完全なDocker環境**: Docker Compose統合による全サービス一括起動（5分セットアップ）、ヘルスチェック機能統合、プロジェクト固有イメージ命名による競合回避
 - **🔐 Laravel Sanctum認証基盤**: ステートレストークン認証による水平スケーリング対応
   - **認証エンドポイント**: Login/Logout、パスワードリセット対応
   - **トークン管理**: 発行、一覧取得、取り消し、更新機能
@@ -28,9 +28,9 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **E2E CI/CD自動実行**: GitHub Actions統合完了、Pull Request時の自動E2Eテスト実行（4 Shard並列実行、約2分完了）
 - **CI/CDパフォーマンス最適化**: Composerキャッシング、並列実行（concurrency設定）、タイムアウト最適化（60分→20分）
 - **GitHub Actions発火最適化**: Concurrency設定による重複実行削減、Paths設定による担当領域明確化、API契約監視による整合性検証、実行頻度60-70%削減
-- **固定ポート設定**: 開発環境ポート統一（User App: 13001、Admin App: 13002、API: 13000）による複数プロジェクト並行開発対応
+- **固定ポート設定**: 開発環境ポート統一（User App: 13001、Admin App: 13002、API: 13000）による複数プロジェクト並行開発対応、Dockerfile APP_PORTデフォルト値最適化済み（80→13000）
 - **Dockerヘルスチェック**: 全サービスのヘルスチェック機能統合、依存関係の自動管理、障害検知の早期化（IPv4明示対応）
-- **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備、DDDアーキテクチャガイド・開発ガイド・テスト戦略ドキュメント統合
+- **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備、DDDアーキテクチャガイド・開発ガイド・テスト戦略ドキュメント統合、Dockerトラブルシューティング完全ガイド（DOCKER_TROUBLESHOOTING.md）
 - **開発者エクスペリエンス**: Turbopack、Tailwind CSS v4、ESLintの統合開発環境
 - **モノレポ統一コード品質管理**: ESLint 9 + Prettier設定、husky + lint-staged導入による自動品質チェック
 - **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Pest 4 + Git Hooks + CI/CD統合による包括的コード品質保証
@@ -77,10 +77,10 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **CORS最適化**: Next.js フロントエンドとの完全統合設定
 - **モジュラー構成**: 各コンポーネントの独立開発・デプロイ可能、既存MVCとDDD層の共存戦略
 - **包括的最適化ドキュメント**: `backend/laravel-api/docs/`に移行ガイド・DDDアーキテクチャガイド完備
-- **開発環境統一**: Docker Compose統合による全サービス一括起動・一貫した環境構築
+- **開発環境統一**: Docker Compose統合による全サービス一括起動・一貫した環境構築、プロジェクト固有Dockerイメージ命名（laravel-next-b2c/app）による他プロジェクトとの競合回避
 - **Dockerヘルスチェック統合**: 全サービス（Laravel API、Next.js apps、PostgreSQL、Redis）のヘルスチェック機能、`docker compose ps`によるリアルタイム状態確認、IPv4明示対応（localhost→127.0.0.1）
 - **PostgreSQL接続最適化**: ServiceProvider方式によるタイムアウト設定、環境別設定テンプレート（Docker/Native/Production）、エラーハンドリング強化
-- **固定ポート設計**: 13000番台統一によるポート競合回避、複数プロジェクト同時実行対応
+- **固定ポート設計**: 13000番台統一によるポート競合回避、複数プロジェクト同時実行対応、Dockerfileデフォルト値最適化（APP_PORT=13000）、ランタイム変更可能（再ビルド不要）
 - **Next.js最適化構成**: outputFileTracingRoot設定によるDocker Standalone最適化
 
 ## 最適化実績
