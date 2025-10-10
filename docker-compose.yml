@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile
       args:
         WWWGROUP: '${WWWGROUP:-1000}'
-        APP_PORT: '${APP_PORT:-13000}'
     image: sail-8.4/app
     container_name: laravel-api
     extra_hosts:
