@@ -970,6 +970,63 @@ cd frontend/admin-app && npm run dev &
 </details>
 
 <details>
+<summary>🚨 Dockerでポート13000ではなく80で起動する問題</summary>
+
+**症状**:
+```
+laravel-api  |    INFO  Server running on [http://0.0.0.0:80].
+```
+
+**原因**:
+- `backend/laravel-api/docker/8.4/Dockerfile`の`ARG APP_PORT`がデフォルト値80で設定されている
+- ビルド時にENVに焼き込まれるため、ランタイムの環境変数では上書きできない
+
+**解決方法**:
+
+```bash
+# 1. Dockerfileの修正（既に修正済み）
+# backend/laravel-api/docker/8.4/Dockerfile:9
+# ARG APP_PORT=13000  # 80から変更
+
+# 2. Dockerイメージを再ビルド（プロジェクトルートから）
+docker compose build --no-cache laravel-api
+
+# 3. コンテナを再起動
+docker compose up -d
+
+# 4. ポート13000で起動していることを確認
+docker compose logs laravel-api | grep "Server running"
+# → "Server running on [http://0.0.0.0:13000]" が表示されれば成功
+```
+
+**注意**:
+- この問題は、`compose.yaml`の環境変数だけでは解決できません
+- `Dockerfile`の`ARG`はビルド時の値なので、イメージ再ビルドが必須です
+- `backend/laravel-api/`ディレクトリと、プロジェクトルートの両方の`compose.yaml`で設定を統一しています
+
+**完全クリーンアップ（推奨）**:
+
+既存のコンテナ・イメージ・ボリュームをすべて削除してクリーンな状態から再構築する場合：
+
+```bash
+# 1. 全サービス停止＆コンテナ・ボリューム削除
+docker compose down -v
+
+# 2. Laravel APIイメージ削除（キャッシュ影響を完全に排除）
+docker rmi laravel-next-b2c/app
+
+# 3. クリーンビルド＆起動
+docker compose up -d --build
+
+# 4. ポート確認
+docker compose logs laravel-api | grep "Server running"
+```
+
+**関連Issue**: #76
+
+</details>
+
+<details>
 <summary>🚨 CORS エラー</summary>
 
 フロントエンドとAPIの通信でCORSエラーが発生した場合：
