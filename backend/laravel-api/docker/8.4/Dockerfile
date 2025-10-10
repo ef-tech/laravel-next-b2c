@@ -6,7 +6,6 @@ ARG WWWGROUP
 ARG NODE_VERSION=22
 ARG MYSQL_CLIENT="mysql-client"
 ARG POSTGRES_VERSION=17
-ARG APP_PORT=13000
 
 WORKDIR /var/www/html
 
@@ -69,6 +68,6 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.4/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
 
-EXPOSE $APP_PORT/tcp
+EXPOSE 13000/tcp
 
 ENTRYPOINT ["start-container"]
