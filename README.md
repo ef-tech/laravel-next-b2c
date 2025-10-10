@@ -1013,7 +1013,7 @@ docker compose logs laravel-api | grep "Server running"
 docker compose down -v
 
 # 2. Laravel APIイメージ削除（キャッシュ影響を完全に排除）
-docker rmi sail-8.4/app
+docker rmi laravel-next-b2c/app
 
 # 3. クリーンビルド＆起動
 docker compose up -d --build
