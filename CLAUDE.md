@@ -32,6 +32,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `docker-compose-healthcheck` - Docker Composeヘルスチェック追加（Next.jsアプリ・サービス間依存関係最適化）
 - `testing-database-setup` - テスト用DB設定（SQLite/PostgreSQL環境切替・並列テスト実行・CI/CD統合）
 - `laravel-sanctum-basic-setup` - Laravel Sanctum基本設定（API認証基盤整備・トークンベース認証・セキュアAPI通信）
+- `laravel-api-health-check-endpoint` - Laravel APIヘルスチェックエンドポイント実装（/api/health追加・Dockerヘルスチェック統合）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
