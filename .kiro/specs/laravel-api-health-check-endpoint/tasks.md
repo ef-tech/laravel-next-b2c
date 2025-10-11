@@ -76,13 +76,13 @@
   - 応答時間が10ミリ秒以内であることを確認
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 5.2 Dockerイメージビルドとコンテナ起動
+- [x] 5.2 Dockerイメージビルドとコンテナ起動
   - `docker compose up --build -d`で全サービスビルドと起動
   - Laravel APIコンテナが正常に起動することを確認
   - 起動猶予期間（30秒）経過後のヘルスチェック実行確認
   - _Requirements: 3.5_
 
-- [ ] 5.3 Docker Composeヘルスチェックステータス確認
+- [x] 5.3 Docker Composeヘルスチェックステータス確認
   - `docker compose ps`でlaravel-apiのHEALTHカラムにhealthyステータス表示
   - admin-app/user-appがlaravel-api healthy後に起動することを確認
   - サービス間依存関係が正しく動作することを確認
