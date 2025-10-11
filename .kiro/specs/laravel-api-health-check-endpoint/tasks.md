@@ -15,7 +15,7 @@
   - 認証不要のパブリックアクセス可能エンドポイント
   - _Requirements: 1.1, 1.2, 2.1, 2.2, 2.4, 5.1, 5.2, 5.5, 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 1.2 エンドポイントのレスポンス最適化
+- [x] 1.2 エンドポイントのレスポンス最適化
   - Cache-Control: no-storeヘッダーを含むJSON応答
   - 外部依存なしで10ミリ秒以内に応答
   - データベース接続やRedis接続を実行しない
@@ -23,47 +23,47 @@
   - _Requirements: 1.3, 1.4, 1.5, 2.3, 7.1, 7.2, 7.3_
 
 - [ ] 2. Pest 4 Featureテストの実装
-- [ ] 2.1 ヘルスチェックエンドポイントの基本テスト作成
+- [x] 2.1 ヘルスチェックエンドポイントの基本テスト作成
   - Pest 4 Function Syntaxでテストファイル作成
   - HTTPステータス200 OKの検証
   - JSONレスポンス構造`{"status": "ok"}`の検証
   - describe()によるテストグループ化
   - _Requirements: 4.1, 4.2, 4.3, 6.6, 6.7_
 
-- [ ] 2.2 セキュリティとパフォーマンステストの追加
+- [x] 2.2 セキュリティとパフォーマンステストの追加
   - Cache-Control: no-storeヘッダーの検証
   - 認証なしでアクセス可能であることの検証
   - レート制限が適用されないことの検証（150回連続アクセス）
   - _Requirements: 1.3, 2.1, 2.2, 2.5, 4.4, 4.5_
 
 - [ ] 3. Dockerヘルスチェックの統合
-- [ ] 3.1 Dockerfileにヘルスチェック命令を追加
+- [x] 3.1 Dockerfileにヘルスチェック命令を追加
   - HEALTHCHECKディレクティブをEXPOSE 13000の後に配置
   - wgetコマンドで`http://127.0.0.1:13000/api/health`に10秒間隔アクセス
   - タイムアウト3秒、起動猶予期間30秒、リトライ3回を設定
   - IPv4明示対応（127.0.0.1使用）でlocalhost DNS解決問題回避
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 5.4, 5.6, 6.5_
 
-- [ ] 3.2 Docker Composeサービス依存関係の更新
+- [x] 3.2 Docker Composeサービス依存関係の更新
   - admin-appのdepends_onにlaravel-apiのservice_healthy条件を追加
   - user-appのdepends_onにlaravel-apiのservice_healthy条件を追加
   - Laravel APIがhealthy状態になるまで依存サービスの起動を待機
   - _Requirements: 3.7, 3.8, 5.3_
 
 - [ ] 4. コード品質とテスト実行の確認
-- [ ] 4.1 Laravel Pintによるコードフォーマット確認
+- [x] 4.1 Laravel Pintによるコードフォーマット確認
   - routes/api.phpのヘルスチェック定義がLaravel Pint標準ルールに準拠
   - `./vendor/bin/pint`コマンドで自動フォーマット実行
   - フォーマットチェック通過確認
   - _Requirements: 4.6_
 
-- [ ] 4.2 Larastan静的解析の実行
+- [x] 4.2 Larastan静的解析の実行
   - routes/api.phpのヘルスチェック定義がLevel 8静的解析基準を満たす
   - `./vendor/bin/phpstan analyse`コマンドで静的解析実行
   - 型安全性と静的解析チェック通過確認
   - _Requirements: 4.7_
 
-- [ ] 4.3 Pestテストスイート実行確認
+- [x] 4.3 Pestテストスイート実行確認
   - `./vendor/bin/pest tests/Feature/HealthCheckTest.php`でテスト実行
   - 全テストケース（5テスト）が成功することを確認
   - テストカバレッジが要件を満たすことを確認

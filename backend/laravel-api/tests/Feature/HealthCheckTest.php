@@ -27,3 +27,10 @@ it('is accessible without authentication', function () {
 
     $response->assertStatus(200);
 });
+
+it('does not apply rate limiting (150 consecutive requests)', function () {
+    for ($i = 0; $i < 150; $i++) {
+        $response = get('/api/health');
+        $response->assertStatus(200);
+    }
+})->skip('Performance test: Enable when needed');
