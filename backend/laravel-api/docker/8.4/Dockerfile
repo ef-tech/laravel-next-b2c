@@ -71,6 +71,6 @@ RUN chmod +x /usr/local/bin/start-container
 EXPOSE 13000/tcp
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:13000/api/health || exit 1
+    CMD sh -c 'wget --no-verbose --tries=1 --spider http://127.0.0.1:${APP_PORT:-13000}/api/health || exit 1'
 
 ENTRYPOINT ["start-container"]
