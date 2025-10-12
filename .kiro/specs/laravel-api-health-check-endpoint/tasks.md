@@ -94,14 +94,14 @@
   - wgetコマンドの動作確認（ヘルスチェック実行ログ確認）
   - _Requirements: 3.2, 5.4_
 
-- [ ] 6. CI/CD環境での検証
-- [ ] 6.1 GitHub Actions php-qualityワークフロー確認
+- [x] 6. CI/CD環境での検証
+- [x] 6.1 GitHub Actions php-qualityワークフロー確認
   - Laravel Pint + Larastan品質チェックが成功することを確認
   - routes/api.phpの変更がコード品質基準を満たすことを確認
   - CI/CD環境でのフォーマットと静的解析が通過することを確認
   - _Requirements: 4.6, 4.7, 4.8_
 
-- [ ] 6.2 GitHub Actions testワークフロー確認
+- [x] 6.2 GitHub Actions testワークフロー確認
   - Pest 4テストスイートが成功することを確認
   - ヘルスチェックエンドポイントテストが全て合格することを確認
   - テストカバレッジレポートが生成されることを確認
