@@ -22,6 +22,12 @@ it('includes Cache-Control no-store header', function () {
     expect($response->headers->get('Cache-Control'))->toContain('no-store');
 });
 
+it('returns JSON Content-Type header', function () {
+    $response = get('/api/health');
+
+    expect($response->headers->get('Content-Type'))->toContain('application/json');
+});
+
 it('is accessible without authentication', function () {
     $response = get('/api/health');
 
