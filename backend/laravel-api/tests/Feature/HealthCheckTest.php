@@ -28,6 +28,15 @@ it('is accessible without authentication', function () {
     $response->assertStatus(200);
 });
 
+it('is accessible via named route', function () {
+    $url = route('health');
+
+    expect($url)->toContain('/api/health');
+
+    $response = get($url);
+    $response->assertStatus(200);
+});
+
 it('does not apply rate limiting (150 consecutive requests)', function () {
     for ($i = 0; $i < 150; $i++) {
         $response = get('/api/health');
