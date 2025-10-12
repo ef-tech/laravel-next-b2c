@@ -1,0 +1,66 @@
+{
+  "feature_name": "frontend-test-eslint-setup",
+  "created_at": "2025-10-12T15:00:00Z",
+  "updated_at": "2025-10-12T15:05:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 79,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/79",
+    "title": "Priority: 高 - フロントエンドテストコードのリント設定追加",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "",
+      "frontend": "Next.js 15.5, React 19, Jest 29, React Testing Library 16, ESLint 9, Prettier",
+      "infrastructure": "GitHub Actions, Docker",
+      "tools": "eslint-plugin-jest, eslint-plugin-testing-library, eslint-plugin-jest-dom, globals, husky, lint-staged"
+    },
+    "requirements_hints": [
+      "Jest/Testing Libraryのベストプラクティスを強制し、テストコードの品質と一貫性を向上",
+      "テストファイル特有のESLint設定を導入し、開発体験を改善",
+      "モノレポ（admin-app/user-app）全体で統一されたテストコードリント環境を構築",
+      "FlatCompat方式維持しつつ、eslint-plugin-jest/testing-library統合",
+      "段階的導入: 初期はwarn、安定後errorへ昇格"
+    ],
+    "project_structure": [
+      "frontend/.eslint.base.mjs",
+      "frontend/admin-app/",
+      "frontend/user-app/",
+      "package.json",
+      ".github/workflows/frontend-test.yml",
+      ".husky/pre-commit",
+      "docs/JEST_ESLINT_INTEGRATION_GUIDE.md",
+      "docs/JEST_ESLINT_CONFIG_EXAMPLES.md",
+      "docs/JEST_ESLINT_QUICKSTART.md"
+    ],
+    "services": {},
+    "todo_items": [
+      "Phase 1: 依存パッケージインストール (eslint-plugin-jest, eslint-plugin-testing-library, globals)",
+      "Phase 2: ESLint設定変更 (frontend/.eslint.base.mjs)",
+      "Phase 3: ローカル動作確認",
+      "Phase 4: lint-staged統合",
+      "Phase 5: CI/CD統合 (.github/workflows/frontend-test.yml)",
+      "Phase 6: 段階的ルール昇格（運用フェーズ）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
