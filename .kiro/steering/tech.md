@@ -89,6 +89,13 @@
 - **POST `/api/tokens/{id}/revoke`**: 特定トークン無効化
 - **POST `/api/tokens/refresh`**: トークン更新（新規トークン発行）
 
+**📊 ヘルスチェックエンドポイント** (`routes/api.php`):
+- **GET `/api/health`**: APIサーバー稼働状態確認（ルート名: `health`）
+  - **レスポンス**: `{ "status": "ok", "timestamp": "2025-10-12T..." }` (JSON形式)
+  - **用途**: Dockerヘルスチェック統合、ロードバランサー監視、サービス死活監視
+  - **動的ポート対応**: `APP_PORT`環境変数による柔軟なポート設定
+  - **認証不要**: パブリックエンドポイント（middleware: なし）
+
 **トークン管理機能**:
 - **Personal Access Tokens**: UUIDベーストークン（`personal_access_tokens`テーブル）
 - **有効期限管理**: `SANCTUM_EXPIRATION` 環境変数で設定可能（デフォルト: 60日）
@@ -267,7 +274,8 @@ parameters:
 - laravel-api: Laravel 12 API (PHP 8.4) - ポート: 13000
   - イメージ名: laravel-next-b2c/app（プロジェクト固有、他プロジェクトとの競合回避）
   - APP_PORTデフォルト値: 13000（Dockerfile最適化済み、ランタイム変更可能）
-  - healthcheck: curl http://127.0.0.1:13000/api/health (5秒間隔)
+  - healthcheck: curl http://127.0.0.1:${APP_PORT}/api/health (5秒間隔、動的ポート対応)
+    - エンドポイント: GET /api/health → { "status": "ok", "timestamp": "..." }
 - pgsql: PostgreSQL 17-alpine - ポート: 13432
   - healthcheck: pg_isready -U sail (5秒間隔)
 - redis: Redis alpine - ポート: 13379

@@ -21,6 +21,7 @@ laravel-next-b2c/
 ├── .idea/               # IntelliJ IDEA設定 (IDE固有、gitignore済み)
 ├── .git/                # Gitリポジトリ
 ├── docker-compose.yml   # Docker Compose統合設定（全サービス一括起動、ヘルスチェック統合、プロジェクト固有イメージ命名）
+│                        # Laravel APIヘルスチェック: curl http://127.0.0.1:${APP_PORT}/api/health (動的ポート対応)
 ├── .dockerignore        # Dockerビルド除外設定（モノレポ対応）
 ├── .gitignore           # 統合ファイル除外設定 (モノレポ対応)
 ├── Makefile             # テストインフラ管理タスク（quick-test, test-pgsql, test-parallel, test-setup, etc.）
@@ -62,6 +63,8 @@ laravel-api/
 │   │       └── PruneExpiredTokens.php  # 🔐 期限切れトークン削除コマンド（tokens:prune）
 │   ├── Http/            # 🏗️ HTTP層（DDD統合）
 │   │   ├── Controllers/ # Controllerからユースケース呼び出し
+│   │   │   ├── Api/     # 📊 API基本機能コントローラー
+│   │   │   │   └── HealthController.php  # ヘルスチェック（GET /api/health）
 │   │   │   ├── Auth/    # 🔐 認証コントローラー
 │   │   │   │   ├── LoginController.php     # ログイン処理（POST /api/login, POST /api/logout）
 │   │   │   │   ├── MeController.php        # 認証ユーザー情報（GET /api/me）
@@ -104,6 +107,8 @@ laravel-api/
 │   └── views/           # Bladeテンプレート
 ├── routes/              # ルート定義
 │   ├── api.php          # API専用ルート
+│   │                    # 📊 ヘルスチェックエンドポイント:
+│   │                    #   - GET /api/health (HealthController@show, ルート名: health)
 │   │                    # 🔐 認証エンドポイント:
 │   │                    #   - POST /api/login (LoginController@login)
 │   │                    #   - POST /api/logout (LoginController@logout, auth:sanctum)
@@ -118,6 +123,8 @@ laravel-api/
 ├── storage/             # ストレージ (ログ、キャッシュ、アップロード)
 ├── tests/               # 🏗️ テストスイート (Pest 4 + Architecture Tests: 96.1%カバレッジ)
 │   ├── Feature/         # 機能テスト（HTTP層統合テスト）
+│   │   ├── Api/         # 📊 API基本機能テスト
+│   │   │   └── HealthCheckTest.php  # ヘルスチェックエンドポイントテスト（JSON形式、Content-Type、ルート名検証）
 │   │   └── Auth/        # 🔐 認証機能テスト
 │   │       ├── LoginTest.php          # ログイン・ログアウトテスト（12テスト）
 │   │       └── TokenManagementTest.php # トークン管理テスト（一覧取得、無効化、更新）
