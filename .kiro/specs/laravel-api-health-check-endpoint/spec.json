@@ -1,0 +1,77 @@
+{
+  "feature_name": "laravel-api-health-check-endpoint",
+  "created_at": "2025-10-11T12:50:17Z",
+  "updated_at": "2025-10-11T13:25:18Z",
+  "language": "ja",
+  "phase": "tasks-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 78,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/78",
+    "title": "Priority: 高 - Laravel APIヘルスチェックエンドポイント実装",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Pest 4, Laravel Pint, Larastan",
+      "frontend": "Next.js (admin-app, user-app)",
+      "infrastructure": "Docker, Docker Compose, wget",
+      "tools": "curl, GitHub Actions"
+    },
+    "requirements_hints": [
+      "Closure実装でDDD非適用（HTTP層で完結）",
+      "Livenessチェックのみ実装（Readinessは将来拡張）",
+      "最小JSON応答（{\"status\": \"ok\"}）+ Cache-Control: no-store",
+      "レート制限除外（オーケストレータ/LBからの高頻度アクセス）",
+      "認証不要のパブリックアクセス可能エンドポイント",
+      "Dockerヘルスチェック統合（depends_on: service_healthy対応）",
+      "IPv4明示（127.0.0.1）でlocalhost DNS解決問題回避",
+      "Featureテストのみ（正常系テスト）"
+    ],
+    "project_structure": [
+      "routes/api.php",
+      "backend/laravel-api/docker/8.4/Dockerfile",
+      "tests/Feature/HealthCheckTest.php",
+      ".kiro/specs/docker-compose-healthcheck/design.md"
+    ],
+    "services": {
+      "laravel-api": {
+        "port": "13000",
+        "endpoint": "/api/health"
+      }
+    },
+    "todo_items": [
+      "routes/api.php に /health エンドポイント追加（Closure実装、レート制限除外）",
+      "backend/laravel-api/docker/8.4/Dockerfile に HEALTHCHECK 追加",
+      "tests/Feature/HealthCheckTest.php 作成（Pest 4テスト）",
+      "Pest テスト実行確認（./vendor/bin/pest tests/Feature/HealthCheckTest.php）",
+      "Laravel Pint フォーマットチェック（./vendor/bin/pint）",
+      "Larastan 静的解析（./vendor/bin/phpstan analyse）",
+      "ローカルAPI動作確認（curl -f http://localhost:13000/api/health）",
+      "Docker Compose起動確認（docker compose up --build -d）",
+      "ヘルスチェック状態確認（docker compose ps → healthy表示確認）",
+      "コンテナ内からヘルスチェック実行（docker exec laravel-api curl -f http://127.0.0.1:13000/api/health）",
+      "変更ファイルをgit add（routes/api.php, Dockerfile, HealthCheckTest.php）",
+      "Git コミット作成（コミットメッセージ: Feat: ✅ Laravel APIヘルスチェックエンドポイント実装）",
+      "GitHub Actions実行確認（php-quality, test ワークフロー）",
+      "全テスト成功確認（Pest 4テストスイート、カバレッジ確認）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": false
+    },
+    "tasks": {
+      "generated": true,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}

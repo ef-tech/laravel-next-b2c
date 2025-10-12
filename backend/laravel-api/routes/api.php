@@ -5,6 +5,12 @@ use App\Http\Controllers\Api\TokenController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Health check endpoint (no rate limiting, no authentication)
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'])
+        ->header('Cache-Control', 'no-store');
+})->withoutMiddleware('throttle:api')->name('health');
+
 // Public routes
 Route::post('/users', [UserController::class, 'register']);
 
