@@ -300,15 +300,15 @@
 
 ## Phase 2: 低ノイズルール昇格（error化）
 
-- [ ] 9. Phase 1期間中の警告分析
-- [ ] 9.1 警告数の収集と分析
+- [x] 9. Phase 1期間中の警告分析
+- [x] 9.1 警告数の収集と分析
   - Phase 1開始から2-4週間後の警告数を収集
   - カテゴリ別（jest、testing-library、jest-dom）に分類
   - 誤検知率の計算
   - 修正容易性の評価
   - _Requirements: 6.3_
 
-- [ ] 9.2 低ノイズルールの特定
+- [x] 9.2 低ノイズルールの特定
   - jest/no-disabled-testsの誤検知率と修正容易性を評価
   - jest/no-focused-testsの誤検知率と修正容易性を評価
   - jest/valid-expectの誤検知率と修正容易性を評価
@@ -317,15 +317,15 @@
   - 低ノイズルールリストを作成
   - _Requirements: 6.4_
 
-- [ ] 10. 低ノイズルールのerror昇格
-- [ ] 10.1 ESLint設定の更新
+- [x] 10. 低ノイズルールのerror昇格
+- [x] 10.1 ESLint設定の更新
   - frontend/.eslint.base.mjsを編集
   - 低ノイズルール5個をerrorレベルに変更
   - 既存warnルールは維持
   - 設定ファイルの構文妥当性を確認
   - _Requirements: 6.4_
 
-- [ ] 10.2 既存テストの違反箇所を修正
+- [x] 10.2 既存テストの違反箇所を修正
   - npm run lintを実行してエラー箇所を特定
   - jest/no-disabled-tests違反を修正
   - jest/no-focused-tests違反を修正
@@ -334,20 +334,20 @@
   - testing-library/no-manual-cleanup違反を修正
   - _Requirements: 6.4実装_
 
-- [ ] 10.3 修正後のテスト実行を確認
+- [x] 10.3 修正後のテスト実行を確認
   - npm testを実行して全テストが正常動作することを確認
   - テストカバレッジが94%以上維持されていることを確認
   - 新たなバグが発生していないことを確認
   - _Requirements: 完了定義品質基準_
 
-- [ ] 11. Phase 2完了確認
-- [ ] 11.1 低ノイズルールerror化の動作確認
+- [x] 11. Phase 2完了確認
+- [x] 11.1 低ノイズルールerror化の動作確認
   - fitを使用したテストでCI/CDが失敗することを確認
   - 既存テスト全件が正常動作することを確認
   - リント実行時間が目標範囲内であることを確認
   - _Requirements: 6.4最終確認_
 
-- [ ] 11.2 Pull Request作成とレビュー依頼
+- [x] 11.2 Pull Request作成とレビュー依頼
   - Phase 2実装のPull Requestを作成
   - 修正内容とメリットを説明
   - 修正箇所のBefore/After比較を添付
@@ -356,67 +356,67 @@
 
 ## Phase 3: 全ルール昇格（完全適用）
 
-- [ ] 12. Phase 2期間中の残り警告分析
-- [ ] 12.1 残り警告数の収集と分析
+- [x] 12. Phase 2期間中の残り警告分析
+- [x] 12.1 残り警告数の収集と分析
   - Phase 2開始から2-4週間後の警告数を収集
   - カテゴリ別に分類
   - 修正可能性の評価
   - 修正優先順位の決定
   - _Requirements: 6.3_
 
-- [ ] 12.2 修正計画の策定
+- [x] 12.2 修正計画の策定
   - 全警告の修正計画を作成
   - 修正順序を決定
   - 修正コスト見積もりを実施
   - ロールバックトリガー（修正不可能な警告5件以上）の確認
   - _Requirements: Phase 3実行内容_
 
-- [ ] 13. 既存テストコードの全件修正
-- [ ] 13.1 testing-library/no-node-access警告の修正
+- [x] 13. 既存テストコードの全件修正
+- [x] 13.1 testing-library/no-node-access警告の修正
   - container.querySelector()をscreen.getByRole()等に置き換え
   - 全ファイルで修正を実施
   - 修正後のテスト動作を確認
   - _Requirements: 6.5実装_
 
-- [ ] 13.2 testing-library/no-container警告の修正
+- [x] 13.2 testing-library/no-container警告の修正
   - container直接操作をTesting Library推奨クエリに置き換え
   - 全ファイルで修正を実施
   - 修正後のテスト動作を確認
   - _Requirements: 6.5実装_
 
-- [ ] 13.3 testing-library/no-debugging-utils警告の修正
+- [x] 13.3 testing-library/no-debugging-utils警告の修正
   - debug()呼び出しを削除またはコメントアウト
   - 全ファイルで修正を実施
   - 修正後のテスト動作を確認
   - _Requirements: 6.5実装_
 
-- [ ] 13.4 その他の警告の修正
+- [x] 13.4 その他の警告の修正
   - 残存する全警告を修正
   - 修正後のテスト動作を確認
   - テストカバレッジが94%以上維持されていることを確認
   - _Requirements: 6.5実装_
 
-- [ ] 14. 全ルールのerror昇格
-- [ ] 14.1 ESLint設定の更新
+- [x] 14. 全ルールのerror昇格
+- [x] 14.1 ESLint設定の更新
   - frontend/.eslint.base.mjsを編集
   - 全推奨ルールをerrorレベルに変更
   - 設定ファイルの構文妥当性を確認
   - _Requirements: 6.5_
 
-- [ ] 14.2 CI/CDへの--max-warnings=0追加
+- [x] 14.2 CI/CDへの--max-warnings=0追加
   - .github/workflows/frontend-test.ymlを編集
   - npm run lintに--max-warnings=0フラグを追加
   - ワークフロー構文の妥当性を確認
   - _Requirements: 6.6_
 
-- [ ] 14.3 全ルールerror化の動作確認
+- [x] 14.3 全ルールerror化の動作確認
   - npm run lintを実行してエラー0、警告0を確認
   - CI/CDで警告があるとジョブが失敗することを確認
   - 新規テストコード作成時に即座にエラー検出されることを確認
   - _Requirements: 6.7_
 
-- [ ] 15. Phase 3完了確認
-- [ ] 15.1 全ルール完全適用の最終検証
+- [x] 15. Phase 3完了確認
+- [x] 15.1 全ルール完全適用の最終検証
   - 全テストファイルでエラー0、警告0を確認
   - CI/CDで警告があるとジョブが失敗することを確認
   - 新規テストコード作成時に即座にエラー検出されることを確認
@@ -424,14 +424,14 @@
   - テストカバレッジが94%以上維持されていることを確認
   - _Requirements: 6.5, 6.6, 6.7最終確認_
 
-- [ ] 15.2 Pull Request作成とレビュー依頼
+- [x] 15.2 Pull Request作成とレビュー依頼
   - Phase 3実装のPull Requestを作成
   - 完全適用完了報告を記載
   - 全修正箇所のサマリーを添付
   - チームレビューを依頼
   - _Requirements: Phase 3実行内容_
 
-- [ ] 15.3 チーム周知とドキュメント更新
+- [x] 15.3 チーム周知とドキュメント更新
   - Pull Request説明を共有
   - 新ルールの主要ポイントを説明
   - ドキュメントを最新状態に更新
