@@ -71,10 +71,8 @@ export default [
       ],
       "no-empty-function": "off", // jest.fn()許容
 
-      // 初期フェーズ: 低ノイズルールをwarnレベル維持（Phase 1）
-      "testing-library/no-node-access": "warn",
-      "testing-library/no-container": "warn",
-      "testing-library/no-debugging-utils": "warn",
+      // Phase 3完了: 全ルールerrorレベル適用（推奨ルールセットのデフォルト）
+      // Phase 1-2で段階的に昇格、Phase 3で完全適用
     },
   },
 
