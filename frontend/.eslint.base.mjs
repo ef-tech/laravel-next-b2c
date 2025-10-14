@@ -69,7 +69,7 @@ export default [
           caughtErrors: "none",
         },
       ],
-      "no-empty-function": "off", // jest.fn()許容
+      "no-empty-function": "off", // テスト用モック関数（jest.fn()等）での空関数定義を許容
 
       // Phase 3完了: 全ルールerrorレベル適用（推奨ルールセットのデフォルト）
       // Phase 1-2で段階的に昇格、Phase 3で完全適用
