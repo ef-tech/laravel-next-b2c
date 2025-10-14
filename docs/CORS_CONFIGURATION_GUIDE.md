@@ -282,4 +282,4 @@ php artisan pail --filter="CORS"
 - [MDN Web Docs: CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
 - [Laravel CORS公式ドキュメント](https://laravel.com/docs/12.x/cors)
 - [OWASP CORS Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Origin_Resource_Sharing_Cheat_Sheet.html)
-- [Laravel Sanctum認証ガイド](./backend/laravel-api/docs/sanctum-authentication-guide.md)
+- [Laravel Sanctum認証ガイド](../backend/laravel-api/docs/sanctum-authentication.md)
