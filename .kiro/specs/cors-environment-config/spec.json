@@ -1,0 +1,77 @@
+{
+  "feature_name": "cors-environment-config",
+  "created_at": "2025-10-14T12:24:34Z",
+  "updated_at": "2025-10-14T13:10:47Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 29,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/29",
+    "title": "CORS 設定（フロントエンドアプリ用）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Laravel Sanctum 4.0",
+      "frontend": "Next.js 15.5, React 19",
+      "infrastructure": "Docker Compose",
+      "tools": "Pest 4, GitHub Actions, curl"
+    },
+    "requirements_hints": [
+      "環境変数ドリブンなCORS設定への移行（開発/ステージング/本番環境）",
+      "Docker環境対応（host.docker.internal）",
+      "セキュリティ強化（本番環境でのHTTPS強制）",
+      "設定バリデーションと自動検証システムの構築",
+      "ドキュメント整備（環境別設定例、トラブルシューティング）",
+      "Feature Tests実装（Pest 4）",
+      "CI/CDへの環境変数検証ステップ追加"
+    ],
+    "project_structure": [
+      "config/cors.php",
+      "app/Providers/AppServiceProvider.php",
+      ".env.example",
+      "docs/CORS_CONFIGURATION_GUIDE.md",
+      "backend/laravel-api/tests/Feature/Http/CorsTest.php",
+      ".github/workflows/test.yml",
+      "docker-compose.yml"
+    ],
+    "services": {
+      "User App": {"port": "13001"},
+      "Admin App": {"port": "13002"},
+      "Laravel API": {"port": "13000"}
+    },
+    "todo_items": [
+      "config/cors.phpを環境変数ドリブンに変更",
+      ".env.exampleにCORS設定サンプル追加（3環境分）",
+      "AppServiceProviderに設定バリデーション追加",
+      "Docker Compose設定確認（extra_hosts）",
+      "docs/CORS_CONFIGURATION_GUIDE.md作成",
+      "Feature Tests実装（tests/Feature/Http/CorsTest.php）",
+      "CI/CDにCORS環境変数検証ステップ追加",
+      "ローカル環境でPestテスト実行（全テストパス）",
+      "Docker環境でCORS設定確認（php artisan config:show cors）",
+      "curl でPreflightリクエスト検証",
+      "Next.js User AppからのAPI呼び出し確認（ブラウザDevTools確認）",
+      "Next.js Admin AppからのAPI呼び出し確認（ブラウザDevTools確認）",
+      "CI/CDワークフロー実行確認（GitHub Actions）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
