@@ -440,29 +440,33 @@
 
 ## ロールバック準備（全フェーズ共通）
 
-- [ ] 16. ロールバック手順の準備
-- [ ] 16.1 ロールバックトリガーの文書化
+- [x] 16. ロールバック手順の準備
+- [x] 16.1 ロールバックトリガーの文書化
   - Phase 1トリガー（実行時間超過、CI/CD恒常的失敗、チーム反対）を文書化
   - Phase 2トリガー（修正コスト超過、新バグ多発）を文書化
   - Phase 3トリガー（修正不可能警告残存、チーム合意得られず）を文書化
   - _Requirements: Phase 1-3ロールバックトリガー_
+  - _完了: docs/JEST_ESLINT_TROUBLESHOOTING.md に「ロールバック判断基準」セクションを記載_
 
-- [ ] 16.2 ロールバック実行手順の検証
+- [x] 16.2 ロールバック実行手順の検証
   - npm uninstall eslint-plugin-jest eslint-plugin-testing-library eslint-plugin-jest-dom globalsを実行
   - git checkout frontend/.eslint.base.mjsを実行
   - npm installで再構築
   - npm run lintが正常動作することを確認
   - 1分以内に完了することを確認
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
+  - _完了: docs/JEST_ESLINT_TROUBLESHOOTING.md に「Phase 1完全ロールバック（緊急時）」セクションを記載_
 
-- [ ] 16.3 部分的ロールバック手順の確認
+- [x] 16.3 部分的ロールバック手順の確認
   - 特定ルールのみを無効化する手順を確認
   - プラグイン自体は維持する方法を確認
   - 部分的ロールバック後の動作を確認
   - _Requirements: 8.8_
+  - _完了: docs/JEST_ESLINT_TROUBLESHOOTING.md に「部分的ロールバック」セクション（3パターン）を記載_
 
-- [ ] 16.4 ロールバック後の原因分析手順の確認
+- [x] 16.4 ロールバック後の原因分析手順の確認
   - 問題の根本原因を分析する手順を確認
   - 再導入計画を策定する手順を確認
   - チーム合意形成の手順を確認
   - _Requirements: 8.7_
+  - _完了: docs/JEST_ESLINT_TROUBLESHOOTING.md に「詳細診断手順」「サポート連絡先」セクションを記載_
