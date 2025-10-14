@@ -17,23 +17,30 @@ return [
 
     'paths' => ['api/*', 'up'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => array_filter(array_map(
+        'trim',
+        explode(',', env('CORS_ALLOWED_METHODS', '*'))
+    )),
 
-    'allowed_origins' => [
-        'http://localhost:13001',   // user-app
-        'http://localhost:13002',   // admin-app
-        'http://127.0.0.1:13001',   // user-app (127.0.0.1)
-        'http://127.0.0.1:13002',   // admin-app (127.0.0.1)
-    ],
+    'allowed_origins' => array_filter(array_map(
+        'trim',
+        explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:13001,http://localhost:13002,http://127.0.0.1:13001,http://127.0.0.1:13002'))
+    )),
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => array_filter(array_map(
+        'trim',
+        explode(',', env('CORS_ALLOWED_HEADERS', '*'))
+    )),
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    'max_age' => (int) env('CORS_MAX_AGE', env('APP_ENV') === 'production' ? 86400 : 600),
 
-    'supports_credentials' => false,
+    'supports_credentials' => filter_var(
+        env('CORS_SUPPORTS_CREDENTIALS', false),
+        FILTER_VALIDATE_BOOLEAN
+    ),
 
 ];

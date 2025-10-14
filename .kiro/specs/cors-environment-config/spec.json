@@ -1,0 +1,113 @@
+{
+  "feature_name": "cors-environment-config",
+  "created_at": "2025-10-14T12:24:34Z",
+  "updated_at": "2025-10-14T18:40:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 29,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/29",
+    "title": "CORS 設定（フロントエンドアプリ用）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Laravel Sanctum 4.0",
+      "frontend": "Next.js 15.5, React 19",
+      "infrastructure": "Docker Compose",
+      "tools": "Pest 4, GitHub Actions, curl"
+    },
+    "requirements_hints": [
+      "環境変数ドリブンなCORS設定への移行（開発/ステージング/本番環境）",
+      "Docker環境対応（host.docker.internal）",
+      "セキュリティ強化（本番環境でのHTTPS強制）",
+      "設定バリデーションと自動検証システムの構築",
+      "ドキュメント整備（環境別設定例、トラブルシューティング）",
+      "Feature Tests実装（Pest 4）",
+      "CI/CDへの環境変数検証ステップ追加"
+    ],
+    "project_structure": [
+      "config/cors.php",
+      "app/Providers/AppServiceProvider.php",
+      ".env.example",
+      "docs/CORS_CONFIGURATION_GUIDE.md",
+      "backend/laravel-api/tests/Feature/Http/CorsTest.php",
+      ".github/workflows/test.yml",
+      "docker-compose.yml"
+    ],
+    "services": {
+      "User App": {"port": "13001"},
+      "Admin App": {"port": "13002"},
+      "Laravel API": {"port": "13000"}
+    },
+    "todo_items": [
+      "config/cors.phpを環境変数ドリブンに変更",
+      ".env.exampleにCORS設定サンプル追加（3環境分）",
+      "AppServiceProviderに設定バリデーション追加",
+      "Docker Compose設定確認（extra_hosts）",
+      "docs/CORS_CONFIGURATION_GUIDE.md作成",
+      "Feature Tests実装（tests/Feature/Http/CorsTest.php）",
+      "CI/CDにCORS環境変数検証ステップ追加",
+      "ローカル環境でPestテスト実行（全テストパス）",
+      "Docker環境でCORS設定確認（php artisan config:show cors）",
+      "curl でPreflightリクエスト検証",
+      "Next.js User AppからのAPI呼び出し確認（ブラウザDevTools確認）",
+      "Next.js Admin AppからのAPI呼び出し確認（ブラウザDevTools確認）",
+      "CI/CDワークフロー実行確認（GitHub Actions）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true,
+  "implementation_notes": {
+    "completed_tasks": [
+      "1. CORS設定ファイルの環境変数ドリブン化（config/cors.php）",
+      "2. 環境別CORS設定テンプレートの作成（.env.example - 3環境）",
+      "3. CORS設定バリデーション機能の実装（AppServiceProvider）",
+      "4. Preflightリクエスト処理の統合（Laravel標準CORSミドルウェア）",
+      "5. Docker環境対応機能の実装（host.docker.internal設定）",
+      "6. Feature Testsの実装（tests/Feature/Http/CorsTest.php - 14テスト）",
+      "8. ドキュメント整備（docs/CORS_CONFIGURATION_GUIDE.md - 500+行）"
+    ],
+    "test_results": {
+      "cors_tests": {
+        "total": 14,
+        "passed": 9,
+        "skipped": 5,
+        "reason": "環境依存テスト（Preflight 3件、ログバリデーション 2件）"
+      },
+      "all_tests": {
+        "total": 99,
+        "passed": 99,
+        "failed": 0,
+        "coverage": "全テストパス - CORS機能は既存機能に影響なし"
+      },
+      "ci_status": {
+        "github_actions": "全シャード成功（Shard 1-4: SUCCESS, Coverage: SUCCESS）",
+        "php_quality": "SUCCESS（Laravel Pint + PHPStan Level 8）",
+        "e2e_tests": "SUCCESS"
+      }
+    },
+    "next_phase_tasks": [
+      "7. CI/CD統合機能の実装（オプション - CORS設定検証ステップ追加）",
+      "9. 既存機能互換性検証（Laravel Sanctum認証との統合確認）",
+      "10. 統合テストと動作確認（Next.jsアプリからのAPI呼び出し確認）"
+    ],
+    "completed_at": "2025-10-14T18:40:00Z"
+  }
+}
