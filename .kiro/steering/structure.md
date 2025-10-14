@@ -27,6 +27,12 @@ laravel-next-b2c/
 ├── Makefile             # テストインフラ管理タスク（quick-test, test-pgsql, test-parallel, test-setup, etc.）
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
 ├── node_modules/        # 共通依存関係
+├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint）
+│   ├── JEST_ESLINT_INTEGRATION_GUIDE.md  # Jest/Testing Library ESLint統合ガイド（設定概要、プラグイン詳細、適用ルール）
+│   ├── JEST_ESLINT_QUICKSTART.md         # Jest/ESLintクイックスタートガイド（5分セットアップ、基本ワークフロー）
+│   ├── JEST_ESLINT_TROUBLESHOOTING.md    # Jest/ESLintトラブルシューティング（設定問題、実行エラー、ルール調整）
+│   ├── JEST_ESLINT_CONFIG_EXAMPLES.md    # Jest/ESLint設定サンプル集（プロジェクト別設定例、カスタマイズパターン）
+│   └── TESTING_DATABASE_WORKFLOW.md      # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
 ├── README.md            # プロジェクト概要
 └── DOCKER_TROUBLESHOOTING.md  # Dockerトラブルシューティング完全ガイド（APP_PORTポート設定問題、イメージ再ビルド、完全クリーンアップ手順）
@@ -175,6 +181,22 @@ laravel-api/
 ├── tailwind.config.js   # Tailwind CSS設定
 ├── next.config.ts       # Next.js設定（outputFileTracingRoot設定、モノレポ対応）
 └── eslint.config.mjs    # ESLint 9設定 (flat config形式)
+```
+
+### フロントエンド共通設定 (`frontend/`)
+```
+frontend/
+├── .eslint.base.mjs     # 共通ESLint Base設定（モノレポ統一設定）
+│                        # - Next.js推奨設定（core-web-vitals, typescript）
+│                        # - テストファイル専用オーバーライド設定
+│                        #   - Jest推奨ルールセット（flat/recommended）
+│                        #   - Testing Library推奨ルールセット（flat/react）
+│                        #   - Jest-DOM推奨ルールセット（flat/recommended）
+│                        # - Prettier競合ルール無効化
+├── admin-app/           # 管理者向けアプリケーション
+├── user-app/            # エンドユーザー向けアプリケーション
+├── TESTING_GUIDE.md     # フロントエンドテストガイド
+└── TESTING_TROUBLESHOOTING.md  # テストトラブルシューティング
 ```
 
 **Docker最適化ポイント**:

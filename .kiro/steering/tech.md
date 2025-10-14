@@ -39,6 +39,12 @@
 - **husky**: ^9.1.7 (Gitフック管理、`.husky/`直下にフック直接配置する推奨方法に移行済み)
 - **lint-staged**: ^15 (ステージされたファイルのみlint/format実行)
 - **設定ファイル**: 各アプリに`eslint.config.mjs`（ESLint 9対応flat config）
+- **テストコード品質管理**:
+  - **eslint-plugin-jest**: ^28.14.0 (Jest専用ESLintルール、flat/recommended適用)
+  - **eslint-plugin-testing-library**: ^6.5.0 (Testing Library専用ルール、flat/react適用)
+  - **eslint-plugin-jest-dom**: ^5.5.0 (Jest-DOM専用ルール、flat/recommended適用)
+  - **共通Base設定**: `frontend/.eslint.base.mjs` - テストファイル専用オーバーライド設定
+  - **適用ルールレベル**: errorレベル（CI/CD厳格チェック対応）
 
 ### デュアルアプリケーション構成
 - **Admin App** (`frontend/admin-app/`): 管理者向けダッシュボード
@@ -252,6 +258,12 @@ parameters:
 
 **テストDB運用ドキュメント**:
 - `docs/TESTING_DATABASE_WORKFLOW.md`: テストDB設定ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行、Makefileタスク運用）
+
+**フロントエンドテストコードESLintドキュメント** (`docs/`):
+- `JEST_ESLINT_INTEGRATION_GUIDE.md`: Jest/Testing Library ESLint統合ガイド（設定概要、プラグイン詳細、適用ルール）
+- `JEST_ESLINT_QUICKSTART.md`: クイックスタートガイド（5分セットアップ、基本ワークフロー、トラブルシューティング）
+- `JEST_ESLINT_TROUBLESHOOTING.md`: トラブルシューティング完全ガイド（設定問題、実行エラー、ルール調整）
+- `JEST_ESLINT_CONFIG_EXAMPLES.md`: 設定サンプル集（プロジェクト別設定例、カスタマイズパターン）
 
 **🏗️ DDD/クリーンアーキテクチャドキュメント**:
 - `ddd-architecture.md`: DDD 4層構造アーキテクチャ概要、依存方向ルール、主要パターン

@@ -34,6 +34,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備、DDDアーキテクチャガイド・開発ガイド・テスト戦略ドキュメント統合、Dockerトラブルシューティング完全ガイド（DOCKER_TROUBLESHOOTING.md）
 - **開発者エクスペリエンス**: Turbopack、Tailwind CSS v4、ESLintの統合開発環境
 - **モノレポ統一コード品質管理**: ESLint 9 + Prettier設定、husky + lint-staged導入による自動品質チェック
+- **フロントエンドテストコードESLint統合**: Jest + Testing Library + Jest-DOM専用ESLintルール適用（errorレベル）、テストコード品質の自動検証、4つの包括的ガイドドキュメント完備
 - **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Pest 4 + Git Hooks + CI/CD統合による包括的コード品質保証
 
 ## ターゲットユースケース
