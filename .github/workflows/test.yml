@@ -90,12 +90,14 @@ jobs:
         env:
           ENV_VALIDATION_SKIP: true
 
-      - name: Validate environment variables
-        run: php artisan env:validate
-        working-directory: backend/laravel-api
-
       - name: Generate application key
         run: php artisan key:generate
+        working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
+
+      - name: Validate environment variables
+        run: php artisan env:validate
         working-directory: backend/laravel-api
 
       - name: Create shard test database
@@ -189,12 +191,14 @@ jobs:
         env:
           ENV_VALIDATION_SKIP: true
 
-      - name: Validate environment variables
-        run: php artisan env:validate
-        working-directory: backend/laravel-api
-
       - name: Generate application key
         run: php artisan key:generate
+        working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
+
+      - name: Validate environment variables
+        run: php artisan env:validate
         working-directory: backend/laravel-api
 
       - name: Run Tests with Coverage
