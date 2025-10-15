@@ -61,7 +61,7 @@ describe('EnvSchema', function () {
         expect($schema)->toHaveKey('DB_CONNECTION');
         expect($schema['DB_CONNECTION'])->toHaveKey('required', true);
         expect($schema['DB_CONNECTION'])->toHaveKey('type', 'string');
-        expect($schema['DB_CONNECTION'])->toHaveKey('allowed_values', ['sqlite', 'pgsql', 'mysql']);
+        expect($schema['DB_CONNECTION'])->toHaveKey('allowed_values', ['sqlite', 'pgsql', 'mysql', 'pgsql_testing']);
         expect($schema['DB_CONNECTION'])->toHaveKey('default', 'sqlite');
     });
 

@@ -121,9 +121,9 @@ jobs:
 
       - name: Setup Laravel
         run: |
-          php artisan key:generate
-          php artisan migrate --force
-          php artisan db:seed --force
+          ENV_VALIDATION_SKIP=true php artisan key:generate
+          ENV_VALIDATION_SKIP=true php artisan migrate --force
+          ENV_VALIDATION_SKIP=true php artisan db:seed --force
         working-directory: backend/laravel-api
         env:
           DB_CONNECTION: pgsql
