@@ -40,6 +40,7 @@
     "next-router-mock": "^0.9.13",
     "prettier": "^3",
     "prettier-plugin-tailwindcss": "^0.6",
+    "tsx": "^4.20.6",
     "whatwg-fetch": "^3.6.20"
   },
   "lint-staged": {
