@@ -58,6 +58,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-phpstan-
 
+      - name: Copy .env
+        run: cp .env.example .env
+        working-directory: backend/laravel-api
+
       - name: Install Composer dependencies
         working-directory: backend/laravel-api
         run: composer install --prefer-dist --no-progress --no-interaction
