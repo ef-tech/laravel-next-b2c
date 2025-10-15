@@ -2,36 +2,40 @@
 
 ## 実装タスク一覧
 
-- [ ] 1. 環境変数テンプレートファイルの詳細化
-- [ ] 1.1 ルートディレクトリの .env.example に詳細コメントを追加
+- [x] 1. 環境変数テンプレートファイルの詳細化 ✅
+- [x] 1.1 ルートディレクトリの .env.example に詳細コメントを追加 ✅
   - モノレポ全体で共通の環境変数（NEXT_PUBLIC_API_URL、APP_PORT、Docker関連ポート、E2E URL等）に対して、説明・必須性・環境別値例・セキュリティレベル・注意事項を含むコメントを追加
   - セクション分割により可読性を向上（Frontend、Docker Port Configuration、E2E Tests等）
   - 各変数のコメントフォーマット統一（説明、必須、環境、セキュリティ、デフォルト、注意事項）
   - _Requirements: 1.1, 1.2_
+  - _Commit: 80b7111_
 
-- [ ] 1.2 Laravel .env.example に詳細コメントを追加
+- [x] 1.2 Laravel .env.example に詳細コメントを追加 ✅
   - Laravel API固有の環境変数（APP_NAME、APP_ENV、APP_KEY、APP_DEBUG、DB関連、Sanctum、CORS等）に対して詳細コメントを追加
   - セクション分割（Application Configuration、Database Configuration、Sanctum Configuration、CORS Configuration等）
   - 条件付き必須項目の明示（DB_HOST、DB_PORT等はDB_CONNECTION次第）
   - セキュリティレベルの明示（公開可/機密/極秘）
   - _Requirements: 1.1, 1.3_
+  - _Commit: 80b7111_
 
-- [ ] 1.3 E2E .env.example に詳細コメントを追加
+- [x] 1.3 E2E .env.example に詳細コメントを追加 ✅
   - E2Eテスト実行に必要な環境変数（E2E_ADMIN_URL、E2E_USER_URL、E2E_API_URL、認証情報等）に詳細コメントを追加
   - テスト環境固有の注意事項を記載（本番環境では使用しないこと等）
   - セキュリティレベルの明示（機密/極秘、ただしテスト用のため低リスク）
   - _Requirements: 1.1, 1.4_
+  - _Commit: 80b7111_
 
-- [ ] 2. Laravel環境変数バリデーション機能の実装
-- [ ] 2.1 環境変数スキーマ定義を作成
+- [x] 2. Laravel環境変数バリデーション機能の実装 ✅
+- [x] 2.1 環境変数スキーマ定義を作成 ✅
   - スキーマファイルで環境変数の必須性、型、デフォルト値、許可値、条件付き必須を宣言的に定義
   - 主要な環境変数（APP_NAME、APP_ENV、APP_DEBUG、DB関連、Sanctum、CORS等）のスキーマを実装
   - 型定義（string、integer、boolean、url、email）と型検証ルールを定義
   - 条件付き必須項目の実装（DB_CONNECTION=pgsql/mysqlの場合、DB_HOSTが必須等）
   - セキュリティレベル定義（security_level: high等）
   - _Requirements: 2.1, 2.5_
+  - _Commit: 5a3393d_
 
-- [ ] 2.2 環境変数バリデータクラスを実装
+- [x] 2.2 環境変数バリデータクラスを実装 ✅
   - スキーマに基づく環境変数バリデーションロジックを実装
   - 必須チェック機能（条件付き必須も含む）
   - 型検証機能（string、integer、boolean、url、email）
@@ -39,53 +43,60 @@
   - エラーメッセージフォーマット機能（不足変数名、期待される型・値、設定例を含む）
   - 警告モード機能（エラーがあってもログ記録のみで起動継続）
   - _Requirements: 2.2, 2.3_
+  - _Commit: 5a3393d_
 
-- [ ] 2.3 Bootstrapper（起動時バリデーション）を実装
+- [x] 2.3 Bootstrapper（起動時バリデーション）を実装 ✅
   - アプリケーションブートストラップフェーズで環境変数バリデーションを実行
   - スキップフラグ機能（ENV_VALIDATION_SKIP=trueで緊急時にバリデーション無効化）
   - 警告モード・エラーモード切り替え機能（ENV_VALIDATION_MODE環境変数）
   - バリデーション成功時のログ記録
   - バリデーション失敗時のRuntimeException発生とアプリケーション起動停止
   - _Requirements: 2.1, 2.2_
+  - _Commit: 4ccdc40_
 
-- [ ] 2.4 Artisan手動検証コマンドを実装
+- [x] 2.4 Artisan手動検証コマンドを実装 ✅
   - 手動で環境変数を検証するArtisanコマンドを実装
   - コマンドシグネチャ（env:validate --mode=error|warning）
   - 警告モード・エラーモードのオプション対応
   - 検証成功時の成功メッセージ表示
   - 検証失敗時のエラー詳細表示とコマンド終了ステータス設定
   - _Requirements: 2.4_
+  - _Commit: 7c5952a_
 
-- [ ] 2.5 Bootstrapperをアプリケーションに登録
+- [x] 2.5 Bootstrapperをアプリケーションに登録 ✅
   - bootstrap/app.phpでBootstrapperを登録し、起動時バリデーションを有効化
-  - withBootstrappers配列にValidateEnvironmentクラスを追加
+  - withBootstrappers配列にValidateEnvironmentクラスを追加（→AppServiceProvider::boot()に変更）
   - 登録後の動作確認（起動時にバリデーションが実行されることを確認）
   - _Requirements: 2.1, 2.6_
+  - _Commit: e731687_
 
-- [ ] 3. Next.js環境変数バリデーション機能の実装
-- [ ] 3.1 Admin App用Zodスキーマを実装
+- [x] 3. Next.js環境変数バリデーション機能の実装 ✅
+- [x] 3.1 Admin App用Zodスキーマを実装 ✅
   - Zodスキーマによる環境変数定義を実装（NEXT_PUBLIC_API_URL、NODE_ENV等）
   - 型安全な環境変数オブジェクトのエクスポート
   - TypeScript型推論によるコンパイル時型チェックの有効化
   - 実行時バリデーション（Zodスキーマによる検証）
   - バリデーションエラー時の明確なエラーメッセージ表示
   - _Requirements: 3.1, 3.4, 3.5_
+  - _Commit: 9cbd438_
 
-- [ ] 3.2 User App用Zodスキーマを実装
+- [x] 3.2 User App用Zodスキーマを実装 ✅
   - Zodスキーマによる環境変数定義を実装（Admin Appとほぼ同様だが、NEXT_PUBLIC_APP_NAME等の差分を反映）
   - 型安全な環境変数オブジェクトのエクスポート
   - TypeScript型推論によるコンパイル時型チェックの有効化
   - 実行時バリデーション（Zodスキーマによる検証）
   - バリデーションエラー時の明確なエラーメッセージ表示
   - _Requirements: 3.1, 3.4, 3.5_
+  - _Commit: 9cbd438_
 
-- [ ] 3.3 ビルド前検証スクリプトとpackage.json統合を実装
+- [x] 3.3 ビルド前検証スクリプトとpackage.json統合を実装 ✅
   - ビルド前検証スクリプト（check-env.ts）を作成し、env.tsをインポートしてバリデーション実行
   - package.jsonのpredev/prebuildフックに検証スクリプトを統合
   - Admin App、User App両方に統合
   - バリデーション成功時の成功メッセージ表示
   - バリデーション失敗時のエラー表示と実行停止
   - _Requirements: 3.1, 3.2, 3.6_
+  - _Commit: 9cbd438_
 
 - [ ] 4. 環境変数同期スクリプトの実装
 - [ ] 4.1 環境変数同期スクリプトを実装
@@ -168,8 +179,8 @@
   - ビルド時間増加の確認（約10-20秒増加、許容範囲内）
   - _Requirements: 7.6, 7.7, 7.8_
 
-- [ ] 9. ユニットテスト・統合テストの実装
-- [ ] 9.1 Laravel EnvValidatorのユニットテストを実装
+- [x] 9. ユニットテスト・統合テストの実装（一部完了）
+- [x] 9.1 Laravel EnvValidatorのユニットテストを実装 ✅
   - 必須変数不足時のRuntimeException検証テスト
   - 正常な環境変数でのバリデーション成功テスト
   - 型違いでのバリデーションエラーテスト
@@ -177,14 +188,18 @@
   - 警告モードでのバリデーション成功テスト
   - 条件付き必須チェックのテスト
   - _Requirements: 8.1, 8.2_
+  - _テストカバレッジ: 35テスト（EnvSchema: 10, EnvValidator: 10, ValidateEnvironment: 7, ValidateEnvCommand: 8）_
+  - _Commit: 5a3393d, 4ccdc40, 7c5952a_
 
-- [ ] 9.2 Next.js Zodスキーマのユニットテストを実装
-  - 正常な環境変数でのバリデーション成功テスト（Admin App）
+- [x] 9.2 Next.js Zodスキーマのユニットテストを実装 ✅
+  - 正常な環境変数でのバリデーション成功テスト（Admin App: 8テスト）
   - 不正なURL形式でのバリデーションエラーテスト（Admin App）
   - 許可されていないNODE_ENVでのエラーテスト（Admin App）
   - 必須環境変数不足時のエラーテスト（Admin App）
-  - User App用の同様のテストを実装
+  - User App用の同様のテストを実装（User App: 10テスト）
   - _Requirements: 8.3, 8.4_
+  - _テストカバレッジ: 18テスト（Admin App: 8, User App: 10）_
+  - _Commit: 9cbd438_
 
 - [ ] 9.3 環境変数同期スクリプトの統合テストを実装
   - .env.exampleのみ存在する場合の.env作成テスト
