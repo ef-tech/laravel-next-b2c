@@ -109,8 +109,8 @@ jobs:
             frontend/user-app/package-lock.json
             e2e/package-lock.json
 
-      - name: Copy .env
-        run: cp .env.example .env
+      - name: Copy .env for CI
+        run: cp .env.ci .env
         working-directory: backend/laravel-api
 
       - name: Install Composer dependencies

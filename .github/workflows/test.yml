@@ -67,8 +67,8 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
-      - name: Copy .env
-        run: cp .env.example .env
+      - name: Copy .env for CI
+        run: cp .env.ci .env
         working-directory: backend/laravel-api
 
       - name: Get Composer cache directory
@@ -168,8 +168,8 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
-      - name: Copy .env
-        run: cp .env.example .env
+      - name: Copy .env for CI
+        run: cp .env.ci .env
         working-directory: backend/laravel-api
 
       - name: Get Composer cache directory
