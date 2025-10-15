@@ -35,6 +35,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `laravel-api-health-check-endpoint` - Laravel APIヘルスチェックエンドポイント実装（/api/health追加・Dockerヘルスチェック統合）
 - `frontend-test-eslint-setup` - フロントエンドテストコードのESLint設定追加（Jest/Testing Libraryルール統合・モノレポ対応）
 - `cors-environment-config` - CORS環境変数設定（フロントエンドアプリ用、開発/本番環境対応、セキュリティ強化）
+- `environment-variable-management` - 環境変数適切管理方法整備（.env.exampleコメント整備、バリデーション実装、セキュリティガイド作成）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
