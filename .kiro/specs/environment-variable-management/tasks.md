@@ -117,8 +117,8 @@
   - dotenv依存関係の追加（.envファイルパース用）
   - _Requirements: 4.1, 4.4_
 
-- [ ] 5. GitHub Actions Secrets設定ガイドの作成
-- [ ] 5.1 GitHub Actions Secrets設定ガイドドキュメントを作成
+- [x] 5. GitHub Actions Secrets設定ガイドの作成 ✅
+- [x] 5.1 GitHub Actions Secrets設定ガイドドキュメントを作成 ✅
   - GitHub Actions Secretsの役割と重要性を説明
   - Secrets命名規約（{サービス}_{環境}_{変数名}パターン）の定義
   - Repository Secrets vs Environment Secretsの使い分け基準と設定手順
@@ -126,24 +126,27 @@
   - CI/CDワークフローでのSecrets参照方法（${{ secrets.SECRET_NAME }}）
   - セキュリティベストプラクティス（定期ローテーション、アクセス制御、監査ログ確認）
   - トラブルシューティング（Secret不足エラーの解決方法）
+  - ドキュメント作成完了: `docs/GITHUB_ACTIONS_SECRETS_GUIDE.md`
   - _Requirements: 5.1, 5.2_
 
-- [ ] 6. 環境変数セキュリティガイドの作成
-- [ ] 6.1 環境変数セキュリティガイドドキュメントを作成
+- [x] 6. 環境変数セキュリティガイドの作成 ✅
+- [x] 6.1 環境変数セキュリティガイドドキュメントを作成 ✅
   - セキュリティ原則（機密情報の定義、.env管理、バージョン管理からの除外）
   - Laravel/Next.jsセキュリティ設定（CORS、CSRFプロテクション、Sanctum認証設定）
   - CI/CDセキュリティ（GitHub Secrets暗号化、アクセス制御、監査ログ）
   - セキュリティチェックリスト（セットアップ時、運用時、インシデント対応）
   - インシデント対応手順（機密情報漏洩時の緊急対応、影響範囲調査、再発防止策）
+  - ドキュメント作成完了: `docs/ENVIRONMENT_VARIABLE_SECURITY_GUIDE.md`
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 7. README.md環境変数管理セクションの更新
-- [ ] 7.1 README.mdに環境変数管理セクションを追加
+- [x] 7. README.md環境変数管理セクションの更新 ✅
+- [x] 7.1 README.mdに環境変数管理セクションを追加 ✅
   - セットアップ手順（.env.exampleコピー、環境変数設定、バリデーション実行）
   - 環境変数テンプレート構成（ルート、Laravel、E2E）
   - バリデーションコマンド（php artisan env:validate、npm run env:check/env:sync）
   - トラブルシューティング（よくあるエラーと解決方法）
   - 関連ドキュメントへのリンク（GitHub Actions Secrets、環境変数セキュリティガイド）
+  - README.md目次に「🔐 環境変数管理」セクション追加
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
 - [x] 8. CI/CDワークフロー統合 ✅
