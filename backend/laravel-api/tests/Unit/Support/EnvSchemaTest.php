@@ -27,7 +27,7 @@ describe('EnvSchema', function () {
         expect($schema)->toHaveKey('APP_ENV');
         expect($schema['APP_ENV'])->toHaveKey('required', true);
         expect($schema['APP_ENV'])->toHaveKey('type', 'string');
-        expect($schema['APP_ENV'])->toHaveKey('allowed_values', ['local', 'staging', 'production']);
+        expect($schema['APP_ENV'])->toHaveKey('allowed_values', ['local', 'testing', 'staging', 'production']);
     });
 
     test('APP_DEBUG のスキーマ定義が正しいこと', function () {

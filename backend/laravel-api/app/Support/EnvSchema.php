@@ -27,7 +27,7 @@ class EnvSchema
             'APP_ENV' => [
                 'required' => true,
                 'type' => 'string',
-                'allowed_values' => ['local', 'staging', 'production'],
+                'allowed_values' => ['local', 'testing', 'staging', 'production'],
                 'default' => 'local',
                 'description' => 'アプリケーション実行環境',
             ],
