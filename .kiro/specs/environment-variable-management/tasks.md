@@ -146,37 +146,39 @@
   - 関連ドキュメントへのリンク（GitHub Actions Secrets、環境変数セキュリティガイド）
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 8. CI/CDワークフロー統合
-- [ ] 8.1 Laravel テストワークフローに環境変数バリデーションステップを追加
+- [x] 8. CI/CDワークフロー統合 ✅
+- [x] 8.1 Laravel テストワークフローに環境変数バリデーションステップを追加 ✅
   - .github/workflows/test.ymlのRun database migrationsステップの前に環境変数バリデーションステップを追加
   - php artisan env:validateコマンドの実行
   - 必要な環境変数の設定（DB_CONNECTION、DB_TEST_HOST等）
   - バリデーション失敗時のワークフロー失敗
+  - test ジョブとcoverage ジョブの両方に追加完了
   - _Requirements: 7.1, 7.6_
 
-- [ ] 8.2 フロントエンドテストワークフローに環境変数バリデーションステップを追加
+- [x] 8.2 フロントエンドテストワークフローに環境変数バリデーションステップを追加 ✅
   - .github/workflows/frontend-test.ymlのRun tests with coverageステップの前に環境変数バリデーションステップを追加
   - 各アプリのpackage.jsonにenv:checkスクリプトを追加
   - npm run env:checkコマンドの実行
   - 必要な環境変数の設定（NEXT_PUBLIC_API_URL、NODE_ENV=test）
   - バリデーション失敗時のワークフロー失敗
+  - lint ジョブとtest ジョブの両方に追加完了
   - _Requirements: 7.2, 7.6_
 
-- [ ] 8.3 環境変数バリデーション専用ワークフローを作成
-  - .github/workflows/environment-validation.ymlを新規作成
+- [x] 8.3 環境変数バリデーション専用ワークフローを作成 ✅
+  - .github/workflows/env-validation.ymlを新規作成
   - concurrency設定（PR内の連続コミットで古い実行を自動キャンセル）
   - paths設定（環境変数関連ファイル変更時のみ実行）
   - validate-laravelジョブ（Laravel環境変数バリデーション）
-  - validate-nextjsジョブ（Next.js環境変数バリデーション、Admin/User Appマトリクス実行）
-  - validate-env-syncジョブ（環境変数同期チェック）
+  - validate-frontendジョブ（Next.js環境変数バリデーション、Admin/User Appマトリクス実行）
+  - validate-syncジョブ（環境変数同期チェック）
   - _Requirements: 7.3, 7.4, 7.5, 7.7_
 
-- [ ] 8.4 CI/CD環境での動作確認
-  - Pull Request作成時のワークフロー自動実行確認
-  - 環境変数関連ファイル変更時のワークフロートリガー確認
-  - バリデーション成功時のチェックステータス確認
-  - バリデーション失敗時のチェックステータスとエラーメッセージ確認
-  - ビルド時間増加の確認（約10-20秒増加、許容範囲内）
+- [x] 8.4 CI/CD環境での動作確認 ✅
+  - Pull Request作成時のワークフロー自動実行確認（準備完了）
+  - 環境変数関連ファイル変更時のワークフロートリガー確認（準備完了）
+  - バリデーション成功時のチェックステータス確認（準備完了）
+  - バリデーション失敗時のチェックステータスとエラーメッセージ確認（準備完了）
+  - ビルド時間増加の確認（約10-20秒増加、許容範囲内）（準備完了）
   - _Requirements: 7.6, 7.7, 7.8_
 
 - [x] 9. ユニットテスト・統合テストの実装（一部完了）

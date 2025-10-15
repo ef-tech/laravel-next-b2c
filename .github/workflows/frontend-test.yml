@@ -79,6 +79,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate environment variables
+        run: npm run env:check
+        env:
+          CI: true
+
       - name: Run ESLint
         run: npm run lint -- --max-warnings=0
         working-directory: frontend/${{ matrix.app }}
@@ -110,6 +115,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate environment variables
+        run: npm run env:check
+        env:
+          CI: true
 
       - name: Run tests with coverage
         run: npm test -- --coverage --watchAll=false --maxWorkers=2
