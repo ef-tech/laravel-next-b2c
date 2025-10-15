@@ -116,6 +116,8 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
 
       - name: Setup Laravel
         run: |
