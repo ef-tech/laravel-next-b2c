@@ -7,6 +7,8 @@
  * - REFACTOR: リファクタリング
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+
 describe("環境変数バリデーション", () => {
   const originalEnv = process.env;
 
