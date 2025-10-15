@@ -83,6 +83,8 @@ class EnvValidator
 
     /**
      * 環境変数が必須かどうか判定
+     *
+     * @param  array<string, mixed>  $config
      */
     private function isRequired(string $key, array $config): bool
     {
@@ -179,6 +181,8 @@ class EnvValidator
 
     /**
      * 必須エラーメッセージフォーマット
+     *
+     * @param  array<string, mixed>  $config
      */
     private function formatRequiredError(string $key, array $config): string
     {
@@ -190,6 +194,8 @@ class EnvValidator
 
     /**
      * 型エラーメッセージフォーマット
+     *
+     * @param  array<string, mixed>  $config
      */
     private function formatTypeError(string $key, array $config): string
     {
@@ -201,6 +207,8 @@ class EnvValidator
 
     /**
      * 許可値エラーメッセージフォーマット
+     *
+     * @param  array<string, mixed>  $config
      */
     private function formatAllowedValuesError(string $key, array $config): string
     {
