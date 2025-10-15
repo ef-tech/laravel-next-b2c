@@ -59,7 +59,7 @@ class EnvSchema
             'DB_CONNECTION' => [
                 'required' => true,
                 'type' => 'string',
-                'allowed_values' => ['sqlite', 'pgsql', 'mysql'],
+                'allowed_values' => ['sqlite', 'pgsql', 'mysql', 'pgsql_testing'],
                 'default' => 'sqlite',
                 'description' => 'データベース接続ドライバ',
             ],
