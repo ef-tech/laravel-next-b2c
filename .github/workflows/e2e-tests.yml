@@ -165,7 +165,7 @@ jobs:
           npx wait-on \
             http://localhost:13001 \
             http://localhost:13002 \
-            http://localhost:13000/up \
+            http://localhost:13000/api/health \
             --timeout 120000 \
             --interval 2000 \
             --verbose
