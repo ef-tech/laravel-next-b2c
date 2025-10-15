@@ -27,11 +27,12 @@ laravel-next-b2c/
 ├── Makefile             # テストインフラ管理タスク（quick-test, test-pgsql, test-parallel, test-setup, etc.）
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
 ├── node_modules/        # 共通依存関係
-├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint）
+├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint、CORS設定、テストDB運用）
 │   ├── JEST_ESLINT_INTEGRATION_GUIDE.md  # Jest/Testing Library ESLint統合ガイド（設定概要、プラグイン詳細、適用ルール）
 │   ├── JEST_ESLINT_QUICKSTART.md         # Jest/ESLintクイックスタートガイド（5分セットアップ、基本ワークフロー）
 │   ├── JEST_ESLINT_TROUBLESHOOTING.md    # Jest/ESLintトラブルシューティング（設定問題、実行エラー、ルール調整）
 │   ├── JEST_ESLINT_CONFIG_EXAMPLES.md    # Jest/ESLint設定サンプル集（プロジェクト別設定例、カスタマイズパターン）
+│   ├── CORS_CONFIGURATION_GUIDE.md       # 🌐 CORS環境変数設定完全ガイド（環境別設定、セキュリティベストプラクティス、トラブルシューティング）
 │   └── TESTING_DATABASE_WORKFLOW.md      # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
 ├── README.md            # プロジェクト概要

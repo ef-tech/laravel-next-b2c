@@ -127,6 +127,10 @@ $schedule->command('tokens:prune')->daily();
 SANCTUM_STATEFUL_DOMAINS=localhost:13001,localhost:13002
 SESSION_DRIVER=array  # ステートレス設計
 SANCTUM_EXPIRATION=60 # トークン有効期限（日数）
+
+# 🌐 CORS環境変数設定
+CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002  # 開発環境
+# 本番環境例: CORS_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
 ```
 
 ### データベース・ストレージ
@@ -264,6 +268,9 @@ parameters:
 - `JEST_ESLINT_QUICKSTART.md`: クイックスタートガイド（5分セットアップ、基本ワークフロー、トラブルシューティング）
 - `JEST_ESLINT_TROUBLESHOOTING.md`: トラブルシューティング完全ガイド（設定問題、実行エラー、ルール調整）
 - `JEST_ESLINT_CONFIG_EXAMPLES.md`: 設定サンプル集（プロジェクト別設定例、カスタマイズパターン）
+
+**🌐 CORS環境変数設定ドキュメント** (`docs/`):
+- `CORS_CONFIGURATION_GUIDE.md`: CORS環境変数設定完全ガイド（環境別設定、セキュリティベストプラクティス、トラブルシューティング、テスト戦略）
 
 **🏗️ DDD/クリーンアーキテクチャドキュメント**:
 - `ddd-architecture.md`: DDD 4層構造アーキテクチャ概要、依存方向ルール、主要パターン

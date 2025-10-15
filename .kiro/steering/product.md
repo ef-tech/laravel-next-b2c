@@ -36,6 +36,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **モノレポ統一コード品質管理**: ESLint 9 + Prettier設定、husky + lint-staged導入による自動品質チェック
 - **フロントエンドテストコードESLint統合**: Jest + Testing Library + Jest-DOM専用ESLintルール適用（errorレベル）、テストコード品質の自動検証、4つの包括的ガイドドキュメント完備
 - **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Pest 4 + Git Hooks + CI/CD統合による包括的コード品質保証
+- **🌐 CORS環境変数ドリブン設定**: 環境変数による柔軟なCORS設定、開発/本番環境対応、セキュリティ強化、フロントエンドアプリとのシームレスな統合
 
 ## ターゲットユースケース
 - **B2Cアプリケーション開発**: EC、SaaS、メディアサイトなどの顧客向けサービス
@@ -76,6 +77,12 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **トークンライフサイクル管理**: 自動期限切れ削除（Scheduled Tasks統合）、手動取り消し機能
   - **セキュリティベストプラクティス**: `auth:sanctum` middleware、CSRF保護、レート制限対応
   - **PHPStan Level 8準拠**: 型安全性保証、静的解析合格
+- **🌐 CORS環境変数ドリブン設定**:
+  - **環境変数による柔軟な設定**: `CORS_ALLOWED_ORIGINS` 環境変数で動的設定
+  - **開発/本番環境対応**: 環境別のオリジン設定（localhost:13001,13002 → 本番ドメイン）
+  - **セキュリティ強化**: ワイルドカード禁止、明示的オリジン指定、本番環境での厳格な検証
+  - **テスト環境統合**: PHPUnit/Pest テストでのCORS検証サポート
+  - **完全ガイド**: `docs/CORS_CONFIGURATION_GUIDE.md` による環境別設定・トラブルシューティング
 - **CORS最適化**: Next.js フロントエンドとの完全統合設定
 - **モジュラー構成**: 各コンポーネントの独立開発・デプロイ可能、既存MVCとDDD層の共存戦略
 - **包括的最適化ドキュメント**: `backend/laravel-api/docs/`に移行ガイド・DDDアーキテクチャガイド完備
