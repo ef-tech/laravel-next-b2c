@@ -56,7 +56,8 @@ class ValidateEnvironment
      */
     private function shouldSkipValidation(): bool
     {
-        $skipFlag = $_ENV['ENV_VALIDATION_SKIP'] ?? 'false';
+        // getenv() と $_ENV の両方をチェック（CI/CD環境対応）
+        $skipFlag = getenv('ENV_VALIDATION_SKIP') ?: ($_ENV['ENV_VALIDATION_SKIP'] ?? 'false');
 
         return strtolower($skipFlag) === 'true' || $skipFlag === '1';
     }
@@ -66,7 +67,8 @@ class ValidateEnvironment
      */
     private function getValidationMode(): string
     {
-        $mode = $_ENV['ENV_VALIDATION_MODE'] ?? 'error';
+        // getenv() と $_ENV の両方をチェック（CI/CD環境対応）
+        $mode = getenv('ENV_VALIDATION_MODE') ?: ($_ENV['ENV_VALIDATION_MODE'] ?? 'error');
 
         return in_array($mode, ['error', 'warning'], true) ? $mode : 'error';
     }
