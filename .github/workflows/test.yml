@@ -67,6 +67,10 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
+      - name: Copy .env for CI
+        run: cp .env.ci .env
+        working-directory: backend/laravel-api
+
       - name: Get Composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
@@ -84,12 +88,8 @@ jobs:
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         working-directory: backend/laravel-api
 
-      - name: Copy .env
-        run: cp .env.example .env
-        working-directory: backend/laravel-api
-
-      - name: Generate application key
-        run: php artisan key:generate
+      - name: Validate environment variables
+        run: php artisan env:validate
         working-directory: backend/laravel-api
 
       - name: Create shard test database
@@ -100,6 +100,7 @@ jobs:
         run: php artisan migrate --force
         working-directory: backend/laravel-api
         env:
+          ENV_VALIDATION_SKIP: true
           DB_CONNECTION: pgsql_testing
           DB_TEST_HOST: 127.0.0.1
           DB_TEST_PORT: 13432
@@ -113,6 +114,7 @@ jobs:
           php artisan cache:clear
         working-directory: backend/laravel-api
         env:
+          ENV_VALIDATION_SKIP: true
           DB_CONNECTION: pgsql_testing
           DB_TEST_HOST: 127.0.0.1
           DB_TEST_PORT: 13432
@@ -160,6 +162,10 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
+      - name: Copy .env for CI
+        run: cp .env.ci .env
+        working-directory: backend/laravel-api
+
       - name: Get Composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
@@ -177,12 +183,8 @@ jobs:
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         working-directory: backend/laravel-api
 
-      - name: Copy .env
-        run: cp .env.example .env
-        working-directory: backend/laravel-api
-
-      - name: Generate application key
-        run: php artisan key:generate
+      - name: Validate environment variables
+        run: php artisan env:validate
         working-directory: backend/laravel-api
 
       - name: Run Tests with Coverage

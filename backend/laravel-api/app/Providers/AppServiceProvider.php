@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Bootstrap\ValidateEnvironment;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,7 +21,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->validateEnvironmentVariables();
         $this->validateCorsConfiguration();
+    }
+
+    /**
+     * 環境変数を検証する
+     *
+     * 起動時に環境変数のバリデーションを実行する
+     */
+    private function validateEnvironmentVariables(): void
+    {
+        $validator = new ValidateEnvironment;
+        $validator->bootstrap($this->app);
     }
 
     /**

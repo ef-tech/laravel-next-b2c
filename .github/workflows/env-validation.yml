@@ -1,0 +1,151 @@
+name: Environment Variables Validation
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '.env.example'
+      - 'backend/laravel-api/.env.example'
+      - 'e2e/.env.example'
+      - 'frontend/admin-app/.env.example'
+      - 'frontend/user-app/.env.example'
+      - 'backend/laravel-api/app/Support/EnvValidator.php'
+      - 'backend/laravel-api/app/Support/EnvSchema.php'
+      - 'backend/laravel-api/app/Bootstrap/ValidateEnvironment.php'
+      - 'backend/laravel-api/app/Console/Commands/ValidateEnvCommand.php'
+      - 'frontend/admin-app/src/lib/env.ts'
+      - 'frontend/admin-app/scripts/check-env.ts'
+      - 'frontend/user-app/src/lib/env.ts'
+      - 'frontend/user-app/scripts/check-env.ts'
+      - 'scripts/env-sync.ts'
+      - '.github/workflows/env-validation.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+      - develop
+    paths:
+      - '.env.example'
+      - 'backend/laravel-api/.env.example'
+      - 'e2e/.env.example'
+      - 'frontend/admin-app/.env.example'
+      - 'frontend/user-app/.env.example'
+      - 'backend/laravel-api/app/Support/EnvValidator.php'
+      - 'backend/laravel-api/app/Support/EnvSchema.php'
+      - 'backend/laravel-api/app/Bootstrap/ValidateEnvironment.php'
+      - 'backend/laravel-api/app/Console/Commands/ValidateEnvCommand.php'
+      - 'frontend/admin-app/src/lib/env.ts'
+      - 'frontend/admin-app/scripts/check-env.ts'
+      - 'frontend/user-app/src/lib/env.ts'
+      - 'frontend/user-app/scripts/check-env.ts'
+      - 'scripts/env-sync.ts'
+      - '.github/workflows/env-validation.yml'
+
+jobs:
+  validate-laravel:
+    name: Validate Laravel Environment Variables
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: dom, curl, libxml, mbstring, zip
+          tools: composer:v2
+
+      - name: Copy .env for CI
+        run: cp .env.ci .env
+        working-directory: backend/laravel-api
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        working-directory: backend/laravel-api
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/laravel-api/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: backend/laravel-api
+
+      - name: Validate environment variables
+        run: php artisan env:validate
+        working-directory: backend/laravel-api
+
+  validate-frontend:
+    name: Validate Frontend Environment Variables
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [admin-app, user-app]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/admin-app/package-lock.json
+            frontend/user-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Copy .env.example to .env.local
+        run: cp .env.example .env.local
+        working-directory: frontend/${{ matrix.app }}
+
+      - name: Build Next.js app (validates env)
+        run: npm run build
+        working-directory: frontend/${{ matrix.app }}
+        env:
+          CI: true
+
+  validate-sync:
+    name: Validate Environment Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create .env files from examples
+        run: |
+          cp .env.example .env
+          cp backend/laravel-api/.env.example backend/laravel-api/.env
+          [ -f e2e/.env.example ] && cp e2e/.env.example e2e/.env || true
+
+      - name: Run environment sync check
+        run: npm run env:check

@@ -58,6 +58,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-phpstan-
 
+      - name: Copy .env for CI
+        run: cp .env.ci .env
+        working-directory: backend/laravel-api
+
       - name: Install Composer dependencies
         working-directory: backend/laravel-api
         run: composer install --prefer-dist --no-progress --no-interaction
@@ -93,3 +97,5 @@ jobs:
             echo "📖 詳細: https://github.com/ef-tech/laravel-next-b2c/blob/main/README.md#larastan-phpstan"
             exit 1
           }
+        env:
+          ENV_VALIDATION_SKIP: true

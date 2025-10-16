@@ -69,7 +69,14 @@ laravel-next-b2c/
   - [コード品質とテスト](#コード品質とテスト)
 - [🌐 システムアーキテクチャ](#-システムアーキテクチャ)
 - [⚙️ 環境設定](#️-環境設定)
-- [🔧 トラブルシューティング](#-トラブルシューティング)
+- [🔐 環境変数管理](#-環境変数管理)
+  - [環境変数テンプレート構成](#環境変数テンプレート構成)
+  - [環境変数バリデーション](#環境変数バリデーション)
+  - [環境変数同期チェック](#環境変数同期チェック)
+  - [CI/CD自動バリデーション](#cicd自動バリデーション)
+  - [トラブルシューティング](#トラブルシューティング-1)
+  - [セキュリティガイド](#セキュリティガイド)
+- [🔧 トラブルシューティング](#-トラブルシューティング-2)
 - [📚 開発リソース](#-開発リソース)
 
 ## ⚡ Laravel API最適化詳細
@@ -831,6 +838,207 @@ NEXT_PUBLIC_APP_ENV=development
 NEXT_PUBLIC_API_URL=http://localhost:13000
 NEXT_PUBLIC_APP_ENV=development
 ```
+
+## 🔐 環境変数管理
+
+このプロジェクトでは、**環境変数の適切な管理**を実現するための包括的な機能を提供しています。
+
+### 環境変数テンプレート構成
+
+各環境に対応した `.env.example` ファイルが用意されています。
+
+| ファイルパス | 対象環境 | 説明 |
+|------------|---------|------|
+| `.env.example` | モノレポ全体 | Next.jsアプリ共通、Docker設定、E2E設定 |
+| `backend/laravel-api/.env.example` | Laravel API | データベース、認証、CORS設定 |
+| `e2e/.env.example` | E2Eテスト | Playwright実行用エンドポイント |
+
+#### セットアップ手順
+
+```bash
+# 1. ルートディレクトリの環境変数
+cp .env.example .env
+
+# 2. Laravel API環境変数
+cp backend/laravel-api/.env.example backend/laravel-api/.env
+
+# 3. Laravel アプリケーションキーを生成
+cd backend/laravel-api
+php artisan key:generate
+# または Docker環境
+./vendor/bin/sail artisan key:generate
+
+# 4. E2Eテスト環境変数（必要に応じて）
+cp e2e/.env.example e2e/.env
+```
+
+### 環境変数バリデーション
+
+環境変数の不足や設定ミスを **起動前に自動検出** します。
+
+#### Laravel（起動時自動バリデーション）
+
+Laravel APIは起動時に自動的に環境変数をバリデーションします。
+
+```bash
+# 手動バリデーション
+cd backend/laravel-api
+php artisan env:validate
+
+# 成功時
+✅ 環境変数のバリデーションが成功しました。
+
+# 失敗時（例）
+❌ 環境変数のバリデーションに失敗しました。
+
+不足している環境変数:
+  - APP_KEY
+    説明: アプリケーション暗号化キー
+    生成方法: php artisan key:generate
+
+  - DB_PASSWORD
+    説明: データベースパスワード
+    推奨: 20文字以上の強力なパスワード
+```
+
+**起動時自動バリデーション**:
+- Laravel API起動時に自動実行
+- バリデーション失敗時はアプリケーションが起動しません
+- 緊急時のスキップ: `ENV_VALIDATION_SKIP=true`
+
+#### Next.js（ビルド時自動バリデーション）
+
+Next.jsアプリケーションはビルド時に自動的に環境変数をバリデーションします。
+
+```bash
+# Admin App ビルド（自動バリデーション）
+cd frontend/admin-app
+npm run build
+
+# User App ビルド（自動バリデーション）
+cd frontend/user-app
+npm run build
+
+# バリデーション失敗時（例）
+❌ 環境変数のバリデーションに失敗しました:
+  NEXT_PUBLIC_API_URL が設定されていません
+```
+
+**Zod スキーマによる型安全バリデーション**:
+- 必須環境変数の自動チェック
+- URL形式、NODE_ENV値の検証
+- TypeScript型推論によるコンパイル時型チェック
+
+### 環境変数同期チェック
+
+`.env.example` と `.env` の差分を自動検出します。
+
+```bash
+# 差分チェック（読み取りのみ）
+npm run env:check
+
+# 実行例
+📝 .env.example → .env
+⚠️  不足キー (2件):
+  - NEW_FEATURE_FLAG
+  - NEW_API_KEY
+  → .env.example への追加を検討してください
+
+# 差分を自動同期（.envに不足キーを追加）
+npm run env:sync
+
+# 実行例
+📝 .env.example → .env
+⚠️  不足キー (2件):
+  - NEW_FEATURE_FLAG
+  - NEW_API_KEY
+✅ 2件のキーを .env に追加しました
+```
+
+**対象ファイル**:
+- `.env.example` → `.env`
+- `backend/laravel-api/.env.example` → `backend/laravel-api/.env`
+- `e2e/.env.example` → `e2e/.env`
+
+### CI/CD自動バリデーション
+
+GitHub Actionsで自動的に環境変数バリデーションが実行されます。
+
+#### 実行タイミング
+
+- **Pull Request作成時**: 自動実行
+- **環境変数関連ファイル変更時**: 自動実行
+- **Laravel/Next.jsテストワークフロー**: テスト実行前にバリデーション
+
+#### ワークフロー
+
+| ワークフロー | バリデーション内容 |
+|------------|-----------------|
+| `test.yml` | Laravel環境変数バリデーション（`php artisan env:validate`） |
+| `frontend-test.yml` | フロントエンド環境変数バリデーション（`npm run env:check`） |
+| `env-validation.yml` | 専用環境変数バリデーションワークフロー |
+
+### トラブルシューティング
+
+#### 環境変数が設定されていない
+
+**エラー**:
+```
+RuntimeException: 環境変数のバリデーションに失敗しました。
+不足している環境変数: APP_KEY
+```
+
+**解決方法**:
+```bash
+# Laravel
+cd backend/laravel-api
+php artisan key:generate
+
+# Next.js
+cd frontend/admin-app
+cp .env.example .env.local
+# .env.local を編集して NEXT_PUBLIC_API_URL を設定
+```
+
+#### .env と .env.example の差分が多い
+
+**解決方法**:
+```bash
+# 差分を確認
+npm run env:check
+
+# 新規キーを自動追加
+npm run env:sync
+
+# 既存値は保持されます（新規キーのみ追加）
+```
+
+#### CI/CDでバリデーションが失敗する
+
+**原因**:
+- GitHub Secretsが設定されていない
+- .env.exampleに新規キーが追加されたが、CIに反映されていない
+
+**解決方法**:
+1. GitHub Settings > Secrets and variables > Actions
+2. 必須Secretsを設定
+3. [GitHub Actions Secrets 設定ガイド](./docs/GITHUB_ACTIONS_SECRETS_GUIDE.md)を参照
+
+### セキュリティガイド
+
+環境変数のセキュリティに関する詳細は、以下のドキュメントを参照してください：
+
+- **[GitHub Actions Secrets 設定ガイド](./docs/GITHUB_ACTIONS_SECRETS_GUIDE.md)**
+  - Secrets命名規約
+  - Repository Secrets vs Environment Secrets
+  - 必須Secrets一覧
+  - セキュリティベストプラクティス
+
+- **[環境変数セキュリティガイド](./docs/ENVIRONMENT_VARIABLE_SECURITY_GUIDE.md)**
+  - セキュリティ原則
+  - 機密情報の分類（公開可能/機密/極秘）
+  - Laravel/Next.jsセキュリティ設定
+  - インシデント対応手順
 
 ### ポート競合の回避
 

@@ -1,0 +1,97 @@
+{
+  "feature_name": "environment-variable-management",
+  "created_at": "2025-10-15T00:52:37Z",
+  "updated_at": "2025-10-16T01:11:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 33,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/33",
+    "title": "環境変数適切管理方法整備",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Composer, Artisan",
+      "frontend": "Next.js 15.5, React 19, TypeScript, Zod, @next/env, tsx",
+      "infrastructure": "Docker, Docker Compose, GitHub Actions",
+      "tools": "Laravel Pint, Larastan (PHPStan Level 8), ESLint, Prettier"
+    },
+    "requirements_hints": [
+      "起動前バリデーション: 環境変数の不足・誤設定を起動時に検知してフェイルファスト",
+      "型安全性: TypeScript型定義による環境変数の型安全なアクセス（Next.js）",
+      "仕様化された .env.example: 生きた仕様書としての詳細コメント整備",
+      "自動同期: .env.example と実際の .env の差分を自動検出・同期",
+      "セキュアなCI/CD: GitHub Secrets を活用した安全な環境変数注入",
+      "チーム標準化: 環境変数管理のベストプラクティスをドキュメント化"
+    ],
+    "project_structure": [
+      ".env.example",
+      "backend/laravel-api/.env.example",
+      "e2e/.env.example",
+      "backend/laravel-api/config/env_schema.php",
+      "backend/laravel-api/app/Support/EnvValidator.php",
+      "backend/laravel-api/app/Bootstrap/ValidateEnvironment.php",
+      "backend/laravel-api/app/Console/Commands/EnvValidate.php",
+      "frontend/admin-app/src/lib/env.ts",
+      "frontend/user-app/src/lib/env.ts",
+      "frontend/admin-app/scripts/check-env.ts",
+      "frontend/user-app/scripts/check-env.ts",
+      "scripts/env-sync.ts",
+      "docs/GITHUB_ACTIONS_SECRETS_GUIDE.md",
+      "docs/ENVIRONMENT_SECURITY_GUIDE.md",
+      ".github/workflows/environment-validation.yml"
+    ],
+    "services": {},
+    "todo_items": [
+      "ルート .env.example 詳細コメント追加",
+      "Laravel .env.example 詳細コメント追加",
+      "E2E .env.example 詳細コメント追加",
+      "環境変数スキーマ定義（config/env_schema.php）",
+      "バリデータ実装（app/Support/EnvValidator.php）",
+      "Bootstrapper 実装（app/Bootstrap/ValidateEnvironment.php）",
+      "Artisan コマンド実装（app/Console/Commands/EnvValidate.php）",
+      "Bootstrapper 登録（bootstrap/app.php）",
+      "Zod スキーマ実装（Admin App: src/lib/env.ts）",
+      "Zod スキーマ実装（User App: src/lib/env.ts）",
+      "ビルド前検証スクリプト統合（両アプリ）",
+      "環境変数同期スクリプト実装（scripts/env-sync.ts）",
+      "package.json スクリプト追加",
+      "同期スクリプト動作確認",
+      "GitHub Actions Secrets 設定ガイド作成",
+      "環境変数セキュリティガイド作成",
+      "README.md 更新（環境変数管理セクション追加）",
+      "Laravel テストワークフロー修正",
+      "フロントエンドテストワークフロー修正",
+      "環境変数バリデーション専用ワークフロー作成",
+      "CI/CD 動作確認",
+      "ユニットテスト実装（Laravel EnvValidator）",
+      "ユニットテスト実装（Next.js env.ts）",
+      "統合テスト実装（env-sync.ts）",
+      "CI/CD環境でのE2Eテスト",
+      "エラーメッセージの分かりやすさ確認",
+      "チームレビュー実施",
+      "フィードバック反映",
+      "ロールアウト計画確定",
+      "運用開始"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}
