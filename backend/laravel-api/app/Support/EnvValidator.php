@@ -186,10 +186,10 @@ class EnvValidator
      */
     private function formatRequiredError(string $key, array $config): string
     {
-        $description = $config['description'] ?? '';
+        $message = "環境変数 {$key} は必須です。";
         $default = isset($config['default']) ? " (デフォルト: {$config['default']})" : '';
 
-        return "環境変数 {$key} は必須です。{$description}{$default}";
+        return $this->formatErrorMessage($message, $config, $default);
     }
 
     /**
@@ -200,9 +200,9 @@ class EnvValidator
     private function formatTypeError(string $key, array $config): string
     {
         $type = $config['type'];
-        $description = $config['description'] ?? '';
+        $message = "環境変数 {$key} は {$type} 型である必要があります。";
 
-        return "環境変数 {$key} は {$type} 型である必要があります。{$description}";
+        return $this->formatErrorMessage($message, $config);
     }
 
     /**
@@ -213,8 +213,20 @@ class EnvValidator
     private function formatAllowedValuesError(string $key, array $config): string
     {
         $allowedValues = implode(', ', $config['allowed_values']);
+        $message = "環境変数 {$key} は次のいずれかの値である必要があります: {$allowedValues}。";
+
+        return $this->formatErrorMessage($message, $config);
+    }
+
+    /**
+     * エラーメッセージを整形（共通ロジック）
+     *
+     * @param  array<string, mixed>  $config
+     */
+    private function formatErrorMessage(string $message, array $config, string $suffix = ''): string
+    {
         $description = $config['description'] ?? '';
 
-        return "環境変数 {$key} は次のいずれかの値である必要があります: {$allowedValues}。{$description}";
+        return $message.$description.$suffix;
     }
 }

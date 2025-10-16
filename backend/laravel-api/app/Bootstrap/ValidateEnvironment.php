@@ -56,8 +56,7 @@ class ValidateEnvironment
      */
     private function shouldSkipValidation(): bool
     {
-        // getenv() と $_ENV の両方をチェック（CI/CD環境対応）
-        $skipFlag = getenv('ENV_VALIDATION_SKIP') ?: ($_ENV['ENV_VALIDATION_SKIP'] ?? 'false');
+        $skipFlag = $this->getEnvVariable('ENV_VALIDATION_SKIP', 'false');
 
         return strtolower($skipFlag) === 'true' || $skipFlag === '1';
     }
@@ -67,10 +66,18 @@ class ValidateEnvironment
      */
     private function getValidationMode(): string
     {
-        // getenv() と $_ENV の両方をチェック（CI/CD環境対応）
-        $mode = getenv('ENV_VALIDATION_MODE') ?: ($_ENV['ENV_VALIDATION_MODE'] ?? 'error');
+        $mode = $this->getEnvVariable('ENV_VALIDATION_MODE', 'error');
 
         return in_array($mode, ['error', 'warning'], true) ? $mode : 'error';
+    }
+
+    /**
+     * 環境変数を取得（getenv と $_ENV の両方をチェック）
+     */
+    private function getEnvVariable(string $key, string $default = ''): string
+    {
+        // getenv() と $_ENV の両方をチェック（CI/CD環境対応）
+        return getenv($key) ?: ($_ENV[$key] ?? $default);
     }
 
     /**
@@ -80,14 +87,9 @@ class ValidateEnvironment
      */
     private function handleValidationFailure(array $errors): void
     {
-        $errorMessages = [];
-        foreach ($errors as $key => $message) {
-            $errorMessages[] = "  - {$key}: {$message}";
-        }
-
         $errorMessage = sprintf(
             "Environment variable validation failed:\n%s",
-            implode("\n", $errorMessages)
+            $this->formatErrorMessages($errors)
         );
 
         Log::error($errorMessage);
@@ -102,17 +104,27 @@ class ValidateEnvironment
      */
     private function logValidationErrors(array $errors, string $mode): void
     {
+        $logMessage = sprintf(
+            "Environment variable validation errors (mode=%s):\n%s",
+            $mode,
+            $this->formatErrorMessages($errors)
+        );
+
+        Log::warning($logMessage);
+    }
+
+    /**
+     * エラーメッセージを整形
+     *
+     * @param  array<string, string>  $errors
+     */
+    private function formatErrorMessages(array $errors): string
+    {
         $errorMessages = [];
         foreach ($errors as $key => $message) {
             $errorMessages[] = "  - {$key}: {$message}";
         }
 
-        $logMessage = sprintf(
-            "Environment variable validation errors (mode=%s):\n%s",
-            $mode,
-            implode("\n", $errorMessages)
-        );
-
-        Log::warning($logMessage);
+        return implode("\n", $errorMessages);
     }
 }
