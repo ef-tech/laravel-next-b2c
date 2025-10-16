@@ -131,6 +131,9 @@ SANCTUM_EXPIRATION=60 # トークン有効期限（日数）
 # 🌐 CORS環境変数設定
 CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002  # 開発環境
 # 本番環境例: CORS_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
+
+# 環境変数バリデーションスキップ（緊急時のみ、migrate/seed実行時に使用可能）
+# ENV_VALIDATION_SKIP=true
 ```
 
 ### データベース・ストレージ
