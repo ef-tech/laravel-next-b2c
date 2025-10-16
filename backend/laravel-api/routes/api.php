@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TokenController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\CspReportController;
 use Illuminate\Support\Facades\Route;
 
 // Health check endpoint (no rate limiting, no authentication)
@@ -10,6 +11,11 @@ Route::get('/health', function () {
     return response()->json(['status' => 'ok'])
         ->header('Cache-Control', 'no-store');
 })->withoutMiddleware('throttle:api')->name('health');
+
+// CSP violation report endpoint (no authentication, but with rate limiting)
+Route::post('/csp/report', [CspReportController::class, 'report'])
+    ->middleware('throttle:100,1')
+    ->name('csp.report');
 
 // Public routes
 Route::post('/users', [UserController::class, 'register']);
