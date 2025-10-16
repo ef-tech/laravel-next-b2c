@@ -184,6 +184,22 @@
   - ビルド時間増加の確認（約10-20秒増加、許容範囲内）（準備完了）
   - _Requirements: 7.6, 7.7, 7.8_
 
+- [x] 8.5 CI/CD環境変数バリデーション問題修正 ✅
+  - .env.ci ファイル作成（CI/CD専用環境設定）
+  - 全ワークフローで .env.example → .env.ci に変更
+  - ENV_VALIDATION_SKIP を全必要箇所に追加（composer install、key:generate、migrate、config/cache clear、PHPStan）
+  - ValidateEnvironment.php で getenv() と $_ENV 両方チェック（GitHub Actions env: 対応）
+  - EnvSchema.php に pgsql_testing 追加（テスト用DB接続）
+  - EnvSchemaTest.php の期待値更新（pgsql_testing 対応）
+  - frontend/.env.example ファイル作成（admin-app、user-app）
+  - E2E Tests の tsx 依存関係追加（admin-app、user-app に tsx インストール）
+  - E2E Tests ワークフローで npm run dev → npx next dev に変更（predev スキップ）
+  - E2E Tests ヘルスチェックエンドポイント修正（/up → /api/health）
+  - E2E Tests wait-on タイムアウト延長（2分 → 5分）
+  - 全5ワークフロー成功確認（PHP Quality Checks、Frontend Tests、Environment Variables Validation、Tests、E2E Tests）
+  - _Commits: ea7dca5, b52a7b1, c30e4f3, 389e806, bc71623, ca0f6dd, 906691b_
+  - _Requirements: 7.6, 7.7, 7.8_
+
 - [x] 9. ユニットテスト・統合テストの実装（一部完了）
 - [x] 9.1 Laravel EnvValidatorのユニットテストを実装 ✅
   - 必須変数不足時のRuntimeException検証テスト
