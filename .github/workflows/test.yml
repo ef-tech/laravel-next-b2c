@@ -100,6 +100,7 @@ jobs:
         run: php artisan migrate --force
         working-directory: backend/laravel-api
         env:
+          ENV_VALIDATION_SKIP: true
           DB_CONNECTION: pgsql_testing
           DB_TEST_HOST: 127.0.0.1
           DB_TEST_PORT: 13432
@@ -113,6 +114,7 @@ jobs:
           php artisan cache:clear
         working-directory: backend/laravel-api
         env:
+          ENV_VALIDATION_SKIP: true
           DB_CONNECTION: pgsql_testing
           DB_TEST_HOST: 127.0.0.1
           DB_TEST_PORT: 13432

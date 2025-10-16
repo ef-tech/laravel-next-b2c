@@ -97,3 +97,5 @@ jobs:
             echo "📖 詳細: https://github.com/ef-tech/laravel-next-b2c/blob/main/README.md#larastan-phpstan"
             exit 1
           }
+        env:
+          ENV_VALIDATION_SKIP: true
