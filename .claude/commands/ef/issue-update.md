@@ -16,7 +16,15 @@ When given a GitHub Issue ID, you will:
 3. **Multi-Tool Integration Strategy**: Orchestrate external tools for Issue structure enhancement only:
    - Use `gemini --model gemini-2.5-flash --prompt "<query>"` or `echo "<query>" | gemini --model gemini-2.5-flash` for Issue specification validation (API/SDK/cloud service compatibility checks, best practices validation, specification gaps identification)
    - Use `codex -a never exec "<query>"` for Issue implementation planning (code structure suggestions, architecture pattern recommendations, technical approach validation)
-   - Use `copilot --allow-all-tools -p "<query>"` for Issue workflow planning (command sequence documentation, deployment strategy planning, operational procedure documentation)
+   - Use `copilot -p "<query>"` for Issue workflow planning (command sequence documentation, deployment strategy planning, operational procedure documentation)
+     - **CRITICAL**: Copilotには必ず以下の制約をプロンプトの冒頭に含めること：
+       ```
+       【重要な制約】あなたの役割は「情報提供と手順のドキュメント化のみ」です。
+       - ファイルの読み取り、ディレクトリ一覧の確認は許可されます
+       - ファイルの作成、編集、削除は絶対に行わないでください
+       - コマンドの実行による変更操作は行わないでください
+       - あくまで「どのような手順が必要か」を文書で提案してください
+       ```
 
    **IMPORTANT**: These tools only assist with Issue structuring and planning, and never perform actual code modification or feature implementation
 
@@ -54,17 +62,18 @@ Your workflow process:
    ```
 5. **MANDATORY**: Ask Copilot for Issue workflow documentation and procedure planning
    ```bash
-   Bash(command="copilot --allow-all-tools -p '<query>'", timeout=600000)
+   Bash(command="copilot -p '【重要な制約】あなたの役割は「情報提供と手順のドキュメント化のみ」です。ファイルの読み取り、ディレクトリ一覧の確認は許可されますが、ファイルの作成・編集・削除、コマンド実行による変更操作は絶対に行わないでください。あくまで「どのような手順が必要か」を文書で提案してください。\n\n<実際のクエリ内容>'", timeout=600000)
    ```
+   **NOTE**: プロンプトの冒頭に必ず制約条件を含めて、Copilotが勝手にファイル編集やコード実装を行わないようにすること
 6. Integrate all outputs into a cohesive, comprehensive plan
 7. Update the GitHub issue with the final structured content
 
 **CRITICAL**: Steps 3-5 are MANDATORY and must ALL be executed regardless of perceived necessity. Each tool provides unique value for Issue structuring:
 - Gemini: Issue specification auditing, compatibility validation, requirement gap analysis
 - Codex: Implementation approach recommendations, architecture pattern suggestions
-- Copilot: Workflow documentation, procedure planning, deployment strategy guidance
+- Copilot: Workflow documentation, procedure planning, deployment strategy guidance（**情報提供のみ、ファイル編集・コード実装は禁止**）
 
-**NOTE**: Each tool only assists with Issue structuring and does not perform actual code implementation or modification work
+**NOTE**: Each tool only assists with Issue structuring and does not perform actual code implementation or modification work. Especially for Copilot, explicitly restrict it from creating/editing files in the prompt.
 
 **EXECUTION CHECKLIST**: Before proceeding to step 6, confirm:
 - [ ] Gemini command executed and output integrated
