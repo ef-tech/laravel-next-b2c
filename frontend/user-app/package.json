@@ -38,6 +38,7 @@
     "jest-environment-jsdom": "^30.2.0",
     "next-router-mock": "^1.0.2",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5",
     "whatwg-fetch": "^3.6.20"
   }
