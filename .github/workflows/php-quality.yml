@@ -65,8 +65,6 @@ jobs:
       - name: Install Composer dependencies
         working-directory: backend/laravel-api
         run: composer install --prefer-dist --no-progress --no-interaction
-        env:
-          ENV_VALIDATION_SKIP: true
 
       - name: Validate composer.json
         working-directory: backend/laravel-api
@@ -99,5 +97,3 @@ jobs:
             echo "📖 詳細: https://github.com/ef-tech/laravel-next-b2c/blob/main/README.md#larastan-phpstan"
             exit 1
           }
-        env:
-          ENV_VALIDATION_SKIP: true

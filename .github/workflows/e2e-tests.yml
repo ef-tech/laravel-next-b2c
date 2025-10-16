@@ -116,14 +116,15 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         working-directory: backend/laravel-api
-        env:
-          ENV_VALIDATION_SKIP: true
+
+      - name: Validate environment variables
+        run: php artisan env:validate
+        working-directory: backend/laravel-api
 
       - name: Setup Laravel
         run: |
-          ENV_VALIDATION_SKIP=true php artisan key:generate
-          ENV_VALIDATION_SKIP=true php artisan migrate --force
-          ENV_VALIDATION_SKIP=true php artisan db:seed --force
+          php artisan migrate --force
+          php artisan db:seed --force
         working-directory: backend/laravel-api
         env:
           DB_CONNECTION: pgsql
@@ -147,7 +148,7 @@ jobs:
         run: |
           # Start Laravel API (ポート13000)
           cd backend/laravel-api
-          ENV_VALIDATION_SKIP=true DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
+          DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - 開発モード)
