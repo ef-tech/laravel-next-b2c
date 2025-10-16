@@ -1,9 +1,9 @@
 {
   "feature_name": "security-headers-setup",
   "created_at": "2025-10-16T09:37:00Z",
-  "updated_at": "2025-10-16T09:35:17Z",
+  "updated_at": "2025-10-16T09:47:00Z",
   "language": "ja",
-  "phase": "design-generated",
+  "phase": "tasks-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 32,
@@ -102,10 +102,10 @@
     },
     "design": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "tasks": {
-      "generated": false,
+      "generated": true,
       "approved": false
     }
   },
