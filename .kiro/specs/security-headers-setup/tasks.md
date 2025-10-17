@@ -247,24 +247,29 @@
   - TDD REDフェーズ完了: 9テスト失敗、6テスト成功
   - _Requirements: 11.1_
 
-- [ ] 12.2 User App セキュリティヘッダー検証テスト実装
+- [x] 12.2 User App セキュリティヘッダー検証テスト実装
   - User App のトップページにアクセスし、レスポンスヘッダーに必要なセキュリティヘッダーが含まれることを検証する
   - X-Frame-Options が SAMEORIGIN であることを確認する
+  - TDD GREENフェーズ完了: User App 3テスト全通過
   - _Requirements: 11.2_
 
-- [ ] 12.3 Admin App セキュリティヘッダー検証テスト実装
+- [x] 12.3 Admin App セキュリティヘッダー検証テスト実装
   - Admin App のトップページにアクセスし、User App よりも厳格なヘッダーが設定されていることを検証する
   - X-Frame-Options が DENY であることを確認する
+  - TDD GREENフェーズ完了: Admin App 4テスト全通過
   - _Requirements: 11.3_
 
-- [ ] 12.4 CSP 違反検出テスト実装
+- [x] 12.4 CSP 違反検出テスト実装
   - ブラウザコンソールで CSP 違反イベントを監視する
   - 正常なページアクセスで CSP 違反が発生しないことを検証する
+  - TDD GREENフェーズ完了: CSP違反検出 2テスト全通過
   - _Requirements: 11.4_
 
-- [ ] 12.5 CORS 統合テスト実装
+- [x] 12.5 CORS 統合テスト実装
   - User App から Laravel API への API 呼び出しが成功することを検証する
   - 未許可オリジンからの API 呼び出しがブロックされることを検証する
+  - TDD RED-GREEN-REFACTORサイクル完了: 全17テスト通過
+  - CORS_SUPPORTS_CREDENTIALS=true 設定完了（.env, .env.example更新）
   - _Requirements: 11.5, 11.6_
 
 ## 13. CI/CD 統合

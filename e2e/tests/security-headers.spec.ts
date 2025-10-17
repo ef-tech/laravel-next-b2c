@@ -260,3 +260,48 @@ test.describe('CSP Violation Detection', () => {
     expect(cspViolations).toHaveLength(0);
   });
 });
+
+test.describe('CORS Integration', () => {
+  test('should allow API requests from User App origin', async ({ request }) => {
+    // Arrange: Set Origin header to User App URL
+    const userAppOrigin = new URL(USER_APP_URL).origin;
+
+    // Act: Make request with User App origin
+    const response = await request.get(`${LARAVEL_API_URL}/api/health`, {
+      headers: {
+        Origin: userAppOrigin,
+      },
+    });
+
+    // Assert: Request should succeed
+    expect(response.ok()).toBeTruthy();
+    expect(response.status()).toBe(200);
+
+    // Assert: CORS headers should be present
+    const headers = response.headers();
+    expect(headers['access-control-allow-origin']).toBe(userAppOrigin);
+    expect(headers['access-control-allow-credentials']).toBe('true');
+  });
+
+  test('should block API requests from unauthorized origin', async ({ request }) => {
+    // Arrange: Set Origin header to unauthorized domain
+    const unauthorizedOrigin = 'https://malicious-site.com';
+
+    // Act: Make request with unauthorized origin
+    const response = await request.get(`${LARAVEL_API_URL}/api/health`, {
+      headers: {
+        Origin: unauthorizedOrigin,
+      },
+    });
+
+    // Assert: Response should not include CORS headers for unauthorized origin
+    const headers = response.headers();
+
+    // CORS should either:
+    // 1. Not include Access-Control-Allow-Origin header
+    // 2. Not match the unauthorized origin
+    if (headers['access-control-allow-origin']) {
+      expect(headers['access-control-allow-origin']).not.toBe(unauthorizedOrigin);
+    }
+  });
+});
