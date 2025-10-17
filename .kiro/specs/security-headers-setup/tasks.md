@@ -274,33 +274,38 @@
 
 ## 13. CI/CD 統合
 
-- [ ] 13.1 セキュリティヘッダー検証ワークフロー作成
+- [x] 13.1 セキュリティヘッダー検証ワークフロー作成
   - .github/workflows/security-headers.yml を作成する
   - Pull Request 作成/更新時に自動実行するトリガーを設定する
   - セキュリティ関連ファイル（SecurityHeaders.php, config/security.php, next.config.ts, security-config.ts）変更時に自動トリガーするパス設定を追加する
+  - ✅ 完了: security-headers.yml作成、PR/pushトリガー設定、paths設定完了
   - _Requirements: 12.1, 12.2_
 
-- [ ] 13.2 並列ジョブ実装
+- [x] 13.2 並列ジョブ実装
   - Laravel API セキュリティヘッダー検証ジョブを実装する
   - Next.js User App セキュリティヘッダー検証ジョブを実装する
   - Next.js Admin App セキュリティヘッダー検証ジョブを実装する
   - CSP ポリシー構文検証ジョブを実装する
   - CORS 設定整合性確認ジョブを実装する
+  - ✅ 完了: 5つの並列ジョブ実装完了（security-headers.yml内）
   - _Requirements: 12.3_
 
-- [ ] 13.3 セキュリティヘッダー検証スクリプト作成
+- [x] 13.3 セキュリティヘッダー検証スクリプト作成
   - scripts/validate-security-headers.sh を作成する
   - curl -I コマンドで各サービスのヘッダーを取得し、必須ヘッダーの存在を検証する
+  - ✅ 完了: 検証スクリプト作成、Laravel/User App/Admin App対応、構文チェック通過
   - _Requirements: 12.4_
 
-- [ ] 13.4 CORS 設定検証スクリプト作成
+- [x] 13.4 CORS 設定検証スクリプト作成
   - scripts/validate-cors-config.sh を作成する
   - CORS 許可オリジンリストの整合性を確認する
+  - ✅ 完了: CORS検証スクリプト作成、ローカルテスト全通過（10項目検証）
   - _Requirements: 12.5_
 
-- [ ] 13.5 検証失敗時のワークフロー制御
+- [x] 13.5 検証失敗時のワークフロー制御
   - セキュリティヘッダー検証が失敗した場合、ワークフローを失敗させる設定を追加する
   - Pull Request をブロックする
+  - ✅ 完了: security-validation-summaryジョブで全検証結果チェック、失敗時exit 1実装
   - _Requirements: 12.6_
 
 ## 14. パフォーマンス影響測定
