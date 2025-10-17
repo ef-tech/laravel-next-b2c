@@ -32,6 +32,7 @@ on:
       # 検証スクリプト
       - 'scripts/validate-security-headers.sh'
       - 'scripts/validate-cors-config.sh'
+      - 'scripts/measure-performance.sh'
   push:
     branches: [main]
     paths:
@@ -118,6 +119,10 @@ jobs:
         run: |
           bash scripts/validate-security-headers.sh http://localhost:13000/api/health laravel
 
+      - name: Measure Laravel API Performance
+        run: |
+          bash scripts/measure-performance.sh http://localhost:13000/api/health
+
   nextjs-user-app-security-headers:
     name: Next.js User App Security Headers
     runs-on: ubuntu-latest
@@ -156,6 +161,10 @@ jobs:
         run: |
           bash scripts/validate-security-headers.sh http://localhost:13001 user-app
 
+      - name: Measure User App Performance
+        run: |
+          bash scripts/measure-performance.sh http://localhost:13001
+
   nextjs-admin-app-security-headers:
     name: Next.js Admin App Security Headers
     runs-on: ubuntu-latest
@@ -193,6 +202,10 @@ jobs:
       - name: Validate Admin App Security Headers
         run: |
           bash scripts/validate-security-headers.sh http://localhost:13002 admin-app
+
+      - name: Measure Admin App Performance
+        run: |
+          bash scripts/measure-performance.sh http://localhost:13002
 
   csp-policy-syntax:
     name: CSP Policy Syntax Validation
