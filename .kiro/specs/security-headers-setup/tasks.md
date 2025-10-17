@@ -101,24 +101,24 @@
 
 ## 6. Next.js User App セキュリティヘッダー実装
 
-- [ ] 6.1 User App next.config.ts ヘッダー設定
+- [x] 6.1 User App next.config.ts ヘッダー設定
   - frontend/user-app/next.config.ts を更新する
   - security-config.ts から getSecurityConfig() をインポートする
   - headers() 関数で基本セキュリティヘッダー（X-Frame-Options: SAMEORIGIN, X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin）を設定する
   - _Requirements: 4.1, 4.2_
 
-- [ ] 6.2 User App CSP ヘッダー設定
+- [x] 6.2 User App CSP ヘッダー設定
   - buildCSPString() を使用して CSP ポリシー文字列を構築する
   - 開発環境では script-src に 'unsafe-eval' を含め、connect-src に ws: wss: http://localhost:13000 を含める
   - 本番環境では厳格なポリシー（script-src 'self', connect-src 'self' https://api.example.com）を使用する
   - _Requirements: 4.3_
 
-- [ ] 6.3 User App Permissions-Policy 設定
+- [x] 6.3 User App Permissions-Policy 設定
   - buildPermissionsPolicyString() を使用して Permissions-Policy 文字列を構築する
   - geolocation=(self), camera=(), microphone=(), payment=(self) を設定する
   - _Requirements: 4.4_
 
-- [ ] 6.4 User App HSTS 設定
+- [x] 6.4 User App HSTS 設定
   - 本番環境かつ HTTPS プロトコルの場合、Strict-Transport-Security ヘッダーを付与する
   - max-age=31536000, includeSubDomains を設定する
   - _Requirements: 4.5_
