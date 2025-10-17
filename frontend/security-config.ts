@@ -60,7 +60,9 @@ export function getSecurityConfig(isDev: boolean): SecurityConfig {
     referrerPolicy: 'strict-origin-when-cross-origin',
     csp: {
       defaultSrc: ["'self'"],
-      scriptSrc: isDev ? ["'self'", "'unsafe-eval'"] : ["'self'"],
+      scriptSrc: isDev
+        ? ["'self'", "'unsafe-eval'", "'unsafe-inline'"]
+        : ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'https:'],
       connectSrc: isDev
@@ -110,8 +112,8 @@ export function getAdminSecurityConfig(isDev: boolean): SecurityConfig {
     referrerPolicy: 'no-referrer',
     csp: {
       defaultSrc: ["'self'"],
-      // Admin App は開発環境でも unsafe-eval を許可しない
-      scriptSrc: ["'self'"],
+      // 開発環境: Next.jsのインラインスクリプト許可（本番環境では削除）
+      scriptSrc: isDev ? ["'self'", "'unsafe-inline'"] : ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'https:'],
       // Admin App は開発環境でも ws/wss を許可しない

@@ -112,7 +112,24 @@ class SecurityHeaders
                 continue;
             }
 
-            $directiveString = $directive.' '.implode(' ', $values);
+            // CSP値を正規化: 'self', 'none'などのキーワードにシングルクォートを追加
+            $normalizedValues = array_map(function ($value) {
+                // 既にシングルクォートで囲まれている場合はそのまま
+                if (str_starts_with($value, "'") && str_ends_with($value, "'")) {
+                    return $value;
+                }
+
+                // CSPキーワード（self, none, unsafe-inline等）にシングルクォートを追加
+                $keywords = ['self', 'none', 'unsafe-inline', 'unsafe-eval', 'strict-dynamic', 'report-sample'];
+                if (in_array($value, $keywords, true)) {
+                    return "'{$value}'";
+                }
+
+                // それ以外（data:, https:, URLなど）はそのまま
+                return $value;
+            }, $values);
+
+            $directiveString = $directive.' '.implode(' ', $normalizedValues);
             $policyParts[] = $directiveString;
         }
 

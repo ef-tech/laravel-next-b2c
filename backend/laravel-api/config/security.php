@@ -57,11 +57,11 @@ return [
             'default-src' => ["'self'"],
             'object-src' => ["'none'"],
             'frame-ancestors' => ["'none'"],
-            'script-src' => array_filter(explode(' ', (string) env('SECURITY_CSP_SCRIPT_SRC', "'self'"))),
-            'style-src' => array_filter(explode(' ', (string) env('SECURITY_CSP_STYLE_SRC', "'self' 'unsafe-inline'"))),
-            'img-src' => array_filter(explode(' ', (string) env('SECURITY_CSP_IMG_SRC', "'self' data: https:"))),
-            'connect-src' => array_filter(explode(' ', (string) env('SECURITY_CSP_CONNECT_SRC', "'self'"))),
-            'font-src' => array_filter(explode(' ', (string) env('SECURITY_CSP_FONT_SRC', "'self' data:"))),
+            'script-src' => array_map('trim', array_filter(explode(',', (string) env('SECURITY_CSP_SCRIPT_SRC', 'self')))),
+            'style-src' => array_map('trim', array_filter(explode(',', (string) env('SECURITY_CSP_STYLE_SRC', 'self,unsafe-inline')))),
+            'img-src' => array_map('trim', array_filter(explode(',', (string) env('SECURITY_CSP_IMG_SRC', 'self,data:,https:')))),
+            'connect-src' => array_map('trim', array_filter(explode(',', (string) env('SECURITY_CSP_CONNECT_SRC', 'self')))),
+            'font-src' => array_map('trim', array_filter(explode(',', (string) env('SECURITY_CSP_FONT_SRC', 'self,data:')))),
         ],
 
         /*
