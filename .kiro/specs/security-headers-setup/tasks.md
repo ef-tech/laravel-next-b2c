@@ -2,47 +2,47 @@
 
 ## 1. Laravel API セキュリティヘッダー基盤実装
 
-- [ ] 1.1 SecurityHeaders ミドルウェア作成
+- [x] 1.1 SecurityHeaders ミドルウェア作成
   - SecurityHeaders ミドルウェアクラスを作成する
   - handle() メソッドで基本セキュリティヘッダー（X-Frame-Options, X-Content-Type-Options, Referrer-Policy）を付与する機能を実装する
   - レスポンスオブジェクトにヘッダーを追加し、次のミドルウェアに処理を委譲する
   - _Requirements: 1.1, 1.2_
 
-- [ ] 1.2 セキュリティ設定ファイル作成
+- [x] 1.2 セキュリティ設定ファイル作成
   - config/security.php を作成する
   - 環境変数から基本セキュリティヘッダー設定を読み込む機能を実装する
   - デフォルト値を設定し、環境変数が未設定の場合に安全な値を使用する
   - _Requirements: 1.1, 1.2_
 
-- [ ] 1.3 ミドルウェアチェーンへの登録
+- [x] 1.3 ミドルウェアチェーンへの登録
   - bootstrap/app.php で SecurityHeaders ミドルウェアをミドルウェアスタックに登録する
   - CORS ミドルウェアの後に配置し、ヘッダー重複を回避する
   - _Requirements: 1.7_
 
 ## 2. Content Security Policy (CSP) 動的構築機能
 
-- [ ] 2.1 CSP ポリシー構築機能実装
+- [x] 2.1 CSP ポリシー構築機能実装
   - SecurityHeaders ミドルウェアに buildCspPolicy() プライベートメソッドを追加する
   - config/security.php から CSP ディレクティブ設定を読み込む機能を実装する
   - 環境変数駆動で各ディレクティブ（script-src, style-src, img-src, connect-src, font-src）を動的に構築する
   - デフォルトディレクティブ（default-src, object-src, frame-ancestors, upgrade-insecure-requests）を含める
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-- [ ] 2.2 CSP モード切り替え機能実装
+- [x] 2.2 CSP モード切り替え機能実装
   - 環境変数 SECURITY_CSP_MODE の値に基づいて、Report-Only または Enforce モードを選択する機能を実装する
   - Report-Only モードの場合は Content-Security-Policy-Report-Only ヘッダーを使用する
   - Enforce モードの場合は Content-Security-Policy ヘッダーを使用する
   - CSP が無効（SECURITY_ENABLE_CSP=false）の場合は CSP ヘッダーを付与しない
   - _Requirements: 1.3, 1.4, 1.6_
 
-- [ ] 2.3 CSP レポート URI 設定機能
+- [x] 2.3 CSP レポート URI 設定機能
   - 環境変数 SECURITY_CSP_REPORT_URI が設定されている場合、report-uri ディレクティブを CSP ポリシーに含める機能を実装する
   - デフォルト値として /api/csp/report を使用する
   - _Requirements: 2.7_
 
 ## 3. HTTPS セキュリティ強化機能
 
-- [ ] 3.1 HSTS ヘッダー付与機能実装
+- [x] 3.1 HSTS ヘッダー付与機能実装
   - リクエストが HTTPS プロトコル経由であることを検証する機能を実装する
   - 環境変数 SECURITY_FORCE_HSTS が true の場合、Strict-Transport-Security ヘッダーを付与する
   - HSTS ヘッダーの値（max-age, includeSubDomains, preload）を環境変数から読み込む
@@ -50,25 +50,25 @@
 
 ## 4. CSP 違反レポート収集機能
 
-- [ ] 4.1 CspReportController 作成
+- [x] 4.1 CspReportController 作成
   - CspReportController を作成する
   - store() メソッドでブラウザからの CSP 違反レポートを受信する機能を実装する
   - リクエストボディから CSP 違反情報（blocked-uri, violated-directive, document-uri, source-file, line-number）を抽出する
   - _Requirements: 3.2_
 
-- [ ] 4.2 CSP 違反ログ記録機能実装
+- [x] 4.2 CSP 違反ログ記録機能実装
   - security ログチャンネルに CSP 違反情報を記録する機能を実装する
   - ログに含める情報（blocked-uri, violated-directive, source-file, line-number, タイムスタンプ）を設定する
   - ログ記録後、HTTP ステータス 204 (No Content) を返却する
   - _Requirements: 3.3, 3.4_
 
-- [ ] 4.3 セキュリティログチャンネル設定
+- [x] 4.3 セキュリティログチャンネル設定
   - config/logging.php に security ログチャンネルを追加する
   - ログファイルのパスを storage/logs/security.log に設定する
   - ログレベルを warning に設定する
   - _Requirements: 3.3_
 
-- [ ] 4.4 CSP レポートルート登録
+- [x] 4.4 CSP レポートルート登録
   - routes/api.php に POST /api/csp/report ルートを追加する
   - CspReportController の store() メソッドにマッピングする
   - レート制限から除外する設定を追加する
@@ -184,17 +184,17 @@
 
 ## 10. テスト実装（Laravel Pest）
 
-- [ ] 10.1 SecurityHeaders ミドルウェアテスト作成
+- [x] 10.1 SecurityHeaders ミドルウェアテスト作成
   - tests/Feature/SecurityHeadersTest.php を作成する
   - 基本セキュリティヘッダー（X-Frame-Options, X-Content-Type-Options, Referrer-Policy）が設定されることを検証する
   - _Requirements: 9.1_
 
-- [ ] 10.2 CSP ヘッダーテスト実装
+- [x] 10.2 CSP ヘッダーテスト実装
   - CSP が有効な場合、Content-Security-Policy または Content-Security-Policy-Report-Only ヘッダーが存在することを検証する
   - Report-Only モードと Enforce モードでヘッダー名が切り替わることを検証する
   - _Requirements: 9.2_
 
-- [ ] 10.3 HSTS ヘッダーテスト実装
+- [x] 10.3 HSTS ヘッダーテスト実装
   - HTTPS 環境かつ SECURITY_FORCE_HSTS=true の場合、Strict-Transport-Security ヘッダーが設定されることを検証する
   - HTTP 環境では HSTS ヘッダーが設定されないことを検証する
   - _Requirements: 9.3_
@@ -205,12 +205,12 @@
   - OPTIONS プリフライトリクエストで CORS ヘッダーが正しく付与されることを検証する
   - _Requirements: 9.4, 9.5, 9.6_
 
-- [ ] 10.5 CspReportController テスト実装
+- [x] 10.5 CspReportController テスト実装
   - 有効な CSP レポートが送信された場合、HTTP 204 を返却することを検証する
   - CSP 違反情報が security ログチャンネルに記録されることを検証する
   - _Requirements: 9.1_
 
-- [ ] 10.6 テストカバレッジ確認
+- [x] 10.6 テストカバレッジ確認
   - SecurityHeaders ミドルウェアのカバレッジが 90% 以上であることを確認する
   - _Requirements: 9.7_
 
