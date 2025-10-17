@@ -1,5 +1,6 @@
 import {
   getSecurityConfig,
+  getAdminSecurityConfig,
   buildCSPString,
   buildPermissionsPolicyString,
   generateNonce,
@@ -8,7 +9,7 @@ import {
 } from "../../../security-config";
 
 describe("security-config", () => {
-  describe("getSecurityConfig", () => {
+  describe("getSecurityConfig (User App用)", () => {
     it("開発環境では緩和されたセキュリティ設定を返却すること", () => {
       const config = getSecurityConfig(true);
 
@@ -46,6 +47,62 @@ describe("security-config", () => {
     it("HSTS 設定が本番環境のみ含まれること", () => {
       const devConfig = getSecurityConfig(true);
       const prodConfig = getSecurityConfig(false);
+
+      expect(devConfig.hsts).toBeUndefined();
+      expect(prodConfig.hsts).toBeDefined();
+      expect(prodConfig.hsts?.maxAge).toBe(31536000);
+      expect(prodConfig.hsts?.includeSubDomains).toBe(true);
+    });
+  });
+
+  describe("getAdminSecurityConfig (Admin App用)", () => {
+    it("開発環境でも厳格なセキュリティ設定を返却すること", () => {
+      const config = getAdminSecurityConfig(true);
+
+      expect(config.xFrameOptions).toBe("DENY");
+      expect(config.xContentTypeOptions).toBe("nosniff");
+      expect(config.referrerPolicy).toBe("no-referrer");
+
+      // Admin App は開発環境でも unsafe-eval を含まない
+      expect(config.csp.scriptSrc).toContain("'self'");
+      expect(config.csp.scriptSrc).not.toContain("'unsafe-eval'");
+
+      // Admin App は開発環境でも ws: wss: を含まない
+      expect(config.csp.connectSrc).toContain("'self'");
+      expect(config.csp.connectSrc).not.toContain("ws:");
+      expect(config.csp.connectSrc).not.toContain("wss:");
+    });
+
+    it("本番環境では厳格なセキュリティ設定を返却すること", () => {
+      const config = getAdminSecurityConfig(false);
+
+      expect(config.xFrameOptions).toBe("DENY");
+      expect(config.xContentTypeOptions).toBe("nosniff");
+      expect(config.referrerPolicy).toBe("no-referrer");
+
+      // 本番環境でも同様に厳格
+      expect(config.csp.scriptSrc).toContain("'self'");
+      expect(config.csp.scriptSrc).not.toContain("'unsafe-eval'");
+
+      expect(config.csp.connectSrc).toContain("'self'");
+      expect(config.csp.connectSrc).not.toContain("ws:");
+      expect(config.csp.connectSrc).not.toContain("wss:");
+    });
+
+    it("Permissions-Policy がすべて禁止されていること", () => {
+      const config = getAdminSecurityConfig(true);
+
+      expect(config.permissionsPolicy.geolocation).toBe("");
+      expect(config.permissionsPolicy.camera).toBe("");
+      expect(config.permissionsPolicy.microphone).toBe("");
+      expect(config.permissionsPolicy.payment).toBe("");
+      expect(config.permissionsPolicy.usb).toBe("");
+      expect(config.permissionsPolicy.bluetooth).toBe("");
+    });
+
+    it("HSTS 設定が本番環境のみ含まれること", () => {
+      const devConfig = getAdminSecurityConfig(true);
+      const prodConfig = getAdminSecurityConfig(false);
 
       expect(devConfig.hsts).toBeUndefined();
       expect(prodConfig.hsts).toBeDefined();

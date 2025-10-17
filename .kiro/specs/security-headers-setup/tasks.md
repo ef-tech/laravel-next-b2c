@@ -125,21 +125,21 @@
 
 ## 7. Next.js Admin App セキュリティヘッダー実装
 
-- [ ] 7.1 Admin App next.config.ts ヘッダー設定
+- [x] 7.1 Admin App next.config.ts ヘッダー設定
   - frontend/admin-app/next.config.ts を更新する
   - User App よりも厳格な基本セキュリティヘッダー（X-Frame-Options: DENY, Referrer-Policy: no-referrer）を設定する
   - _Requirements: 5.1, 5.2_
 
-- [ ] 7.2 Admin App 厳格 CSP ヘッダー設定
+- [x] 7.2 Admin App 厳格 CSP ヘッダー設定
   - script-src 'self' のみを許可し、'unsafe-inline' と 'unsafe-eval' を禁止する
   - その他のディレクティブも User App より厳格に設定する
   - _Requirements: 5.3_
 
-- [ ] 7.3 Admin App 厳格 Permissions-Policy 設定
+- [x] 7.3 Admin App 厳格 Permissions-Policy 設定
   - すべてのブラウザ API を禁止する（geolocation=(), camera=(), microphone=(), payment=(), usb=(), bluetooth=()）
   - _Requirements: 5.4_
 
-- [ ] 7.4 Admin App 追加セキュリティヘッダー設定
+- [x] 7.4 Admin App 追加セキュリティヘッダー設定
   - X-Permitted-Cross-Domain-Policies: none を追加する
   - Cross-Origin-Embedder-Policy: require-corp を追加する
   - Cross-Origin-Opener-Policy: same-origin を追加する

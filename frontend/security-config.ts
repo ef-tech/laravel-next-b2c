@@ -48,7 +48,7 @@ export interface SecurityConfig {
 }
 
 /**
- * 環境に応じたセキュリティ設定を取得
+ * 環境に応じたセキュリティ設定を取得（User App 用）
  *
  * @param isDev - 開発環境フラグ
  * @returns セキュリティ設定オブジェクト
@@ -77,6 +77,59 @@ export function getSecurityConfig(isDev: boolean): SecurityConfig {
       camera: '',
       microphone: '',
       payment: 'self',
+    },
+  };
+
+  // 本番環境のみ HSTS を設定
+  if (!isDev) {
+    config.hsts = {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+    };
+  }
+
+  return config;
+}
+
+/**
+ * Admin App 用の厳格なセキュリティ設定を取得
+ *
+ * Admin App は User App よりも厳格な設定を適用:
+ * - X-Frame-Options: DENY（User App は SAMEORIGIN）
+ * - Referrer-Policy: no-referrer（User App は strict-origin-when-cross-origin）
+ * - CSP: 開発環境でも unsafe-eval を許可しない
+ * - Permissions-Policy: すべての API を禁止
+ *
+ * @param isDev - 開発環境フラグ
+ * @returns Admin App 用セキュリティ設定オブジェクト
+ */
+export function getAdminSecurityConfig(isDev: boolean): SecurityConfig {
+  const config: SecurityConfig = {
+    xFrameOptions: 'DENY',
+    xContentTypeOptions: 'nosniff',
+    referrerPolicy: 'no-referrer',
+    csp: {
+      defaultSrc: ["'self'"],
+      // Admin App は開発環境でも unsafe-eval を許可しない
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      // Admin App は開発環境でも ws/wss を許可しない
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", 'data:'],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      upgradeInsecureRequests: !isDev,
+      reportUri: '/api/csp-report',
+    },
+    permissionsPolicy: {
+      // Admin App はすべてのブラウザ API を禁止
+      geolocation: '',
+      camera: '',
+      microphone: '',
+      payment: '',
+      usb: '',
+      bluetooth: '',
     },
   };
 
