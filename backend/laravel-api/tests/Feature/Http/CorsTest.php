@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Log;
 describe('CORS Configuration', function () {
     describe('Environment Variable Parsing', function () {
         test('parses CORS_ALLOWED_ORIGINS as comma-separated list', function () {
-            putenv('CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002');
+            putenv('CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002,http://127.0.0.1:13001,http://127.0.0.1:13002');
 
             // 設定をリフレッシュ
             config(['cors.allowed_origins' => array_filter(array_map(
@@ -16,9 +16,11 @@ describe('CORS Configuration', function () {
             $origins = config('cors.allowed_origins');
 
             expect($origins)->toBeArray()
-                ->and($origins)->toHaveCount(2)
+                ->and($origins)->toHaveCount(4)
                 ->and($origins)->toContain('http://localhost:13001')
-                ->and($origins)->toContain('http://localhost:13002');
+                ->and($origins)->toContain('http://localhost:13002')
+                ->and($origins)->toContain('http://127.0.0.1:13001')
+                ->and($origins)->toContain('http://127.0.0.1:13002');
 
             putenv('CORS_ALLOWED_ORIGINS');
         });
@@ -42,7 +44,7 @@ describe('CORS Configuration', function () {
         });
 
         test('filters empty strings from origins array', function () {
-            putenv('CORS_ALLOWED_ORIGINS=http://localhost:13001,,http://localhost:13002');
+            putenv('CORS_ALLOWED_ORIGINS=http://localhost:13001,,http://localhost:13002,http://127.0.0.1:13001,http://127.0.0.1:13002,');
 
             config(['cors.allowed_origins' => array_filter(array_map(
                 'trim',
@@ -52,7 +54,7 @@ describe('CORS Configuration', function () {
             $origins = config('cors.allowed_origins');
 
             expect($origins)->toBeArray()
-                ->and($origins)->toHaveCount(2)
+                ->and($origins)->toHaveCount(4)
                 ->and($origins)->each->not()->toBeEmpty();
 
             putenv('CORS_ALLOWED_ORIGINS');
