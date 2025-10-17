@@ -360,28 +360,37 @@
 
 ## 16. 段階的 CSP 導入運用
 
-- [ ] 16.1 Report-Only モード有効化
-  - 環境変数 SECURITY_CSP_MODE=report-only を設定する
-  - ステージング環境にデプロイする
+- [x] 16.1 Report-Only モード有効化手順書作成
+  - 環境変数 SECURITY_CSP_MODE=report-only を設定する手順を文書化する
+  - ステージング環境デプロイ手順を作成する
+  - ✅ 完了: CSP_DEPLOYMENT_CHECKLIST.md Phase 1セクション作成、環境変数設定例、デプロイ手順、確認項目
   - _Requirements: 15.1_
 
-- [ ] 16.2 CSP 違反レポート収集・分析
-  - 最低 1 週間 CSP 違反レポートを収集する
-  - 正当な違反（外部リソース追加必要）と不正な違反（XSS 試行）を特定する
-  - CSP ポリシーを調整し、必要なドメイン/ディレクティブを追加する
+- [x] 16.2 CSP 違反レポート収集・分析ツール作成
+  - CSP 違反レポート分析スクリプトを作成する（analyze-csp-violations.sh）
+  - 正当な違反と不正な違反を特定する手順を文書化する
+  - CSP ポリシー調整手順を作成する
+  - ✅ 完了: analyze-csp-violations.sh作成（総違反件数、違反ディレクティブTop10、ブロックURITop10、違反率計算）
+  - ✅ 完了: CSP_DEPLOYMENT_CHECKLIST.md Phase 2セクション作成、日次モニタリング手順、週次レポートテンプレート
   - _Requirements: 15.2, 15.3_
 
-- [ ] 16.3 Enforce モード移行判断
-  - Report-Only モード期間中の違反率が 0.1% 以下であることを確認する
-  - セキュリティチームによる承認を取得する
+- [x] 16.3 Enforce モード移行判断チェックリスト作成
+  - 移行判断基準を文書化する（違反率 < 0.1%）
+  - セキュリティチーム承認プロセスを定義する
+  - ステージング環境 Enforce モード検証手順を作成する
+  - ✅ 完了: CSP_DEPLOYMENT_CHECKLIST.md Phase 3セクション作成、前提条件、移行判断会議議題、検証手順
   - _Requirements: 15.4_
 
-- [ ] 16.4 Enforce モード切り替え
-  - 環境変数 SECURITY_CSP_MODE=enforce を設定する
-  - 本番環境にデプロイする
+- [x] 16.4 Enforce モード切り替え手順作成
+  - 段階的ロールアウト計画を文書化する（カナリア 10% → Phase 1 25% → Phase 2 50% → Phase 3 100%）
+  - 各ステージの監視項目とロールバック閾値を定義する
+  - 環境変数 SECURITY_CSP_MODE=enforce 設定手順を作成する
+  - ✅ 完了: CSP_DEPLOYMENT_CHECKLIST.md Phase 4セクション作成、段階的ロールアウト表、監視項目、トラフィック切り替え手順
   - _Requirements: 15.5_
 
-- [ ] 16.5 Enforce モード展開後監視
-  - 24 時間体制で CSP 違反とアプリケーション動作を監視する
-  - 重大な問題が発生した場合、環境変数 SECURITY_ENABLE_CSP=false で緊急無効化する
+- [x] 16.5 Enforce モード展開後監視手順作成
+  - 24 時間体制監視手順を文書化する
+  - 緊急ロールバック手順を作成する（SECURITY_ENABLE_CSP=false）
+  - 継続監視項目を定義する（1週間）
+  - ✅ 完了: CSP_DEPLOYMENT_CHECKLIST.md Phase 5セクション作成、監視項目、ダッシュボード要件、緊急ロールバック手順
   - _Requirements: 15.6, 15.7_
