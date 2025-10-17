@@ -166,13 +166,13 @@
 
 ## 9. 環境変数設定と検証
 
-- [ ] 9.1 .env.example 更新
+- [x] 9.1 .env.example 更新
   - .env.example にセキュリティヘッダー関連の環境変数を追加する
   - SECURITY_X_FRAME_OPTIONS, SECURITY_REFERRER_POLICY, SECURITY_ENABLE_CSP, SECURITY_CSP_MODE, SECURITY_CSP_SCRIPT_SRC, SECURITY_CSP_REPORT_URI, SECURITY_FORCE_HSTS, SECURITY_CORS_ALLOWED_ORIGINS の設定例を追加する
   - 各環境変数にコメントでデフォルト値と説明を追記する
   - _Requirements: 8.1_
 
-- [ ] 9.2 .env.production.example 作成
+- [x] 9.2 .env.production.example 作成
   - .env.production.example を作成する
   - 本番環境向けの厳格な設定例を含める（SECURITY_X_FRAME_OPTIONS=DENY, SECURITY_CSP_MODE=enforce, SECURITY_FORCE_HSTS=true）
   - _Requirements: 8.2_
