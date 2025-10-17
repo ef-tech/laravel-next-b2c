@@ -239,9 +239,12 @@
 
 ## 12. E2E テスト実装（Playwright）
 
-- [ ] 12.1 E2E セキュリティヘッダーテストファイル作成
+- [x] 12.1 E2E セキュリティヘッダーテストファイル作成
   - e2e/tests/security-headers.spec.ts を作成する
   - Laravel API のセキュリティヘッダーをブラウザ経由で検証するテストを実装する
+  - playwright.config.ts に api-chromium プロジェクトを追加する
+  - 15個のE2Eテストを実装（Laravel API 6テスト、User App 3テスト、Admin App 4テスト、CSP違反検出 2テスト）
+  - TDD REDフェーズ完了: 9テスト失敗、6テスト成功
   - _Requirements: 11.1_
 
 - [ ] 12.2 User App セキュリティヘッダー検証テスト実装
