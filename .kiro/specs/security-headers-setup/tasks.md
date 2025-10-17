@@ -147,14 +147,14 @@
 
 ## 8. Next.js CSP レポート収集 API 実装
 
-- [ ] 8.1 User App CSP レポート API 作成
+- [x] 8.1 User App CSP レポート API 作成
   - frontend/user-app/src/app/api/csp-report/route.ts を作成する
   - POST メソッドで CSP 違反レポートを受信する
   - 開発環境では console.warn() でブラウザコンソールに出力する
   - HTTP 204 (No Content) を返却する
   - _Requirements: 7.1, 7.2, 7.5_
 
-- [ ] 8.2 Admin App CSP レポート API 作成
+- [x] 8.2 Admin App CSP レポート API 作成
   - frontend/admin-app/src/app/api/csp-report/route.ts を作成する
   - User App と同様の処理を実装する
   - _Requirements: 7.4, 7.5_
