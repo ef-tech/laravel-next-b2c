@@ -76,25 +76,25 @@
 
 ## 5. フロントエンド共通セキュリティ設定モジュール
 
-- [ ] 5.1 共通セキュリティ設定モジュール作成
+- [x] 5.1 共通セキュリティ設定モジュール作成
   - frontend/security-config.ts を作成する
   - CSPConfig, PermissionsPolicyConfig, SecurityConfig インターフェースを定義する
   - getSecurityConfig() 関数を実装し、開発環境と本番環境で異なる設定を返却する
   - _Requirements: 6.1, 6.2_
 
-- [ ] 5.2 CSP ポリシー文字列構築機能実装
+- [x] 5.2 CSP ポリシー文字列構築機能実装
   - buildCSPString() 関数を実装する
   - CSPConfig オブジェクトから CSP ポリシー文字列を構築する
   - 各ディレクティブをセミコロン区切りで連結する
   - _Requirements: 6.3_
 
-- [ ] 5.3 Permissions-Policy 文字列構築機能実装
+- [x] 5.3 Permissions-Policy 文字列構築機能実装
   - buildPermissionsPolicyString() 関数を実装する
   - PermissionsPolicyConfig オブジェクトから Permissions-Policy 文字列を構築する
   - 各ポリシーをカンマ区切りで連結する
   - _Requirements: 6.4_
 
-- [ ] 5.4 Nonce 生成機能実装
+- [x] 5.4 Nonce 生成機能実装
   - generateNonce() 関数を実装する
   - ランダムな nonce 値を生成し、Base64 エンコードして返却する
   - _Requirements: 6.5_
@@ -216,22 +216,22 @@
 
 ## 11. テスト実装（Next.js Jest）
 
-- [ ] 11.1 security-config.ts テスト作成
+- [x] 11.1 security-config.ts テスト作成
   - frontend/*/src/__tests__/security.test.ts を作成する
   - getSecurityConfig() 関数が開発環境と本番環境で異なる設定を返却することを検証する
   - _Requirements: 10.1, 10.2_
 
-- [ ] 11.2 CSP 文字列構築テスト実装
+- [x] 11.2 CSP 文字列構築テスト実装
   - buildCSPString() 関数が正しい CSP ポリシー文字列を生成することを検証する
   - 各ディレクティブがセミコロン区切りで連結されることを確認する
   - _Requirements: 10.3_
 
-- [ ] 11.3 Permissions-Policy 文字列構築テスト実装
+- [x] 11.3 Permissions-Policy 文字列構築テスト実装
   - buildPermissionsPolicyString() 関数が正しい文字列を生成することを検証する
   - 各ポリシーがカンマ区切りで連結されることを確認する
   - _Requirements: 10.4_
 
-- [ ] 11.4 Nonce 生成テスト実装
+- [x] 11.4 Nonce 生成テスト実装
   - generateNonce() 関数がランダムな nonce 値を生成することを検証する
   - 異なる呼び出しで異なる値が生成されることを確認する
   - Base64 形式であることを検証する
