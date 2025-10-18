@@ -15,7 +15,7 @@
 #   0: すべての検証成功
 #   1: 検証失敗
 
-set -e
+set -eo pipefail
 
 # カラー出力設定
 RED='\033[0;31m'
@@ -48,6 +48,7 @@ FAILED=0
 
 # ヘッダー検証関数
 check_header() {
+  set +e  # 一時的にエラーで終了しないようにする
   local header_name="$1"
   local expected_pattern="$2"
   local is_required="${3:-true}"
@@ -75,6 +76,7 @@ check_header() {
       echo -e "${YELLOW}⚠️  $header_name: NOT FOUND (optional)${NC}"
     fi
   fi
+  set -e  # エラーで終了する設定に戻す
 }
 
 # 共通セキュリティヘッダー検証
@@ -90,11 +92,15 @@ case "$APP_TYPE" in
     check_header "Referrer-Policy" "strict-origin-when-cross-origin|no-referrer"
 
     # CSP は環境変数次第でオプショナル
+    set +e
     if echo "$HEADERS" | grep -qi "^Content-Security-Policy:"; then
+      set -e
       check_header "Content-Security-Policy" "" false
     elif echo "$HEADERS" | grep -qi "^Content-Security-Policy-Report-Only:"; then
+      set -e
       check_header "Content-Security-Policy-Report-Only" "" false
     else
+      set -e
       echo -e "${YELLOW}⚠️  Content-Security-Policy: NOT FOUND (may be disabled via env)${NC}"
     fi
 
