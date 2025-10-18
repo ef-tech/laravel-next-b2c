@@ -1,7 +1,15 @@
 import { POST } from "../route";
 
+// NextRequestのモック型定義
+type MockNextRequest = {
+  json: jest.Mock<Promise<unknown>>;
+  headers: {
+    get: jest.Mock<string | null, [string]>;
+  };
+};
+
 // NextRequestのモックヘルパー
-function createMockRequest(body: unknown, headers: Record<string, string>): any {
+function createMockRequest(body: unknown, headers: Record<string, string>): MockNextRequest {
   return {
     json: jest.fn().mockResolvedValue(body),
     headers: {
