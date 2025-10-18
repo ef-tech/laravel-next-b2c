@@ -30,11 +30,8 @@ class ValidateEnvironment
         // 環境変数スキーマを取得
         $schema = EnvSchema::getSchema();
 
-        // 環境変数を取得（$_ENV + getenv() の両方をマージ）
-        $envVars = $this->collectEnvironmentVariables($schema);
-
         // バリデーション実行
-        $validator = new EnvValidator($schema, $envVars, $mode);
+        $validator = new EnvValidator($schema, $_ENV, $mode);
         $result = $validator->validate();
 
         // バリデーション結果の処理
@@ -81,32 +78,6 @@ class ValidateEnvironment
     {
         // getenv() と $_ENV の両方をチェック（CI/CD環境対応）
         return getenv($key) ?: ($_ENV[$key] ?? $default);
-    }
-
-    /**
-     * バリデーション対象の環境変数を収集
-     *
-     * @param  array<string, array<string, mixed>>  $schema
-     * @return array<string, string>
-     */
-    private function collectEnvironmentVariables(array $schema): array
-    {
-        $envVars = [];
-
-        foreach (array_keys($schema) as $key) {
-            // getenv() を優先、次に $_ENV、次に $_SERVER をチェック
-            $value = getenv($key);
-            if ($value === false) {
-                $value = $_ENV[$key] ?? $_SERVER[$key] ?? null;
-            }
-
-            // 値が存在する場合のみ追加（null や false は除外）
-            if ($value !== null && $value !== false) {
-                $envVars[$key] = (string) $value;
-            }
-        }
-
-        return $envVars;
     }
 
     /**
