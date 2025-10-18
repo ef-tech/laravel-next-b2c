@@ -149,7 +149,7 @@ jobs:
         run: |
           # Start Laravel API (ポート13000)
           cd backend/laravel-api
-          ENV_VALIDATION_SKIP=true DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
+          ENV_VALIDATION_SKIP=true DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password SECURITY_ENABLE_CSP=true php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - 開発モード)
