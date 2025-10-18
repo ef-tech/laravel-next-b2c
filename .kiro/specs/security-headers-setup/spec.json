@@ -1,0 +1,131 @@
+{
+  "feature_name": "security-headers-setup",
+  "created_at": "2025-10-16T09:37:00Z",
+  "updated_at": "2025-10-18T00:00:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 32,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/32",
+    "title": "セキュリティヘッダー設定",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": ["Laravel 12", "Pest", "PHPUnit", "PHPStan Level 8"],
+      "frontend": ["Next.js 15", "React 19", "TypeScript", "Jest", "Testing Library"],
+      "infrastructure": ["Docker", "Docker Compose", "GitHub Actions", "PostgreSQL", "Redis"],
+      "tools": ["Playwright", "OWASP ZAP", "Pint", "Larastan", "ESLint", "Prettier"]
+    },
+    "requirements_hints": [
+      "OWASP セキュリティベストプラクティスに準拠したセキュリティヘッダー実装",
+      "段階的導入（Report-Only → Enforce）による既存機能への影響最小化",
+      "X-Frame-Options によるクリックジャッキング攻撃防止",
+      "X-Content-Type-Options による MIME タイプスニッフィング攻撃防止",
+      "Content-Security-Policy (CSP) による XSS 攻撃防御",
+      "Strict-Transport-Security (HSTS) による HTTPS 強制とダウングレード攻撃防止",
+      "Referrer-Policy によるリファラー情報漏洩防止",
+      "Permissions-Policy によるブラウザ API 悪用防止",
+      "CORS 設定との統合（fruitcake/laravel-cors 併用）",
+      "CSP レポート収集エンドポイント実装",
+      "環境変数駆動による柔軟な設定管理"
+    ],
+    "project_structure": [
+      "backend/laravel-api/app/Http/Middleware/SecurityHeaders.php",
+      "backend/laravel-api/config/security.php",
+      "backend/laravel-api/app/Http/Controllers/CspReportController.php",
+      "backend/laravel-api/bootstrap/app.php",
+      "backend/laravel-api/config/logging.php",
+      "backend/laravel-api/routes/api.php",
+      "backend/laravel-api/tests/Feature/SecurityHeadersTest.php",
+      "frontend/security-config.ts",
+      "frontend/user-app/next.config.ts",
+      "frontend/admin-app/next.config.ts",
+      "frontend/user-app/src/app/api/csp-report/route.ts",
+      "frontend/admin-app/src/app/api/csp-report/route.ts",
+      "frontend/*/src/__tests__/security.test.ts",
+      "e2e/tests/security-headers.spec.ts",
+      ".env.example",
+      ".env.production.example",
+      ".github/workflows/security-headers.yml",
+      "scripts/validate-security-headers.sh",
+      "scripts/validate-cors-config.sh",
+      "SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md",
+      "docs/SECURITY_HEADERS_OPERATION.md",
+      "docs/SECURITY_HEADERS_TROUBLESHOOTING.md"
+    ],
+    "services": {
+      "Laravel API": {"port": "13000", "endpoint": "/api/health"},
+      "User App": {"port": "13001"},
+      "Admin App": {"port": "13002"}
+    },
+    "todo_items": [
+      "SecurityHeaders ミドルウェア作成（app/Http/Middleware/SecurityHeaders.php）",
+      "セキュリティ設定ファイル作成（config/security.php）",
+      "CSP レポートコントローラー作成（app/Http/Controllers/CspReportController.php）",
+      "ミドルウェア登録（bootstrap/app.php）",
+      "セキュリティログチャンネル追加（config/logging.php）",
+      "CSP レポートルート追加（routes/api.php）",
+      "Pest テスト実装（tests/Feature/SecurityHeadersTest.php）",
+      "共通セキュリティ設定モジュール作成（frontend/security-config.ts）",
+      "User App ヘッダー設定（frontend/user-app/next.config.ts）",
+      "Admin App ヘッダー設定（frontend/admin-app/next.config.ts）",
+      "User App CSP レポート API 作成",
+      "Admin App CSP レポート API 作成",
+      "Jest テスト実装（frontend/*/src/__tests__/security.test.ts）",
+      "Playwright セキュリティヘッダーテスト作成（e2e/tests/security-headers.spec.ts）",
+      "CORS テストケース実装",
+      "CSP 違反検出テストケース実装",
+      ".env.example 更新（セキュリティヘッダー設定項目追加）",
+      ".env.production.example 作成",
+      "GitHub Actions ワークフロー作成（.github/workflows/security-headers.yml）",
+      "セキュリティヘッダー検証スクリプト作成（scripts/validate-security-headers.sh）",
+      "CORS 設定検証スクリプト作成（scripts/validate-cors-config.sh）",
+      "SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md 更新",
+      "docs/SECURITY_HEADERS_OPERATION.md 作成",
+      "docs/SECURITY_HEADERS_TROUBLESHOOTING.md 作成",
+      "README.md 更新（セキュリティヘッダーセクション追加）",
+      "Report-Only モード有効化（SECURITY_CSP_MODE=report-only）",
+      "1週間 CSP 違反レポート収集・分析",
+      "CSP ポリシー調整",
+      "Enforce モード切り替え（SECURITY_CSP_MODE=enforce）",
+      "本番環境デプロイ・監視体制確立"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true,
+  "implementation": {
+    "started_at": "2025-10-16T10:00:00Z",
+    "completed_at": "2025-10-18T00:00:00Z",
+    "total_phases": 16,
+    "completed_phases": 16,
+    "status": "completed",
+    "notes": [
+      "全16フェーズ完了",
+      "Laravel API セキュリティヘッダー実装完了（SecurityHeaders ミドルウェア）",
+      "Next.js User App/Admin App セキュリティヘッダー実装完了",
+      "CSP レポート収集機能実装完了（CspReportController）",
+      "E2Eテスト実装完了（全17テスト通過）",
+      "CI/CD統合完了（GitHub Actions セキュリティヘッダー検証ワークフロー）",
+      "パフォーマンス測定ツール実装完了（measure-performance.sh）",
+      "ドキュメント整備完了（実装ガイド・運用マニュアル・トラブルシューティング）",
+      "段階的CSP導入運用ツール完備（analyze-csp-violations.sh・デプロイチェックリスト）"
+    ]
+  }
+}

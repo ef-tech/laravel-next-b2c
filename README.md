@@ -76,6 +76,12 @@ laravel-next-b2c/
   - [CI/CD自動バリデーション](#cicd自動バリデーション)
   - [トラブルシューティング](#トラブルシューティング-1)
   - [セキュリティガイド](#セキュリティガイド)
+- [🔐 セキュリティヘッダー](#-セキュリティヘッダー)
+  - [実装機能](#実装機能)
+  - [クイックスタート](#クイックスタート-1)
+  - [主要なセキュリティヘッダー説明](#主要なセキュリティヘッダー説明)
+  - [テスト戦略](#テスト戦略-1)
+  - [関連ドキュメント](#関連ドキュメント-1)
 - [🔧 トラブルシューティング](#-トラブルシューティング-2)
 - [📚 開発リソース](#-開発リソース)
 
@@ -1039,6 +1045,173 @@ npm run env:sync
   - 機密情報の分類（公開可能/機密/極秘）
   - Laravel/Next.jsセキュリティ設定
   - インシデント対応手順
+
+## 🔐 セキュリティヘッダー
+
+### 概要
+
+**OWASP セキュリティベストプラクティス** に準拠した包括的なセキュリティヘッダーを実装しています。XSS、CSRF、クリックジャッキング、MIME タイプスニッフィングなどの攻撃からアプリケーションを保護し、段階的導入（Report-Only → Enforce）により既存機能への影響を最小化します。
+
+### 実装機能
+
+#### ✅ 実装済みセキュリティヘッダー
+
+| ヘッダー | Laravel API | User App | Admin App | 用途 |
+|---------|-------------|----------|-----------|------|
+| **X-Frame-Options** | `SAMEORIGIN` | `SAMEORIGIN` | `DENY` | クリックジャッキング攻撃防止 |
+| **X-Content-Type-Options** | `nosniff` | `nosniff` | `nosniff` | MIME スニッフィング攻撃防止 |
+| **Referrer-Policy** | `strict-origin-when-cross-origin` | `strict-origin-when-cross-origin` | `no-referrer` | リファラー情報漏洩防止 |
+| **Content-Security-Policy** | 動的構築 | 動的構築 | 厳格設定 | XSS 攻撃防御 |
+| **Permissions-Policy** | ❌ | 設定済み | 厳格設定 | ブラウザ API 悪用防止 |
+| **Strict-Transport-Security** | HTTPS環境のみ | 本番環境のみ | 本番環境のみ | HTTPS 強制、ダウングレード攻撃防止 |
+
+#### 🎯 主要機能
+
+- **段階的 CSP 導入**: Report-Only モード（監視）→ Enforce モード（強制）の段階的移行
+- **CSP 違反レポート収集**: Laravel/Next.js 両対応、違反検出・分析による最適化
+- **環境変数駆動設定**: 開発/本番環境で異なるセキュリティレベル適用
+- **CORS 統合**: fruitcake/laravel-cors との完全統合
+- **自動CI/CD検証**: GitHub Actions による自動セキュリティヘッダー検証
+
+### クイックスタート
+
+#### 1. セキュリティヘッダー確認
+
+```bash
+# Laravel API
+curl -I http://localhost:13000/api/health
+
+# User App
+curl -I http://localhost:13001
+
+# Admin App
+curl -I http://localhost:13002
+```
+
+**期待される出力例** (Laravel API):
+```
+HTTP/1.1 200 OK
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy-Report-Only: default-src 'self'; ...
+```
+
+#### 2. 検証スクリプト実行
+
+```bash
+# セキュリティヘッダー検証
+bash scripts/validate-security-headers.sh http://localhost:13000/api/health laravel
+bash scripts/validate-security-headers.sh http://localhost:13001 user-app
+bash scripts/validate-security-headers.sh http://localhost:13002 admin-app
+
+# CORS 設定整合性確認
+bash scripts/validate-cors-config.sh
+```
+
+#### 3. CSP 違反ログ確認
+
+```bash
+# Laravel セキュリティログ
+tail -f backend/laravel-api/storage/logs/security.log
+
+# CSP 違反のみフィルタリング
+grep "CSP Violation" backend/laravel-api/storage/logs/security.log
+```
+
+### 主要なセキュリティヘッダー説明
+
+#### Content Security Policy (CSP)
+
+XSS 攻撃を防ぐため、読み込み可能なリソースのオリジンを制限します。
+
+**開発環境** (Report-Only モード):
+```bash
+# Laravel .env
+SECURITY_ENABLE_CSP=true
+SECURITY_CSP_MODE=report-only
+SECURITY_CSP_SCRIPT_SRC='self' 'unsafe-eval'  # Next.js HMR 対応
+```
+
+**本番環境** (Enforce モード):
+```bash
+SECURITY_CSP_MODE=enforce
+SECURITY_CSP_SCRIPT_SRC='self'  # 厳格設定
+```
+
+**段階的導入フロー**:
+1. **Report-Only モード** で 1 週間運用
+2. CSP 違反レポート分析・ポリシー調整
+3. 違反率 < 0.1% 確認
+4. **Enforce モード** に切り替え
+
+#### HSTS (HTTP Strict Transport Security)
+
+HTTPS を強制し、中間者攻撃とダウングレード攻撃を防ぎます。
+
+```bash
+# 本番環境のみ有効化
+SECURITY_FORCE_HSTS=true
+SECURITY_HSTS_MAX_AGE=31536000  # 1年間
+```
+
+#### X-Frame-Options
+
+クリックジャッキング攻撃（iframe 悪用）を防ぎます。
+
+| アプリ | 設定値 | 理由 |
+|--------|--------|------|
+| **Laravel API** | `SAMEORIGIN` | 同一オリジン iframe 許可 |
+| **User App** | `SAMEORIGIN` | 同一オリジン iframe 許可 |
+| **Admin App** | `DENY` | **完全拒否** (管理画面は iframe 不要) |
+
+### テスト戦略
+
+#### Laravel Pest テスト
+
+```bash
+cd backend/laravel-api
+
+# セキュリティヘッダーテスト実行
+./vendor/bin/pest tests/Feature/SecurityHeadersTest.php
+
+# カバレッジ確認
+./vendor/bin/pest --coverage --min=90
+```
+
+#### E2E Playwright テスト
+
+```bash
+cd e2e
+
+# セキュリティヘッダーE2Eテスト実行（全17テスト）
+npx playwright test security-headers.spec.ts
+
+# UIモードで実行
+npx playwright test security-headers.spec.ts --ui
+```
+
+**テスト内容**:
+- ✅ Laravel API セキュリティヘッダー検証 (6 テスト)
+- ✅ User App セキュリティヘッダー検証 (3 テスト)
+- ✅ Admin App セキュリティヘッダー検証 (4 テスト)
+- ✅ CSP 違反検出テスト (2 テスト)
+- ✅ CORS 統合テスト (2 テスト)
+
+### 関連ドキュメント
+
+| ドキュメント | 内容 |
+|------------|------|
+| **[実装ガイド](SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md)** | Laravel/Next.js 実装手順、環境変数設定、CSP カスタマイズ方法 |
+| **[運用マニュアル](docs/SECURITY_HEADERS_OPERATION.md)** | 日常運用、Report-Only モード運用、Enforce モード切り替え手順 |
+| **[トラブルシューティング](docs/SECURITY_HEADERS_TROUBLESHOOTING.md)** | よくある問題、CSP 違反デバッグ、CORS エラー対処 |
+
+### 外部リソース
+
+- [OWASP Secure Headers Project](https://owasp.org/www-project-secure-headers/)
+- [MDN: Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+- [CSP Evaluator (Google)](https://csp-evaluator.withgoogle.com/)
+- [Security Headers Scanner](https://securityheaders.com/)
 
 ### ポート競合の回避
 

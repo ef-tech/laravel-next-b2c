@@ -94,6 +94,9 @@ pids
 coverage/
 *.lcov
 
+# E2E test results
+test-results/
+
 # Temporary folders
 tmp/
 temp/

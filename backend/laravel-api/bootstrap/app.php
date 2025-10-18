@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
         ]);
+
+        // セキュリティヘッダーミドルウェアをグローバルに追加
+        // Note: CORS ミドルウェアの後に配置（ヘッダー重複回避）
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle DDD Domain Exceptions
