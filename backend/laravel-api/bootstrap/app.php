@@ -19,7 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // セキュリティヘッダーミドルウェアをグローバルに追加
-        // Note: CORS ミドルウェアの後に配置（ヘッダー重複回避）
+        // Note: append()により最後に実行されるため、Laravel組み込みのHandleCorsミドルウェアの後に実行される
+        //       これによりCORSヘッダー（Access-Control-Allow-Origin等）を上書きせず、セキュリティヘッダーのみ追加
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
