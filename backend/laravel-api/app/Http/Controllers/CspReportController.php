@@ -19,10 +19,14 @@ class CspReportController extends Controller
      */
     public function report(Request $request): JsonResponse|Response
     {
-        // Content-Type が application/csp-report であることを確認
-        if ($request->header('Content-Type') !== 'application/csp-report') {
+        // Content-Type が application/csp-report または application/json であることを確認
+        // Note: ブラウザによっては application/json を送信する場合がある（互換性対応）
+        $contentType = $request->header('Content-Type');
+        $allowedTypes = ['application/csp-report', 'application/json'];
+
+        if (! $contentType || ! in_array($contentType, $allowedTypes, true)) {
             return response()->json([
-                'error' => 'Invalid Content-Type',
+                'error' => 'Invalid Content-Type. Expected application/csp-report or application/json',
             ], 400);
         }
 

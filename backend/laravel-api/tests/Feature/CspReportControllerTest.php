@@ -23,6 +23,21 @@ describe('CspReportController', function () {
         $response->assertNoContent();
     });
 
+    test('Content-Type application/jsonでも正常に受信できること（互換性）', function () {
+        $response = $this->postJson('/api/csp/report', [
+            'csp-report' => [
+                'blocked-uri' => 'https://evil.com/script.js',
+                'violated-directive' => 'script-src',
+                'original-policy' => "default-src 'self'; script-src 'self'",
+                'document-uri' => 'https://example.com/page',
+            ],
+        ], [
+            'Content-Type' => 'application/json',
+        ]);
+
+        $response->assertNoContent();
+    });
+
     test('Content-Typeが不正な場合は400エラーを返すこと', function () {
         $response = $this->postJson('/api/csp/report', [
             'csp-report' => [
@@ -30,11 +45,11 @@ describe('CspReportController', function () {
                 'violated-directive' => 'script-src',
             ],
         ], [
-            'Content-Type' => 'application/json',
+            'Content-Type' => 'text/plain',
         ]);
 
         $response->assertStatus(400);
-        $response->assertJson(['error' => 'Invalid Content-Type']);
+        $response->assertJson(['error' => 'Invalid Content-Type. Expected application/csp-report or application/json']);
     });
 
     test('CSPレポートが空の場合は400エラーを返すこと', function () {
