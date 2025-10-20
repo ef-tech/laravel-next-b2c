@@ -1,0 +1,134 @@
+{
+  "feature_name": "basic-middleware-setup",
+  "created_at": "2025-10-20T04:32:00Z",
+  "updated_at": "2025-10-20T04:37:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 31,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/31",
+    "title": "基本ミドルウェア設定",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12 (API専用), PHP 8.4, Pest 4, PHPStan Level 8, Laravel Pint",
+      "frontend": "Next.js 15.5, React 19 (E2Eテスト用)",
+      "infrastructure": "Redis (レート制限・キャッシュ), PostgreSQL, Docker Compose, GitHub Actions",
+      "tools": "Playwright (E2Eテスト), Monolog (構造化ログ), OpenTelemetry (分散トレーシング), Laravel Sanctum (認証)"
+    },
+    "requirements_hints": [
+      "API専用最適化されたLaravel 12バックエンドに統一ミドルウェアスタックを確立",
+      "セキュリティ、パフォーマンス、可観測性の包括的な標準化",
+      "DDD/クリーンアーキテクチャとの整合性確保（HTTP層実装、Application層DI）",
+      "既存ミドルウェア（Sanctum、SecurityHeaders、CSP、CORS）との統合",
+      "認証・認可の一貫性向上とセキュリティ強化",
+      "構造化されたリクエスト/レスポンスログによる可観測性向上",
+      "レート制限による悪用防止とシステム保護",
+      "パフォーマンスメトリクス収集による継続的改善",
+      "運用時のトラブルシューティング効率化"
+    ],
+    "project_structure": [
+      "app/Http/Middleware/ForceJsonResponse.php",
+      "app/Http/Middleware/SetRequestId.php",
+      "app/Http/Middleware/CorrelationId.php",
+      "app/Http/Middleware/RequestLogging.php",
+      "app/Http/Middleware/PerformanceTracking.php",
+      "app/Http/Middleware/EnhancedRateLimit.php",
+      "app/Http/Middleware/TokenValidation.php",
+      "app/Http/Middleware/PermissionCheck.php",
+      "app/Http/Middleware/AuditTrail.php",
+      "app/Http/Middleware/IdempotencyKey.php",
+      "app/Http/Middleware/CacheHeaders.php",
+      "app/Http/Middleware/ETag.php",
+      "config/middleware.php",
+      "config/ratelimit.php",
+      "config/monitoring.php",
+      "bootstrap/app.php",
+      "tests/Unit/Middleware/",
+      "tests/Feature/Middleware/",
+      "e2e/projects/shared/tests/middleware.spec.ts",
+      "backend/laravel-api/docs/middleware-implementation-guide.md",
+      "backend/laravel-api/docs/middleware-operation-manual.md",
+      ".github/workflows/middleware-tests.yml"
+    ],
+    "services": {
+      "Redis": {
+        "port": "13379",
+        "purpose": "レート制限・Idempotencyキー・キャッシュ"
+      },
+      "PostgreSQL": {
+        "port": "13432",
+        "purpose": "監査ログ・データベース"
+      },
+      "Laravel API": {
+        "port": "13000",
+        "purpose": "バックエンドAPI"
+      },
+      "User App": {
+        "port": "13001",
+        "purpose": "フロントエンド（ユーザー向け）"
+      },
+      "Admin App": {
+        "port": "13002",
+        "purpose": "フロントエンド（管理者向け）"
+      }
+    },
+    "middleware_list": [
+      "ForceJsonResponse - JSON入出力強制",
+      "SetRequestId - リクエストID生成・伝播（X-Request-Id）",
+      "CorrelationId - 分散トレーシング対応（X-Correlation-Id、traceparent）",
+      "RequestLogging - 構造化リクエスト/レスポンスログ（JSON形式）",
+      "PerformanceTracking - パフォーマンスメトリクス収集",
+      "EnhancedRateLimit - 動的レート制限（Redis統合）",
+      "TokenValidation - Sanctumトークン詳細検証",
+      "PermissionCheck - 権限ベースアクセス制御",
+      "AuditTrail - 重要操作の監査イベント記録",
+      "IdempotencyKey - Idempotency-Keyによる重複防止（POST/PUT/PATCH/DELETE）",
+      "CacheHeaders - Cache-Control/Expires設定（GETエンドポイント）",
+      "ETag - 条件付きGET対応（ETag/If-None-Match）"
+    ],
+    "middleware_groups": [
+      "api（基底グループ） - 全API共通ミドルウェア",
+      "auth（認証前提） - Sanctum認証 + 監査",
+      "guest（公開API） - 低レート制限",
+      "internal（内部/管理用） - IP制限 + 強レート制限",
+      "webhook（外部コールバック） - Idempotency + 署名検証",
+      "readonly（読み取り専用） - キャッシュ制御 + ETag"
+    ],
+    "todo_items": [
+      "ミドルウェア一覧・責務定義書作成",
+      "実行順序図作成（グローバル/グループ別）",
+      "config/middleware.php設計",
+      "config/ratelimit.php設計",
+      ".env.example更新（新規環境変数追加）",
+      "既存ミドルウェア統合方針決定",
+      "全12種類のミドルウェア実装・単体テスト",
+      "bootstrap/app.phpミドルウェア設定",
+      "統合テスト実装（ミドルウェアチェーン、グループ別）",
+      "E2Eテスト実装（Playwright、レート制限/Idempotency/パフォーマンス）",
+      ".github/workflows/middleware-tests.yml作成",
+      "middleware-implementation-guide.md作成",
+      "middleware-operation-manual.md作成",
+      "README.md更新（ミドルウェア設定概要追記）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
