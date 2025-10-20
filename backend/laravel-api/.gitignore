@@ -3,3 +3,6 @@
 
 # PHPStan
 phpstan-baseline.neon
+
+# Coverage reports
+coverage-report/
