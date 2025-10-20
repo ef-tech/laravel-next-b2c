@@ -1,0 +1,317 @@
+# Security Headers Validation Workflow
+#
+# このワークフローはセキュリティヘッダー関連の変更を自動検証します:
+# - Laravel API セキュリティヘッダー検証
+# - Next.js User App セキュリティヘッダー検証
+# - Next.js Admin App セキュリティヘッダー検証
+# - CSP ポリシー構文検証
+# - CORS 設定整合性確認
+
+name: Security Headers Validation
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+    paths:
+      # Laravel セキュリティヘッダー関連ファイル
+      - 'backend/laravel-api/app/Http/Middleware/SecurityHeaders.php'
+      - 'backend/laravel-api/config/security.php'
+      - 'backend/laravel-api/config/cors.php'
+      - 'backend/laravel-api/.env.example'
+      # Next.js セキュリティ設定ファイル
+      - 'frontend/security-config.ts'
+      - 'frontend/admin-app/next.config.ts'
+      - 'frontend/user-app/next.config.ts'
+      # ワークフロー自体の変更
+      - '.github/workflows/security-headers.yml'
+      # 検証スクリプト
+      - 'scripts/validate-security-headers.sh'
+      - 'scripts/validate-cors-config.sh'
+      - 'scripts/measure-performance.sh'
+  push:
+    branches: [main]
+    paths:
+      - 'backend/laravel-api/app/Http/Middleware/SecurityHeaders.php'
+      - 'backend/laravel-api/config/security.php'
+      - 'backend/laravel-api/config/cors.php'
+      - 'frontend/security-config.ts'
+      - 'frontend/admin-app/next.config.ts'
+      - 'frontend/user-app/next.config.ts'
+      - '.github/workflows/security-headers.yml'
+
+jobs:
+  laravel-security-headers:
+    name: Laravel API Security Headers
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      pgsql:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sail
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testing
+        ports:
+          - 13432:5432
+        options: >-
+          --health-cmd "pg_isready -U sail"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo, pdo_pgsql, zip
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/laravel-api/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Copy .env for CI
+        run: cp .env.ci .env
+        working-directory: backend/laravel-api
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: backend/laravel-api
+
+      - name: Setup Laravel
+        run: |
+          php artisan migrate --force
+        working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 13432
+          DB_DATABASE: testing
+          DB_USERNAME: sail
+          DB_PASSWORD: password
+
+      - name: Start Laravel API
+        run: |
+          cd backend/laravel-api
+          ENV_VALIDATION_SKIP=true DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
+          sleep 5
+
+      - name: Wait for Laravel API
+        run: |
+          npx wait-on http://localhost:13000/api/health --timeout 60000 --interval 1000
+
+      - name: Validate Laravel API Security Headers
+        run: |
+          bash scripts/validate-security-headers.sh http://localhost:13000/api/health laravel
+
+      - name: Measure Laravel API Performance
+        run: |
+          bash scripts/measure-performance.sh http://localhost:13000/api/health
+
+  nextjs-user-app-security-headers:
+    name: Next.js User App Security Headers
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/user-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend/user-app
+
+      - name: Setup environment file
+        run: cp .env.example .env.local
+        working-directory: frontend/user-app
+
+      - name: Start User App
+        run: |
+          cd frontend/user-app
+          npx next dev --turbopack --port 13001 > /tmp/user-app.log 2>&1 &
+          sleep 10
+
+      - name: Wait for User App
+        run: |
+          npx wait-on http://localhost:13001 --timeout 60000 --interval 1000
+
+      - name: Validate User App Security Headers
+        run: |
+          bash scripts/validate-security-headers.sh http://localhost:13001 user-app
+
+      - name: Measure User App Performance
+        run: |
+          bash scripts/measure-performance.sh http://localhost:13001
+
+  nextjs-admin-app-security-headers:
+    name: Next.js Admin App Security Headers
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/admin-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend/admin-app
+
+      - name: Setup environment file
+        run: cp .env.example .env.local
+        working-directory: frontend/admin-app
+
+      - name: Start Admin App
+        run: |
+          cd frontend/admin-app
+          npx next dev --turbopack --port 13002 > /tmp/admin-app.log 2>&1 &
+          sleep 10
+
+      - name: Wait for Admin App
+        run: |
+          npx wait-on http://localhost:13002 --timeout 60000 --interval 1000
+
+      - name: Validate Admin App Security Headers
+        run: |
+          bash scripts/validate-security-headers.sh http://localhost:13002 admin-app
+
+      - name: Measure Admin App Performance
+        run: |
+          bash scripts/measure-performance.sh http://localhost:13002
+
+  csp-policy-syntax:
+    name: CSP Policy Syntax Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate CSP Syntax
+        run: |
+          # frontend/security-config.ts の CSP 構文を検証
+          node -e "
+          const fs = require('fs');
+          const content = fs.readFileSync('frontend/security-config.ts', 'utf8');
+
+          // 基本的な CSP ディレクティブの存在確認
+          const requiredDirectives = [
+            'default-src',
+            'script-src',
+            'style-src',
+            'img-src',
+            'connect-src',
+            'font-src',
+            'object-src'
+          ];
+
+          let errors = [];
+          for (const directive of requiredDirectives) {
+            if (!content.includes(directive)) {
+              errors.push(\`Missing required CSP directive: \${directive}\`);
+            }
+          }
+
+          if (errors.length > 0) {
+            console.error('CSP Validation Errors:');
+            errors.forEach(err => console.error(\`  - \${err}\`));
+            process.exit(1);
+          }
+
+          console.log('✅ CSP syntax validation passed');
+          "
+
+  cors-config-consistency:
+    name: CORS Configuration Consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+
+      - name: Validate CORS Configuration
+        run: |
+          bash scripts/validate-cors-config.sh
+
+  security-validation-summary:
+    name: Security Validation Summary
+    runs-on: ubuntu-latest
+    needs:
+      - laravel-security-headers
+      - nextjs-user-app-security-headers
+      - nextjs-admin-app-security-headers
+      - csp-policy-syntax
+      - cors-config-consistency
+    if: always()
+
+    steps:
+      - name: Check validation results
+        run: |
+          if [[ "${{ needs.laravel-security-headers.result }}" != "success" ]]; then
+            echo "❌ Laravel API security headers validation failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.nextjs-user-app-security-headers.result }}" != "success" ]]; then
+            echo "❌ Next.js User App security headers validation failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.nextjs-admin-app-security-headers.result }}" != "success" ]]; then
+            echo "❌ Next.js Admin App security headers validation failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.csp-policy-syntax.result }}" != "success" ]]; then
+            echo "❌ CSP policy syntax validation failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.cors-config-consistency.result }}" != "success" ]]; then
+            echo "❌ CORS configuration consistency check failed"
+            exit 1
+          fi
+
+          echo "✅ All security validations passed!"

@@ -39,6 +39,14 @@ export default defineConfig({
     //   testMatch: /global\.setup\.ts/,
     // },
     {
+      name: 'api-chromium',
+      testDir: './tests',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.E2E_API_URL ?? 'http://localhost:13000',
+      },
+    },
+    {
       name: 'admin-chromium',
       testDir: './projects/admin/tests',
       use: {
