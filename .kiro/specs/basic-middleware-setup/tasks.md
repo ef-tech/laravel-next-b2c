@@ -171,14 +171,14 @@ Laravel Next.js B2C Application TemplateのAPI専用Laravel 12バックエンド
   - Webhookエンドポイントに対してIdempotency検証を必須とする
   - _Requirements: 7.4, 7.5, 7.6, 7.7, 7.8_
 
-- [ ] 10. キャッシュ制御とHTTPキャッシング最適化機能の実装
-- [ ] 10.1 Cache-Controlヘッダー設定機能を実装する
+- [x] 10. キャッシュ制御とHTTPキャッシング最適化機能の実装
+- [x] 10.1 Cache-Controlヘッダー設定機能を実装する
   - GETリクエストに対してCache-Controlヘッダーを設定する
   - 開発環境ではno-cacheを設定し、本番環境ではエンドポイントごとのmax-age値を設定する
   - キャッシュTTLをエンドポイントごとに設定する（例: /api/health: 60秒、/api/user: 300秒）
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-- [ ] 10.2 Expiresヘッダーと環境変数制御を実装する
+- [x] 10.2 Expiresヘッダーと環境変数制御を実装する
   - Cache-Controlヘッダーと併せてExpiresヘッダーも設定する
   - 環境変数で機能の有効/無効を切り替え可能にする
   - POST/PUT/PATCH/DELETEリクエストに対してはキャッシュヘッダーを設定しない
