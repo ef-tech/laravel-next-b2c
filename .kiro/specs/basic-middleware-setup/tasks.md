@@ -156,14 +156,14 @@ Laravel Next.js B2C Application TemplateのAPI専用Laravel 12バックエンド
   - GETリクエスト（読み取り専用操作）では監査イベントを記録しない
   - _Requirements: 6.5, 6.6, 6.7_
 
-- [ ] 9. Idempotency保証と重複防止機能の実装
-- [ ] 9.1 Idempotencyキー検証基盤を実装する
+- [x] 9. Idempotency保証と重複防止機能の実装
+- [x] 9.1 Idempotencyキー検証基盤を実装する
   - Idempotency-Keyヘッダーによる冪等性保証機能を実装する
   - IdempotencyキーをRedisに保存する（形式: idempotency:{key}:{user_id}）
   - 同じIdempotencyキーで2回目のリクエストを受信した際にリクエストペイロードの指紋を比較する
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 9.2 Idempotencyキャッシュとエラーハンドリングを実装する
+- [x] 9.2 Idempotencyキャッシュとエラーハンドリングを実装する
   - ペイロード指紋が一致する場合はキャッシュ済みレスポンスを返却し、処理を実行しない
   - ペイロード指紋が異なる場合はHTTP 422ステータスコードを返し、リクエストを拒否する
   - IdempotencyキーのTTL（有効期限）を24時間に設定する
