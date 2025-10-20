@@ -207,39 +207,39 @@ Laravel Next.js B2C Application TemplateのAPI専用Laravel 12バックエンド
   - 例外が発生した場合も統一されたJSON形式のエラー応答を返す
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-- [ ] 13. ミドルウェアグループ化とルート適用設定
-- [ ] 13.1 apiグループミドルウェアを設定する
+- [x] 13. ミドルウェアグループ化とルート適用設定
+- [x] 13.1 apiグループミドルウェアを設定する
   - 全てのAPIエンドポイントに適用される基底グループを設定する
   - TrimStrings、ConvertEmptyStringsToNull、SubstituteBindingsを含める
   - RequestLogging、PerformanceTracking、EnhancedRateLimitを含める
   - SecurityHeaders、ContentSecurityPolicyを含める
   - _Requirements: 11.1, 11.2, 16.2, 16.3_
 
-- [ ] 13.2 authグループミドルウェアを設定する
+- [x] 13.2 authグループミドルウェアを設定する
   - 認証必須エンドポイントに適用されるグループを設定する
   - apiグループに加えて、auth:sanctum、TokenValidation、AuditTrailを含める
   - _Requirements: 11.3, 11.4, 16.1_
 
-- [ ] 13.3 guestグループミドルウェアを設定する
+- [x] 13.3 guestグループミドルウェアを設定する
   - 公開APIエンドポイント（認証不要）に適用されるグループを設定する
   - apiグループに加えて、EnhancedRateLimit:publicを含める
   - _Requirements: 11.5, 11.6_
 
-- [ ] 13.4 internal、webhook、readonlyグループミドルウェアを設定する
+- [x] 13.4 internal、webhook、readonlyグループミドルウェアを設定する
   - 内部/管理用エンドポイントに適用されるinternalグループを設定する（auth:sanctum、PermissionCheck:admin、EnhancedRateLimit:strict、AuditTrail）
   - Webhookエンドポイントに適用されるwebhookグループを設定する（IdempotencyKey、EnhancedRateLimit:webhook）
   - 読み取り専用エンドポイントに適用されるreadonlyグループを設定する（CacheHeaders、ETag）
   - _Requirements: 11.7, 11.8, 11.9, 11.10, 11.11, 11.12_
 
-- [ ] 14. グローバルミドルウェアと実行順序設定
-- [ ] 14.1 グローバルミドルウェアチェーンを設定する
+- [x] 14. グローバルミドルウェアと実行順序設定
+- [x] 14.1 グローバルミドルウェアチェーンを設定する
   - 全てのリクエストに適用されるグローバルミドルウェアを定義する
   - 実行順序を明確に定義する（TrustProxies、ValidatePostSize、PreventRequestsDuringMaintenance、Cors、SetRequestId、CorrelationId、ForceJsonResponse）
   - グローバルミドルウェア実行後にルート固有のミドルウェアグループを実行する
   - 既存ミドルウェア（Sanctum、SecurityHeaders、CSP、CORS）との統合を保証する
   - _Requirements: 12.1, 12.2, 12.3, 16.4, 16.5_
 
-- [ ] 14.2 bootstrap/app.phpでミドルウェアを登録する
+- [x] 14.2 bootstrap/app.phpでミドルウェアを登録する
   - グローバルミドルウェア、ミドルウェアグループ、ミドルウェアエイリアスを明確に定義する
   - Laravel 12の新しいミドルウェア登録APIを使用する
   - _Requirements: 12.4_
