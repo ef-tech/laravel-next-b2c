@@ -6,22 +6,22 @@ Laravel Next.js B2C Application TemplateのAPI専用Laravel 12バックエンド
 
 ## 実装タスク
 
-- [ ] 1. Application層ポート設計とインターフェース定義
-- [ ] 1.1 AuthorizationServiceポートを定義する
+- [x] 1. Application層ポート設計とインターフェース定義
+- [x] 1.1 AuthorizationServiceポートを定義する
   - Application層に認可サービスのインターフェースを作成する
   - ユーザーと権限文字列を受け取り、認可判定結果を返すメソッドを定義する
   - DDD/クリーンアーキテクチャ原則に従い、Domain層に依存しないインターフェースとする
   - PHPStan Level 8準拠の型定義を含める
   - _Requirements: 5.2, 5.3, 5.7, 15.3_
 
-- [ ] 1.2 AuditServiceポートを定義する
+- [x] 1.2 AuditServiceポートを定義する
   - Application層に監査サービスのインターフェースを作成する
   - 監査イベント情報を受け取り、記録処理を実行するメソッドを定義する
   - DDD/クリーンアーキテクチャ原則に従い、Domain層に依存しないインターフェースとする
   - PHPStan Level 8準拠の型定義を含める
   - _Requirements: 6.3, 15.4_
 
-- [ ] 1.3 Application層ポートのInfrastructure実装を作成する
+- [x] 1.3 Application層ポートのInfrastructure実装を作成する
   - AuthorizationServiceの具象実装をInfrastructure層に作成する
   - AuditServiceの具象実装をInfrastructure層に作成する
   - Eloquent/データベースを使用した実際の認可判定ロジックを実装する

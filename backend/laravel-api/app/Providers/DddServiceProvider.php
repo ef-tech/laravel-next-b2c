@@ -29,6 +29,17 @@ final class DddServiceProvider extends ServiceProvider
             \Ddd\Application\Shared\Services\Events\EventBus::class,
             \Ddd\Infrastructure\Services\Events\LaravelEventBus::class
         );
+
+        // Authorization and Audit services (Requirements: 5.2, 6.3, 15.2)
+        $this->app->singleton(
+            \Ddd\Application\Shared\Services\Authorization\AuthorizationService::class,
+            \Ddd\Infrastructure\Persistence\Services\LaravelAuthorizationService::class
+        );
+
+        $this->app->singleton(
+            \Ddd\Application\Shared\Services\Audit\AuditService::class,
+            \Ddd\Infrastructure\Persistence\Services\LaravelAuditService::class
+        );
     }
 
     /**
