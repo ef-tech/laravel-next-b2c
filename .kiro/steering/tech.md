@@ -130,7 +130,17 @@ SANCTUM_EXPIRATION=60 # トークン有効期限（日数）
 
 # 🌐 CORS環境変数設定
 CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002  # 開発環境
+CORS_SUPPORTS_CREDENTIALS=true  # Cookie送信許可（Sanctum認証対応）
 # 本番環境例: CORS_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
+
+# 🔐 セキュリティヘッダー設定（OWASP準拠）
+SECURITY_ENABLE_CSP=true  # Content Security Policy有効化
+SECURITY_CSP_MODE=report-only  # CSPモード: report-only（監視）または enforce（強制）
+SECURITY_CSP_SCRIPT_SRC='self' 'unsafe-eval'  # スクリプト読み込み元（開発環境: unsafe-eval許可）
+SECURITY_CSP_STYLE_SRC='self' 'unsafe-inline'  # スタイル読み込み元（Tailwind CSS対応）
+SECURITY_CSP_REPORT_URI=/api/csp-report  # CSP違反レポート送信先
+SECURITY_FORCE_HSTS=false  # HSTS強制（本番環境のみtrue推奨）
+SECURITY_HSTS_MAX_AGE=31536000  # HSTS有効期間（1年間）
 
 # 環境変数バリデーションスキップ（緊急時のみ、migrate/seed実行時に使用可能）
 # ENV_VALIDATION_SKIP=true
@@ -274,6 +284,12 @@ parameters:
 
 **🌐 CORS環境変数設定ドキュメント** (`docs/`):
 - `CORS_CONFIGURATION_GUIDE.md`: CORS環境変数設定完全ガイド（環境別設定、セキュリティベストプラクティス、トラブルシューティング、テスト戦略）
+
+**🔐 セキュリティヘッダー設定ドキュメント**:
+- `SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md`: Laravel/Next.js実装手順、環境変数設定、CSPカスタマイズ方法（ルート配置）
+- `docs/SECURITY_HEADERS_OPERATION.md`: 日常運用マニュアル、Report-Onlyモード運用、Enforceモード切り替え手順
+- `docs/SECURITY_HEADERS_TROUBLESHOOTING.md`: よくある問題、CSP違反デバッグ、CORSエラー対処
+- `docs/CSP_DEPLOYMENT_CHECKLIST.md`: CSP本番デプロイチェックリスト、段階的導入フローガイド
 
 **🏗️ DDD/クリーンアーキテクチャドキュメント**:
 - `ddd-architecture.md`: DDD 4層構造アーキテクチャ概要、依存方向ルール、主要パターン
@@ -582,8 +598,17 @@ E2E_USER_PASSWORD=password            # ユーザーパスワード
 
 ## セキュリティ・品質管理
 - **トークンベース認証**: Laravel Sanctum 4.0によるセキュアなステートレス認証
+- **🔐 包括的セキュリティヘッダー**: OWASP準拠の攻撃防御実装
+  - **X-Frame-Options**: クリックジャッキング攻撃防止（Admin: DENY、User/Laravel: SAMEORIGIN）
+  - **X-Content-Type-Options**: MIMEスニッフィング攻撃防止（全サービス: nosniff）
+  - **Referrer-Policy**: リファラー情報漏洩防止（Admin: no-referrer、他: strict-origin-when-cross-origin）
+  - **Content-Security-Policy**: XSS攻撃防御、動的CSP構築、Report-Only/Enforceモード切替可能
+  - **Permissions-Policy**: ブラウザAPI悪用防止（User/Admin App設定済み）
+  - **Strict-Transport-Security**: HTTPS強制、ダウングレード攻撃防止（本番環境のみ）
+  - **CSP違反レポート収集**: Laravel/Next.js両対応、application/json互換性、違反分析による最適化
+  - **段階的導入**: Report-Onlyモード運用 → 違反分析 → Enforceモード切り替え
 - **CSRFプロテクション**: APIエンドポイント専用設定
-- **CORS最適化**: Next.jsフロントエンドとの統合設定
+- **CORS最適化**: Next.jsフロントエンドとの統合設定、credentials対応
 - **XDEBUG**: 開発・デバッグサポート
 - **環境分離**: .env設定による環境別管理
 - **型安全性**: TypeScript全面採用

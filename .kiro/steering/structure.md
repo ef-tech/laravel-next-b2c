@@ -27,15 +27,23 @@ laravel-next-b2c/
 ├── Makefile             # テストインフラ管理タスク（quick-test, test-pgsql, test-parallel, test-setup, etc.）
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
 ├── node_modules/        # 共通依存関係
-├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint、CORS設定、テストDB運用）
+├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint、CORS設定、セキュリティヘッダー、テストDB運用）
 │   ├── JEST_ESLINT_INTEGRATION_GUIDE.md  # Jest/Testing Library ESLint統合ガイド（設定概要、プラグイン詳細、適用ルール）
 │   ├── JEST_ESLINT_QUICKSTART.md         # Jest/ESLintクイックスタートガイド（5分セットアップ、基本ワークフロー）
 │   ├── JEST_ESLINT_TROUBLESHOOTING.md    # Jest/ESLintトラブルシューティング（設定問題、実行エラー、ルール調整）
 │   ├── JEST_ESLINT_CONFIG_EXAMPLES.md    # Jest/ESLint設定サンプル集（プロジェクト別設定例、カスタマイズパターン）
 │   ├── CORS_CONFIGURATION_GUIDE.md       # 🌐 CORS環境変数設定完全ガイド（環境別設定、セキュリティベストプラクティス、トラブルシューティング）
+│   ├── SECURITY_HEADERS_OPERATION.md     # 🔐 セキュリティヘッダー運用マニュアル（日常運用、Report-Onlyモード運用、Enforceモード切り替え）
+│   ├── SECURITY_HEADERS_TROUBLESHOOTING.md  # 🔐 セキュリティヘッダートラブルシューティング（CSP違反デバッグ、CORSエラー対処）
+│   ├── CSP_DEPLOYMENT_CHECKLIST.md       # 🔐 CSP本番デプロイチェックリスト（段階的導入フローガイド）
 │   └── TESTING_DATABASE_WORKFLOW.md      # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
+├── scripts/             # プロジェクトスクリプト
+│   ├── analyze-csp-violations.sh         # 🔐 CSP違反ログ分析スクリプト
+│   ├── validate-security-headers.sh      # 🔐 セキュリティヘッダー検証スクリプト（Laravel/Next.js対応）
+│   └── validate-cors-config.sh           # 🌐 CORS設定整合性確認スクリプト
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
 ├── README.md            # プロジェクト概要
+├── SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md  # 🔐 セキュリティヘッダー実装ガイド（Laravel/Next.js実装手順、環境変数設定、CSPカスタマイズ）
 └── DOCKER_TROUBLESHOOTING.md  # Dockerトラブルシューティング完全ガイド（APP_PORTポート設定問題、イメージ再ビルド、完全クリーンアップ手順）
 ```
 
@@ -71,13 +79,16 @@ laravel-api/
 │   ├── Http/            # 🏗️ HTTP層（DDD統合）
 │   │   ├── Controllers/ # Controllerからユースケース呼び出し
 │   │   │   ├── Api/     # 📊 API基本機能コントローラー
-│   │   │   │   └── HealthController.php  # ヘルスチェック（GET /api/health）
+│   │   │   │   ├── HealthController.php  # ヘルスチェック（GET /api/health）
+│   │   │   │   └── CspReportController.php  # 🔐 CSP違反レポート収集（POST /api/csp-report、application/json互換性対応）
 │   │   │   ├── Auth/    # 🔐 認証コントローラー
 │   │   │   │   ├── LoginController.php     # ログイン処理（POST /api/login, POST /api/logout）
 │   │   │   │   ├── MeController.php        # 認証ユーザー情報（GET /api/me）
 │   │   │   │   └── TokenController.php     # トークン管理（GET /api/tokens, POST /api/tokens/{id}/revoke）
 │   │   ├── Middleware/  # ミドルウェア
-│   │   │   └── Authenticate.php  # 🔐 Sanctum認証ミドルウェア（auth:sanctum）
+│   │   │   ├── Authenticate.php  # 🔐 Sanctum認証ミドルウェア（auth:sanctum）
+│   │   │   ├── SecurityHeaders.php  # 🔐 セキュリティヘッダーミドルウェア（X-Frame-Options、X-Content-Type-Options等）
+│   │   │   └── ContentSecurityPolicy.php  # 🔐 CSPヘッダー設定ミドルウェア（動的CSP構築、Report-Only/Enforceモード切替）
 │   │   ├── Requests/    # リクエストバリデーション
 │   │   │   └── Auth/    # 🔐 認証リクエスト
 │   │   │       └── LoginRequest.php  # ログインバリデーション（email, password必須）
@@ -89,14 +100,16 @@ laravel-api/
 ├── bootstrap/           # アプリケーション初期化
 ├── config/              # 設定ファイル
 │   ├── sanctum.php      # 🔐 Sanctum認証設定（stateful_domains, expiration等）
-│   └── auth.php         # 認証設定（guards: sanctum）
+│   ├── auth.php         # 認証設定（guards: sanctum）
+│   ├── security.php     # 🔐 セキュリティヘッダー設定（CSP、HSTS、X-Frame-Options等環境変数駆動設定）
+│   └── cors.php         # 🌐 CORS設定（fruitcake/laravel-cors統合、credentials対応）
 ├── database/            # データベース関連
 │   ├── factories/       # モデルファクトリー
 │   ├── migrations/      # マイグレーション
 │   │   └── 2019_12_14_000001_create_personal_access_tokens_table.php  # 🔐 Sanctumトークンテーブル
 │   └── seeders/         # シーダー
 ├── docker/              # Docker設定 (PHP 8.0-8.4対応、APP_PORTデフォルト13000最適化済み)
-├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証 + テストDB運用 + 認証 + Docker）
+├── docs/                # 🏗️ プロジェクトドキュメント（DDD + 最適化ガイド + インフラ検証 + テストDB運用 + 認証 + セキュリティヘッダー + Docker）
 │   ├── ddd-architecture.md        # DDD 4層構造アーキテクチャ概要
 │   ├── ddd-development-guide.md   # DDD開発ガイドライン
 │   ├── ddd-testing-strategy.md    # DDD層別テスト戦略
@@ -105,6 +118,7 @@ laravel-api/
 │   ├── VERIFICATION.md            # Dockerヘルスチェック検証手順ドキュメント
 │   ├── TESTING_DATABASE_WORKFLOW.md  # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
 │   ├── sanctum-authentication-guide.md  # 🔐 Sanctum認証ガイド（エンドポイント、トークン管理、セキュリティ設定、トラブルシューティング）
+│   ├── security-headers-implementation.md  # 🔐 セキュリティヘッダー実装詳細（Laravel/Next.js実装、環境変数設定、CSPカスタマイズ）
 │   ├── DOCKER_TROUBLESHOOTING.md  # Dockerトラブルシューティング（APP_PORTポート設定、イメージ再ビルド、完全クリーンアップ）
 │   └── [その他最適化ドキュメント]
 ├── public/              # 公開ディレクトリ (エントリーポイント)
@@ -123,6 +137,8 @@ laravel-api/
 │   │                    #   - GET /api/tokens (TokenController@index, auth:sanctum)
 │   │                    #   - POST /api/tokens/{id}/revoke (TokenController@revoke, auth:sanctum)
 │   │                    #   - POST /api/tokens/refresh (TokenController@refresh, auth:sanctum)
+│   │                    # 🔐 セキュリティエンドポイント:
+│   │                    #   - POST /api/csp-report (CspReportController@store, CSP違反レポート収集、application/json互換性対応)
 │   ├── web.php          # Web画面ルート
 │   └── console.php      # コンソールルート
 │                        # 🔐 Scheduled Tasks:
@@ -132,9 +148,12 @@ laravel-api/
 │   ├── Feature/         # 機能テスト（HTTP層統合テスト）
 │   │   ├── Api/         # 📊 API基本機能テスト
 │   │   │   └── HealthCheckTest.php  # ヘルスチェックエンドポイントテスト（JSON形式、Content-Type、ルート名検証）
-│   │   └── Auth/        # 🔐 認証機能テスト
-│   │       ├── LoginTest.php          # ログイン・ログアウトテスト（12テスト）
-│   │       └── TokenManagementTest.php # トークン管理テスト（一覧取得、無効化、更新）
+│   │   ├── Auth/        # 🔐 認証機能テスト
+│   │   │   ├── LoginTest.php          # ログイン・ログアウトテスト（12テスト）
+│   │   │   └── TokenManagementTest.php # トークン管理テスト（一覧取得、無効化、更新）
+│   │   └── Security/    # 🔐 セキュリティ機能テスト
+│   │       ├── SecurityHeadersTest.php  # セキュリティヘッダーテスト（X-Frame-Options、X-Content-Type-Options等）
+│   │       └── CspReportTest.php        # CSP違反レポートテスト（application/json互換性検証）
 │   ├── Unit/            # ユニットテスト（ドメインロジックテスト）
 │   ├── Arch/            # 🏗️ Architecture Tests（依存方向検証、レイヤー分離チェック）
 │   │   ├── DomainLayerTest.php         # Domain層依存チェック
@@ -175,13 +194,15 @@ laravel-api/
 ├── public/              # 静的ファイル
 ├── coverage/            # テストカバレッジレポート
 ├── node_modules/        # Node.js依存関係
+├── middleware.ts        # 🔐 Next.jsミドルウェア（セキュリティヘッダー設定、環境変数駆動）
 ├── Dockerfile           # Next.js Dockerイメージ定義（本番ビルド最適化）
 ├── package.json         # フロントエンド依存関係管理（--port固定設定）
 ├── tsconfig.json        # TypeScript設定
 ├── jest.config.js       # Jest設定（プロジェクト固有）
 ├── tailwind.config.js   # Tailwind CSS設定
 ├── next.config.ts       # Next.js設定（outputFileTracingRoot設定、モノレポ対応）
-└── eslint.config.mjs    # ESLint 9設定 (flat config形式)
+├── eslint.config.mjs    # ESLint 9設定 (flat config形式)
+└── .env.local           # 環境変数（セキュリティヘッダー設定含む）
 ```
 
 ### フロントエンド共通設定 (`frontend/`)
@@ -263,11 +284,14 @@ e2e/
 │   │       ├── home.spec.ts          # ホームページテスト
 │   │       ├── login.spec.ts         # ログインテスト（未実装スキップ中）
 │   │       └── products-crud.spec.ts # 商品CRUD操作テスト（未実装スキップ中）
-│   └── user/            # User Appテスト
-│       ├── pages/       # Page Object Model
+│   ├── user/            # User Appテスト
+│   │   ├── pages/       # Page Object Model
+│   │   └── tests/       # テストケース
+│   │       ├── home.spec.ts              # ホームページテスト
+│   │       └── api-integration.spec.ts   # API統合テスト（未実装スキップ中）
+│   └── shared/          # 共通テスト
 │       └── tests/       # テストケース
-│           ├── home.spec.ts              # ホームページテスト
-│           └── api-integration.spec.ts   # API統合テスト（未実装スキップ中）
+│           └── security-headers.spec.ts  # 🔐 セキュリティヘッダーE2Eテスト（Laravel/User/Admin全17テスト、CSP違反検出テスト含む）
 ├── storage/             # 認証状態ファイル（自動生成）
 │   ├── admin.json       # Admin認証状態
 │   └── user.json        # User認証状態

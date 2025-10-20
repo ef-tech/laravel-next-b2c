@@ -37,6 +37,13 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **フロントエンドテストコードESLint統合**: Jest + Testing Library + Jest-DOM専用ESLintルール適用（errorレベル）、テストコード品質の自動検証、4つの包括的ガイドドキュメント完備
 - **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Pest 4 + Git Hooks + CI/CD統合による包括的コード品質保証
 - **🌐 CORS環境変数ドリブン設定**: 環境変数による柔軟なCORS設定、開発/本番環境対応、セキュリティ強化、フロントエンドアプリとのシームレスな統合
+- **🔐 包括的セキュリティヘッダー実装**: OWASP準拠のセキュリティベストプラクティス統合
+  - **セキュリティヘッダー**: X-Frame-Options、X-Content-Type-Options、Referrer-Policy、CSP、Permissions-Policy、HSTS
+  - **段階的CSP導入**: Report-Onlyモード（監視）→ Enforceモード（強制）の段階的移行戦略
+  - **CSP違反レポート収集**: Laravel/Next.js両対応、違反検出・分析による最適化、application/json互換性対応
+  - **環境変数駆動設定**: 開発/本番環境で異なるセキュリティレベル適用、柔軟なポリシーカスタマイズ
+  - **自動CI/CD検証**: GitHub Actionsによるセキュリティヘッダー自動検証、検証スクリプト統合
+  - **包括的ドキュメント**: 実装ガイド、運用マニュアル、トラブルシューティング完備
 
 ## ターゲットユースケース
 - **B2Cアプリケーション開発**: EC、SaaS、メディアサイトなどの顧客向けサービス
@@ -59,6 +66,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **完全なテスト戦略**: ユニット（Jest/Pest）→統合（Testing Library）→E2E（Playwright + Docker）の3層テスト体制、テストDB環境管理（SQLite/PostgreSQL切り替え、並列実行）
 - **高速CI/CDパイプライン**: Composerキャッシング、並列実行最適化、タイムアウト短縮による開発効率向上
 - **インテリジェントCI/CD**: Paths設定による必要最小限のワークフロー実行、Concurrencyによる重複実行自動キャンセル、API契約変更の早期検出
+- **本番環境セキュリティ対応**: OWASP準拠セキュリティヘッダー実装、XSS/CSRF/クリックジャッキング攻撃防御、段階的CSP導入による既存機能への影響最小化、環境変数駆動設定による柔軟なポリシー管理
 
 ## アーキテクチャ上の特徴
 - **API専用最適化**: Web機能削除によるステートレス設計とパフォーマンス最大化
@@ -91,6 +99,12 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **PostgreSQL接続最適化**: ServiceProvider方式によるタイムアウト設定、環境別設定テンプレート（Docker/Native/Production）、エラーハンドリング強化
 - **固定ポート設計**: 13000番台統一によるポート競合回避、複数プロジェクト同時実行対応、Dockerfileデフォルト値最適化（APP_PORT=13000）、ランタイム変更可能（再ビルド不要）
 - **Next.js最適化構成**: outputFileTracingRoot設定によるDocker Standalone最適化
+- **🔐 セキュリティヘッダー統合**:
+  - **OWASP準拠実装**: XSS、CSRF、クリックジャッキング、MIMEスニッフィング攻撃防御
+  - **Laravel API**: 動的CSP構築、CORS統合、CSP違反レポート収集（application/json対応）
+  - **Next.js Apps**: 環境変数駆動設定、User App（柔軟設定）/Admin App（厳格設定）の適切な分離
+  - **段階的導入戦略**: Report-Onlyモード運用 → 違反分析・ポリシー調整 → Enforceモード切り替え
+  - **CI/CD検証**: セキュリティヘッダー自動検証ワークフロー、検証スクリプト統合（Laravel/Next.js対応）
 
 ## 最適化実績
 ### パフォーマンス改善メトリクス
