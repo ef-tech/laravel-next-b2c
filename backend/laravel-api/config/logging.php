@@ -135,6 +135,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'middleware' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/middleware.log'),
+            'level' => 'info',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];
