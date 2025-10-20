@@ -198,8 +198,8 @@ Laravel Next.js B2C Application TemplateのAPI専用Laravel 12バックエンド
   - レスポンスボディサイズが1MB以上の場合はETag生成をスキップする
   - _Requirements: 9.3, 9.4, 9.5, 9.6, 9.7_
 
-- [ ] 12. JSON入出力の強制とAPI統一性機能の実装
-- [ ] 12.1 JSON入出力強制機能を実装する
+- [x] 12. JSON入出力の強制とAPI統一性機能の実装
+- [x] 12.1 JSON入出力強制機能を実装する
   - 全てのAPIエンドポイントでJSON形式の入出力を強制する
   - Acceptヘッダーがapplication/json以外の場合はHTTP 406ステータスコードを返す
   - POST/PUT/PATCHリクエストのContent-Typeがapplication/json以外の場合はHTTP 415ステータスコードを返す
