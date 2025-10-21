@@ -137,6 +137,7 @@ jobs:
           DB_TEST_PASSWORD: password
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 13379
+          RATELIMIT_CACHE_STORE: array
 
       - name: Archive test results
         if: failure()
