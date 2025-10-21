@@ -43,14 +43,14 @@ describe('IdempotencyKey', function () {
         // @phpstan-ignore-next-line
         $redis->shouldReceive('get')
             ->once()
-            ->with('idempotency:test-key-123:123')
+            ->with('idempotency:test-key-123:user:123')
             ->andReturn(null);
 
         // @phpstan-ignore-next-line
         $redis->shouldReceive('setex')
             ->once()
             ->with(
-                'idempotency:test-key-123:123',
+                'idempotency:test-key-123:user:123',
                 86400, // 24 hours
                 Mockery::type('string')
             )
@@ -93,7 +93,7 @@ describe('IdempotencyKey', function () {
         // @phpstan-ignore-next-line
         $redis->shouldReceive('get')
             ->once()
-            ->with('idempotency:test-key-456:456')
+            ->with('idempotency:test-key-456:user:456')
             ->andReturn($cachedData);
 
         $middleware = new IdempotencyKey;
@@ -133,7 +133,7 @@ describe('IdempotencyKey', function () {
         // @phpstan-ignore-next-line
         $redis->shouldReceive('get')
             ->once()
-            ->with('idempotency:test-key-789:789')
+            ->with('idempotency:test-key-789:user:789')
             ->andReturn($cachedData);
 
         $middleware = new IdempotencyKey;
@@ -176,22 +176,42 @@ describe('IdempotencyKey', function () {
         expect($response->getContent())->toBe('OK');
     });
 
-    it('未認証リクエストではIdempotency検証をスキップすること', function () {
-        Redis::shouldReceive('connection')->never();
+    it('未認証リクエストでもIdempotency検証が動作すること（IPアドレスベース）', function () {
+        $redis = Mockery::mock();
+        Redis::shouldReceive('connection')->andReturn($redis);
+
+        // @phpstan-ignore-next-line
+        $redis->shouldReceive('get')
+            ->once()
+            ->with('idempotency:test-key-unauth:ip:127.0.0.1')
+            ->andReturn(null);
+
+        // @phpstan-ignore-next-line
+        $redis->shouldReceive('setex')
+            ->once()
+            ->with(
+                'idempotency:test-key-unauth:ip:127.0.0.1',
+                86400,
+                Mockery::type('string')
+            )
+            ->andReturn(true);
 
         $middleware = new IdempotencyKey;
-        $request = Request::create('/api/users', 'POST');
+        $request = Request::create('/api/webhooks/stripe', 'POST', [
+            'event' => 'payment.success',
+        ]);
         $request->headers->set('Idempotency-Key', 'test-key-unauth');
+        $request->server->set('REMOTE_ADDR', '127.0.0.1');
 
         $request->setUserResolver(function () {
             return null;
         });
 
         $response = $middleware->handle($request, function ($req) {
-            return new Response('Unauthorized', 401);
+            return new Response('OK', 200);
         });
 
-        expect($response->getStatusCode())->toBe(401);
+        expect($response->getStatusCode())->toBe(200);
     });
 
     it('Idempotency-KeyのTTLを24時間に設定すること', function () {

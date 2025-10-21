@@ -59,11 +59,13 @@ describe('Idempotency and Performance E2E', function () {
             expect($response->headers->has('X-Correlation-ID'))->toBeTrue();
         });
 
-        it('Idempotencyキーが設定されている場合もリクエストが処理されること', function () {
-            // 未認証ユーザーの場合、IdempotencyKeyミドルウェアはスキップされる
+        it('未認証ユーザーでもIdempotencyキーが動作すること（IPアドレスベース）', function () {
+            // 未認証ユーザーの場合、IPアドレスベースでIdempotency検証が動作
             $idempotencyKey = 'test-key-'.uniqid();
+            $uniqueIp = '10.0.1.2';
 
-            $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.1.2'])
+            // 1回目のリクエスト
+            $response1 = $this->withServerVariables(['REMOTE_ADDR' => $uniqueIp])
                 ->postJson('/test/idempotency/webhook', [
                     'data' => 'with-idempotency-key',
                 ], [
@@ -72,12 +74,23 @@ describe('Idempotency and Performance E2E', function () {
                     'Idempotency-Key' => $idempotencyKey,
                 ]);
 
-            // IdempotencyKeyミドルウェアは未認証ユーザーをスキップ
-            $response->assertStatus(200);
-            $response->assertJson(['status' => 'processed']);
+            $response1->assertStatus(200);
+            $response1->assertJson(['status' => 'processed']);
 
-            // Note: IdempotencyKeyミドルウェアはRedis依存かつ認証必須
-            // 未認証の場合は通常処理される
+            // 2回目のリクエスト（同じペイロード）- キャッシュ済みレスポンスを返す
+            $response2 = $this->withServerVariables(['REMOTE_ADDR' => $uniqueIp])
+                ->postJson('/test/idempotency/webhook', [
+                    'data' => 'with-idempotency-key',
+                ], [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'Idempotency-Key' => $idempotencyKey,
+                ]);
+
+            $response2->assertStatus(200);
+            $response2->assertJson(['status' => 'processed']);
+
+            // Note: IdempotencyKeyミドルウェアは未認証でもIPベースで動作
         });
 
         it('webhookグループのミドルウェアチェーンが正しく動作すること', function () {

@@ -38,12 +38,6 @@ final class IdempotencyKey
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // 認証済みユーザーの確認
-        $user = $request->user();
-        if ($user === null) {
-            return $next($request);
-        }
-
         // GETリクエストはスキップ（読み取り専用操作は冪等性保証不要）
         if ($request->method() === 'GET') {
             return $next($request);
@@ -61,8 +55,11 @@ final class IdempotencyKey
             return $next($request);
         }
 
-        // Redisキーの生成: idempotency:{key}:{user_id}
-        $redisKey = sprintf('idempotency:%s:%s', $idempotencyKey, $user->id);
+        // Redisキーの生成: idempotency:{key}:{identifier}
+        // 認証済みユーザーはuser_id、未認証はIPアドレスを使用
+        $user = $request->user();
+        $identifier = $user !== null ? "user:{$user->id}" : "ip:{$request->ip()}";
+        $redisKey = sprintf('idempotency:%s:%s', $idempotencyKey, $identifier);
 
         // リクエストペイロードの指紋を生成
         $payload = $request->all();
