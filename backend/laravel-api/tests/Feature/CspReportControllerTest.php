@@ -78,14 +78,24 @@ describe('CspReportController', function () {
     });
 
     test('レート制限が適用されること (60 requests per minute)', function () {
-        // 完全に一意なIPアドレスを使用（タイムスタンプベース）
-        $uniqueIp = '192.168.'.((int) (microtime(true) * 1000) % 256).'.'.rand(1, 254);
+        // 固定IPアドレスを使用（テスト専用）
+        $testIp = '10.255.255.255';
+
+        // このテスト専用のRedisキーをクリア
+        try {
+            $redis = Redis::connection('default');
+            $testKey = "rate_limit:api:{$testIp}";
+            $redis->del($testKey);
+            $redis->del($testKey.':timer');
+        } catch (\Exception $e) {
+            // Redis接続エラーは無視
+        }
 
         // 60リクエストは成功（apiグループのDynamicRateLimit:api設定）
         // Note: routes/api.phpでthrottle:100,1を設定しているが、
         // apiグループのDynamicRateLimit:api (60 req/min) がより厳しいため優先される
         for ($i = 0; $i < 60; $i++) {
-            $response = $this->withServerVariables(['REMOTE_ADDR' => $uniqueIp])
+            $response = $this->withServerVariables(['REMOTE_ADDR' => $testIp])
                 ->postJson('/api/csp/report', [
                     'csp-report' => [
                         'blocked-uri' => 'https://evil.com/script.js',
@@ -99,7 +109,7 @@ describe('CspReportController', function () {
         }
 
         // 61リクエスト目は失敗 (レート制限)
-        $response = $this->withServerVariables(['REMOTE_ADDR' => $uniqueIp])
+        $response = $this->withServerVariables(['REMOTE_ADDR' => $testIp])
             ->postJson('/api/csp/report', [
                 'csp-report' => [
                     'blocked-uri' => 'https://evil.com/script.js',
