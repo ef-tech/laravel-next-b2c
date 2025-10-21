@@ -13,8 +13,6 @@ describe('CspReportController', function () {
             if (! empty($keys)) {
                 $redis->del($keys);
             }
-            // 明示的にflush（念のため）
-            $redis->flushdb();
         } catch (\Exception $e) {
             // Redis接続エラーは無視（CI環境でRedisが利用できない場合）
         }
