@@ -130,7 +130,7 @@ return [
         'security' => [
             'driver' => 'daily',
             'path' => storage_path('logs/security.log'),
-            'level' => env('LOG_LEVEL', 'warning'),
+            'level' => 'info', // セキュリティログは常に記録（環境変数に依存しない）
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
         ],
