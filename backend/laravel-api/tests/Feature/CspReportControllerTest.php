@@ -77,9 +77,11 @@ describe('CspReportController', function () {
         $response->assertJson(['error' => 'Empty CSP report']);
     });
 
-    test('レート制限が適用されること (100 requests per minute)', function () {
-        // 100リクエストは成功
-        for ($i = 0; $i < 100; $i++) {
+    test('レート制限が適用されること (60 requests per minute)', function () {
+        // 60リクエストは成功（apiグループのDynamicRateLimit:api設定）
+        // Note: routes/api.phpでthrottle:100,1を設定しているが、
+        // apiグループのDynamicRateLimit:api (60 req/min) がより厳しいため優先される
+        for ($i = 0; $i < 60; $i++) {
             $response = $this->postJson('/api/csp/report', [
                 'csp-report' => [
                     'blocked-uri' => 'https://evil.com/script.js',
@@ -92,7 +94,7 @@ describe('CspReportController', function () {
             $response->assertStatus(204);
         }
 
-        // 101リクエスト目は失敗 (レート制限)
+        // 61リクエスト目は失敗 (レート制限)
         $response = $this->postJson('/api/csp/report', [
             'csp-report' => [
                 'blocked-uri' => 'https://evil.com/script.js',
