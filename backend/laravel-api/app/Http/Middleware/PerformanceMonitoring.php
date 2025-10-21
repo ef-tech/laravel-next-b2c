@@ -40,7 +40,7 @@ final class PerformanceMonitoring
     public function handle(Request $request, Closure $next): Response
     {
         // リクエスト開始時刻を記録（マイクロ秒精度）
-        $request->attributes->set('start_time', microtime(true));
+        $request->attributes->set('performance_start_time', microtime(true));
 
         // データベースクエリカウンター設定
         DB::listen(function ($query) {
@@ -59,7 +59,7 @@ final class PerformanceMonitoring
     public function terminate(Request $request, Response $response): void
     {
         /** @var float $startTime */
-        $startTime = $request->attributes->get('start_time');
+        $startTime = $request->attributes->get('performance_start_time');
         $responseTime = microtime(true) - $startTime;
 
         // ピークメモリ使用量（MB単位）

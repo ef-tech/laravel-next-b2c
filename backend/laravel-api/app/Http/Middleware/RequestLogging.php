@@ -47,7 +47,7 @@ final class RequestLogging
     public function handle(Request $request, Closure $next): Response
     {
         // リクエスト開始時刻を記録（マイクロ秒精度）
-        $request->attributes->set('start_time', microtime(true));
+        $request->attributes->set('logging_start_time', microtime(true));
 
         return $next($request);
     }
@@ -61,7 +61,7 @@ final class RequestLogging
     public function terminate(Request $request, Response $response): void
     {
         /** @var float $startTime */
-        $startTime = $request->attributes->get('start_time');
+        $startTime = $request->attributes->get('logging_start_time');
         $duration = microtime(true) - $startTime;
 
         // リクエストデータの取得と機密データマスキング
