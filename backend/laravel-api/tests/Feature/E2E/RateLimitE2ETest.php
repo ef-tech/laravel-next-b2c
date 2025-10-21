@@ -28,6 +28,8 @@ describe('Rate Limit E2E', function () {
             if (! empty($keys)) {
                 $redis->del($keys);
             }
+            // 明示的にflush（念のため）
+            $redis->flushdb();
         } catch (\Exception $e) {
             // Redis接続エラーは無視（CI環境でRedisが利用できない場合）
         }
@@ -42,7 +44,10 @@ describe('Rate Limit E2E', function () {
     });
 
     it('APIエンドポイントでミドルウェアチェーンが正しく動作すること', function () {
-        $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.3.1'])
+        // 完全に一意なIPアドレスを使用（タイムスタンプベース）
+        $uniqueIp = '10.100.'.((int) (microtime(true) * 1000) % 256).'.'.rand(1, 254);
+
+        $response = $this->withServerVariables(['REMOTE_ADDR' => $uniqueIp])
             ->getJson('/test/rate-limit/api', [
                 'Accept' => 'application/json',
             ]);
@@ -60,7 +65,10 @@ describe('Rate Limit E2E', function () {
     });
 
     it('publicエンドポイントでguestグループが適用されること', function () {
-        $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.3.2'])
+        // 完全に一意なIPアドレスを使用（タイムスタンプベース）
+        $uniqueIp = '10.101.'.((int) (microtime(true) * 1000) % 256).'.'.rand(1, 254);
+
+        $response = $this->withServerVariables(['REMOTE_ADDR' => $uniqueIp])
             ->post('/test/rate-limit/public', [], [
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
@@ -101,7 +109,10 @@ describe('Rate Limit E2E', function () {
         // Redis接続エラーが発生してもリクエストは正常処理されること
         // （グレースフルデグラデーション）
 
-        $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.3.4'])
+        // 完全に一意なIPアドレスを使用（タイムスタンプベース）
+        $uniqueIp = '10.102.'.((int) (microtime(true) * 1000) % 256).'.'.rand(1, 254);
+
+        $response = $this->withServerVariables(['REMOTE_ADDR' => $uniqueIp])
             ->getJson('/test/rate-limit/api', [
                 'Accept' => 'application/json',
             ]);
