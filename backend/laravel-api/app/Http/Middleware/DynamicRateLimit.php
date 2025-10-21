@@ -29,7 +29,7 @@ final class DynamicRateLimit
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  $endpointType  エンドポイントタイプ（login/api/public/internal/webhook）
+     * @param  string  $endpointType  エンドポイントタイプ（api/public/webhook/strict）
      */
     public function handle(Request $request, Closure $next, string $endpointType = 'api'): Response
     {

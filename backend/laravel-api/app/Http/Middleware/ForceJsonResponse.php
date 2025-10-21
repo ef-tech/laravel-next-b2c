@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
  * - Acceptヘッダーがapplication/json以外の場合はHTTP 406を返す
  * - POST/PUT/PATCHリクエストでContent-Typeがapplication/json以外の場合はHTTP 415を返す
  * - 全てのエラー応答もJSON形式で返す
- * - Accept: ワイルドカード (*-slash-* や application-slash-*) もサポート
+ * - Accept: ワイルドカード (* / * や application/ *) もサポート
  *
  * Requirements: 10.1, 10.2, 10.3, 10.4, 10.5
  */
