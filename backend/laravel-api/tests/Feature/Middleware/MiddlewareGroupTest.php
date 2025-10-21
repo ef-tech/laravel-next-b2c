@@ -201,9 +201,10 @@ describe('Middleware Group Integration', function () {
 
         it('同じIdempotencyキーでの2回目のリクエストはキャッシュを返すこと', function () {
             $idempotencyKey = 'webhook-duplicate-456';
+            $payload = ['data' => 'test-data'];
 
             // 1回目のリクエスト
-            $response1 = postJson('/test/webhook-group', ['data' => 'first'], [
+            $response1 = postJson('/test/webhook-group', $payload, [
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
                 'Idempotency-Key' => $idempotencyKey,
@@ -211,8 +212,8 @@ describe('Middleware Group Integration', function () {
 
             $response1->assertStatus(200);
 
-            // 2回目のリクエスト（同じIdempotencyキー）
-            $response2 = postJson('/test/webhook-group', ['data' => 'second'], [
+            // 2回目のリクエスト（同じIdempotencyキー・同じペイロード）
+            $response2 = postJson('/test/webhook-group', $payload, [
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
                 'Idempotency-Key' => $idempotencyKey,
