@@ -181,4 +181,65 @@ describe('ForceJsonResponse', function () {
         expect($response->getStatusCode())->toBe(200);
         expect($response->getContent())->toBe('OK');
     });
+
+    it('CSPレポートエンドポイントでapplication/csp-reportを許可すること', function () {
+        $middleware = new ForceJsonResponse;
+        $jsonContent = json_encode(['csp-report' => ['document-uri' => 'https://example.com']]);
+        if ($jsonContent === false) {
+            $jsonContent = '{}';
+        }
+        $request = Request::create('/api/csp/report', 'POST', [], [], [], [], $jsonContent);
+        $request->headers->set('Accept', 'application/json');
+        $request->headers->set('Content-Type', 'application/csp-report');
+
+        $response = $middleware->handle($request, function ($req) {
+            return new Response('OK', 204);
+        });
+
+        expect($response->getStatusCode())->toBe(204);
+    });
+
+    it('CSPレポートエンドポイントでapplication/jsonも許可すること', function () {
+        $middleware = new ForceJsonResponse;
+        $jsonContent = json_encode(['csp-report' => ['document-uri' => 'https://example.com']]);
+        if ($jsonContent === false) {
+            $jsonContent = '{}';
+        }
+        $request = Request::create('/api/csp/report', 'POST', [], [], [], [], $jsonContent);
+        $request->headers->set('Accept', 'application/json');
+        $request->headers->set('Content-Type', 'application/json');
+
+        $response = $middleware->handle($request, function ($req) {
+            return new Response('OK', 204);
+        });
+
+        expect($response->getStatusCode())->toBe(204);
+    });
+
+    it('CSPレポートエンドポイント以外ではapplication/csp-reportを拒否すること', function () {
+        $middleware = new ForceJsonResponse;
+        $jsonContent = json_encode(['data' => 'test']);
+        if ($jsonContent === false) {
+            $jsonContent = '{}';
+        }
+        $request = Request::create('/api/users', 'POST', [], [], [], [], $jsonContent);
+        $request->headers->set('Accept', 'application/json');
+        $request->headers->set('Content-Type', 'application/csp-report');
+
+        $response = $middleware->handle($request, function ($req) {
+            return new Response('OK', 200);
+        });
+
+        expect($response->getStatusCode())->toBe(415);
+        expect($response->headers->get('Content-Type'))->toContain('application/json');
+
+        $responseContent = $response->getContent();
+        expect($responseContent)->not()->toBeFalse();
+        if ($responseContent !== false) {
+            $content = json_decode($responseContent, true);
+            expect($content)->toBeArray();
+            expect($content)->toHaveKey('error');
+            expect($content['error'])->toBe('Unsupported Media Type');
+        }
+    });
 });

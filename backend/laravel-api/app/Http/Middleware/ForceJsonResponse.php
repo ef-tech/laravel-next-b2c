@@ -38,7 +38,7 @@ final class ForceJsonResponse
         // POST/PUT/PATCH リクエストの Content-Type 検証
         if (in_array($request->method(), ['POST', 'PUT', 'PATCH'], true)) {
             $contentType = $request->header('Content-Type', '');
-            if (! $this->isJsonContentType($contentType)) {
+            if (! $this->isValidContentType($request, $contentType)) {
                 return $this->jsonError('Unsupported Media Type', 'Request body must be application/json', 415);
             }
         }
@@ -72,13 +72,23 @@ final class ForceJsonResponse
     }
 
     /**
-     * Content-Type ヘッダーが application/json であるか判定
+     * Content-Type ヘッダーが有効か判定
      *
+     * @param  Request  $request  リクエスト
      * @param  string  $contentType  Content-Type ヘッダーの値
-     * @return bool application/json の場合は true
+     * @return bool 有効な Content-Type の場合は true
      */
-    private function isJsonContentType(string $contentType): bool
+    private function isValidContentType(Request $request, string $contentType): bool
     {
+        // CSPレポートエンドポイントの場合は application/csp-report または application/json を許可
+        // W3C CSP Level 3 仕様では application/csp-report が標準だが、
+        // 互換性のため application/json も受け付ける
+        if ($request->is('api/csp/report')) {
+            return str_contains($contentType, 'application/csp-report') ||
+                   str_contains($contentType, 'application/json');
+        }
+
+        // 通常のエンドポイントは application/json のみ許可
         // Content-Type: application/json または application/json;charset=utf-8 を許可
         return str_contains($contentType, 'application/json');
     }
