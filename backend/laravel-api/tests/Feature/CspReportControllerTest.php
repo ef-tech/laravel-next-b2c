@@ -2,7 +2,22 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Redis;
+
 describe('CspReportController', function () {
+    beforeEach(function () {
+        // レート制限カウンターをクリア
+        try {
+            $redis = Redis::connection('default');
+            $keys = $redis->keys('rate_limit:*');
+            if (! empty($keys)) {
+                $redis->del($keys);
+            }
+        } catch (\Exception $e) {
+            // Redis接続エラーは無視（CI環境でRedisが利用できない場合）
+        }
+    });
+
     test('CSP違反レポートを正常に受信できること', function () {
         $response = $this->postJson('/api/csp/report', [
             'csp-report' => [
@@ -38,7 +53,7 @@ describe('CspReportController', function () {
         $response->assertNoContent();
     });
 
-    test('Content-Typeが不正な場合は400エラーを返すこと', function () {
+    test('Content-Typeが不正な場合は415エラーを返すこと', function () {
         $response = $this->postJson('/api/csp/report', [
             'csp-report' => [
                 'blocked-uri' => 'https://evil.com/script.js',
@@ -48,8 +63,9 @@ describe('CspReportController', function () {
             'Content-Type' => 'text/plain',
         ]);
 
-        $response->assertStatus(400);
-        $response->assertJson(['error' => 'Invalid Content-Type. Expected application/csp-report or application/json']);
+        // ForceJsonResponseミドルウェアがapplication/csp-report以外を拒否
+        $response->assertStatus(415);
+        $response->assertJson(['error' => 'Unsupported Media Type']);
     });
 
     test('CSPレポートが空の場合は400エラーを返すこと', function () {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\postJson;
@@ -20,6 +21,17 @@ describe('Idempotency and Performance E2E', function () {
     beforeEach(function () {
         // データベースマイグレーション実行
         $this->artisan('migrate:fresh');
+
+        // レート制限カウンターをクリア
+        try {
+            $redis = Redis::connection('default');
+            $keys = $redis->keys('rate_limit:*');
+            if (! empty($keys)) {
+                $redis->del($keys);
+            }
+        } catch (\Exception $e) {
+            // Redis接続エラーは無視（CI環境でRedisが利用できない場合）
+        }
 
         // テスト用ルートを登録
         Route::post('/test/idempotency/webhook', function () {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\getJson;
@@ -22,6 +23,16 @@ use function Pest\Laravel\getJson;
  */
 describe('Rate Limit E2E', function () {
     beforeEach(function () {
+        // レート制限カウンターをクリア
+        try {
+            $redis = Redis::connection('default');
+            $keys = $redis->keys('rate_limit:*');
+            if (! empty($keys)) {
+                $redis->del($keys);
+            }
+        } catch (\Exception $e) {
+            // Redis接続エラーは無視（CI環境でRedisが利用できない場合）
+        }
         // テスト用ルートを登録
         Route::get('/test/rate-limit/api', function () {
             return response()->json(['endpoint' => 'api']);
