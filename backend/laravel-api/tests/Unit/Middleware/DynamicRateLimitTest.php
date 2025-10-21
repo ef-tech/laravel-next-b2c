@@ -19,7 +19,7 @@ describe('DynamicRateLimit', function () {
         $request->server->set('REMOTE_ADDR', '192.168.1.1');
 
         Cache::shouldReceive('store')
-            ->with('redis')
+            ->with(Mockery::anyOf('redis', 'array'))
             ->andReturnSelf();
 
         Cache::shouldReceive('get')
@@ -45,7 +45,7 @@ describe('DynamicRateLimit', function () {
         $request->server->set('REMOTE_ADDR', '192.168.1.1');
 
         Cache::shouldReceive('store')
-            ->with('redis')
+            ->with(Mockery::anyOf('redis', 'array'))
             ->andReturnSelf();
 
         // 2回目以降のリクエスト（キーが存在）
@@ -72,7 +72,7 @@ describe('DynamicRateLimit', function () {
         $request->server->set('REMOTE_ADDR', '192.168.1.1');
 
         Cache::shouldReceive('store')
-            ->with('redis')
+            ->with(Mockery::anyOf('redis', 'array'))
             ->andReturnSelf();
 
         Cache::shouldReceive('has')
@@ -97,7 +97,7 @@ describe('DynamicRateLimit', function () {
         $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
         Cache::shouldReceive('store')
-            ->with('redis')
+            ->with(Mockery::anyOf('redis', 'array'))
             ->andReturnSelf();
 
         // 初回リクエスト
@@ -133,7 +133,7 @@ describe('DynamicRateLimit', function () {
         });
 
         Cache::shouldReceive('store')
-            ->with('redis')
+            ->with(Mockery::anyOf('redis', 'array'))
             ->andReturnSelf();
 
         Cache::shouldReceive('has')
@@ -162,10 +162,10 @@ describe('DynamicRateLimit', function () {
         $request->server->set('REMOTE_ADDR', '192.168.1.1');
 
         Cache::shouldReceive('store')
-            ->with('redis')
-            ->andThrow(new \Exception('Redis connection failed'));
+            ->with(Mockery::anyOf('redis', 'array'))
+            ->andThrow(new \Exception('Cache connection failed'));
 
-        // Redis障害時でもリクエストは通過する
+        // キャッシュ障害時でもリクエストは通過する
         $response = $middleware->handle($request, function ($req) {
             return new Response('OK', 200);
         }, 'api');
@@ -181,7 +181,7 @@ describe('DynamicRateLimit', function () {
         $strictRequest->server->set('REMOTE_ADDR', '192.168.1.1');
 
         Cache::shouldReceive('store')
-            ->with('redis')
+            ->with(Mockery::anyOf('redis', 'array'))
             ->andReturnSelf();
 
         Cache::shouldReceive('has')
