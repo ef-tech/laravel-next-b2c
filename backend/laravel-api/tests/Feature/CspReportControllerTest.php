@@ -82,7 +82,22 @@ describe('CspReportController', function () {
         // Note: routes/api.phpでthrottle:100,1を設定しているが、
         // apiグループのDynamicRateLimit:api (60 req/min) がより厳しいため優先される
         for ($i = 0; $i < 60; $i++) {
-            $response = $this->postJson('/api/csp/report', [
+            $response = $this->withServerVariables(['REMOTE_ADDR' => '192.168.4.1'])
+                ->postJson('/api/csp/report', [
+                    'csp-report' => [
+                        'blocked-uri' => 'https://evil.com/script.js',
+                        'violated-directive' => 'script-src',
+                    ],
+                ], [
+                    'Content-Type' => 'application/csp-report',
+                ]);
+
+            $response->assertStatus(204);
+        }
+
+        // 61リクエスト目は失敗 (レート制限)
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '192.168.4.1'])
+            ->postJson('/api/csp/report', [
                 'csp-report' => [
                     'blocked-uri' => 'https://evil.com/script.js',
                     'violated-directive' => 'script-src',
@@ -90,19 +105,6 @@ describe('CspReportController', function () {
             ], [
                 'Content-Type' => 'application/csp-report',
             ]);
-
-            $response->assertStatus(204);
-        }
-
-        // 61リクエスト目は失敗 (レート制限)
-        $response = $this->postJson('/api/csp/report', [
-            'csp-report' => [
-                'blocked-uri' => 'https://evil.com/script.js',
-                'violated-directive' => 'script-src',
-            ],
-        ], [
-            'Content-Type' => 'application/csp-report',
-        ]);
 
         $response->assertStatus(429); // Too Many Requests
     });

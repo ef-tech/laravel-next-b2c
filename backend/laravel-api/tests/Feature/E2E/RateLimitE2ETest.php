@@ -5,8 +5,6 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 
-use function Pest\Laravel\getJson;
-
 /**
  * レート制限E2Eテスト
  *
@@ -44,9 +42,10 @@ describe('Rate Limit E2E', function () {
     });
 
     it('APIエンドポイントでミドルウェアチェーンが正しく動作すること', function () {
-        $response = getJson('/test/rate-limit/api', [
-            'Accept' => 'application/json',
-        ]);
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.3.1'])
+            ->getJson('/test/rate-limit/api', [
+                'Accept' => 'application/json',
+            ]);
 
         // レート制限ミドルウェアが含まれるapiグループが適用されていること
         $response->assertStatus(200);
@@ -61,10 +60,11 @@ describe('Rate Limit E2E', function () {
     });
 
     it('publicエンドポイントでguestグループが適用されること', function () {
-        $response = $this->post('/test/rate-limit/public', [], [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ]);
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.3.2'])
+            ->post('/test/rate-limit/public', [], [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ]);
 
         // guestグループミドルウェアが適用されていること
         $response->assertStatus(200);
@@ -101,9 +101,10 @@ describe('Rate Limit E2E', function () {
         // Redis接続エラーが発生してもリクエストは正常処理されること
         // （グレースフルデグラデーション）
 
-        $response = getJson('/test/rate-limit/api', [
-            'Accept' => 'application/json',
-        ]);
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.3.4'])
+            ->getJson('/test/rate-limit/api', [
+                'Accept' => 'application/json',
+            ]);
 
         // レート制限エラーではなく、正常にリクエストが処理されること
         $response->assertStatus(200);
