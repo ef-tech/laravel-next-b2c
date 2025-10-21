@@ -108,6 +108,9 @@ describe('CspReportController', function () {
             $response->assertStatus(204);
         }
 
+        // Redis書き込み完了を待機（非同期処理対応）
+        usleep(100000); // 100ミリ秒待機
+
         // 61リクエスト目は失敗 (レート制限)
         $response = $this->withServerVariables(['REMOTE_ADDR' => $testIp])
             ->postJson('/api/csp/report', [
