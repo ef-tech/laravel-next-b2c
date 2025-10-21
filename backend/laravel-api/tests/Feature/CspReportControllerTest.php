@@ -106,6 +106,9 @@ describe('CspReportController', function () {
     });
 
     test('CSPレポートがオプションフィールドを含まない場合でもログ記録できること', function () {
+        // レート制限回避のため異なるIPアドレスを設定
+        $_SERVER['REMOTE_ADDR'] = '192.168.2.1';
+
         $response = $this->postJson('/api/csp/report', [
             'csp-report' => [
                 'blocked-uri' => 'https://evil.com/script.js',
@@ -121,6 +124,9 @@ describe('CspReportController', function () {
     });
 
     test('User-AgentとIPアドレスがログに記録されること', function () {
+        // レート制限回避のため異なるIPアドレスを設定
+        $_SERVER['REMOTE_ADDR'] = '192.168.3.1';
+
         $response = $this->postJson('/api/csp/report', [
             'csp-report' => [
                 'blocked-uri' => 'https://evil.com/script.js',

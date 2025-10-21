@@ -44,6 +44,9 @@ describe('Idempotency and Performance E2E', function () {
 
     describe('Idempotency機能', function () {
         it('Idempotencyキーがない場合は通常処理されること', function () {
+            // レート制限回避のため異なるIPアドレスを設定
+            $_SERVER['REMOTE_ADDR'] = '10.0.1.1';
+
             $response = postJson('/test/idempotency/webhook', [
                 'data' => 'test-data-1',
             ], [
@@ -61,6 +64,9 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('Idempotencyキーが設定されている場合もリクエストが処理されること', function () {
+            // レート制限回避のため異なるIPアドレスを設定
+            $_SERVER['REMOTE_ADDR'] = '10.0.1.2';
+
             // 未認証ユーザーの場合、IdempotencyKeyミドルウェアはスキップされる
             $idempotencyKey = 'test-key-'.uniqid();
 
@@ -81,6 +87,9 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('webhookグループのミドルウェアチェーンが正しく動作すること', function () {
+            // レート制限回避のため異なるIPアドレスを設定
+            $_SERVER['REMOTE_ADDR'] = '10.0.1.3';
+
             $response = postJson('/test/idempotency/webhook', [
                 'data' => 'webhook-test',
             ], [
@@ -99,6 +108,9 @@ describe('Idempotency and Performance E2E', function () {
 
     describe('パフォーマンスメトリクス', function () {
         it('PerformanceMonitoringミドルウェアが適用されること', function () {
+            // レート制限回避のため異なるIPアドレスを設定
+            $_SERVER['REMOTE_ADDR'] = '10.0.2.1';
+
             $startTime = microtime(true);
 
             $response = postJson('/test/idempotency/webhook', [
@@ -122,6 +134,9 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('複数リクエストのパフォーマンスが安定していること', function () {
+            // レート制限回避のため異なるIPアドレスを設定
+            $_SERVER['REMOTE_ADDR'] = '10.0.2.2';
+
             $responseTimes = [];
 
             // 10回リクエストを送信してレスポンス時間を測定
@@ -153,6 +168,9 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('ミドルウェアチェーン全体のオーバーヘッドが許容範囲内であること', function () {
+            // レート制限回避のため異なるIPアドレスを設定
+            $_SERVER['REMOTE_ADDR'] = '10.0.2.3';
+
             // シンプルなレスポンスで全ミドルウェアチェーンのオーバーヘッドを測定
             $startTime = microtime(true);
 
