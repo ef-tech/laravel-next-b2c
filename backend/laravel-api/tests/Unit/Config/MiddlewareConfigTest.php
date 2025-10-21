@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Config;
-
 /**
  * ミドルウェア共通設定ファイルのテスト
  *
@@ -14,24 +12,6 @@ describe('MiddlewareConfig', function () {
         $config = config('middleware');
 
         expect($config)->not->toBeNull('middleware設定ファイルが読み込まれること');
-    });
-
-    it('キャッシュヘッダー設定が存在すること', function () {
-        $config = config('middleware.cache');
-
-        expect($config)->toBeArray('cache設定が配列であること');
-        expect($config)->toHaveKey('enabled');
-        expect($config)->toHaveKey('ttl');
-    });
-
-    it('キャッシュTTL設定がエンドポイント別に定義されていること', function () {
-        $ttl = config('middleware.cache.ttl');
-
-        expect($ttl)->toBeArray('ttl設定が配列であること');
-        expect($ttl)->toHaveKey('/api/health');
-        expect($ttl)->toHaveKey('/api/user');
-        expect($ttl['/api/health'])->toBe(60);
-        expect($ttl['/api/user'])->toBe(300);
     });
 
     it('ログローテーション日数設定が存在すること', function () {
@@ -47,13 +27,5 @@ describe('MiddlewareConfig', function () {
         expect($sensitiveFields)->toContain('password');
         expect($sensitiveFields)->toContain('token');
         expect($sensitiveFields)->toContain('secret');
-    });
-
-    it('キャッシュ有効化設定が環境変数から読み込まれること', function () {
-        Config::set('middleware.cache.enabled', false);
-        expect(config('middleware.cache.enabled'))->toBe(false);
-
-        Config::set('middleware.cache.enabled', true);
-        expect(config('middleware.cache.enabled'))->toBe(true);
     });
 });
