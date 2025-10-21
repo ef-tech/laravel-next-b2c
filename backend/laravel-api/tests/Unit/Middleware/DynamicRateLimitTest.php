@@ -48,14 +48,14 @@ describe('DynamicRateLimit', function () {
             ->with('redis')
             ->andReturnSelf();
 
-        Cache::shouldReceive('get')
+        // 2回目以降のリクエスト（キーが存在）
+        Cache::shouldReceive('has')
+            ->andReturn(true);
+
+        // increment() は現在のカウント（増分後）を返す
+        Cache::shouldReceive('increment')
+            ->with(Mockery::type('string'), 1)
             ->andReturn(5);
-
-        Cache::shouldReceive('put')
-            ->andReturn(true);
-
-        Cache::shouldReceive('add')
-            ->andReturn(true);
 
         $response = $middleware->handle($request, function ($req) {
             return new Response('OK', 200);
@@ -75,13 +75,14 @@ describe('DynamicRateLimit', function () {
             ->with('redis')
             ->andReturnSelf();
 
-        // Strictエンドポイントは10回/分の制限
-        // 10リクエスト以上でレート制限を返す
-        Cache::shouldReceive('get')
-            ->andReturn(11);
-
-        Cache::shouldReceive('add')
+        Cache::shouldReceive('has')
             ->andReturn(true);
+
+        // Strictエンドポイントは10回/分の制限
+        // 11リクエスト目でレート制限を返す（increment後の値が11）
+        Cache::shouldReceive('increment')
+            ->with(Mockery::type('string'), 1)
+            ->andReturn(11);
 
         $response = $middleware->handle($request, function ($req) {
             return new Response('OK', 200);
@@ -99,18 +100,19 @@ describe('DynamicRateLimit', function () {
             ->with('redis')
             ->andReturnSelf();
 
+        // 初回リクエスト
+        Cache::shouldReceive('has')
+            ->andReturn(false);
+
         // rate_limit:public:192.168.1.100 の形式でキーが生成されることを確認
-        Cache::shouldReceive('get')
-            ->with(\Mockery::on(function ($key) {
-                return str_contains($key, 'rate_limit:public:192.168.1.100');
-            }))
-            ->andReturn(0);
-
-        Cache::shouldReceive('put')
-            ->andReturn(true);
-
         Cache::shouldReceive('add')
             ->andReturn(true);
+
+        Cache::shouldReceive('increment')
+            ->with(\Mockery::on(function ($key) {
+                return str_contains($key, 'rate_limit:public:192.168.1.100');
+            }), 1)
+            ->andReturn(1);
 
         $response = $middleware->handle($request, function ($req) {
             return new Response('OK', 200);
@@ -134,18 +136,18 @@ describe('DynamicRateLimit', function () {
             ->with('redis')
             ->andReturnSelf();
 
-        // rate_limit:api:123 の形式でキーが生成されることを確認
-        Cache::shouldReceive('get')
-            ->with(\Mockery::on(function ($key) {
-                return str_contains($key, 'rate_limit:api:123');
-            }))
-            ->andReturn(0);
-
-        Cache::shouldReceive('put')
-            ->andReturn(true);
+        Cache::shouldReceive('has')
+            ->andReturn(false);
 
         Cache::shouldReceive('add')
             ->andReturn(true);
+
+        // rate_limit:api:123 の形式でキーが生成されることを確認
+        Cache::shouldReceive('increment')
+            ->with(\Mockery::on(function ($key) {
+                return str_contains($key, 'rate_limit:api:123');
+            }), 1)
+            ->andReturn(1);
 
         $response = $middleware->handle($request, function ($req) {
             return new Response('OK', 200);
@@ -182,14 +184,14 @@ describe('DynamicRateLimit', function () {
             ->with('redis')
             ->andReturnSelf();
 
-        Cache::shouldReceive('get')
-            ->andReturn(0);
-
-        Cache::shouldReceive('put')
-            ->andReturn(true);
+        Cache::shouldReceive('has')
+            ->andReturn(false);
 
         Cache::shouldReceive('add')
             ->andReturn(true);
+
+        Cache::shouldReceive('increment')
+            ->andReturn(1);
 
         $response = $middleware->handle($strictRequest, function ($req) {
             return new Response('OK', 200);

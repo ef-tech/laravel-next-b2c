@@ -50,28 +50,25 @@ final class DynamicRateLimit
             // レート制限キーの生成（形式: rate_limit:{endpoint}:{identifier}）
             $key = "rate_limit:{$endpointType}:{$identifier}";
 
-            // Redisストアの取得
-            $cache = Cache::store('redis');
-
-            // 現在のリクエスト数を取得
-            $attempts = (int) $cache->get($key, 0);
+            // Redisストアの取得（設定ファイルから参照）
+            $cacheStore = config('ratelimit.cache.store', 'redis');
+            $cache = Cache::store($cacheStore);
 
             // TTLの計算（秒単位）
             $ttl = $decayMinutes * 60;
             $resetTime = now()->addSeconds($ttl)->getTimestamp();
 
-            // レート制限超過チェック
-            if ($attempts >= $maxAttempts) {
-                return $this->buildRateLimitResponse($maxAttempts, 0, $resetTime);
+            // 初回リクエストの場合はTTL付きでキーを作成
+            if (! $cache->has($key)) {
+                $cache->add($key, 0, $ttl);
             }
 
-            // リクエストカウントを増加
-            $newAttempts = $attempts + 1;
-            $cache->put($key, $newAttempts, $ttl);
+            // 原子的にカウントを増分（競合対策）
+            $attempts = $cache->increment($key, 1);
 
-            // キーのTTLを設定（初回のみ）
-            if ($attempts === 0) {
-                $cache->add($key.':timer', true, $ttl);
+            // レート制限超過チェック
+            if ($attempts > $maxAttempts) {
+                return $this->buildRateLimitResponse($maxAttempts, 0, $resetTime);
             }
 
             // 次のミドルウェアへ
@@ -81,7 +78,7 @@ final class DynamicRateLimit
             return $this->addRateLimitHeaders(
                 $response,
                 $maxAttempts,
-                $maxAttempts - $newAttempts,
+                $maxAttempts - $attempts,
                 $resetTime
             );
         } catch (\Exception $e) {
