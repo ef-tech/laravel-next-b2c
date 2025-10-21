@@ -6,7 +6,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Idempotency-Keyヘッダーによる冪等性保証機能を実装し、
  * 重複リクエストの検出と防止を可能にします。
  * - POST/PUT/PATCH/DELETEリクエストのIdempotency検証
- * - Redisによる24時間キャッシュ管理
+ * - キャッシュストアによる24時間キャッシュ管理（デフォルトRedis）
  * - ペイロード指紋比較による重複検出
  * - 同一ペイロードの場合はキャッシュ済みレスポンス返却
  * - 異なるペイロードの場合はHTTP 422返却
@@ -55,11 +55,11 @@ final class IdempotencyKey
             return $next($request);
         }
 
-        // Redisキーの生成: idempotency:{key}:{identifier}
+        // キャッシュキーの生成: idempotency:{key}:{identifier}
         // 認証済みユーザーはuser_id、未認証はIPアドレスを使用
         $user = $request->user();
         $identifier = $user !== null ? "user:{$user->id}" : "ip:{$request->ip()}";
-        $redisKey = sprintf('idempotency:%s:%s', $idempotencyKey, $identifier);
+        $cacheKey = sprintf('idempotency:%s:%s', $idempotencyKey, $identifier);
 
         // リクエストペイロードの指紋を生成
         $payload = $request->all();
@@ -69,12 +69,11 @@ final class IdempotencyKey
         }
         $payloadFingerprint = hash('sha256', $payloadJson);
 
-        // Redisから既存のIdempotencyレコードを取得
-        $redis = Redis::connection();
-        $cached = $redis->get($redisKey);
+        // キャッシュストアから既存のIdempotencyレコードを取得
+        $cached = Cache::get($cacheKey);
 
         if ($cached === null) {
-            // 初回リクエスト: レスポンスを生成してRedisに保存
+            // 初回リクエスト: レスポンスを生成してキャッシュに保存
             $response = $next($request);
 
             $cacheData = [
@@ -86,7 +85,7 @@ final class IdempotencyKey
                 ],
             ];
 
-            $redis->setex($redisKey, self::TTL_SECONDS, json_encode($cacheData));
+            Cache::put($cacheKey, json_encode($cacheData), self::TTL_SECONDS);
 
             return $response;
         }

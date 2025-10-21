@@ -6,7 +6,7 @@ use App\Http\Middleware\IdempotencyKey;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * IdempotencyKey ミドルウェアのテスト
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Redis;
  */
 describe('IdempotencyKey', function () {
     it('Idempotency-Keyヘッダーがない場合は通常処理を行うこと', function () {
-        Redis::shouldReceive('connection')->never();
+        Cache::shouldReceive('get')->never();
 
         $middleware = new IdempotencyKey;
         $request = Request::create('/api/users', 'POST', [
@@ -37,22 +37,17 @@ describe('IdempotencyKey', function () {
     });
 
     it('初回リクエストでIdempotency-Keyを保存しレスポンスを返すこと', function () {
-        $redis = Mockery::mock();
-        Redis::shouldReceive('connection')->andReturn($redis);
-
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('get')
+        Cache::shouldReceive('get')
             ->once()
             ->with('idempotency:test-key-123:user:123')
             ->andReturn(null);
 
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('setex')
+        Cache::shouldReceive('put')
             ->once()
             ->with(
                 'idempotency:test-key-123:user:123',
-                86400, // 24 hours
-                Mockery::type('string')
+                Mockery::type('string'),
+                86400 // 24 hours
             )
             ->andReturn(true);
 
@@ -77,9 +72,6 @@ describe('IdempotencyKey', function () {
     });
 
     it('同じペイロードで2回目のリクエストを受けた場合はキャッシュ済みレスポンスを返すこと', function () {
-        $redis = Mockery::mock();
-        Redis::shouldReceive('connection')->andReturn($redis);
-
         $payloadJson = (string) json_encode(['name' => 'John Doe']);
         $cachedData = json_encode([
             'payload_fingerprint' => hash('sha256', $payloadJson),
@@ -90,8 +82,7 @@ describe('IdempotencyKey', function () {
             ],
         ]);
 
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('get')
+        Cache::shouldReceive('get')
             ->once()
             ->with('idempotency:test-key-456:user:456')
             ->andReturn($cachedData);
@@ -117,9 +108,6 @@ describe('IdempotencyKey', function () {
     });
 
     it('異なるペイロードで2回目のリクエストを受けた場合はHTTP 422を返すこと', function () {
-        $redis = Mockery::mock();
-        Redis::shouldReceive('connection')->andReturn($redis);
-
         $payloadJson = (string) json_encode(['name' => 'John Doe']);
         $cachedData = json_encode([
             'payload_fingerprint' => hash('sha256', $payloadJson),
@@ -130,8 +118,7 @@ describe('IdempotencyKey', function () {
             ],
         ]);
 
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('get')
+        Cache::shouldReceive('get')
             ->once()
             ->with('idempotency:test-key-789:user:789')
             ->andReturn($cachedData);
@@ -156,7 +143,7 @@ describe('IdempotencyKey', function () {
     });
 
     it('GETリクエストではIdempotency検証をスキップすること', function () {
-        Redis::shouldReceive('connection')->never();
+        Cache::shouldReceive('get')->never();
 
         $middleware = new IdempotencyKey;
         $request = Request::create('/api/users', 'GET');
@@ -177,22 +164,17 @@ describe('IdempotencyKey', function () {
     });
 
     it('未認証リクエストでもIdempotency検証が動作すること（IPアドレスベース）', function () {
-        $redis = Mockery::mock();
-        Redis::shouldReceive('connection')->andReturn($redis);
-
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('get')
+        Cache::shouldReceive('get')
             ->once()
             ->with('idempotency:test-key-unauth:ip:127.0.0.1')
             ->andReturn(null);
 
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('setex')
+        Cache::shouldReceive('put')
             ->once()
             ->with(
                 'idempotency:test-key-unauth:ip:127.0.0.1',
-                86400,
-                Mockery::type('string')
+                Mockery::type('string'),
+                86400
             )
             ->andReturn(true);
 
@@ -215,21 +197,16 @@ describe('IdempotencyKey', function () {
     });
 
     it('Idempotency-KeyのTTLを24時間に設定すること', function () {
-        $redis = Mockery::mock();
-        Redis::shouldReceive('connection')->andReturn($redis);
-
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('get')
+        Cache::shouldReceive('get')
             ->once()
             ->andReturn(null);
 
-        // @phpstan-ignore-next-line
-        $redis->shouldReceive('setex')
+        Cache::shouldReceive('put')
             ->once()
             ->with(
                 Mockery::type('string'),
-                86400, // 24 hours = 86400 seconds
-                Mockery::type('string')
+                Mockery::type('string'),
+                86400 // 24 hours = 86400 seconds
             )
             ->andReturn(true);
 

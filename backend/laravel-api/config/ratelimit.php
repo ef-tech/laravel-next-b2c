@@ -127,9 +127,12 @@ return [
     | レート制限カウンターの保存先設定です。
     | Redisを使用して高速な分散カウントを実現します。
     |
+    | テスト環境では RATELIMIT_CACHE_STORE=array を設定することで、
+    | インメモリキャッシュを使用してテスト間の干渉を防ぐことができます。
+    |
     */
     'cache' => [
-        'store' => 'redis',
+        'store' => env('RATELIMIT_CACHE_STORE', 'redis'),
         'prefix' => 'rate_limit',
     ],
 ];
