@@ -7,7 +7,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -32,7 +32,7 @@ final class SetRequestId
     {
         // 既存のリクエストIDを取得、なければUUIDv4を生成
         $requestId = $request->header('X-Request-Id')
-            ?? (string) Uuid::uuid4();
+            ?? (string) Str::uuid();
 
         // リクエストヘッダーにリクエストIDを設定
         $request->headers->set('X-Request-Id', $requestId);

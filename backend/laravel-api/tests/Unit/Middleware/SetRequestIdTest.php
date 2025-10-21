@@ -6,7 +6,7 @@ use App\Http\Middleware\SetRequestId;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Str;
 
 /**
  * SetRequestId ミドルウェアのテスト
@@ -25,12 +25,12 @@ describe('SetRequestId', function () {
         expect($response->headers->has('X-Request-Id'))->toBeTrue();
         /** @var string $requestId */
         $requestId = $response->headers->get('X-Request-Id');
-        expect(Uuid::isValid($requestId))->toBeTrue();
+        expect(Str::isUuid($requestId))->toBeTrue();
     });
 
     it('既存のリクエストIDを継承すること', function () {
         $middleware = new SetRequestId;
-        $existingId = (string) Uuid::uuid4();
+        $existingId = (string) Str::uuid();
         $request = Request::create('/test', 'GET');
         $request->headers->set('X-Request-Id', $existingId);
 
@@ -51,9 +51,11 @@ describe('SetRequestId', function () {
 
         /** @var string $requestId */
         $requestId = $response->headers->get('X-Request-Id');
-        $uuid = Uuid::fromString($requestId);
 
-        expect($uuid->getVersion())->toBe(4);
+        // UUIDフォーマット検証
+        expect(Str::isUuid($requestId))->toBeTrue();
+        // UUIDv4のバージョン部分を検証（UUIDの15文字目が '4' であること）
+        expect($requestId[14])->toBe('4');
     });
 
     it('リクエストオブジェクトにもリクエストIDが設定されること', function () {
@@ -64,7 +66,7 @@ describe('SetRequestId', function () {
             expect($req->headers->has('X-Request-Id'))->toBeTrue();
             /** @var string $requestId */
             $requestId = $req->headers->get('X-Request-Id');
-            expect(Uuid::isValid($requestId))->toBeTrue();
+            expect(Str::isUuid($requestId))->toBeTrue();
 
             return new Response('OK');
         });
@@ -77,7 +79,7 @@ describe('SetRequestId', function () {
         Log::shouldReceive('withContext')
             ->once()
             ->with(\Mockery::on(function ($context) {
-                return isset($context['request_id']) && Uuid::isValid($context['request_id']);
+                return isset($context['request_id']) && Str::isUuid($context['request_id']);
             }));
 
         $middleware->handle($request, function ($req) {
