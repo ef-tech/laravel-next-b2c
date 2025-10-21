@@ -68,23 +68,23 @@ describe('DynamicRateLimit', function () {
 
     it('レート制限超過時にHTTP 429を返すこと', function () {
         $middleware = new DynamicRateLimit;
-        $request = Request::create('/api/login', 'POST');
+        $request = Request::create('/api/admin', 'POST');
         $request->server->set('REMOTE_ADDR', '192.168.1.1');
 
         Cache::shouldReceive('store')
             ->with('redis')
             ->andReturnSelf();
 
-        // ログインエンドポイントは5回/分の制限
+        // Strictエンドポイントは10回/分の制限
         Cache::shouldReceive('get')
-            ->andReturn(5);
+            ->andReturn(10);
 
         Cache::shouldReceive('add')
             ->andReturn(true);
 
         $response = $middleware->handle($request, function ($req) {
             return new Response('OK', 200);
-        }, 'login');
+        }, 'strict');
 
         expect($response->getStatusCode())->toBe(429);
     });
@@ -173,9 +173,9 @@ describe('DynamicRateLimit', function () {
     it('エンドポイントタイプ別の制限値を適用すること', function () {
         $middleware = new DynamicRateLimit;
 
-        // ログインエンドポイント: 5回/分
-        $loginRequest = Request::create('/api/login', 'POST');
-        $loginRequest->server->set('REMOTE_ADDR', '192.168.1.1');
+        // Strictエンドポイント: 10回/分
+        $strictRequest = Request::create('/api/admin', 'POST');
+        $strictRequest->server->set('REMOTE_ADDR', '192.168.1.1');
 
         Cache::shouldReceive('store')
             ->with('redis')
@@ -190,11 +190,11 @@ describe('DynamicRateLimit', function () {
         Cache::shouldReceive('add')
             ->andReturn(true);
 
-        $response = $middleware->handle($loginRequest, function ($req) {
+        $response = $middleware->handle($strictRequest, function ($req) {
             return new Response('OK', 200);
-        }, 'login');
+        }, 'strict');
 
-        // X-RateLimit-Limitが5であることを確認
-        expect($response->headers->get('X-RateLimit-Limit'))->toBe('5');
+        // X-RateLimit-Limitが10であることを確認
+        expect($response->headers->get('X-RateLimit-Limit'))->toBe('10');
     });
 });
