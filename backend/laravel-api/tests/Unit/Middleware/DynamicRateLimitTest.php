@@ -76,8 +76,9 @@ describe('DynamicRateLimit', function () {
             ->andReturnSelf();
 
         // Strictエンドポイントは10回/分の制限
+        // 10リクエスト以上でレート制限を返す
         Cache::shouldReceive('get')
-            ->andReturn(10);
+            ->andReturn(11);
 
         Cache::shouldReceive('add')
             ->andReturn(true);
