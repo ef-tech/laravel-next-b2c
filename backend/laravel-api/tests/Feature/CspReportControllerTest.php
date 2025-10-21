@@ -106,38 +106,34 @@ describe('CspReportController', function () {
     });
 
     test('CSPレポートがオプションフィールドを含まない場合でもログ記録できること', function () {
-        // レート制限回避のため異なるIPアドレスを設定
-        $_SERVER['REMOTE_ADDR'] = '192.168.2.1';
-
-        $response = $this->postJson('/api/csp/report', [
-            'csp-report' => [
-                'blocked-uri' => 'https://evil.com/script.js',
-                'violated-directive' => 'script-src',
-                'original-policy' => "default-src 'self'",
-                'document-uri' => 'https://example.com/page',
-            ],
-        ], [
-            'Content-Type' => 'application/csp-report',
-        ]);
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '192.168.2.1'])
+            ->postJson('/api/csp/report', [
+                'csp-report' => [
+                    'blocked-uri' => 'https://evil.com/script.js',
+                    'violated-directive' => 'script-src',
+                    'original-policy' => "default-src 'self'",
+                    'document-uri' => 'https://example.com/page',
+                ],
+            ], [
+                'Content-Type' => 'application/csp-report',
+            ]);
 
         $response->assertNoContent();
     });
 
     test('User-AgentとIPアドレスがログに記録されること', function () {
-        // レート制限回避のため異なるIPアドレスを設定
-        $_SERVER['REMOTE_ADDR'] = '192.168.3.1';
-
-        $response = $this->postJson('/api/csp/report', [
-            'csp-report' => [
-                'blocked-uri' => 'https://evil.com/script.js',
-                'violated-directive' => 'script-src',
-                'original-policy' => "default-src 'self'",
-                'document-uri' => 'https://example.com/page',
-            ],
-        ], [
-            'User-Agent' => 'Mozilla/5.0 (Test Browser)',
-            'Content-Type' => 'application/csp-report',
-        ]);
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '192.168.3.1'])
+            ->postJson('/api/csp/report', [
+                'csp-report' => [
+                    'blocked-uri' => 'https://evil.com/script.js',
+                    'violated-directive' => 'script-src',
+                    'original-policy' => "default-src 'self'",
+                    'document-uri' => 'https://example.com/page',
+                ],
+            ], [
+                'User-Agent' => 'Mozilla/5.0 (Test Browser)',
+                'Content-Type' => 'application/csp-report',
+            ]);
 
         $response->assertNoContent();
     });

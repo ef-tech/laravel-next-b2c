@@ -5,8 +5,6 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 
-use function Pest\Laravel\postJson;
-
 /**
  * IdempotencyとパフォーマンスE2Eテスト
  *
@@ -44,15 +42,13 @@ describe('Idempotency and Performance E2E', function () {
 
     describe('Idempotency機能', function () {
         it('Idempotencyキーがない場合は通常処理されること', function () {
-            // レート制限回避のため異なるIPアドレスを設定
-            $_SERVER['REMOTE_ADDR'] = '10.0.1.1';
-
-            $response = postJson('/test/idempotency/webhook', [
-                'data' => 'test-data-1',
-            ], [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ]);
+            $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.1.1'])
+                ->postJson('/test/idempotency/webhook', [
+                    'data' => 'test-data-1',
+                ], [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ]);
 
             // webhookグループが適用されていること
             $response->assertStatus(200);
@@ -64,19 +60,17 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('Idempotencyキーが設定されている場合もリクエストが処理されること', function () {
-            // レート制限回避のため異なるIPアドレスを設定
-            $_SERVER['REMOTE_ADDR'] = '10.0.1.2';
-
             // 未認証ユーザーの場合、IdempotencyKeyミドルウェアはスキップされる
             $idempotencyKey = 'test-key-'.uniqid();
 
-            $response = postJson('/test/idempotency/webhook', [
-                'data' => 'with-idempotency-key',
-            ], [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-                'Idempotency-Key' => $idempotencyKey,
-            ]);
+            $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.1.2'])
+                ->postJson('/test/idempotency/webhook', [
+                    'data' => 'with-idempotency-key',
+                ], [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'Idempotency-Key' => $idempotencyKey,
+                ]);
 
             // IdempotencyKeyミドルウェアは未認証ユーザーをスキップ
             $response->assertStatus(200);
@@ -87,15 +81,13 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('webhookグループのミドルウェアチェーンが正しく動作すること', function () {
-            // レート制限回避のため異なるIPアドレスを設定
-            $_SERVER['REMOTE_ADDR'] = '10.0.1.3';
-
-            $response = postJson('/test/idempotency/webhook', [
-                'data' => 'webhook-test',
-            ], [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ]);
+            $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.1.3'])
+                ->postJson('/test/idempotency/webhook', [
+                    'data' => 'webhook-test',
+                ], [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ]);
 
             // webhookグループ = api + IdempotencyKey + DynamicRateLimit:webhook
             $response->assertStatus(200);
@@ -108,17 +100,15 @@ describe('Idempotency and Performance E2E', function () {
 
     describe('パフォーマンスメトリクス', function () {
         it('PerformanceMonitoringミドルウェアが適用されること', function () {
-            // レート制限回避のため異なるIPアドレスを設定
-            $_SERVER['REMOTE_ADDR'] = '10.0.2.1';
-
             $startTime = microtime(true);
 
-            $response = postJson('/test/idempotency/webhook', [
-                'data' => 'performance-test',
-            ], [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ]);
+            $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.2.1'])
+                ->postJson('/test/idempotency/webhook', [
+                    'data' => 'performance-test',
+                ], [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ]);
 
             $endTime = microtime(true);
             $responseTime = ($endTime - $startTime) * 1000; // ミリ秒
@@ -134,21 +124,19 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('複数リクエストのパフォーマンスが安定していること', function () {
-            // レート制限回避のため異なるIPアドレスを設定
-            $_SERVER['REMOTE_ADDR'] = '10.0.2.2';
-
             $responseTimes = [];
 
             // 10回リクエストを送信してレスポンス時間を測定
             for ($i = 0; $i < 10; $i++) {
                 $startTime = microtime(true);
 
-                $response = postJson('/test/idempotency/webhook', [
-                    'data' => 'performance-test-'.$i,
-                ], [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                ]);
+                $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.2.2'])
+                    ->postJson('/test/idempotency/webhook', [
+                        'data' => 'performance-test-'.$i,
+                    ], [
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ]);
 
                 $endTime = microtime(true);
                 $responseTimes[] = ($endTime - $startTime) * 1000;
@@ -168,18 +156,16 @@ describe('Idempotency and Performance E2E', function () {
         });
 
         it('ミドルウェアチェーン全体のオーバーヘッドが許容範囲内であること', function () {
-            // レート制限回避のため異なるIPアドレスを設定
-            $_SERVER['REMOTE_ADDR'] = '10.0.2.3';
-
             // シンプルなレスポンスで全ミドルウェアチェーンのオーバーヘッドを測定
             $startTime = microtime(true);
 
-            $response = postJson('/test/idempotency/webhook', [
-                'data' => 'overhead-test',
-            ], [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ]);
+            $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.2.3'])
+                ->postJson('/test/idempotency/webhook', [
+                    'data' => 'overhead-test',
+                ], [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ]);
 
             $endTime = microtime(true);
             $totalTime = ($endTime - $startTime) * 1000; // ミリ秒
