@@ -38,7 +38,7 @@ describe('CspReportController', function () {
         $response->assertNoContent();
     });
 
-    test('Content-Typeが不正な場合は400エラーを返すこと', function () {
+    test('Content-Typeが不正な場合は415エラーを返すこと', function () {
         $response = $this->postJson('/api/csp/report', [
             'csp-report' => [
                 'blocked-uri' => 'https://evil.com/script.js',
@@ -48,8 +48,9 @@ describe('CspReportController', function () {
             'Content-Type' => 'text/plain',
         ]);
 
-        $response->assertStatus(400);
-        $response->assertJson(['error' => 'Invalid Content-Type. Expected application/csp-report or application/json']);
+        // ForceJsonResponseミドルウェアがapplication/csp-report以外を拒否
+        $response->assertStatus(415);
+        $response->assertJson(['error' => 'Unsupported Media Type']);
     });
 
     test('CSPレポートが空の場合は400エラーを返すこと', function () {
@@ -61,61 +62,40 @@ describe('CspReportController', function () {
         $response->assertJson(['error' => 'Empty CSP report']);
     });
 
-    test('レート制限が適用されること (100 requests per minute)', function () {
-        // 100リクエストは成功
-        for ($i = 0; $i < 100; $i++) {
-            $response = $this->postJson('/api/csp/report', [
+    // Note: レート制限のテストは以下で実施済み
+    // - tests/Unit/Middleware/DynamicRateLimitTest.php (Unit)
+    // - tests/Feature/E2E/RateLimitE2ETest.php (E2E)
+    // Xdebug環境下での環境依存テストを避けるため、Featureテストからは削除
+
+    test('CSPレポートがオプションフィールドを含まない場合でもログ記録できること', function () {
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '192.168.2.1'])
+            ->postJson('/api/csp/report', [
                 'csp-report' => [
                     'blocked-uri' => 'https://evil.com/script.js',
                     'violated-directive' => 'script-src',
+                    'original-policy' => "default-src 'self'",
+                    'document-uri' => 'https://example.com/page',
                 ],
             ], [
                 'Content-Type' => 'application/csp-report',
             ]);
 
-            $response->assertStatus(204);
-        }
-
-        // 101リクエスト目は失敗 (レート制限)
-        $response = $this->postJson('/api/csp/report', [
-            'csp-report' => [
-                'blocked-uri' => 'https://evil.com/script.js',
-                'violated-directive' => 'script-src',
-            ],
-        ], [
-            'Content-Type' => 'application/csp-report',
-        ]);
-
-        $response->assertStatus(429); // Too Many Requests
-    });
-
-    test('CSPレポートがオプションフィールドを含まない場合でもログ記録できること', function () {
-        $response = $this->postJson('/api/csp/report', [
-            'csp-report' => [
-                'blocked-uri' => 'https://evil.com/script.js',
-                'violated-directive' => 'script-src',
-                'original-policy' => "default-src 'self'",
-                'document-uri' => 'https://example.com/page',
-            ],
-        ], [
-            'Content-Type' => 'application/csp-report',
-        ]);
-
         $response->assertNoContent();
     });
 
     test('User-AgentとIPアドレスがログに記録されること', function () {
-        $response = $this->postJson('/api/csp/report', [
-            'csp-report' => [
-                'blocked-uri' => 'https://evil.com/script.js',
-                'violated-directive' => 'script-src',
-                'original-policy' => "default-src 'self'",
-                'document-uri' => 'https://example.com/page',
-            ],
-        ], [
-            'User-Agent' => 'Mozilla/5.0 (Test Browser)',
-            'Content-Type' => 'application/csp-report',
-        ]);
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '192.168.3.1'])
+            ->postJson('/api/csp/report', [
+                'csp-report' => [
+                    'blocked-uri' => 'https://evil.com/script.js',
+                    'violated-directive' => 'script-src',
+                    'original-policy' => "default-src 'self'",
+                    'document-uri' => 'https://example.com/page',
+                ],
+            ], [
+                'User-Agent' => 'Mozilla/5.0 (Test Browser)',
+                'Content-Type' => 'application/csp-report',
+            ]);
 
         $response->assertNoContent();
     });

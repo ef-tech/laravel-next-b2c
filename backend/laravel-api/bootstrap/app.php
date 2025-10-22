@@ -18,10 +18,83 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
         ]);
 
-        // セキュリティヘッダーミドルウェアをグローバルに追加
-        // Note: append()により最後に実行されるため、Laravel組み込みのHandleCorsミドルウェアの後に実行される
-        //       これによりCORSヘッダー（Access-Control-Allow-Origin等）を上書きせず、セキュリティヘッダーのみ追加
+        // ========================================
+        // グローバルミドルウェア（全リクエストに適用）
+        // ========================================
+        // 実行順序: TrustProxies → ValidatePostSize → PreventRequestsDuringMaintenance
+        //          → HandleCors (Laravel組み込み)
+        //          → SetRequestId → CorrelationId → ForceJsonResponse
+        //          → SecurityHeaders (最後に実行)
+
+        $middleware->append(\App\Http\Middleware\SetRequestId::class);
+        $middleware->append(\App\Http\Middleware\CorrelationId::class);
+        $middleware->append(\App\Http\Middleware\ForceJsonResponse::class);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // ========================================
+        // ミドルウェアグループ
+        // ========================================
+
+        // api グループ（基底グループ - 全APIエンドポイント共通）
+        $middleware->group('api', [
+            // Laravel標準
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // カスタムミドルウェア
+            \App\Http\Middleware\RequestLogging::class,
+            \App\Http\Middleware\PerformanceMonitoring::class,
+            \App\Http\Middleware\DynamicRateLimit::class.':api',
+            // Note: SecurityHeadersはグローバルミドルウェアとして既に設定済み（CSP含む）
+        ]);
+
+        // auth グループ（認証必須エンドポイント）
+        $middleware->group('auth', [
+            'api', // api グループを継承
+            'auth:sanctum', // Laravel Sanctum認証
+            \App\Http\Middleware\SanctumTokenVerification::class,
+            \App\Http\Middleware\AuditTrail::class,
+        ]);
+
+        // guest グループ（公開APIエンドポイント - 認証不要）
+        $middleware->group('guest', [
+            'api', // api グループを継承
+            \App\Http\Middleware\DynamicRateLimit::class.':public',
+        ]);
+
+        // internal グループ（内部/管理用エンドポイント）
+        $middleware->group('internal', [
+            'api', // api グループを継承
+            'auth:sanctum',
+            \App\Http\Middleware\SanctumTokenVerification::class,
+            \App\Http\Middleware\AuthorizationCheck::class.':admin',
+            \App\Http\Middleware\DynamicRateLimit::class.':strict',
+            \App\Http\Middleware\AuditTrail::class,
+        ]);
+
+        // webhook グループ（外部コールバックエンドポイント）
+        $middleware->group('webhook', [
+            'api', // api グループを継承
+            \App\Http\Middleware\IdempotencyKey::class,
+            \App\Http\Middleware\DynamicRateLimit::class.':webhook',
+        ]);
+
+        // readonly グループ（読み取り専用エンドポイント）
+        $middleware->group('readonly', [
+            'api', // api グループを継承
+            \App\Http\Middleware\CacheHeaders::class,
+            \App\Http\Middleware\ETag::class,
+        ]);
+
+        // ========================================
+        // ミドルウェアエイリアス
+        // ========================================
+        $middleware->alias([
+            'auth.token' => \App\Http\Middleware\SanctumTokenVerification::class,
+            'permission' => \App\Http\Middleware\AuthorizationCheck::class,
+            'audit' => \App\Http\Middleware\AuditTrail::class,
+            'idempotent' => \App\Http\Middleware\IdempotencyKey::class,
+            'cache.headers' => \App\Http\Middleware\CacheHeaders::class,
+            'etag' => \App\Http\Middleware\ETag::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle DDD Domain Exceptions

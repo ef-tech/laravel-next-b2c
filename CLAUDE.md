@@ -37,6 +37,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `cors-environment-config` - CORS環境変数設定（フロントエンドアプリ用、開発/本番環境対応、セキュリティ強化）
 - `environment-variable-management` - 環境変数適切管理方法整備（.env.exampleコメント整備、バリデーション実装、セキュリティガイド作成）
 - `security-headers-setup` - セキュリティヘッダー設定（OWASP準拠、Laravel/Next.js実装、CSPレポート収集、段階的導入）
+- `basic-middleware-setup` - 基本ミドルウェア設定（統一ミドルウェアスタック、ログ・レート制限・認証認可・監査・キャッシュ、DDD統合）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
