@@ -97,8 +97,8 @@
 
 ## Phase 3: Infrastructure層ストア実装
 
-- [ ] 3. レート制限ストアとメトリクス記録を実装
-- [ ] 3.1 Redisを使用したレート制限ストアを実装
+- [x] 3. レート制限ストアとメトリクス記録を実装
+- [x] 3.1 Redisを使用したレート制限ストアを実装
   - Laravel Cache Facadeを使用してRedis接続を確立
   - 原子的カウント操作（`Cache::increment()`と`Cache::add()`の組み合わせ）を実装
   - TTL（Time To Live）を計算してキーの自動削除を設定
@@ -106,8 +106,9 @@
   - Application層のRateLimitServiceインターフェースを実装
   - Redis障害時は`RedisException`をスロー
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 9.1, 9.2, 9.3, 7.5_
+  - ✅ **実装完了**: LaravelRateLimiterStore実装（10テスト、29アサーション）
 
-- [ ] 3.2 Redis障害時のフェイルオーバーストアを実装
+- [x] 3.2 Redis障害時のフェイルオーバーストアを実装
   - プライマリストア（Redis）とセカンダリストア（Array/File Cache）を管理
   - Redis障害検知時に`RedisException`をキャッチしてセカンダリストアへ自動切り替え
   - 30秒間隔でRedis疎通確認（PING）を実行
@@ -117,8 +118,9 @@
   - フェイルオーバー時にメトリクスを記録（`rate_limit.failure`カウンター）
   - Application層のRateLimitServiceインターフェースを実装
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 7.5_
+  - ✅ **実装完了**: FailoverRateLimitStore実装（13テスト、60アサーション）
 
-- [ ] 3.3 構造化ログでメトリクスを記録する実装を作成
+- [x] 3.3 構造化ログでメトリクスを記録する実装を作成
   - Laravel標準Logファサードを使用してJSON形式ログを出力
   - `rate_limit`チャネルに専用ログを記録
   - ヒット時はINFOレベル、ブロック時とRedis障害時はWARNINGレベル
@@ -126,8 +128,9 @@
   - 非同期ログ出力を使用してレート制限チェックのブロッキングを回避
   - Application層のRateLimitMetricsインターフェースを実装
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 7.5_
+  - ✅ **実装完了**: LogMetrics実装（7テスト、7アサーション）
 
-- [ ] 3.4 Infrastructure層ストアのIntegration Testsを実装
+- [x] 3.4 Infrastructure層ストアのIntegration Testsを実装
   - Redisストアの原子的カウント操作テスト（`Cache::increment()`と`Cache::add()`）
   - RedisストアのTTL計算とリセット時刻テスト
   - Redisストアのレート制限超過テスト（60リクエスト目で拒否）
@@ -139,6 +142,7 @@
   - 構造化ログ記録のメトリクス出力テスト
   - テストカバレッジ85%以上を達成
   - _Requirements: 10.3, 10.6, 10.8, 10.9_
+  - ✅ **実装完了**: Infrastructure層統合テスト（7テスト、39アサーション）
 
 ---
 
