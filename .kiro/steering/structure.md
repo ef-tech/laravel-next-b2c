@@ -61,12 +61,16 @@ laravel-api/
 │   │       ├── Services/           # ドメインサービス
 │   │       └── Exceptions/         # ドメイン例外
 │   ├── Application/     # Application層（ユースケース）
-│   │   └── User/        # ユーザーユースケース
-│   │       ├── UseCases/           # ユースケース（RegisterUserUseCase.php）
-│   │       ├── DTOs/               # データ転送オブジェクト（RegisterUserInput.php, RegisterUserOutput.php）
-│   │       ├── Services/           # アプリケーションサービスインターフェース（TransactionManager.php, EventBus.php）
-│   │       ├── Queries/            # クエリインターフェース（UserQueryInterface.php）
-│   │       └── Exceptions/         # アプリケーション例外
+│   │   ├── User/        # ユーザーユースケース
+│   │   │   ├── UseCases/           # ユースケース（RegisterUserUseCase.php）
+│   │   │   ├── DTOs/               # データ転送オブジェクト（RegisterUserInput.php, RegisterUserOutput.php）
+│   │   │   ├── Services/           # アプリケーションサービスインターフェース（TransactionManager.php, EventBus.php）
+│   │   │   ├── Queries/            # クエリインターフェース（UserQueryInterface.php）
+│   │   │   └── Exceptions/         # アプリケーション例外
+│   │   └── Middleware/  # 🛡️ ミドルウェア設定（DDD統合）
+│   │       └── Config/  # ミドルウェアグループ設定
+│   │           ├── MiddlewareGroupsConfig.php  # グループ定義（api/auth/public）
+│   │           └── RateLimitConfig.php         # レート制限設定（エンドポイント別）
 │   └── Infrastructure/  # Infrastructure層（外部システム実装）
 │       └── Persistence/ # 永続化実装
 │           ├── Eloquent/           # Eloquent Repository実装（EloquentUserRepository.php）
@@ -85,10 +89,20 @@ laravel-api/
 │   │   │   │   ├── LoginController.php     # ログイン処理（POST /api/login, POST /api/logout）
 │   │   │   │   ├── MeController.php        # 認証ユーザー情報（GET /api/me）
 │   │   │   │   └── TokenController.php     # トークン管理（GET /api/tokens, POST /api/tokens/{id}/revoke）
-│   │   ├── Middleware/  # ミドルウェア
+│   │   ├── Middleware/  # 🛡️ ミドルウェア（基本ミドルウェアスタック実装）
 │   │   │   ├── Authenticate.php  # 🔐 Sanctum認証ミドルウェア（auth:sanctum）
 │   │   │   ├── SecurityHeaders.php  # 🔐 セキュリティヘッダーミドルウェア（X-Frame-Options、X-Content-Type-Options等）
-│   │   │   └── ContentSecurityPolicy.php  # 🔐 CSPヘッダー設定ミドルウェア（動的CSP構築、Report-Only/Enforceモード切替）
+│   │   │   ├── ContentSecurityPolicy.php  # 🔐 CSPヘッダー設定ミドルウェア（動的CSP構築、Report-Only/Enforceモード切替）
+│   │   │   ├── SetRequestId.php          # 🛡️ リクエストID付与（Laravel標準Str::uuid()）
+│   │   │   ├── LogPerformance.php        # 🛡️ パフォーマンス監視
+│   │   │   ├── LogSecurity.php           # 🛡️ セキュリティログ分離
+│   │   │   ├── DynamicRateLimit.php      # 🛡️ 動的レート制限（環境変数駆動、Redis/Array切替対応）
+│   │   │   ├── IdempotencyKey.php        # 🛡️ 冪等性保証（環境変数駆動、Webhook対応、IPアドレス識別）
+│   │   │   ├── Authorize.php             # 🛡️ ポリシーベース認可
+│   │   │   ├── AuditLog.php              # 🛡️ ユーザー行動追跡
+│   │   │   ├── SecurityAudit.php         # 🛡️ セキュリティイベント監査
+│   │   │   ├── SetETag.php               # 🛡️ ETag自動生成
+│   │   │   └── CheckETag.php             # 🛡️ 条件付きリクエスト対応
 │   │   ├── Requests/    # リクエストバリデーション
 │   │   │   └── Auth/    # 🔐 認証リクエスト
 │   │   │       └── LoginRequest.php  # ログインバリデーション（email, password必須）
@@ -102,7 +116,8 @@ laravel-api/
 │   ├── sanctum.php      # 🔐 Sanctum認証設定（stateful_domains, expiration等）
 │   ├── auth.php         # 認証設定（guards: sanctum）
 │   ├── security.php     # 🔐 セキュリティヘッダー設定（CSP、HSTS、X-Frame-Options等環境変数駆動設定）
-│   └── cors.php         # 🌐 CORS設定（fruitcake/laravel-cors統合、credentials対応）
+│   ├── cors.php         # 🌐 CORS設定（fruitcake/laravel-cors統合、credentials対応）
+│   └── middleware.php   # 🛡️ ミドルウェア設定（DDD Application層統合、エンドポイント別グループ定義）
 ├── database/            # データベース関連
 │   ├── factories/       # モデルファクトリー
 │   ├── migrations/      # マイグレーション
@@ -151,15 +166,22 @@ laravel-api/
 │   │   ├── Auth/        # 🔐 認証機能テスト
 │   │   │   ├── LoginTest.php          # ログイン・ログアウトテスト（12テスト）
 │   │   │   └── TokenManagementTest.php # トークン管理テスト（一覧取得、無効化、更新）
-│   │   └── Security/    # 🔐 セキュリティ機能テスト
-│   │       ├── SecurityHeadersTest.php  # セキュリティヘッダーテスト（X-Frame-Options、X-Content-Type-Options等）
-│   │       └── CspReportTest.php        # CSP違反レポートテスト（application/json互換性検証）
+│   │   ├── Security/    # 🔐 セキュリティ機能テスト
+│   │   │   ├── SecurityHeadersTest.php  # セキュリティヘッダーテスト（X-Frame-Options、X-Content-Type-Options等）
+│   │   │   └── CspReportTest.php        # CSP違反レポートテスト（application/json互換性検証）
+│   │   └── Middleware/  # 🛡️ ミドルウェア機能テスト
+│   │       ├── SetRequestIdTest.php     # リクエストID付与テスト（UUID生成、ヘッダー検証）
+│   │       ├── DynamicRateLimitTest.php # レート制限テスト（環境変数駆動、キャッシュストア切替）
+│   │       ├── IdempotencyKeyTest.php   # 冪等性保証テスト（Webhook対応、IPアドレス識別）
+│   │       ├── LogPerformanceTest.php   # パフォーマンス監視テスト
+│   │       └── SetETagTest.php          # ETag生成・検証テスト
 │   ├── Unit/            # ユニットテスト（ドメインロジックテスト）
 │   ├── Arch/            # 🏗️ Architecture Tests（依存方向検証、レイヤー分離チェック）
 │   │   ├── DomainLayerTest.php         # Domain層依存チェック
 │   │   ├── ApplicationLayerTest.php    # Application層依存チェック
 │   │   ├── InfrastructureLayerTest.php # Infrastructure層実装チェック
-│   │   └── NamingConventionTest.php    # 命名規約検証
+│   │   ├── NamingConventionTest.php    # 命名規約検証
+│   │   └── MiddlewareGroupTest.php     # 🛡️ ミドルウェアグループ設定検証
 │   ├── Pest.php         # Pest設定・ヘルパー
 │   └── TestCase.php     # 基底テストクラス
 ├── vendor/              # Composer依存関係

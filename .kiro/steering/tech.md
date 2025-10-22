@@ -142,9 +142,73 @@ SECURITY_CSP_REPORT_URI=/api/csp-report  # CSP違反レポート送信先
 SECURITY_FORCE_HSTS=false  # HSTS強制（本番環境のみtrue推奨）
 SECURITY_HSTS_MAX_AGE=31536000  # HSTS有効期間（1年間）
 
+# 🛡️ ミドルウェア環境変数設定
+# レート制限設定
+RATELIMIT_CACHE_STORE=redis  # レート制限キャッシュストア: redis（本番推奨）/ array（テスト環境）
+RATELIMIT_LOGIN_MAX_ATTEMPTS=5  # ログインAPIレート制限（5回/分）
+RATELIMIT_API_MAX_ATTEMPTS=60   # 一般APIレート制限（60回/分）
+
+# Idempotencyキャッシュ設定
+IDEMPOTENCY_CACHE_STORE=redis  # 冪等性キャッシュストア: redis（本番推奨）/ array（テスト環境）
+IDEMPOTENCY_TTL=86400          # 冪等性キャッシュTTL（24時間）
+
 # 環境変数バリデーションスキップ（緊急時のみ、migrate/seed実行時に使用可能）
 # ENV_VALIDATION_SKIP=true
 ```
+
+### 🛡️ 基本ミドルウェアスタック詳細
+
+**ミドルウェア構成**（`config/middleware.php`）:
+
+1. **ログ・監視ミドルウェア**:
+   - `SetRequestId`: リクエストID自動付与（Laravel標準Str::uuid()使用）、構造化ログ対応
+   - `LogPerformance`: パフォーマンス監視、レスポンスタイム記録
+   - `LogSecurity`: セキュリティイベントログ分離記録
+
+2. **レート制限ミドルウェア**:
+   - `DynamicRateLimit`: エンドポイント別レート制限、動的制限値設定
+   - **環境変数駆動**: `RATELIMIT_CACHE_STORE`（redis/array切替）
+   - **設定例**:
+     - ログインAPI: 5回/分（`RATELIMIT_LOGIN_MAX_ATTEMPTS`）
+     - 一般API: 60回/分（`RATELIMIT_API_MAX_ATTEMPTS`）
+   - **キャッシュ競合対策**: `Cache::increment()` + `Cache::add()`組み合わせ
+
+3. **Idempotencyミドルウェア**:
+   - `IdempotencyKey`: 冪等性保証、重複リクエスト防止
+   - **環境変数駆動**: `IDEMPOTENCY_CACHE_STORE`（redis/array切替）
+   - **キャッシュTTL**: 24時間（`IDEMPOTENCY_TTL`）
+   - **Webhook対応**: 同一ペイロード検証、タイムスタンプ記録
+   - **未認証対応**: IPアドレスベース識別
+
+4. **認証・認可ミドルウェア**:
+   - `Authenticate`: Laravel Sanctum統合認証ミドルウェア（`auth:sanctum`）
+   - `Authorize`: ポリシーベース認可チェック
+
+5. **監査ログミドルウェア**:
+   - `AuditLog`: ユーザー行動追跡、イベントログ記録
+   - `SecurityAudit`: セキュリティイベント監査
+
+6. **キャッシュ管理ミドルウェア**:
+   - `SetETag`: ETag自動生成、HTTP Cache-Control設定
+   - `CheckETag`: 条件付きリクエスト対応（304 Not Modified）
+
+**ミドルウェアグループ設定**:
+```php
+// config/middleware.php
+'api' => [
+    SetRequestId::class,           // リクエストID付与
+    DynamicRateLimit::class,       // レート制限
+    IdempotencyKey::class,         // 冪等性保証
+    Authenticate::class,           // 認証（必要に応じて）
+    LogPerformance::class,         // パフォーマンス監視
+    SetETag::class,                // キャッシュ管理
+],
+```
+
+**DDD統合アプローチ**:
+- ミドルウェア設定: Application層に配置（`ddd/Application/Middleware/Config/`）
+- Repositoryパターン: ログ記録・監査ログのRepository実装
+- イベント駆動: ミドルウェアからDomain Eventsディスパッチ
 
 ### データベース・ストレージ
 - **PostgreSQL**: 17-alpine (主データベース - ステートレス設計対応)
