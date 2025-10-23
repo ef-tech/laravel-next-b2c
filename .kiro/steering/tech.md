@@ -142,15 +142,21 @@ SECURITY_CSP_REPORT_URI=/api/csp-report  # CSP違反レポート送信先
 SECURITY_FORCE_HSTS=false  # HSTS強制（本番環境のみtrue推奨）
 SECURITY_HSTS_MAX_AGE=31536000  # HSTS有効期間（1年間）
 
-# 🛡️ ミドルウェア環境変数設定
-# レート制限設定
-RATELIMIT_CACHE_STORE=redis  # レート制限キャッシュストア: redis（本番推奨）/ array（テスト環境）
-RATELIMIT_LOGIN_MAX_ATTEMPTS=5  # ログインAPIレート制限（5回/分）
-RATELIMIT_API_MAX_ATTEMPTS=60   # 一般APIレート制限（60回/分）
+# 🛡️ ミドルウェア環境変数設定（APIレート制限強化対応）
+# レート制限設定（エンドポイント分類細分化）
+RATELIMIT_CACHE_STORE=redis  # レート制限キャッシュストア: redis（本番推奨）/ array（テスト環境、Redis障害時フェイルオーバー）
+RATELIMIT_LOGIN_MAX_ATTEMPTS=5        # 認証APIレート制限（5回/分）
+RATELIMIT_WRITE_API_MAX_ATTEMPTS=10   # 書き込みAPIレート制限（10回/分）
+RATELIMIT_READ_API_MAX_ATTEMPTS=60    # 読み取りAPIレート制限（60回/分）
+RATELIMIT_ADMIN_API_MAX_ATTEMPTS=100  # 管理者APIレート制限（100回/分）
 
 # Idempotencyキャッシュ設定
 IDEMPOTENCY_CACHE_STORE=redis  # 冪等性キャッシュストア: redis（本番推奨）/ array（テスト環境）
 IDEMPOTENCY_TTL=86400          # 冪等性キャッシュTTL（24時間）
+
+# ログ個人情報配慮設定
+LOG_HASH_SENSITIVE_DATA=true   # 個人情報ハッシュ化有効化（本番環境推奨）
+LOG_SENSITIVE_FIELDS=email,ip_address,user_agent  # ハッシュ化対象フィールド（カンマ区切り）
 
 # 環境変数バリデーションスキップ（緊急時のみ、migrate/seed実行時に使用可能）
 # ENV_VALIDATION_SKIP=true
@@ -163,15 +169,20 @@ IDEMPOTENCY_TTL=86400          # 冪等性キャッシュTTL（24時間）
 1. **ログ・監視ミドルウェア**:
    - `SetRequestId`: リクエストID自動付与（Laravel標準Str::uuid()使用）、構造化ログ対応
    - `LogPerformance`: パフォーマンス監視、レスポンスタイム記録
-   - `LogSecurity`: セキュリティイベントログ分離記録
+   - `LogSecurity`: セキュリティイベントログ分離記録、個人情報配慮対応（環境変数でハッシュ化制御）
+   - **ログ個人情報ハッシュ化**: `LOG_HASH_SENSITIVE_DATA`環境変数で制御、email/IP/UAをハッシュ化
 
-2. **レート制限ミドルウェア**:
+2. **APIレート制限ミドルウェア（強化版）**:
    - `DynamicRateLimit`: エンドポイント別レート制限、動的制限値設定
-   - **環境変数駆動**: `RATELIMIT_CACHE_STORE`（redis/array切替）
-   - **設定例**:
-     - ログインAPI: 5回/分（`RATELIMIT_LOGIN_MAX_ATTEMPTS`）
-     - 一般API: 60回/分（`RATELIMIT_API_MAX_ATTEMPTS`）
-   - **キャッシュ競合対策**: `Cache::increment()` + `Cache::add()`組み合わせ
+   - **環境変数駆動**: `RATELIMIT_CACHE_STORE`（redis/array切替、Redis障害時フェイルオーバー）
+   - **エンドポイント分類細分化**:
+     - 認証API: 5回/分（`RATELIMIT_LOGIN_MAX_ATTEMPTS`）
+     - 書き込みAPI: 10回/分（`RATELIMIT_WRITE_API_MAX_ATTEMPTS`）
+     - 読み取りAPI: 60回/分（`RATELIMIT_READ_API_MAX_ATTEMPTS`）
+     - 管理者API: 100回/分（`RATELIMIT_ADMIN_API_MAX_ATTEMPTS`）
+   - **キャッシュ競合対策**: `Cache::increment()` + `Cache::add()`アトミック操作組み合わせ
+   - **retry_after最適化**: 負の値問題修正、resetAt計算改善
+   - **DDD統合**: Application層にRateLimitConfig配置（`ddd/Application/Middleware/Config/RateLimitConfig.php`）
 
 3. **Idempotencyミドルウェア**:
    - `IdempotencyKey`: 冪等性保証、重複リクエスト防止
@@ -196,19 +207,22 @@ IDEMPOTENCY_TTL=86400          # 冪等性キャッシュTTL（24時間）
 ```php
 // config/middleware.php
 'api' => [
-    SetRequestId::class,           // リクエストID付与
-    DynamicRateLimit::class,       // レート制限
-    IdempotencyKey::class,         // 冪等性保証
-    Authenticate::class,           // 認証（必要に応じて）
+    SetRequestId::class,           // リクエストID付与（構造化ログ、個人情報ハッシュ化対応）
+    DynamicRateLimit::class,       // APIレート制限（エンドポイント分類、Redis障害時フェイルオーバー）
+    IdempotencyKey::class,         // 冪等性保証（Webhook対応、24時間キャッシュ）
+    Authenticate::class,           // 認証（Laravel Sanctum統合）
     LogPerformance::class,         // パフォーマンス監視
-    SetETag::class,                // キャッシュ管理
+    SetETag::class,                // キャッシュ管理（ETag自動生成）
 ],
 ```
 
-**DDD統合アプローチ**:
+**DDD統合アプローチ（完全実装済み）**:
 - ミドルウェア設定: Application層に配置（`ddd/Application/Middleware/Config/`）
+  - `MiddlewareGroupsConfig.php`: グループ定義（api/auth/public）
+  - `RateLimitConfig.php`: エンドポイント別レート制限設定
 - Repositoryパターン: ログ記録・監査ログのRepository実装
 - イベント駆動: ミドルウェアからDomain Eventsディスパッチ
+- Architecture Tests: 依存方向検証、レイヤー分離チェック
 
 ### データベース・ストレージ
 - **PostgreSQL**: 17-alpine (主データベース - ステートレス設計対応)

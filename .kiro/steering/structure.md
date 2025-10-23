@@ -67,10 +67,14 @@ laravel-api/
 │   │   │   ├── Services/           # アプリケーションサービスインターフェース（TransactionManager.php, EventBus.php）
 │   │   │   ├── Queries/            # クエリインターフェース（UserQueryInterface.php）
 │   │   │   └── Exceptions/         # アプリケーション例外
-│   │   └── Middleware/  # 🛡️ ミドルウェア設定（DDD統合）
+│   │   └── Middleware/  # 🛡️ ミドルウェア設定（DDD統合、完全実装済み）
 │   │       └── Config/  # ミドルウェアグループ設定
 │   │           ├── MiddlewareGroupsConfig.php  # グループ定義（api/auth/public）
-│   │           └── RateLimitConfig.php         # レート制限設定（エンドポイント別）
+│   │           └── RateLimitConfig.php         # APIレート制限設定（エンドポイント分類細分化、フェイルオーバー対応）
+│   │               # - エンドポイント分類: 認証API（5回/分）、書き込みAPI（10回/分）、読み取りAPI（60回/分）、管理者API（100回/分）
+│   │               # - Redis障害時フェイルオーバー: RATELIMIT_CACHE_STORE環境変数でRedis/Array切替
+│   │               # - キャッシュ競合対策: Cache::increment() + Cache::add()アトミック操作
+│   │               # - retry_after最適化: 負の値問題修正、resetAt計算改善
 │   └── Infrastructure/  # Infrastructure層（外部システム実装）
 │       └── Persistence/ # 永続化実装
 │           ├── Eloquent/           # Eloquent Repository実装（EloquentUserRepository.php）
@@ -89,20 +93,25 @@ laravel-api/
 │   │   │   │   ├── LoginController.php     # ログイン処理（POST /api/login, POST /api/logout）
 │   │   │   │   ├── MeController.php        # 認証ユーザー情報（GET /api/me）
 │   │   │   │   └── TokenController.php     # トークン管理（GET /api/tokens, POST /api/tokens/{id}/revoke）
-│   │   ├── Middleware/  # 🛡️ ミドルウェア（基本ミドルウェアスタック実装）
+│   │   ├── Middleware/  # 🛡️ ミドルウェア（基本ミドルウェアスタック完全実装、145テスト成功、85%カバレッジ）
 │   │   │   ├── Authenticate.php  # 🔐 Sanctum認証ミドルウェア（auth:sanctum）
 │   │   │   ├── SecurityHeaders.php  # 🔐 セキュリティヘッダーミドルウェア（X-Frame-Options、X-Content-Type-Options等）
 │   │   │   ├── ContentSecurityPolicy.php  # 🔐 CSPヘッダー設定ミドルウェア（動的CSP構築、Report-Only/Enforceモード切替）
-│   │   │   ├── SetRequestId.php          # 🛡️ リクエストID付与（Laravel標準Str::uuid()）
-│   │   │   ├── LogPerformance.php        # 🛡️ パフォーマンス監視
-│   │   │   ├── LogSecurity.php           # 🛡️ セキュリティログ分離
-│   │   │   ├── DynamicRateLimit.php      # 🛡️ 動的レート制限（環境変数駆動、Redis/Array切替対応）
-│   │   │   ├── IdempotencyKey.php        # 🛡️ 冪等性保証（環境変数駆動、Webhook対応、IPアドレス識別）
+│   │   │   ├── SetRequestId.php          # 🛡️ リクエストID付与（Laravel標準Str::uuid()、構造化ログ対応）
+│   │   │   ├── LogPerformance.php        # 🛡️ パフォーマンス監視（レスポンスタイム記録）
+│   │   │   ├── LogSecurity.php           # 🛡️ セキュリティログ分離（個人情報ハッシュ化対応、LOG_HASH_SENSITIVE_DATA環境変数制御）
+│   │   │   ├── DynamicRateLimit.php      # 🛡️ APIレート制限強化版
+│   │   │   │   # - エンドポイント分類細分化: 認証（5回/分）、書き込み（10回/分）、読み取り（60回/分）、管理者（100回/分）
+│   │   │   │   # - Redis障害時フェイルオーバー: RATELIMIT_CACHE_STORE環境変数でRedis/Array切替
+│   │   │   │   # - キャッシュ競合対策: Cache::increment() + Cache::add()アトミック操作
+│   │   │   │   # - retry_after最適化: 負の値問題修正、resetAt計算改善
+│   │   │   │   # - DDD統合: Application層RateLimitConfig参照
+│   │   │   ├── IdempotencyKey.php        # 🛡️ 冪等性保証（環境変数駆動、Webhook対応、IPアドレス識別、24時間キャッシュ）
 │   │   │   ├── Authorize.php             # 🛡️ ポリシーベース認可
 │   │   │   ├── AuditLog.php              # 🛡️ ユーザー行動追跡
 │   │   │   ├── SecurityAudit.php         # 🛡️ セキュリティイベント監査
-│   │   │   ├── SetETag.php               # 🛡️ ETag自動生成
-│   │   │   └── CheckETag.php             # 🛡️ 条件付きリクエスト対応
+│   │   │   ├── SetETag.php               # 🛡️ ETag自動生成（HTTP Cache-Control設定）
+│   │   │   └── CheckETag.php             # 🛡️ 条件付きリクエスト対応（304 Not Modified）
 │   │   ├── Requests/    # リクエストバリデーション
 │   │   │   └── Auth/    # 🔐 認証リクエスト
 │   │   │       └── LoginRequest.php  # ログインバリデーション（email, password必須）
@@ -117,7 +126,12 @@ laravel-api/
 │   ├── auth.php         # 認証設定（guards: sanctum）
 │   ├── security.php     # 🔐 セキュリティヘッダー設定（CSP、HSTS、X-Frame-Options等環境変数駆動設定）
 │   ├── cors.php         # 🌐 CORS設定（fruitcake/laravel-cors統合、credentials対応）
-│   └── middleware.php   # 🛡️ ミドルウェア設定（DDD Application層統合、エンドポイント別グループ定義）
+│   └── middleware.php   # 🛡️ ミドルウェア設定（DDD Application層統合完了、エンドポイント別グループ定義）
+│       # - グループ定義: api/auth/public
+│       # - DDD Application層参照: MiddlewareGroupsConfig、RateLimitConfig
+│       # - レート制限環境変数: RATELIMIT_CACHE_STORE、RATELIMIT_*_MAX_ATTEMPTS
+│       # - Idempotency環境変数: IDEMPOTENCY_CACHE_STORE、IDEMPOTENCY_TTL
+│       # - ログ個人情報配慮: LOG_HASH_SENSITIVE_DATA、LOG_SENSITIVE_FIELDS
 ├── database/            # データベース関連
 │   ├── factories/       # モデルファクトリー
 │   ├── migrations/      # マイグレーション
@@ -169,12 +183,18 @@ laravel-api/
 │   │   ├── Security/    # 🔐 セキュリティ機能テスト
 │   │   │   ├── SecurityHeadersTest.php  # セキュリティヘッダーテスト（X-Frame-Options、X-Content-Type-Options等）
 │   │   │   └── CspReportTest.php        # CSP違反レポートテスト（application/json互換性検証）
-│   │   └── Middleware/  # 🛡️ ミドルウェア機能テスト
+│   │   └── Middleware/  # 🛡️ ミドルウェア機能テスト（145テスト成功、85%カバレッジ）
 │   │       ├── SetRequestIdTest.php     # リクエストID付与テスト（UUID生成、ヘッダー検証）
-│   │       ├── DynamicRateLimitTest.php # レート制限テスト（環境変数駆動、キャッシュストア切替）
-│   │       ├── IdempotencyKeyTest.php   # 冪等性保証テスト（Webhook対応、IPアドレス識別）
-│   │       ├── LogPerformanceTest.php   # パフォーマンス監視テスト
-│   │       └── SetETagTest.php          # ETag生成・検証テスト
+│   │       ├── DynamicRateLimitTest.php # APIレート制限強化テスト
+│   │       │   # - エンドポイント分類テスト（認証/書き込み/読み取り/管理者API）
+│   │       │   # - 環境変数駆動テスト（RATELIMIT_CACHE_STORE切替）
+│   │       │   # - キャッシュストア切替テスト（Redis/Array）
+│   │       │   # - retry_after計算テスト（負の値問題修正検証）
+│   │       │   # - キャッシュ競合対策テスト（アトミック操作検証）
+│   │       ├── IdempotencyKeyTest.php   # 冪等性保証テスト（Webhook対応、IPアドレス識別、24時間TTL）
+│   │       ├── LogPerformanceTest.php   # パフォーマンス監視テスト（レスポンスタイム記録検証）
+│   │       ├── LogSecurityTest.php      # セキュリティログテスト（個人情報ハッシュ化検証）
+│   │       └── SetETagTest.php          # ETag生成・検証テスト（304 Not Modified検証）
 │   ├── Unit/            # ユニットテスト（ドメインロジックテスト）
 │   ├── Arch/            # 🏗️ Architecture Tests（依存方向検証、レイヤー分離チェック）
 │   │   ├── DomainLayerTest.php         # Domain層依存チェック
