@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Bootstrap\ValidateEnvironment;
-use Ddd\Application\RateLimit\Contracts\RateLimitService;
 use Ddd\Application\RateLimit\Services\EndpointClassifier;
 use Ddd\Application\RateLimit\Services\KeyResolver;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -43,7 +42,6 @@ class AppServiceProvider extends ServiceProvider
             // DDD層のサービスを取得
             $classifier = app(EndpointClassifier::class);
             $keyResolver = app(KeyResolver::class);
-            $rateLimitService = app(RateLimitService::class);
 
             // エンドポイント分類を取得
             $classification = $classifier->classify($request);
@@ -52,10 +50,8 @@ class AppServiceProvider extends ServiceProvider
             // レート制限キーを解決
             $key = $keyResolver->resolve($request, $classification);
 
-            // レート制限チェック
-            $result = $rateLimitService->checkLimit($key, $rule);
-
             // Limit::perMinutes() を使用してLaravel標準のLimitオブジェクトを返す
+            // Note: 実際のレート制限チェックはLaravelのThrottleRequestsミドルウェアが実行
             return Limit::perMinutes(
                 $rule->getDecayMinutes(),
                 $rule->getMaxAttempts()
