@@ -233,50 +233,93 @@ setup_env() {
 install_dependencies() {
     log_info "依存関係をインストールしています..."
 
-    # Composer install
+    # Composer install（Docker経由で実行）
     log_info "  Composer依存関係をインストール中..."
-    cd backend/laravel-api || return 1
-    if ENV_VALIDATION_SKIP=true retry_with_exponential_backoff composer install --no-interaction --prefer-dist --quiet; then
-        log_info "  ✅ Composer install 完了"
-        cd ../.. || return 1
+    if command -v composer &>/dev/null; then
+        # ローカルのComposerが利用可能な場合
+        log_debug "  ローカルのComposerを使用"
+        cd backend/laravel-api || return 1
+        if ENV_VALIDATION_SKIP=true retry_with_exponential_backoff composer install --no-interaction --prefer-dist --quiet; then
+            log_info "  ✅ Composer install 完了"
+            cd ../.. || return 1
+        else
+            log_error "  ❌ Composer install 失敗"
+            cd ../.. || return 1
+            return 1
+        fi
     else
-        log_error "  ❌ Composer install 失敗"
-        cd ../.. || return 1
-        return 1
+        # Docker経由で実行
+        log_debug "  Docker経由でComposerを実行"
+        if retry_with_exponential_backoff docker compose run --rm --no-deps laravel-api composer install --no-interaction --prefer-dist --quiet; then
+            log_info "  ✅ Composer install 完了"
+        else
+            log_error "  ❌ Composer install 失敗"
+            return 1
+        fi
     fi
 
     # APP_KEY生成（Composer install後、vendorが存在する状態で実行）
     if ! grep -q "APP_KEY=base64:" "backend/laravel-api/.env" 2>/dev/null; then
         log_info "  APP_KEYを生成中..."
-        (cd backend/laravel-api && ENV_VALIDATION_SKIP=true php artisan key:generate --ansi --no-interaction --force)
+        if command -v php &>/dev/null && [ -f "backend/laravel-api/vendor/autoload.php" ]; then
+            # ローカルのPHPが利用可能な場合
+            (cd backend/laravel-api && ENV_VALIDATION_SKIP=true php artisan key:generate --ansi --no-interaction --force)
+        else
+            # Docker経由で実行
+            docker compose run --rm --no-deps laravel-api php artisan key:generate --ansi --no-interaction --force
+        fi
         log_info "  ✅ APP_KEY生成完了"
     else
         log_info "  APP_KEYは既に設定済み（スキップ）"
     fi
 
-    # npm install
+    # npm install（Docker経由で実行）
     log_info "  npm依存関係をインストール中..."
-    if retry_with_exponential_backoff npm install --silent; then
-        log_info "  ✅ npm install 完了"
+    if command -v npm &>/dev/null; then
+        # ローカルのnpmが利用可能な場合
+        log_debug "  ローカルのnpmを使用"
+        if retry_with_exponential_backoff npm install --silent; then
+            log_info "  ✅ npm install 完了"
+        else
+            log_error "  ❌ npm install 失敗"
+            return 1
+        fi
     else
-        log_error "  ❌ npm install 失敗"
-        return 1
+        # Docker経由で実行
+        log_debug "  Docker経由でnpmを実行"
+        # Node.jsコンテナを起動してnpm installを実行
+        if retry_with_exponential_backoff docker run --rm -v "$PWD:/app" -w /app node:23-alpine npm install --silent; then
+            log_info "  ✅ npm install 完了"
+        else
+            log_error "  ❌ npm install 失敗"
+            return 1
+        fi
     fi
 
     # Docker images pull（ビルドが必要なイメージは除外）
     log_info "  Dockerイメージをプル中..."
-    if retry_with_exponential_backoff docker compose pull --quiet --ignore-buildable; then
-        log_info "  ✅ Docker images pull 完了"
+    # --ignore-buildableフラグの対応チェック（Compose v2の新しい機能）
+    if docker compose pull --help 2>&1 | grep -q -- --ignore-buildable; then
+        log_debug "  --ignore-buildableフラグを使用"
+        if retry_with_exponential_backoff docker compose pull --quiet --ignore-buildable; then
+            log_info "  ✅ Docker images pull 完了"
+        else
+            log_error "  ❌ Docker images pull 失敗"
+            return 1
+        fi
     else
-        log_error "  ❌ Docker images pull 失敗"
-        return 1
+        log_debug "  通常のpullを使用（--ignore-buildableフラグ未対応）"
+        # --ignore-buildable未対応の場合、エラーを無視して続行
+        if docker compose pull --quiet 2>/dev/null || true; then
+            log_info "  ✅ Docker images pull 完了（一部スキップ）"
+        fi
     fi
 
     log_info "依存関係インストール完了"
 }
 
 # ==============================================================================
-# Phase 4: サービス起動（簡易版）
+# Phase 4: サービス起動
 # ==============================================================================
 
 start_services() {
@@ -286,15 +329,29 @@ start_services() {
     log_info "  Docker Composeでサービスを起動中..."
     docker compose up -d
 
-    # ヘルスチェック待機
-    log_info "  サービスの起動を待機中..."
-    sleep 10
+    # 主要サービスのヘルスチェック
+    log_info "  主要サービスのヘルスチェック中..."
+
+    # PostgreSQL
+    if ! wait_for_service "pgsql" "health" 30; then
+        log_warn "  PostgreSQLのヘルスチェックがタイムアウトしました（続行）"
+    fi
+
+    # Redis
+    if ! wait_for_service "redis" "health" 30; then
+        log_warn "  Redisのヘルスチェックがタイムアウトしました（続行）"
+    fi
+
+    # Laravel API
+    if ! wait_for_service "laravel-api" "health" 60; then
+        log_warn "  Laravel APIのヘルスチェックがタイムアウトしました（続行）"
+    fi
 
     log_info "サービス起動完了"
 }
 
 # ==============================================================================
-# Phase 5: セットアップ検証（簡易版）
+# Phase 5: セットアップ検証
 # ==============================================================================
 
 verify_setup() {
@@ -303,6 +360,14 @@ verify_setup() {
     # Docker Composeサービス確認
     log_info "  サービスステータス:"
     docker compose ps
+
+    # Laravel APIヘルスチェック
+    log_info "  Laravel APIヘルスチェック:"
+    if wait_for_service "Laravel API" "http:http://localhost:13000/api/health" 10; then
+        log_info "  ✅ Laravel API が正常に応答しています"
+    else
+        log_warn "  ⚠️  Laravel APIが応答していません（コンテナが起動中の可能性があります）"
+    fi
 
     log_info "セットアップ検証完了"
 }

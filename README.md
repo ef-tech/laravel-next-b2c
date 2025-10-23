@@ -259,13 +259,15 @@ make setup
 **次のステップ**:
 ```bash
 # データベースマイグレーション
-cd backend/laravel-api && php artisan migrate
+docker compose exec laravel-api php artisan migrate
 
 # シーディング
-php artisan db:seed
+docker compose exec laravel-api php artisan db:seed
 
 # フロントエンドアプリにアクセス
-open http://localhost:13001
+# ブラウザで以下のURLを開く
+# User App: http://localhost:13001
+# Admin App: http://localhost:13002
 ```
 
 ### 🔧 部分的再実行

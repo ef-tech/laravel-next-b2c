@@ -377,3 +377,48 @@ measure_step_time() {
 
     return $exit_code
 }
+
+# ==============================================================================
+# ヘルスチェック
+# ==============================================================================
+
+# サービスのヘルスチェック待機
+# Usage: wait_for_service <service_name> <check_type> [max_attempts]
+# check_type: "health" (Docker health check) or "http:<url>" (HTTP endpoint check)
+# Returns: 0 if healthy, 1 if timeout
+wait_for_service() {
+    local service_name=$1
+    local check_type=$2
+    local max_attempts=${3:-30}  # デフォルト30回（30秒）
+    local attempt=1
+
+    log_info "  $service_name のヘルスチェック待機中..."
+
+    while [ $attempt -le $max_attempts ]; do
+        case "$check_type" in
+            health)
+                # Dockerのヘルスチェックステータスを確認
+                local health_status=$(docker compose ps -q "$service_name" | xargs docker inspect --format='{{.State.Health.Status}}' 2>/dev/null || echo "none")
+                if [ "$health_status" = "healthy" ]; then
+                    log_info "  ✅ $service_name が正常起動しました"
+                    return 0
+                fi
+                ;;
+            http:*)
+                # HTTPエンドポイントを確認
+                local url="${check_type#http:}"
+                if curl -fsS "$url" &>/dev/null; then
+                    log_info "  ✅ $service_name が応答しています"
+                    return 0
+                fi
+                ;;
+        esac
+
+        log_debug "  試行 $attempt/$max_attempts..."
+        sleep 1
+        attempt=$((attempt + 1))
+    done
+
+    log_error "  ❌ $service_name のヘルスチェックがタイムアウトしました"
+    return 1
+}
