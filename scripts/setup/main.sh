@@ -259,9 +259,9 @@ install_dependencies() {
         return 1
     fi
 
-    # Docker images pull
+    # Docker images pull（ビルドが必要なイメージは除外）
     log_info "  Dockerイメージをプル中..."
-    if retry_with_exponential_backoff docker compose pull --quiet; then
+    if retry_with_exponential_backoff docker compose pull --quiet --ignore-buildable; then
         log_info "  ✅ Docker images pull 完了"
     else
         log_error "  ❌ Docker images pull 失敗"
