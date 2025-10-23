@@ -148,7 +148,7 @@ final class DynamicRateLimit
 
         // 拡張ヘッダー
         $response->headers->set('X-RateLimit-Policy', $classification->getType());
-        $response->headers->set('X-RateLimit-Key', hash('sha256', $key->getKey()));
+        $response->headers->set('X-RateLimit-Key', $key->getHashedKey());
 
         return $response;
     }
