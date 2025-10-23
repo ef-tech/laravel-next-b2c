@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Ddd\Application\RateLimit\Services\KeyResolver;
+use Ddd\Domain\RateLimit\ValueObjects\EndpointClassification;
 use Ddd\Domain\RateLimit\ValueObjects\RateLimitKey;
 use Ddd\Domain\RateLimit\ValueObjects\RateLimitRule;
 use Illuminate\Http\Request;
@@ -15,8 +16,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('public_unauthenticated', 60, 1);
+            $classification = EndpointClassification::create('public_unauthenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             expect($key)->toBeInstanceOf(RateLimitKey::class)
                 ->and($key->getKey())->toBe('rate_limit:public_unauthenticated:ip_192.168.1.100');
@@ -30,10 +32,11 @@ describe('KeyResolver Service', function () {
             $request2->server->set('REMOTE_ADDR', '192.168.1.200');
 
             $rule = RateLimitRule::create('public_unauthenticated', 60, 1);
+            $classification = EndpointClassification::create('public_unauthenticated', $rule);
             $resolver = new KeyResolver;
 
-            $key1 = $resolver->resolve($request1, $rule);
-            $key2 = $resolver->resolve($request2, $rule);
+            $key1 = $resolver->resolve($request1, $classification);
+            $key2 = $resolver->resolve($request2, $classification);
 
             expect($key1->getKey())->not->toBe($key2->getKey());
         });
@@ -45,8 +48,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('protected_unauthenticated', 5, 10);
+            $classification = EndpointClassification::create('protected_unauthenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             $expectedEmailHash = hash('sha256', 'user@example.com');
             $expectedKey = "rate_limit:protected_unauthenticated:ip_192.168.1.100_email_{$expectedEmailHash}";
@@ -63,10 +67,11 @@ describe('KeyResolver Service', function () {
             $request2->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('protected_unauthenticated', 5, 10);
+            $classification = EndpointClassification::create('protected_unauthenticated', $rule);
             $resolver = new KeyResolver;
 
-            $key1 = $resolver->resolve($request1, $rule);
-            $key2 = $resolver->resolve($request2, $rule);
+            $key1 = $resolver->resolve($request1, $classification);
+            $key2 = $resolver->resolve($request2, $classification);
 
             expect($key1->getKey())->toBe($key2->getKey());
         });
@@ -79,10 +84,11 @@ describe('KeyResolver Service', function () {
             $request2->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('protected_unauthenticated', 5, 10);
+            $classification = EndpointClassification::create('protected_unauthenticated', $rule);
             $resolver = new KeyResolver;
 
-            $key1 = $resolver->resolve($request1, $rule);
-            $key2 = $resolver->resolve($request2, $rule);
+            $key1 = $resolver->resolve($request1, $classification);
+            $key2 = $resolver->resolve($request2, $classification);
 
             expect($key1->getKey())->not->toBe($key2->getKey());
         });
@@ -92,8 +98,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('protected_unauthenticated', 5, 10);
+            $classification = EndpointClassification::create('protected_unauthenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             $expectedEmailHash = hash('sha256', 'unknown');
             $expectedKey = "rate_limit:protected_unauthenticated:ip_192.168.1.100_email_{$expectedEmailHash}";
@@ -113,8 +120,9 @@ describe('KeyResolver Service', function () {
             $request->setUserResolver(fn () => $user);
 
             $rule = RateLimitRule::create('public_authenticated', 120, 1);
+            $classification = EndpointClassification::create('public_authenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             expect($key)->toBeInstanceOf(RateLimitKey::class)
                 ->and($key->getKey())->toBe('rate_limit:public_authenticated:user_123');
@@ -137,10 +145,11 @@ describe('KeyResolver Service', function () {
             $request2->setUserResolver(fn () => $user2);
 
             $rule = RateLimitRule::create('public_authenticated', 120, 1);
+            $classification = EndpointClassification::create('public_authenticated', $rule);
             $resolver = new KeyResolver;
 
-            $key1 = $resolver->resolve($request1, $rule);
-            $key2 = $resolver->resolve($request2, $rule);
+            $key1 = $resolver->resolve($request1, $classification);
+            $key2 = $resolver->resolve($request2, $classification);
 
             expect($key1->getKey())->not->toBe($key2->getKey());
         });
@@ -157,8 +166,9 @@ describe('KeyResolver Service', function () {
             $request->setUserResolver(fn () => $user);
 
             $rule = RateLimitRule::create('protected_authenticated', 30, 1);
+            $classification = EndpointClassification::create('protected_authenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             expect($key)->toBeInstanceOf(RateLimitKey::class)
                 ->and($key->getKey())->toBe('rate_limit:protected_authenticated:user_123');
@@ -185,8 +195,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('public_authenticated', 120, 1);
+            $classification = EndpointClassification::create('public_authenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             // User ID が優先される（Token IDではない）
             expect($key->getKey())->toBe('rate_limit:public_authenticated:user_123');
@@ -211,8 +222,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('public_authenticated', 120, 1);
+            $classification = EndpointClassification::create('public_authenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             // Token IDにフォールバック
             expect($key->getKey())->toBe('rate_limit:public_authenticated:token_999');
@@ -234,8 +246,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('public_authenticated', 120, 1);
+            $classification = EndpointClassification::create('public_authenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             // IPアドレスにフォールバック
             expect($key->getKey())->toBe('rate_limit:public_authenticated:ip_192.168.1.100');
@@ -247,8 +260,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('public_authenticated', 120, 1);
+            $classification = EndpointClassification::create('public_authenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             // IPアドレスにフォールバック
             expect($key->getKey())->toBe('rate_limit:public_authenticated:ip_192.168.1.100');
@@ -261,8 +275,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('default', 30, 1);
+            $classification = EndpointClassification::create('default', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             expect($key)->toBeInstanceOf(RateLimitKey::class)
                 ->and($key->getKey())->toBe('rate_limit:default:ip_192.168.1.100');
@@ -280,8 +295,9 @@ describe('KeyResolver Service', function () {
             $request->setUserResolver(fn () => $user);
 
             $rule = RateLimitRule::create('public_authenticated', 120, 1);
+            $classification = EndpointClassification::create('public_authenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             $hashedKey = $key->getHashedKey();
 
@@ -295,8 +311,9 @@ describe('KeyResolver Service', function () {
             $request->server->set('REMOTE_ADDR', '192.168.1.100');
 
             $rule = RateLimitRule::create('protected_unauthenticated', 5, 10);
+            $classification = EndpointClassification::create('protected_unauthenticated', $rule);
             $resolver = new KeyResolver;
-            $key = $resolver->resolve($request, $rule);
+            $key = $resolver->resolve($request, $classification);
 
             // キーに元のEmailアドレスは含まれない（ハッシュ化されている）
             expect($key->getKey())->not->toContain('user@example.com')

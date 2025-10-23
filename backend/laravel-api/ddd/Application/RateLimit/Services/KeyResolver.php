@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ddd\Application\RateLimit\Services;
 
+use Ddd\Domain\RateLimit\ValueObjects\EndpointClassification;
 use Ddd\Domain\RateLimit\ValueObjects\RateLimitKey;
-use Ddd\Domain\RateLimit\ValueObjects\RateLimitRule;
 use Illuminate\Http\Request;
 
 /**
@@ -24,21 +24,25 @@ use Illuminate\Http\Request;
 final class KeyResolver
 {
     /**
-     * リクエストとルールから適切なレート制限キーを解決
+     * リクエストとエンドポイント分類から適切なレート制限キーを解決
+     *
+     * Phase 4拡張: EndpointClassificationを受け取るように変更
      *
      * @param  Request  $request  HTTPリクエスト
-     * @param  RateLimitRule  $rule  レート制限ルール
+     * @param  EndpointClassification  $classification  エンドポイント分類
      */
-    public function resolve(Request $request, RateLimitRule $rule): RateLimitKey
+    public function resolve(Request $request, EndpointClassification $classification): RateLimitKey
     {
-        $identifier = match ($rule->getEndpointType()) {
+        $type = $classification->getType();
+
+        $identifier = match ($type) {
             'public_unauthenticated' => $this->getIpAddress($request),
             'protected_unauthenticated' => $this->getIpAndEmail($request),
             'public_authenticated', 'protected_authenticated' => $this->getUserIdentifier($request),
             default => $this->getIpAddress($request),
         };
 
-        $keyString = "rate_limit:{$rule->getEndpointType()}:{$identifier}";
+        $keyString = "rate_limit:{$type}:{$identifier}";
 
         return RateLimitKey::create($keyString);
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Ddd\Application\RateLimit\Services\EndpointClassifier;
 use Ddd\Application\RateLimit\Services\RateLimitConfigManager;
+use Ddd\Domain\RateLimit\ValueObjects\EndpointClassification;
 use Ddd\Domain\RateLimit\ValueObjects\RateLimitRule;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
@@ -53,12 +54,14 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule)->toBeInstanceOf(RateLimitRule::class)
-                ->and($rule->getEndpointType())->toBe('public_unauthenticated')
-                ->and($rule->getMaxAttempts())->toBe(60)
-                ->and($rule->getDecayMinutes())->toBe(1);
+            expect($classification)->toBeInstanceOf(EndpointClassification::class)
+                ->and($classification->getType())->toBe('public_unauthenticated')
+                ->and($classification->getRule())->toBeInstanceOf(RateLimitRule::class)
+                ->and($classification->getRule()->getEndpointType())->toBe('public_unauthenticated')
+                ->and($classification->getRule()->getMaxAttempts())->toBe(60)
+                ->and($classification->getRule()->getDecayMinutes())->toBe(1);
         });
 
         it('未認証 + 保護エンドポイント(login) = protected_unauthenticated (5 req/10min)', function () {
@@ -69,12 +72,12 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule)->toBeInstanceOf(RateLimitRule::class)
-                ->and($rule->getEndpointType())->toBe('protected_unauthenticated')
-                ->and($rule->getMaxAttempts())->toBe(5)
-                ->and($rule->getDecayMinutes())->toBe(10);
+            expect($classification->getRule())->toBeInstanceOf(RateLimitRule::class)
+                ->and($classification->getRule()->getEndpointType())->toBe('protected_unauthenticated')
+                ->and($classification->getRule()->getMaxAttempts())->toBe(5)
+                ->and($classification->getRule()->getDecayMinutes())->toBe(10);
         });
 
         it('認証済み + 公開エンドポイント = public_authenticated (120 req/min)', function () {
@@ -91,12 +94,12 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule)->toBeInstanceOf(RateLimitRule::class)
-                ->and($rule->getEndpointType())->toBe('public_authenticated')
-                ->and($rule->getMaxAttempts())->toBe(120)
-                ->and($rule->getDecayMinutes())->toBe(1);
+            expect($classification->getRule())->toBeInstanceOf(RateLimitRule::class)
+                ->and($classification->getRule()->getEndpointType())->toBe('public_authenticated')
+                ->and($classification->getRule()->getMaxAttempts())->toBe(120)
+                ->and($classification->getRule()->getDecayMinutes())->toBe(1);
         });
 
         it('認証済み + 保護エンドポイント(admin) = protected_authenticated (30 req/min)', function () {
@@ -113,12 +116,12 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule)->toBeInstanceOf(RateLimitRule::class)
-                ->and($rule->getEndpointType())->toBe('protected_authenticated')
-                ->and($rule->getMaxAttempts())->toBe(30)
-                ->and($rule->getDecayMinutes())->toBe(1);
+            expect($classification->getRule())->toBeInstanceOf(RateLimitRule::class)
+                ->and($classification->getRule()->getEndpointType())->toBe('protected_authenticated')
+                ->and($classification->getRule()->getMaxAttempts())->toBe(30)
+                ->and($classification->getRule()->getDecayMinutes())->toBe(1);
         });
     });
 
@@ -131,9 +134,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('protected_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('protected_unauthenticated');
         });
 
         it('registerルートは保護エンドポイントと判定される', function () {
@@ -144,9 +147,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('protected_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('protected_unauthenticated');
         });
 
         it('password.*パターンは保護エンドポイントと判定される', function () {
@@ -157,9 +160,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('protected_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('protected_unauthenticated');
         });
 
         it('admin.*パターンは保護エンドポイントと判定される', function () {
@@ -170,9 +173,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('protected_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('protected_unauthenticated');
         });
 
         it('payment.*パターンは保護エンドポイントと判定される', function () {
@@ -183,9 +186,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('protected_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('protected_unauthenticated');
         });
 
         it('保護パターンに一致しないルートは公開エンドポイントと判定される', function () {
@@ -196,9 +199,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('public_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('public_unauthenticated');
         });
     });
 
@@ -211,9 +214,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('public_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('public_unauthenticated');
         });
 
         it('ルートがnullの場合はデフォルトルールを返す', function () {
@@ -222,9 +225,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('public_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('public_unauthenticated');
         });
 
         it('認証状態がnullの場合は未認証として扱われる', function () {
@@ -236,9 +239,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('public_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('public_unauthenticated');
         });
     });
 
@@ -255,9 +258,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('protected_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('protected_unauthenticated');
         });
 
         it('保護ルート設定が空の場合は全て公開エンドポイントと判定される', function () {
@@ -270,9 +273,9 @@ describe('EndpointClassifier Service', function () {
 
             $configManager = new RateLimitConfigManager;
             $classifier = new EndpointClassifier($configManager);
-            $rule = $classifier->classify($request);
+            $classification = $classifier->classify($request);
 
-            expect($rule->getEndpointType())->toBe('public_unauthenticated');
+            expect($classification->getRule()->getEndpointType())->toBe('public_unauthenticated');
         });
     });
 });

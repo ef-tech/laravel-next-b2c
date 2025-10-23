@@ -148,8 +148,14 @@
 
 ## Phase 4: HTTP層ミドルウェア拡張
 
-- [ ] 4. DynamicRateLimitミドルウェアをApplication層サービスで拡張
-- [ ] 4.1 既存DynamicRateLimitミドルウェアをApplication層サービス統合形式に変更
+- [x] 4. DynamicRateLimitミドルウェアをApplication層サービスで拡張
+
+**実装ハイライト**:
+- EndpointClassification Value Object作成（52行、エンドポイント分類タイプとルールをカプセル化）
+- EndpointClassifier/KeyResolverサービスをEndpointClassification対応に拡張
+- 既存Phase 2/3テスト修正完了（EndpointClassifierTest: 15テスト Pass）
+
+- [x] 4.1 既存DynamicRateLimitミドルウェアをApplication層サービス統合形式に変更
   - コンストラクタでApplication層サービス（EndpointClassifier、KeyResolver、RateLimitService、RateLimitMetrics）を注入
   - `handle()`メソッドでエンドポイント分類サービスを呼び出し
   - `handle()`メソッドでキー解決サービスを呼び出し
@@ -158,8 +164,9 @@
   - レート制限許可時にメトリクスサービスでヒット数を記録
   - 既存の`config/ratelimit.php`設定ファイル統合を維持
   - _Requirements: 6.1, 6.2, 6.6, 7.6_
+  - ✅ **実装完了**: DynamicRateLimitミドルウェア完全リファクタリング（161行、Laravel Pint + PHPStan Level 8 Pass）
 
-- [ ] 4.2 HTTPレスポンスヘッダーを強化
+- [x] 4.2 HTTPレスポンスヘッダーを強化
   - `X-RateLimit-Limit`ヘッダーに最大試行回数を設定
   - `X-RateLimit-Remaining`ヘッダーに残り試行回数を設定
   - `X-RateLimit-Reset`ヘッダーにUNIXタイムスタンプ形式のリセット時刻を設定
@@ -169,15 +176,17 @@
   - 429レスポンスのJSONボディに`{"message": "Too Many Requests", "retry_after": {seconds}}`形式のエラー詳細を含める
   - Laravel標準ThrottleRequestsミドルウェアと同じヘッダー名を使用
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 6.3_
+  - ✅ **実装完了**: HTTPヘッダー強化完了（X-RateLimit-Policy、X-RateLimit-Key、Retry-After、JSONボディ）
 
-- [ ] 4.3 RouteServiceProviderとの統合を確認
+- [x] 4.3 RouteServiceProviderとの統合を確認
   - `RateLimiter::for('dynamic', function() {})`メソッドのサポートを確認
   - ルート定義で`->middleware('throttle:dynamic')`指定が動作することを確認
   - Laravel標準`Cache::increment()`と`Cache::add()`の使用を確認
   - `config/middleware.php`の`api`グループへの配置を確認
   - _Requirements: 6.1, 6.2, 6.4, 6.5, 6.6_
+  - ✅ **実装完了**: AppServiceProvider::configureRateLimiting()実装、RateLimiter::for('dynamic')登録完了
 
-- [ ] 4.4 HTTP層統合のFeature Testsを実装
+- [x] 4.4 HTTP層統合のFeature Testsを実装
   - 公開・未認証エンドポイントのレート制限テスト（60 req/min、IPベース）
   - 保護・未認証エンドポイント（ログイン）のレート制限テスト（5 req/10min、IP + Emailベース）
   - 公開・認証済みエンドポイントのレート制限テスト（120 req/min、User IDベース）
@@ -186,6 +195,7 @@
   - 429レスポンスのJSONボディ検証テスト
   - Laravel標準ThrottleRequests互換性テスト
   - _Requirements: 10.3, 10.4, 10.5_
+  - ✅ **実装完了**: DynamicRateLimitFeatureTest（9テスト、59アサーション全合格）
 
 ---
 
@@ -208,13 +218,14 @@
   - 保護ルートパターン設定の説明を追加
   - _Requirements: 8.1, 8.4_
 
-- [ ] 5.3 DIコンテナにApplication層サービスを登録
+- [x] 5.3 DIコンテナにApplication層サービスを登録
   - ServiceProviderでApplication層サービス（EndpointClassifier、KeyResolver、RateLimitConfigManager）をシングルトン登録
   - ServiceProviderでInfrastructure層サービス（LaravelRateLimiterStore、FailoverRateLimitStore、LogMetrics）をシングルトン登録
   - RateLimitServiceインターフェースにFailoverRateLimitStoreを紐付け
   - RateLimitMetricsインターフェースにLogMetricsを紐付け
   - DynamicRateLimitミドルウェアでコンストラクタインジェクションが動作することを確認
   - _Requirements: 7.3, 7.4, 7.5, 7.6_
+  - ✅ **実装完了**: DddServiceProviderに5つのバインディング追加、Failoverストア自動構成
 
 ---
 

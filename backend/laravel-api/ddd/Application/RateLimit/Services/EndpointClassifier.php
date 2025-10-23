@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ddd\Application\RateLimit\Services;
 
-use Ddd\Domain\RateLimit\ValueObjects\RateLimitRule;
+use Ddd\Domain\RateLimit\ValueObjects\EndpointClassification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -31,20 +31,26 @@ final class EndpointClassifier
     /**
      * リクエストを分類し、適切なレート制限ルールを返す
      *
+     * Phase 4拡張: EndpointClassification Value Objectを返すように変更
+     *
      * @param  Request  $request  HTTPリクエスト
      */
-    public function classify(Request $request): RateLimitRule
+    public function classify(Request $request): EndpointClassification
     {
         $isAuthenticated = $request->user() !== null;
         $isProtected = $this->isProtectedEndpoint($request);
 
-        return match (true) {
-            ! $isAuthenticated && ! $isProtected => $this->configManager->getRule('public_unauthenticated'),
-            ! $isAuthenticated && $isProtected => $this->configManager->getRule('protected_unauthenticated'),
-            $isAuthenticated && ! $isProtected => $this->configManager->getRule('public_authenticated'),
-            $isAuthenticated && $isProtected => $this->configManager->getRule('protected_authenticated'),
-            default => $this->configManager->getDefaultRule(),
+        $type = match (true) {
+            ! $isAuthenticated && ! $isProtected => 'public_unauthenticated',
+            ! $isAuthenticated && $isProtected => 'protected_unauthenticated',
+            $isAuthenticated && ! $isProtected => 'public_authenticated',
+            $isAuthenticated && $isProtected => 'protected_authenticated',
+            default => 'public_unauthenticated',
         };
+
+        $rule = $this->configManager->getRule($type);
+
+        return EndpointClassification::create($type, $rule);
     }
 
     /**
