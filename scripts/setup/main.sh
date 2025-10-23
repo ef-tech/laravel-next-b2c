@@ -196,20 +196,11 @@ setup_env() {
     log_info "環境変数をセットアップしています..."
 
     # Laravel API
-    local env_created=false
     if [ ! -f "backend/laravel-api/.env" ]; then
         cp "backend/laravel-api/.env.example" "backend/laravel-api/.env"
         log_info "  Laravel API .env を作成しました"
-        env_created=true
     else
         log_warn "  Laravel API .env は既に存在します（スキップ）"
-    fi
-
-    # APP_KEY生成（.envが新規作成された場合、または既存でもAPP_KEYが空の場合）
-    if [ "$env_created" = true ] || ! grep -q "APP_KEY=base64:" "backend/laravel-api/.env" 2>/dev/null; then
-        log_info "  APP_KEYを生成中..."
-        (cd backend/laravel-api && ENV_VALIDATION_SKIP=true php artisan key:generate --ansi --no-interaction --force)
-        log_info "  APP_KEY生成完了"
     fi
 
     # User App
@@ -252,6 +243,15 @@ install_dependencies() {
         log_error "  ❌ Composer install 失敗"
         cd ../.. || return 1
         return 1
+    fi
+
+    # APP_KEY生成（Composer install後、vendorが存在する状態で実行）
+    if ! grep -q "APP_KEY=base64:" "backend/laravel-api/.env" 2>/dev/null; then
+        log_info "  APP_KEYを生成中..."
+        (cd backend/laravel-api && ENV_VALIDATION_SKIP=true php artisan key:generate --ansi --no-interaction --force)
+        log_info "  ✅ APP_KEY生成完了"
+    else
+        log_info "  APP_KEYは既に設定済み（スキップ）"
     fi
 
     # npm install
