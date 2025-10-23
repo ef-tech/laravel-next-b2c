@@ -66,7 +66,7 @@ final class DynamicRateLimit
             // レート制限超過チェック
             if ($result->isBlocked()) {
                 // レート制限ブロックをメトリクスに記録
-                $retryAfter = (int) $result->getResetAt()->diffInSeconds(now());
+                $retryAfter = max(0, (int) $result->getResetAt()->diffInSeconds(now()));
                 $this->metrics->recordBlock($key, $rule, $result->getAttempts(), $retryAfter);
 
                 // 429レスポンスを返す
@@ -101,7 +101,7 @@ final class DynamicRateLimit
         $classification,
         $result
     ): Response {
-        $retryAfter = (int) $result->getResetAt()->diffInSeconds(now());
+        $retryAfter = max(0, (int) $result->getResetAt()->diffInSeconds(now()));
 
         // JSONボディを作成
         $body = json_encode([

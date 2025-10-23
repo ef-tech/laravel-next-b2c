@@ -39,29 +39,24 @@ final class LaravelRateLimiterStore implements RateLimitService
     public function checkLimit(RateLimitKey $key, RateLimitRule $rule): RateLimitResult
     {
         $cacheKey = $key->getKey();
+        $resetAtKey = $cacheKey.':reset_at';
         $maxAttempts = $rule->getMaxAttempts();
         $decaySeconds = $rule->getDecaySeconds();
 
-        // 初回リクエスト時にTTL付きキーを作成
+        // 初回リクエスト時にTTL付きキーとresetAt時刻を作成
         $cache = Cache::store($this->store);
         if (! $cache->has($cacheKey)) {
+            $resetAt = Carbon::now()->addSeconds($decaySeconds);
             $cache->add($cacheKey, 0, $decaySeconds);
+            $cache->add($resetAtKey, $resetAt->timestamp, $decaySeconds);
         }
 
         // 原子的にカウンタを増加
         $attempts = (int) $cache->increment($cacheKey);
 
-        // リセット時刻を計算
-        // Note: キャッシュのTTLは最初のリクエスト時に設定されるため、
-        // 初回リクエスト時は now() + decay_minutes、以降はキャッシュの有効期限を使用
-        if ($attempts === 1) {
-            // 初回リクエスト: 現在時刻 + decay_minutes
-            $resetAt = Carbon::now()->addMinutes($rule->getDecayMinutes());
-        } else {
-            // 2回目以降: 初回リクエスト時に設定されたTTLを基準にする
-            // decay_minutes分前の時刻（初回リクエスト時刻）を推定してresetAtを計算
-            $resetAt = Carbon::now()->addMinutes($rule->getDecayMinutes());
-        }
+        // リセット時刻を取得（キャッシュから）
+        $resetAtTimestamp = $cache->get($resetAtKey);
+        $resetAt = Carbon::createFromTimestamp($resetAtTimestamp);
 
         // 許可/拒否判定
         if ($attempts <= $maxAttempts) {
@@ -80,7 +75,11 @@ final class LaravelRateLimiterStore implements RateLimitService
      */
     public function resetLimit(RateLimitKey $key): void
     {
-        Cache::store($this->store)->forget($key->getKey());
+        $cacheKey = $key->getKey();
+        $resetAtKey = $cacheKey.':reset_at';
+        $cache = Cache::store($this->store);
+        $cache->forget($cacheKey);
+        $cache->forget($resetAtKey);
     }
 
     /**
@@ -92,14 +91,20 @@ final class LaravelRateLimiterStore implements RateLimitService
     public function getStatus(RateLimitKey $key, RateLimitRule $rule): RateLimitResult
     {
         $cacheKey = $key->getKey();
+        $resetAtKey = $cacheKey.':reset_at';
         $maxAttempts = $rule->getMaxAttempts();
         $cache = Cache::store($this->store);
 
         // 現在の試行回数を取得（存在しない場合は0）
         $attempts = (int) $cache->get($cacheKey, 0);
 
-        // リセット時刻を計算
-        $resetAt = Carbon::now()->addMinutes($rule->getDecayMinutes());
+        // リセット時刻を取得（存在しない場合は現在時刻 + decay_minutes）
+        $resetAtTimestamp = $cache->get($resetAtKey);
+        if ($resetAtTimestamp !== null) {
+            $resetAt = Carbon::createFromTimestamp($resetAtTimestamp);
+        } else {
+            $resetAt = Carbon::now()->addMinutes($rule->getDecayMinutes());
+        }
 
         // 許可/拒否判定
         if ($attempts < $maxAttempts) {
