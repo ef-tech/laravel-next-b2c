@@ -9,6 +9,9 @@ use Ddd\Application\RateLimit\Contracts\RateLimitMetrics;
 use Ddd\Application\RateLimit\Contracts\RateLimitService;
 use Ddd\Application\RateLimit\Services\EndpointClassifier;
 use Ddd\Application\RateLimit\Services\KeyResolver;
+use Ddd\Domain\RateLimit\ValueObjects\EndpointClassification;
+use Ddd\Domain\RateLimit\ValueObjects\RateLimitKey;
+use Ddd\Domain\RateLimit\ValueObjects\RateLimitResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -91,15 +94,11 @@ final class DynamicRateLimit
 
     /**
      * レート制限超過レスポンスを構築する（429 Too Many Requests）
-     *
-     * @param  \Ddd\Domain\RateLimit\ValueObjects\RateLimitKey  $key
-     * @param  \Ddd\Domain\RateLimit\ValueObjects\EndpointClassification  $classification
-     * @param  \Ddd\Domain\RateLimit\ValueObjects\RateLimitResult  $result
      */
     private function buildRateLimitResponse(
-        $key,
-        $classification,
-        $result
+        RateLimitKey $key,
+        EndpointClassification $classification,
+        RateLimitResult $result
     ): Response {
         $retryAfter = max(0, (int) $result->getResetAt()->diffInSeconds(now()));
 
@@ -133,16 +132,12 @@ final class DynamicRateLimit
      * 拡張ヘッダー:
      * - X-RateLimit-Policy: エンドポイント分類（例: public_unauthenticated）
      * - X-RateLimit-Key: レート制限キー（SHA-256ハッシュ化）
-     *
-     * @param  \Ddd\Domain\RateLimit\ValueObjects\RateLimitKey  $key
-     * @param  \Ddd\Domain\RateLimit\ValueObjects\EndpointClassification  $classification
-     * @param  \Ddd\Domain\RateLimit\ValueObjects\RateLimitResult  $result
      */
     private function addRateLimitHeaders(
         Response $response,
-        $key,
-        $classification,
-        $result
+        RateLimitKey $key,
+        EndpointClassification $classification,
+        RateLimitResult $result
     ): Response {
         $rule = $classification->getRule();
 

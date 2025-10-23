@@ -39,7 +39,7 @@ final class KeyResolver
             'public_unauthenticated' => $this->getIpAddress($request),
             'protected_unauthenticated' => $this->getIpAndEmail($request),
             'public_authenticated', 'protected_authenticated' => $this->getUserIdentifier($request),
-            default => $this->getIpAddress($request),
+            default => $this->getIpAddress($request), // フォールバック（将来の拡張性のため）
         };
 
         $keyString = "rate_limit:{$type}:{$identifier}";

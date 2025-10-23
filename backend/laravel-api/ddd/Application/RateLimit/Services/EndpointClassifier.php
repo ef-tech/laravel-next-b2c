@@ -45,7 +45,7 @@ final class EndpointClassifier
             ! $isAuthenticated && $isProtected => 'protected_unauthenticated',
             $isAuthenticated && ! $isProtected => 'public_authenticated',
             $isAuthenticated && $isProtected => 'protected_authenticated',
-            default => 'public_unauthenticated',
+            default => throw new \LogicException('Unreachable: All boolean combinations are handled'),
         };
 
         $rule = $this->configManager->getRule($type);
