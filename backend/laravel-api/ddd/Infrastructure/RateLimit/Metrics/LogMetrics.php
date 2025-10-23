@@ -24,6 +24,10 @@ use Illuminate\Support\Facades\Log;
  * 出力形式:
  * 全てのログは構造化されたコンテキスト配列とともに出力される。
  * CloudWatch Logs、Datadog、Elasticsearch等の集約システムで検索・分析が容易。
+ *
+ * プライバシー配慮:
+ * config('ratelimit.log.hash_key') = true の場合、レート制限キーをSHA-256ハッシュ化して出力。
+ * GDPR等の規制対応のため、本番環境ではハッシュ化推奨。
  */
 final class LogMetrics implements RateLimitMetrics
 {
@@ -31,6 +35,13 @@ final class LogMetrics implements RateLimitMetrics
      * 遅延とみなすレイテンシ閾値（ミリ秒）
      */
     private const float SLOW_LATENCY_THRESHOLD_MS = 10.0;
+
+    /**
+     * @param  bool  $hashKey  ログ出力時にキーをハッシュ化するかどうか
+     */
+    public function __construct(
+        private readonly bool $hashKey = true,
+    ) {}
 
     /**
      * レート制限ヒットを記録
@@ -43,7 +54,7 @@ final class LogMetrics implements RateLimitMetrics
     public function recordHit(RateLimitKey $key, RateLimitRule $rule, bool $allowed, int $attempts): void
     {
         $context = [
-            'key' => $key->getKey(),
+            'key' => $this->getKeyForLog($key),
             'endpoint_type' => $rule->getEndpointType(),
             'max_attempts' => $rule->getMaxAttempts(),
             'decay_minutes' => $rule->getDecayMinutes(),
@@ -69,7 +80,7 @@ final class LogMetrics implements RateLimitMetrics
     public function recordBlock(RateLimitKey $key, RateLimitRule $rule, int $attempts, int $retryAfter): void
     {
         $context = [
-            'key' => $key->getKey(),
+            'key' => $this->getKeyForLog($key),
             'endpoint_type' => $rule->getEndpointType(),
             'max_attempts' => $rule->getMaxAttempts(),
             'decay_minutes' => $rule->getDecayMinutes(),
@@ -91,7 +102,7 @@ final class LogMetrics implements RateLimitMetrics
     public function recordFailure(RateLimitKey $key, RateLimitRule $rule, string $errorMessage, bool $failedOver): void
     {
         $context = [
-            'key' => $key->getKey(),
+            'key' => $this->getKeyForLog($key),
             'endpoint_type' => $rule->getEndpointType(),
             'max_attempts' => $rule->getMaxAttempts(),
             'decay_minutes' => $rule->getDecayMinutes(),
@@ -126,5 +137,19 @@ final class LogMetrics implements RateLimitMetrics
         } else {
             Log::info('rate_limit.latency', $context);
         }
+    }
+
+    /**
+     * ログ出力用のキーを取得
+     *
+     * プライバシー配慮: hashKey=true の場合、SHA-256ハッシュ化したキーを返す。
+     * GDPR等の規制対応のため、本番環境ではハッシュ化を推奨。
+     *
+     * @param  RateLimitKey  $key  レート制限識別キー
+     * @return string ログ出力用キー（生キーまたはハッシュ化キー）
+     */
+    private function getKeyForLog(RateLimitKey $key): string
+    {
+        return $this->hashKey ? $key->getHashedKey() : $key->getKey();
     }
 }

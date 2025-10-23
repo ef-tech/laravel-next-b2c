@@ -48,7 +48,11 @@ final class DddServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             \Ddd\Application\RateLimit\Contracts\RateLimitMetrics::class,
-            \Ddd\Infrastructure\RateLimit\Metrics\LogMetrics::class
+            function ($app) {
+                return new \Ddd\Infrastructure\RateLimit\Metrics\LogMetrics(
+                    hashKey: (bool) config('ratelimit.log.hash_key', true)
+                );
+            }
         );
 
         // RateLimitService with Failover Store

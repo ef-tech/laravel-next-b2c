@@ -21,7 +21,7 @@ describe('LogMetrics', function () {
                         && $context['attempts'] === 1;
                 }));
 
-            $metrics = new LogMetrics;
+            $metrics = new LogMetrics(hashKey: false);
             $key = RateLimitKey::create('rate_limit:test:user_1');
             $rule = RateLimitRule::create('test', 60, 1);
 
@@ -40,7 +40,7 @@ describe('LogMetrics', function () {
                         && $context['attempts'] === 61;
                 }));
 
-            $metrics = new LogMetrics;
+            $metrics = new LogMetrics(hashKey: false);
             $key = RateLimitKey::create('rate_limit:test:user_2');
             $rule = RateLimitRule::create('test', 60, 1);
 
@@ -61,7 +61,7 @@ describe('LogMetrics', function () {
                         && $context['retry_after'] === 30;
                 }));
 
-            $metrics = new LogMetrics;
+            $metrics = new LogMetrics(hashKey: false);
             $key = RateLimitKey::create('rate_limit:test:user_3');
             $rule = RateLimitRule::create('test', 60, 1);
 
@@ -82,7 +82,7 @@ describe('LogMetrics', function () {
                         && $context['failed_over'] === true;
                 }));
 
-            $metrics = new LogMetrics;
+            $metrics = new LogMetrics(hashKey: false);
             $key = RateLimitKey::create('rate_limit:test:user_4');
             $rule = RateLimitRule::create('test', 60, 1);
 
@@ -101,7 +101,7 @@ describe('LogMetrics', function () {
                         && $context['failed_over'] === false;
                 }));
 
-            $metrics = new LogMetrics;
+            $metrics = new LogMetrics(hashKey: false);
             $key = RateLimitKey::create('rate_limit:test:user_5');
             $rule = RateLimitRule::create('test', 60, 1);
 
@@ -118,7 +118,7 @@ describe('LogMetrics', function () {
                         && $context['store'] === 'primary';
                 }));
 
-            $metrics = new LogMetrics;
+            $metrics = new LogMetrics(hashKey: false);
             $metrics->recordLatency(1.5, 'primary');
         });
 
@@ -130,8 +130,44 @@ describe('LogMetrics', function () {
                         && $context['store'] === 'secondary';
                 }));
 
-            $metrics = new LogMetrics;
+            $metrics = new LogMetrics(hashKey: false);
             $metrics->recordLatency(15.0, 'secondary');
+        });
+    });
+
+    describe('プライバシー配慮 - ハッシュ化', function () {
+        it('hashKey=trueの場合、キーをハッシュ化してログ出力する', function () {
+            $key = RateLimitKey::create('rate_limit:test:user_sensitive');
+            $expectedHash = $key->getHashedKey();
+
+            Log::shouldReceive('info')
+                ->once()
+                ->with('rate_limit.hit', Mockery::on(function ($context) use ($expectedHash) {
+                    return $context['key'] === $expectedHash
+                        && $context['endpoint_type'] === 'test'
+                        && $context['allowed'] === true;
+                }));
+
+            $metrics = new LogMetrics(hashKey: true);
+            $rule = RateLimitRule::create('test', 60, 1);
+
+            $metrics->recordHit($key, $rule, true, 1);
+        });
+
+        it('hashKey=falseの場合、生キーをログ出力する（開発環境用）', function () {
+            Log::shouldReceive('info')
+                ->once()
+                ->with('rate_limit.hit', Mockery::on(function ($context) {
+                    return $context['key'] === 'rate_limit:test:user_debug'
+                        && $context['endpoint_type'] === 'test'
+                        && $context['allowed'] === true;
+                }));
+
+            $metrics = new LogMetrics(hashKey: false);
+            $key = RateLimitKey::create('rate_limit:test:user_debug');
+            $rule = RateLimitRule::create('test', 60, 1);
+
+            $metrics->recordHit($key, $rule, true, 1);
         });
     });
 
