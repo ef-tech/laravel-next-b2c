@@ -199,6 +199,11 @@ setup_env() {
     if [ ! -f "backend/laravel-api/.env" ]; then
         cp "backend/laravel-api/.env.example" "backend/laravel-api/.env"
         log_info "  Laravel API .env を作成しました"
+
+        # APP_KEY生成
+        log_info "  APP_KEYを生成中..."
+        (cd backend/laravel-api && ENV_VALIDATION_SKIP=true php artisan key:generate --ansi --no-interaction)
+        log_info "  APP_KEY生成完了"
     else
         log_warn "  Laravel API .env は既に存在します（スキップ）"
     fi
@@ -235,10 +240,13 @@ install_dependencies() {
 
     # Composer install
     log_info "  Composer依存関係をインストール中..."
-    if retry_with_exponential_backoff bash -c "cd backend/laravel-api && composer install --no-interaction --prefer-dist --quiet"; then
+    cd backend/laravel-api || return 1
+    if ENV_VALIDATION_SKIP=true retry_with_exponential_backoff composer install --no-interaction --prefer-dist --quiet; then
         log_info "  ✅ Composer install 完了"
+        cd ../.. || return 1
     else
         log_error "  ❌ Composer install 失敗"
+        cd ../.. || return 1
         return 1
     fi
 
