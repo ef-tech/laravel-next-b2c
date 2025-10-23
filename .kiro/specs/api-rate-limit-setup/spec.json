@@ -1,0 +1,120 @@
+{
+  "feature_name": "api-rate-limit-setup",
+  "created_at": "2025-10-22T09:35:00Z",
+  "updated_at": "2025-10-23T10:00:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 30,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/30",
+    "title": "API レート制限設定",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Redis, DynamicRateLimit Middleware",
+      "framework_features": "Laravel RateLimiter, ThrottleRequests, Cache Facade, RouteServiceProvider",
+      "architecture": "DDD/Clean Architecture (Domain, Application, Infrastructure, HTTP layers)",
+      "testing": "Pest 4, Architecture Tests, PHPStan Level 8, Laravel Pint",
+      "monitoring": "Prometheus/StatsD (Phase 2), Grafana (Phase 2), Slack/PagerDuty (Phase 2)"
+    },
+    "requirements_hints": [
+      "エンドポイント分類の細分化（認証/非認証 × 公開/保護の4種類）",
+      "Laravel標準ThrottleRequestsとの完全互換性確保",
+      "HTTPヘッダーの強化（X-RateLimit-Policy、X-RateLimit-Key追加）",
+      "Redis障害時の安全なフェイルオーバー戦略実装（Array/File Cacheへの自動切替、30秒間隔ヘルスチェック）",
+      "ログ・メトリクス・アラート統合による運用強化（構造化ログ、Prometheus統合準備）",
+      "DDD/クリーンアーキテクチャ原則への準拠（4層構造: Domain/Application/Infrastructure/HTTP）",
+      "テストカバレッジ85%以上達成（Unit/Feature/Architecture/E2E Tests）",
+      "パフォーマンス要件: レート制限チェック5-7ms以内、Redis応答時間1-2ms以内"
+    ],
+    "project_structure": [
+      "backend/laravel-api/src/Domain/RateLimit/ValueObjects/RateLimitRule.php",
+      "backend/laravel-api/src/Domain/RateLimit/ValueObjects/RateLimitKey.php",
+      "backend/laravel-api/src/Domain/RateLimit/ValueObjects/RateLimitResult.php",
+      "backend/laravel-api/src/Application/RateLimit/RateLimitConfigManager.php",
+      "backend/laravel-api/src/Application/RateLimit/EndpointClassifier.php",
+      "backend/laravel-api/src/Application/RateLimit/KeyResolver.php",
+      "backend/laravel-api/src/Application/RateLimit/RateLimitService.php",
+      "backend/laravel-api/src/Application/RateLimit/RateLimitMetrics.php",
+      "backend/laravel-api/src/Infrastructure/RateLimit/LaravelRateLimiterStore.php",
+      "backend/laravel-api/src/Infrastructure/RateLimit/FailoverRateLimitStore.php",
+      "backend/laravel-api/src/Infrastructure/RateLimit/Metrics/LogMetrics.php",
+      "backend/laravel-api/app/Http/Middleware/DynamicRateLimit.php",
+      "backend/laravel-api/app/Providers/RouteServiceProvider.php",
+      "backend/laravel-api/config/ratelimit.php",
+      "backend/laravel-api/tests/Unit/Domain/RateLimit/",
+      "backend/laravel-api/tests/Unit/Application/RateLimit/",
+      "backend/laravel-api/tests/Feature/Middleware/RateLimitApiTest.php",
+      "backend/laravel-api/tests/Feature/Middleware/RateLimitFailoverTest.php",
+      "backend/laravel-api/tests/Architecture/RateLimitArchitectureTest.php",
+      "backend/laravel-api/tests/Feature/E2E/RateLimitE2ETest.php",
+      "backend/laravel-api/docs/RATELIMIT_IMPLEMENTATION.md",
+      "backend/laravel-api/docs/RATELIMIT_OPERATIONS.md",
+      "backend/laravel-api/docs/RATELIMIT_TROUBLESHOOTING.md"
+    ],
+    "services": {
+      "redis": {
+        "port": "13379",
+        "purpose": "Primary rate limit store, atomic operations via Cache::increment()"
+      },
+      "array_cache": {
+        "purpose": "Failover rate limit store (development environment, in-process memory)"
+      },
+      "file_cache": {
+        "purpose": "Failover rate limit store (production backup, persistent storage)"
+      }
+    },
+    "todo_items": [
+      "Domain層: RateLimitRule ValueObject作成",
+      "Domain層: RateLimitKey ValueObject作成",
+      "Domain層: RateLimitResult ValueObject作成",
+      "Domain層 Unit Tests実装（カバレッジ95%以上）",
+      "Application層: RateLimitConfigManager 実装",
+      "Application層: EndpointClassifier 実装",
+      "Application層: KeyResolver 実装",
+      "Application層: RateLimitService インターフェース定義",
+      "Application層: RateLimitMetrics インターフェース定義",
+      "Application層 Unit Tests実装",
+      "Infrastructure層: LaravelRateLimiterStore 実装",
+      "Infrastructure層: FailoverRateLimitStore 実装",
+      "Infrastructure層: LogMetrics 実装",
+      "Infrastructure層 Integration Tests実装",
+      "Redis障害シミュレーションテスト",
+      "HTTP層: DynamicRateLimit ミドルウェア拡張",
+      "HTTP層: HTTPヘッダー強化（X-RateLimit-Policy, X-RateLimit-Key）",
+      "HTTP層: RouteServiceProvider 統合",
+      "HTTP層: Laravel標準throttle互換性確認",
+      "Feature Tests（エンドポイント別）",
+      "Architecture Tests（DDD準拠検証）",
+      "E2E Tests（フェイルオーバー含む）",
+      "テストカバレッジ85%以上達成",
+      ".env.example 更新（新規環境変数追加）",
+      "config/ratelimit.php 拡張",
+      "docs/RATELIMIT_IMPLEMENTATION.md 作成",
+      "docs/RATELIMIT_OPERATIONS.md 作成（運用手順）",
+      "docs/RATELIMIT_TROUBLESHOOTING.md 作成",
+      "API仕様書更新（レスポンスヘッダー追加）",
+      "GitHub Actions ワークフロー通過"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true,
+      "approved_at": "2025-10-22T10:00:00Z"
+    }
+  },
+  "ready_for_implementation": true
+}

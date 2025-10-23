@@ -3,7 +3,12 @@
 namespace App\Providers;
 
 use App\Bootstrap\ValidateEnvironment;
+use Ddd\Application\RateLimit\Services\EndpointClassifier;
+use Ddd\Application\RateLimit\Services\KeyResolver;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +28,35 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->validateEnvironmentVariables();
         $this->validateCorsConfiguration();
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * Configure rate limiting for the application.
+     *
+     * Register the 'dynamic' rate limiter that uses DDD services.
+     */
+    private function configureRateLimiting(): void
+    {
+        RateLimiter::for('dynamic', function (Request $request) {
+            // DDD層のサービスを取得
+            $classifier = app(EndpointClassifier::class);
+            $keyResolver = app(KeyResolver::class);
+
+            // エンドポイント分類を取得
+            $classification = $classifier->classify($request);
+            $rule = $classification->getRule();
+
+            // レート制限キーを解決
+            $key = $keyResolver->resolve($request, $classification);
+
+            // Limit::perMinutes() を使用してLaravel標準のLimitオブジェクトを返す
+            // Note: 実際のレート制限チェックはLaravelのThrottleRequestsミドルウェアが実行
+            return Limit::perMinutes(
+                $rule->getDecayMinutes(),
+                $rule->getMaxAttempts()
+            )->by($key->getKey());
+        });
     }
 
     /**
