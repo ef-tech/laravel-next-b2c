@@ -39,6 +39,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `security-headers-setup` - セキュリティヘッダー設定（OWASP準拠、Laravel/Next.js実装、CSPレポート収集、段階的導入）
 - `basic-middleware-setup` - 基本ミドルウェア設定（統一ミドルウェアスタック、ログ・レート制限・認証認可・監査・キャッシュ、DDD統合）
 - `api-rate-limit-setup` - APIレート制限設定強化（エンドポイント分類細分化、Redis障害時フェイルオーバー、DDD準拠、テストカバレッジ85%以上）
+- `setup-script` - 一括セットアップスクリプト作成（make setup自動化、15分以内環境構築、冪等性保証、エラーハンドリング）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
