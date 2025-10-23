@@ -229,10 +229,64 @@ graph LR
 | **Node.js** | 18+ | `node --version` |
 | **npm** | 9+ | `npm --version` |
 | **Git** | 2.30+ | `git --version` |
+| **make** | - | `make --version` |
 
-### 📦 5分セットアップ（Docker推奨）
+### ⚡ 2コマンドセットアップ（推奨）
 
-リポジトリをクローンしてから全サービスを起動するまで、わずか5つのコマンドで完了：
+**`make setup` コマンド一つで完全な開発環境を15分以内に構築**できます：
+
+```bash
+# 1. リポジトリのクローンと移動
+git clone https://github.com/ef-tech/laravel-next-b2c.git
+cd laravel-next-b2c
+
+# 2. 一括セットアップ実行（15分以内）
+make setup
+```
+
+**セットアップ内容**:
+- ✅ 前提条件チェック（Docker、Node.js、PHP等のバージョン確認）
+- ✅ 環境変数ファイル作成（`.env`、`.env.local`の自動生成）
+- ✅ 依存関係インストール（Composer、npm、Dockerイメージ）
+- ✅ Dockerサービス起動（PostgreSQL、Redis、Mailpit、MinIO、Laravel API、User App、Admin App）
+- ✅ セットアップ検証（全サービスの疎通確認）
+
+**アクセスURL**:
+- Laravel API: http://localhost:13000/api/health
+- User App: http://localhost:13001
+- Admin App: http://localhost:13002
+
+**次のステップ**:
+```bash
+# データベースマイグレーション
+cd backend/laravel-api && php artisan migrate
+
+# シーディング
+php artisan db:seed
+
+# フロントエンドアプリにアクセス
+open http://localhost:13001
+```
+
+### 🔧 部分的再実行
+
+エラーが発生した場合、指定されたステップから再実行できます：
+
+```bash
+# 依存関係インストールステップから再実行
+make setup-from STEP=install_dependencies
+
+# 利用可能なステップ
+# - check_prerequisites
+# - setup_env
+# - install_dependencies
+# - start_services
+# - verify_setup
+```
+
+### 📦 手動セットアップ（従来の方法）
+
+従来の手動セットアップ方法も利用可能です：
 
 ```bash
 # 1. リポジトリのクローンと移動

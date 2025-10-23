@@ -7,13 +7,27 @@ SCRIPTS_DIR := scripts
 .PHONY: help test test-sqlite test-pgsql test-parallel test-coverage
 .PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql
 .PHONY: docker-up docker-down docker-logs
+.PHONY: setup setup-ci setup-from
 
 # デフォルトターゲット
 help: ## ヘルプを表示
-	@echo "Laravel テストワークフロー Makefile"
+	@echo "Laravel + Next.js モノレポ Makefile"
 	@echo ""
 	@echo "利用可能なコマンド:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+# =============================================================================
+# 環境セットアップコマンド
+# =============================================================================
+
+setup: ## 開発環境一括セットアップ（15分以内）
+	@./$(SCRIPTS_DIR)/setup/main.sh
+
+setup-ci: ## CI/CD用セットアップ（対話的プロンプトなし）
+	@./$(SCRIPTS_DIR)/setup/main.sh --ci
+
+setup-from: ## 部分的再実行（例: make setup-from STEP=install_dependencies）
+	@./$(SCRIPTS_DIR)/setup/main.sh --from $(STEP)
 
 # =============================================================================
 # テスト実行コマンド
