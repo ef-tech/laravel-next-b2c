@@ -6,6 +6,8 @@ SCRIPTS_DIR := scripts
 
 .PHONY: help test test-sqlite test-pgsql test-parallel test-coverage
 .PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql
+.PHONY: test-all test-all-pgsql test-backend-only test-frontend-only test-e2e-only
+.PHONY: test-with-coverage test-pr test-smoke test-diagnose
 .PHONY: docker-up docker-down docker-logs
 .PHONY: setup setup-ci setup-from
 .PHONY: dev dev-docker dev-native dev-api dev-frontend dev-infra dev-minimal dev-stop dev-env
@@ -103,6 +105,43 @@ lint: ## コード品質チェック（Pint + Larastan）
 
 lint-fix: ## コードスタイル自動修正（Pint）
 	cd $(LARAVEL_DIR) && ./vendor/bin/pint
+
+# =============================================================================
+# テスト実行コマンド（新規統合スクリプト）
+# =============================================================================
+
+test-all: ## 全テストスイート実行（SQLite高速モード）
+	@bash $(SCRIPTS_DIR)/test/main.sh --fast
+
+test-all-pgsql: ## 全テストスイート実行（PostgreSQL並列モード）
+	@bash $(SCRIPTS_DIR)/test/main.sh --env postgres --parallel 4
+
+test-backend-only: ## バックエンドテストのみ実行
+	@bash $(SCRIPTS_DIR)/test/main.sh --suite backend
+
+test-frontend-only: ## フロントエンドテストのみ実行
+	@bash $(SCRIPTS_DIR)/test/main.sh --suite frontend
+
+test-e2e-only: ## E2Eテストのみ実行
+	@bash $(SCRIPTS_DIR)/test/main.sh --suite e2e
+
+test-with-coverage: ## カバレッジ付き全テスト実行（PostgreSQL）
+	@bash $(SCRIPTS_DIR)/test/main.sh --env postgres --coverage --report
+
+test-pr: ## PR前推奨テスト（Lint + PostgreSQL + カバレッジ）
+	@echo "🔥 PR前チェックを実行します..."
+	$(MAKE) lint-fix
+	@bash $(SCRIPTS_DIR)/test/main.sh --env postgres --coverage --report
+	@echo "✅ PR前チェック完了！"
+
+test-smoke: ## スモークテスト（高速ヘルスチェック）
+	@echo "🚬 スモークテスト実行中..."
+	@bash $(SCRIPTS_DIR)/test/main.sh --fast --suite backend
+	@echo "✅ スモークテスト完了！"
+
+test-diagnose: ## テスト環境診断（未実装: Phase 5で実装予定）
+	@echo "🏥 テスト環境診断..."
+	@echo "⚠️  診断スクリプトは Phase 5 で実装予定です"
 
 # =============================================================================
 # 統合ワークフロー

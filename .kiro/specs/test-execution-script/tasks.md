@@ -168,8 +168,8 @@
 
 ## フェーズ6: Makefile統合とCI/CD連携
 
-- [ ] 9. Makefile新規タスク追加
-- [ ] 9.1 基本テストタスク実装
+- [x] 9. Makefile新規タスク追加
+- [x] 9.1 基本テストタスク実装
   - test-allタスク追加（SQLite環境全テスト）
   - test-all-pgsqlタスク追加（PostgreSQL環境並列全テスト）
   - test-backend-onlyタスク追加
@@ -177,14 +177,14 @@
   - test-e2e-onlyタスク追加
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 9.2 高度なテストタスク実装
+- [x] 9.2 高度なテストタスク実装
   - test-with-coverageタスク追加（PostgreSQL + カバレッジ）
   - test-prタスク追加（lint + PostgreSQL + カバレッジ）
   - test-smokeタスク追加（スモークテスト高速実行）
   - test-diagnoseタスク追加（診断スクリプト呼び出し）
   - _Requirements: 8.6, 8.7, 8.8, 8.9_
 
-- [ ] 9.3 既存タスク互換性確認
+- [x] 9.3 既存タスク互換性確認
   - quick-test、test-pgsql、test-parallel、ci-testタスク動作確認
   - _Requirements: 8.10_
 
