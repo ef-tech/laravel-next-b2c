@@ -1,0 +1,97 @@
+{
+  "feature_name": "dev-server-startup-script",
+  "created_at": "2025-10-24T01:54:43Z",
+  "updated_at": "2025-10-24T17:30:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "implementation_status": {
+    "phase_1_docker_profiles": "completed",
+    "phase_2_config_files": "completed",
+    "phase_3_typescript_modules": "completed",
+    "phase_4_bash_scripts": "completed",
+    "phase_5_makefile_integration": "completed",
+    "phase_6_testing_documentation": "completed",
+    "testing": {
+      "automated_tests": "completed",
+      "test_results": "95% pass (19/20 tests)",
+      "test_documentation": "completed",
+      "test_report_file": "scripts/dev/TEST_RESULTS.md"
+    }
+  },
+  "source": {
+    "type": "github_issue",
+    "issue_number": 25,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/25",
+    "title": "開発サーバー起動スクリプト作成",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel API, PHP artisan serve",
+      "frontend": "Next.js Admin App, Next.js User App, npm/pnpm",
+      "infrastructure": "Docker, Docker Compose, PostgreSQL, Redis, Mailpit, MinIO",
+      "tools": "Node.js, TypeScript, concurrently, Bash, Makefile"
+    },
+    "requirements_hints": [
+      "単一コマンドで全開発サーバーを起動",
+      "Docker/ネイティブ/ハイブリッドモード切り替え",
+      "サービス選択機能（infra、api、admin、user）",
+      "ログ統合管理（プレフィックス付きカラー出力）",
+      "エラーハンドリングと依存関係チェック",
+      "ポート管理（13000-13002固定、競合検出）",
+      "make setupとの統合（初回セットアップ自動実行）",
+      "ヘルスチェック機能（PostgreSQL、Redis、API）",
+      "グレースフルシャットダウン（SIGINT/SIGTERM対応）",
+      "設定駆動アーキテクチャ（services.json、profiles.json）"
+    ],
+    "project_structure": [
+      "scripts/dev/main.sh",
+      "scripts/dev/dev-server.ts",
+      "scripts/dev/process-manager.sh",
+      "scripts/dev/health-check.ts",
+      "scripts/dev/docker-manager.sh",
+      "scripts/dev/log-manager.ts",
+      "scripts/dev/config/services.json",
+      "scripts/dev/config/ports.json",
+      "scripts/dev/config/profiles.json",
+      "scripts/dev/TESTING.md",
+      "scripts/dev/TEST_RESULTS.md",
+      "docker-compose.yml",
+      "Makefile"
+    ],
+    "services": {
+      "laravel-api": {"port": "13000"},
+      "admin-app": {"port": "13002"},
+      "user-app": {"port": "13001"},
+      "pgsql": {"port": "13432"},
+      "redis": {"port": "13379"},
+      "mailpit": {"smtp_port": "11025", "dashboard_port": "13025"},
+      "minio": {"api_port": "13900", "console_port": "13010"}
+    },
+    "todo_items": [
+      "✅ Docker Compose プロファイル設定",
+      "✅ 設定ファイル作成（services.json、profiles.json、ports.json）",
+      "✅ TypeScript ユーティリティ実装（dev-server.ts、health-check.ts、log-manager.ts）",
+      "✅ Bash スクリプト実装（main.sh、docker-manager.sh、process-manager.sh）",
+      "✅ Makefile 統合（dev、dev-native、dev-docker、dev-api、dev-frontend等）",
+      "✅ テストとドキュメント（各モード動作確認、エラーケーステスト、README更新）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}

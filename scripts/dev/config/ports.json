@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Port Configuration",
+  "description": "定義: 13000-13010ポート範囲固定割り当て（競合検出時の明確なエラーメッセージ）",
+  "portRange": {
+    "start": 13000,
+    "end": 13010
+  },
+  "ports": {
+    "13000": {
+      "service": "laravel-api",
+      "protocol": "HTTP",
+      "description": "Laravel API サーバー",
+      "env": "APP_PORT"
+    },
+    "13001": {
+      "service": "user-app",
+      "protocol": "HTTP",
+      "description": "User App (Next.js)",
+      "env": "PORT"
+    },
+    "13002": {
+      "service": "admin-app",
+      "protocol": "HTTP",
+      "description": "Admin App (Next.js)",
+      "env": "PORT"
+    },
+    "13010": {
+      "service": "minio",
+      "protocol": "HTTP",
+      "description": "MinIO Console",
+      "env": "FORWARD_MINIO_CONSOLE_PORT"
+    },
+    "13025": {
+      "service": "mailpit",
+      "protocol": "HTTP",
+      "description": "Mailpit Dashboard",
+      "env": "FORWARD_MAILPIT_DASHBOARD_PORT",
+      "note": "範囲外だが開発用として定義"
+    },
+    "13379": {
+      "service": "redis",
+      "protocol": "TCP",
+      "description": "Redis Server",
+      "env": "FORWARD_REDIS_PORT",
+      "note": "範囲外だが開発用として定義"
+    },
+    "13432": {
+      "service": "pgsql",
+      "protocol": "TCP",
+      "description": "PostgreSQL Server",
+      "env": "FORWARD_DB_PORT",
+      "note": "範囲外だが開発用として定義"
+    },
+    "13900": {
+      "service": "minio",
+      "protocol": "HTTP",
+      "description": "MinIO API",
+      "env": "FORWARD_MINIO_PORT",
+      "note": "範囲外だが開発用として定義"
+    },
+    "11025": {
+      "service": "mailpit",
+      "protocol": "SMTP",
+      "description": "Mailpit SMTP Server",
+      "env": "FORWARD_MAILPIT_PORT",
+      "note": "範囲外だが開発用として定義"
+    }
+  },
+  "checkPorts": [13000, 13001, 13002, 13010],
+  "errorMessages": {
+    "13000": "ポート13000が使用中です。Laravel APIサーバーを停止してください。",
+    "13001": "ポート13001が使用中です。User Appを停止してください。",
+    "13002": "ポート13002が使用中です。Admin Appを停止してください。",
+    "13010": "ポート13010が使用中です。MinIO Consoleを停止してください。"
+  }
+}
