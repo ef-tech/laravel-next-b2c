@@ -54,7 +54,7 @@
   - 型定義ファイル作成（Config、ServiceDefinition、ProfileDefinition、PortDefinition、Result型）
   - _Requirements: 9.1, 9.2_
 
-- [ ] 3.2 設定管理モジュール実装（dev-server.ts）
+- [x] 3.2 設定管理モジュール実装（dev-server.ts）
   - 設定ファイル読み込み機能（loadConfig関数: config/*.jsonを読み込み、JSON解析エラーハンドリング）
   - サービス選択ロジック（selectServices関数: プロファイル解決、個別サービス選択、不正な入力のエラーハンドリング）
   - 依存関係解決機能（resolveDependencies関数: 依存サービス自動追加、循環依存検出）
