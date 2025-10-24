@@ -139,9 +139,9 @@ test-smoke: ## スモークテスト（高速ヘルスチェック）
 	@bash $(SCRIPTS_DIR)/test/main.sh --fast --suite backend
 	@echo "✅ スモークテスト完了！"
 
-test-diagnose: ## テスト環境診断（未実装: Phase 5で実装予定）
+test-diagnose: ## テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
 	@echo "🏥 テスト環境診断..."
-	@echo "⚠️  診断スクリプトは Phase 5 で実装予定です"
+	@./scripts/test/diagnose.sh
 
 # =============================================================================
 # 統合ワークフロー
