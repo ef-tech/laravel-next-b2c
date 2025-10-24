@@ -61,7 +61,7 @@
   - エラー型定義（ConfigLoadError、ServiceSelectionError）
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 9.1, 9.4, 9.5_
 
-- [ ] 3.3 ヘルスチェックモジュール実装（health-check.ts）
+- [x] 3.3 ヘルスチェックモジュール実装（health-check.ts）
   - 依存ツールチェック機能（checkDependencies関数: Docker、Node.js、PHP、makeのバージョン確認）
   - ポート競合検出機能（checkPorts関数: lsof/ssコマンドでポート使用状況確認、PID・プロセス名取得、クロスプラットフォーム対応）
   - サービスヘルスチェック機能（waitForServices関数: PostgreSQL/Redis/Laravel API/Next.jsアプリのヘルスチェック、リトライロジック、タイムアウト処理）
