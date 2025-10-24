@@ -17,18 +17,22 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # -----------------------------------------------------------------------------
-# Color Definitions
+# Color Definitions (only define if not already defined)
 # -----------------------------------------------------------------------------
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly BLUE='\033[0;34m'
-readonly MAGENTA='\033[0;35m'
-readonly CYAN='\033[0;36m'
-readonly NC='\033[0m' # No Color
+if [[ -z "${RED:-}" ]]; then
+    readonly RED='\033[0;31m'
+    readonly GREEN='\033[0;32m'
+    readonly YELLOW='\033[1;33m'
+    readonly BLUE='\033[0;34m'
+    readonly MAGENTA='\033[0;35m'
+    readonly CYAN='\033[0;36m'
+    readonly NC='\033[0m' # No Color
+fi
 
 # Concurrently color palette (6 colors)
-readonly CONCURRENTLY_COLORS=("blue" "magenta" "cyan" "green" "yellow" "red")
+if [[ -z "${CONCURRENTLY_COLORS:-}" ]]; then
+    readonly CONCURRENTLY_COLORS=("blue" "magenta" "cyan" "green" "yellow" "red")
+fi
 
 # -----------------------------------------------------------------------------
 # Logging Functions

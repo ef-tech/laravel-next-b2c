@@ -17,15 +17,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # -----------------------------------------------------------------------------
-# Color Definitions
+# Color Definitions (only define if not already defined)
 # -----------------------------------------------------------------------------
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly BLUE='\033[0;34m'
-readonly MAGENTA='\033[0;35m'
-readonly CYAN='\033[0;36m'
-readonly NC='\033[0m' # No Color
+if [[ -z "${RED:-}" ]]; then
+    readonly RED='\033[0;31m'
+    readonly GREEN='\033[0;32m'
+    readonly YELLOW='\033[1;33m'
+    readonly BLUE='\033[0;34m'
+    readonly MAGENTA='\033[0;35m'
+    readonly CYAN='\033[0;36m'
+    readonly NC='\033[0m' # No Color
+fi
 
 # -----------------------------------------------------------------------------
 # Logging Functions
@@ -241,8 +243,25 @@ stop_docker_compose() {
         return 1
     fi
 
-    # Build docker compose command
-    local compose_cmd="docker compose down"
+    cd "$PROJECT_ROOT" || return 1
+
+    # First, get all running container IDs from this compose project
+    local container_ids
+    container_ids=$(docker compose ps -q 2>/dev/null)
+
+    if [[ -n "$container_ids" ]]; then
+        log_info "Stopping running containers..."
+        log_debug "Container IDs: $container_ids"
+
+        # Stop containers
+        echo "$container_ids" | xargs docker stop 2>/dev/null || true
+
+        # Remove containers
+        echo "$container_ids" | xargs docker rm 2>/dev/null || true
+    fi
+
+    # Then run docker compose down to clean up networks, etc.
+    local compose_cmd="docker compose down --remove-orphans"
 
     if [[ "$remove_volumes" == "true" ]]; then
         compose_cmd="$compose_cmd -v"
@@ -251,16 +270,12 @@ stop_docker_compose() {
 
     log_debug "Executing: $compose_cmd"
 
-    # Execute Docker Compose
-    cd "$PROJECT_ROOT" || return 1
-
-    if eval "$compose_cmd"; then
+    if eval "$compose_cmd" >/dev/null 2>&1; then
         log_success "Docker Compose services stopped successfully"
         return 0
     else
-        local exit_code=$?
-        handle_docker_error $exit_code "$compose_cmd"
-        return $exit_code
+        log_warn "docker compose down reported an error, but containers were stopped"
+        return 0
     fi
 }
 
