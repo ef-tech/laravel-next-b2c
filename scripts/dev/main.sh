@@ -52,6 +52,40 @@ log_debug() {
 }
 
 # -----------------------------------------------------------------------------
+# Cleanup Function (Graceful Shutdown)
+# -----------------------------------------------------------------------------
+cleanup() {
+    log_info "Shutting down services..."
+
+    # Stop services based on MODE
+    case "${MODE:-docker}" in
+        docker)
+            # Docker mode: stop Docker Compose
+            source "$SCRIPT_DIR/docker-manager.sh"
+            stop_docker_compose || true
+            ;;
+        native)
+            # Native mode: stop native processes
+            source "$SCRIPT_DIR/process-manager.sh"
+            stop_native_processes || true
+            ;;
+        hybrid)
+            # Hybrid mode: stop both native and Docker
+            source "$SCRIPT_DIR/process-manager.sh"
+            stop_native_processes || true
+            source "$SCRIPT_DIR/docker-manager.sh"
+            stop_docker_compose || true
+            ;;
+        *)
+            log_warn "Unknown mode: ${MODE:-docker}"
+            ;;
+    esac
+
+    log_success "Shutdown complete"
+    exit 0
+}
+
+# -----------------------------------------------------------------------------
 # Help Message (Requirement 10.3)
 # -----------------------------------------------------------------------------
 show_help() {
@@ -442,6 +476,9 @@ start_services() {
 main() {
     # Parse command line arguments
     parse_arguments "$@"
+
+    # Setup signal handlers for graceful shutdown
+    trap cleanup INT TERM
 
     # Show help if requested
     if [[ "$SHOW_HELP" == "true" ]]; then

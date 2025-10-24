@@ -4,8 +4,8 @@
   "description": "Development server startup scripts for Laravel Next.js B2C template",
   "type": "module",
   "scripts": {
-    "dev": "tsx main.sh",
-    "validate": "tsx validate-config.py",
+    "dev": "bash ./main.sh",
+    "validate": "python3 validate-config.py",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "typecheck": "tsc --noEmit"

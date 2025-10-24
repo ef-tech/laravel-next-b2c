@@ -171,6 +171,7 @@ dev-minimal: ## 開発サーバー起動（最小構成: API + フロントエ�
 	@./scripts/dev/main.sh --mode hybrid --profile minimal
 
 dev-stop: ## 開発サーバー停止
+	@./scripts/dev/process-manager.sh stop || true
 	@docker compose down
 
 # =============================================================================

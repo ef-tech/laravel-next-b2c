@@ -285,6 +285,138 @@ export function getDockerProfiles(
 }
 
 /**
+ * CLI argument parsing
+ */
+interface CliArgs {
+  mode: 'docker' | 'native' | 'hybrid';
+  profile?: string;
+  services?: string;
+}
+
+function parseCliArgs(): CliArgs {
+  const args: CliArgs = {
+    mode: 'docker',
+  };
+
+  for (let i = 2; i < process.argv.length; i++) {
+    const arg = process.argv[i];
+    if (arg.startsWith('--mode=')) {
+      const mode = arg.split('=')[1] as 'docker' | 'native' | 'hybrid';
+      if (!['docker', 'native', 'hybrid'].includes(mode)) {
+        console.error(`Invalid mode: ${mode}`);
+        process.exit(1);
+      }
+      args.mode = mode;
+    } else if (arg.startsWith('--profile=')) {
+      args.profile = arg.split('=')[1];
+    } else if (arg.startsWith('--services=')) {
+      args.services = arg.split('=')[1];
+    }
+  }
+
+  return args;
+}
+
+/**
+ * Generate configuration JSON for CLI
+ */
+async function generateConfigJson(args: CliArgs) {
+  // Load configuration
+  const configResult = await loadConfig();
+  if (!configResult.success) {
+    console.error(JSON.stringify({ error: configResult.error.message }));
+    process.exit(1);
+  }
+
+  const config = configResult.value;
+
+  // Select services
+  const profileName = args.profile || null;
+  const serviceNames = args.services ? args.services.split(',') : null;
+  const servicesResult = selectServices(config, profileName, serviceNames);
+
+  if (!servicesResult.success) {
+    console.error(JSON.stringify({ error: servicesResult.error.message }));
+    process.exit(1);
+  }
+
+  // Resolve dependencies
+  const resolvedResult = resolveDependencies(
+    servicesResult.value,
+    config.services.services
+  );
+
+  if (!resolvedResult.success) {
+    console.error(JSON.stringify({ error: resolvedResult.error.message }));
+    process.exit(1);
+  }
+
+  const services = resolvedResult.value;
+
+  // Generate Docker profiles and native services based on mode
+  let dockerProfiles: string[] = [];
+  const nativeServices: Array<{
+    name: string;
+    command: string;
+    env?: Record<string, string>;
+  }> = [];
+  const ports: number[] = [];
+
+  for (const [serviceName, service] of Object.entries(services)) {
+    // Collect ports (main port + optional dashboard/console port)
+    if (service.port) {
+      ports.push(service.port);
+    }
+    if ('dashboardPort' in service && typeof service.dashboardPort === 'number') {
+      ports.push(service.dashboardPort);
+    }
+    if ('consolePort' in service && typeof service.consolePort === 'number') {
+      ports.push(service.consolePort);
+    }
+
+    // Determine execution mode
+    if (args.mode === 'docker') {
+      // All services run in Docker
+      if (service.docker?.profile) {
+        dockerProfiles.push(service.docker.profile);
+      }
+    } else if (args.mode === 'native') {
+      // All services run natively
+      if (service.native?.command) {
+        nativeServices.push({
+          name: serviceName,
+          command: service.native.command,
+          env: service.native.env,
+        });
+      }
+    } else if (args.mode === 'hybrid') {
+      // Infra in Docker, apps native
+      if (service.docker?.profile === 'infra') {
+        dockerProfiles.push(service.docker.profile);
+      } else if (service.native?.command) {
+        nativeServices.push({
+          name: serviceName,
+          command: service.native.command,
+          env: service.native.env,
+        });
+      }
+    }
+  }
+
+  // Deduplicate Docker profiles
+  dockerProfiles = Array.from(new Set(dockerProfiles));
+
+  // Output JSON
+  const output = {
+    dockerProfiles,
+    nativeServices,
+    ports,
+  };
+
+  console.log(JSON.stringify(output, null, 2));
+}
+
+/**
  * Main function for testing
  */
 async function main() {
@@ -332,10 +464,21 @@ async function main() {
   console.log(`✓ Docker profiles: ${profiles.join(', ')}`);
 }
 
-// Run main if this file is executed directly
+// Run CLI if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    console.error('Unexpected error:', error);
-    process.exit(1);
-  });
+  // Check if CLI arguments are provided
+  if (process.argv.length > 2) {
+    // CLI mode
+    const args = parseCliArgs();
+    generateConfigJson(args).catch((error) => {
+      console.error(JSON.stringify({ error: error.message }));
+      process.exit(1);
+    });
+  } else {
+    // Test mode
+    main().catch((error) => {
+      console.error('Unexpected error:', error);
+      process.exit(1);
+    });
+  }
 }

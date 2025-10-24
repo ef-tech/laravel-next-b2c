@@ -9,7 +9,7 @@
  * - OS detection (macOS, Linux, Windows WSL)
  */
 
-import { exec } from 'node:child_process';
+import { exec, execSync } from 'node:child_process';
 import { promisify } from 'node:util';
 import type {
   OSType,
@@ -36,7 +36,6 @@ export function detectOS(): OSType {
   if (platform === 'linux') {
     // Check if running under WSL
     try {
-      const { execSync } = require('node:child_process');
       const output = execSync('uname -r', { encoding: 'utf-8' });
       if (output.toLowerCase().includes('microsoft') || output.toLowerCase().includes('wsl')) {
         return 'windows-wsl';
@@ -173,6 +172,13 @@ export async function checkDependencies(): Promise<{
       versionCommand: 'make --version',
       requiredVersion: '3.81.0',
       installUrl: 'https://www.gnu.org/software/make/',
+    },
+    {
+      name: 'jq',
+      command: 'jq',
+      versionCommand: 'jq --version',
+      requiredVersion: '1.5.0',
+      installUrl: 'https://stedolan.github.io/jq/download/',
     },
   ];
 
@@ -405,10 +411,95 @@ async function main() {
   }
 }
 
-// Run main if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    console.error('Unexpected error:', error);
+/**
+ * CLI: check-dependencies subcommand
+ */
+async function cliCheckDependencies() {
+  const result = await checkDependencies();
+
+  if (!result.success) {
+    console.error('Dependency check failed:');
+    for (const error of result.errors) {
+      console.error(`  ✗ ${error.message}`);
+      if (error.installUrl) {
+        console.error(`    Install: ${error.installUrl}`);
+      }
+    }
     process.exit(1);
-  });
+  }
+
+  console.log('✓ All dependencies are available');
+  process.exit(0);
+}
+
+/**
+ * CLI: check-ports subcommand
+ * Reads port array from stdin as JSON
+ */
+async function cliCheckPorts() {
+  // Read stdin
+  const chunks: Buffer[] = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(chunk);
+  }
+  const input = Buffer.concat(chunks).toString('utf-8');
+
+  let ports: number[];
+  try {
+    const data = JSON.parse(input);
+    if (Array.isArray(data.ports)) {
+      ports = data.ports;
+    } else if (Array.isArray(data)) {
+      ports = data;
+    } else {
+      throw new Error('Input must be an array or object with "ports" array');
+    }
+  } catch (error) {
+    console.error('Failed to parse input JSON:', error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+
+  const results = await checkPorts(ports);
+
+  const portsInUse = results.filter((r) => r.inUse);
+
+  if (portsInUse.length > 0) {
+    console.warn('The following ports are in use:');
+    for (const result of portsInUse) {
+      console.warn(
+        `  ✗ Port ${result.port}: In use (PID: ${result.pid}, Process: ${result.processName || 'unknown'})`
+      );
+    }
+    process.exit(1);
+  }
+
+  console.log('✓ All ports are available');
+  process.exit(0);
+}
+
+// Run CLI if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const subcommand = process.argv[2];
+
+  if (subcommand === 'check-dependencies') {
+    cliCheckDependencies().catch((error) => {
+      console.error('Unexpected error:', error);
+      process.exit(1);
+    });
+  } else if (subcommand === 'check-ports') {
+    cliCheckPorts().catch((error) => {
+      console.error('Unexpected error:', error);
+      process.exit(1);
+    });
+  } else if (subcommand) {
+    console.error(`Unknown subcommand: ${subcommand}`);
+    console.error('Available subcommands: check-dependencies, check-ports');
+    process.exit(1);
+  } else {
+    // No subcommand - run test mode
+    main().catch((error) => {
+      console.error('Unexpected error:', error);
+      process.exit(1);
+    });
+  }
 }
