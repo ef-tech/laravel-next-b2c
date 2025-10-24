@@ -523,7 +523,54 @@ php artisan serve --port=13000
 
 ### 開発サーバーの管理
 
-#### 全サービス同時起動（Docker Compose推奨）
+#### 🚀 新: 統合開発サーバー起動（最も簡単）
+
+**単一コマンドで全サービスを起動:**
+
+```bash
+# デフォルト: ハイブリッドモード（インフラDocker、アプリネイティブ）
+make dev
+
+# Dockerモード: 全サービスDocker
+make dev-docker
+
+# ネイティブモード: 全サービスネイティブ
+make dev-native
+
+# プロファイル別起動
+make dev-api        # APIのみ
+make dev-frontend   # フロントエンドのみ
+make dev-infra      # インフラのみ
+make dev-minimal    # 最小構成（API + フロントエンド1つ）
+
+# 停止
+make dev-stop
+```
+
+**起動モード説明:**
+- **ハイブリッドモード** (推奨): インフラ（PostgreSQL, Redis等）はDocker、アプリ（Laravel API, Next.js）はネイティブプロセス
+- **Dockerモード**: 全サービスDockerコンテナで起動（環境統一、E2Eテスト向け）
+- **ネイティブモード**: 全サービスネイティブプロセスで起動（最速起動）
+
+**詳細オプション:**
+
+```bash
+# ヘルプ表示
+./scripts/dev/main.sh --help
+
+# カスタム起動
+./scripts/dev/main.sh --mode hybrid --profile full       # ハイブリッドモード全サービス
+./scripts/dev/main.sh --mode docker --profile api-only   # DockerモードAPI専用
+./scripts/dev/main.sh --services laravel-api,admin-app   # 特定サービスのみ
+
+# セットアップから実行
+./scripts/dev/main.sh --setup --mode docker
+
+# デバッグモード
+DEBUG=1 ./scripts/dev/main.sh --mode native
+```
+
+#### 従来方式: 全サービス同時起動（Docker Compose）
 
 ```bash
 # リポジトリルートから全サービス起動
