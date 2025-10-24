@@ -207,6 +207,7 @@ build_concurrently_command() {
 # -----------------------------------------------------------------------------
 start_native_processes() {
     local services_json="$1"
+    local pid_file="${2:-/tmp/dev-server-processes.pid}"
 
     log_info "Starting native processes..."
 
@@ -227,14 +228,25 @@ start_native_processes() {
     log_info "Executing concurrently with ${#CONCURRENTLY_COLORS[@]} color rotation"
     log_debug "Command: $concurrently_cmd"
 
-    # Execute concurrently
+    # Execute concurrently in background and save PID
     cd "$SCRIPT_DIR" || return 1
 
-    if eval "$concurrently_cmd"; then
+    # Run in background and save PID
+    eval "$concurrently_cmd" &
+    local concurrently_pid=$!
+
+    # Save PID to file
+    echo "$concurrently_pid" > "$pid_file"
+    log_debug "Saved concurrently PID $concurrently_pid to $pid_file"
+
+    # Wait for the background process
+    if wait $concurrently_pid; then
         log_success "All processes completed successfully"
+        rm -f "$pid_file"
         return 0
     else
         local exit_code=$?
+        rm -f "$pid_file"
         handle_process_error $exit_code "$concurrently_cmd"
         return $exit_code
     fi
