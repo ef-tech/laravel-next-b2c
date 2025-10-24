@@ -6,8 +6,8 @@
 
 ## 実装タスク
 
-- [ ] 1. Docker Composeプロファイル設定とインフラ基盤構築
-- [ ] 1.1 Docker Composeプロファイル定義を追加
+- [x] 1. Docker Composeプロファイル設定とインフラ基盤構築
+- [x] 1.1 Docker Composeプロファイル定義を追加
   - `docker-compose.yml`にプロファイル定義を追加（infra、api、frontendプロファイル）
   - 既存サービス（pgsql、redis、mailpit、minio）にinfraプロファイルを適用
   - Laravel APIサービスにapiプロファイルを適用
@@ -15,7 +15,7 @@
   - プロファイル未指定時の後方互換性を確保（全サービス起動）
   - _Requirements: 11.1, 11.6_
 
-- [ ] 1.2 プロファイル別起動の動作確認
+- [x] 1.2 プロファイル別起動の動作確認
   - infraプロファイル単独起動テスト（PostgreSQL、Redis、Mailpit、MinIO）
   - infra+apiプロファイル起動テスト（インフラ+Laravel API）
   - 全プロファイル起動テスト（infra+api+frontend）
@@ -23,14 +23,14 @@
   - _Requirements: 11.2, 11.3, 11.4, 11.5_
 
 - [ ] 2. 設定ファイル作成とJSONスキーマ定義
-- [ ] 2.1 設定ディレクトリとJSONファイルの作成
+- [x] 2.1 設定ディレクトリとJSONファイルの作成
   - `scripts/dev/config/`ディレクトリを作成
   - `services.json`を作成（Laravel API、Admin App、User Appのサービス定義）
   - `profiles.json`を作成（full、api-only、frontend-onlyプロファイル）
   - `ports.json`を作成（13000-13010ポート定義）
   - _Requirements: 9.1, 9.4, 9.5_
 
-- [ ] 2.2 サービス定義とプロファイル定義の詳細設定
+- [x] 2.2 サービス定義とプロファイル定義の詳細設定
   - Laravel APIのDocker/ネイティブコマンド設定、ヘルスチェックURL設定、依存サービス定義（pgsql、redis）
   - Next.js Admin AppのDocker/ネイティブコマンド設定、依存サービス定義（laravel-api）
   - Next.js User AppのDocker/ネイティブコマンド設定、依存サービス定義（laravel-api）
@@ -39,7 +39,7 @@
   - frontend-onlyプロファイルのサービスリスト定義（admin-app、user-app）
   - _Requirements: 3.1, 3.2, 9.1_
 
-- [ ] 2.3 JSON設定ファイルのバリデーション
+- [x] 2.3 JSON設定ファイルのバリデーション
   - 全設定ファイルのJSON構文検証
   - サービス名の一意性検証
   - プロファイル名の有効性検証（full、api-only、frontend-only）
@@ -48,7 +48,7 @@
   - _Requirements: 9.3, 9.6_
 
 - [ ] 3. TypeScriptユーティリティ実装（設定管理・ヘルスチェック・ログ管理）
-- [ ] 3.1 TypeScript環境設定とプロジェクト構造準備
+- [x] 3.1 TypeScript環境設定とプロジェクト構造準備
   - `scripts/dev/package.json`を作成（TypeScript、ts-node、concurrently依存関係）
   - `scripts/dev/tsconfig.json`を作成（TypeScript設定、ES Modules対応）
   - 型定義ファイル作成（Config、ServiceDefinition、ProfileDefinition、PortDefinition、Result型）

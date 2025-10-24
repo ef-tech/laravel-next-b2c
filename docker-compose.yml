@@ -41,6 +41,8 @@ services:
       timeout: 3s
       start_period: 30s
       retries: 3
+    profiles:
+      - api
 
   # ============================================
   # Admin App (Next.js)
@@ -62,6 +64,8 @@ services:
     depends_on:
       laravel-api:
         condition: service_healthy
+    profiles:
+      - frontend
     # Hot Reload対応（開発環境用）
     # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
     # volumes:
@@ -89,6 +93,8 @@ services:
     depends_on:
       laravel-api:
         condition: service_healthy
+    profiles:
+      - frontend
     # Hot Reload対応（開発環境用）
     # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
     # volumes:
@@ -162,6 +168,8 @@ services:
         - '${DB_USERNAME:-sail}'
       retries: 3
       timeout: 5s
+    profiles:
+      - infra
 
   # ============================================
   # Redis
@@ -183,6 +191,8 @@ services:
         - ping
       retries: 3
       timeout: 5s
+    profiles:
+      - infra
 
   # ============================================
   # Mailpit (開発用メールサーバー)
@@ -198,6 +208,8 @@ services:
       MP_UI_BIND_ADDR: ':${FORWARD_MAILPIT_DASHBOARD_PORT:-13025}'
     networks:
       - app-network
+    profiles:
+      - infra
 
   # ============================================
   # MinIO (S3互換オブジェクトストレージ)
@@ -224,6 +236,8 @@ services:
         - local
       retries: 3
       timeout: 5s
+    profiles:
+      - infra
 
 # ============================================
 # ネットワーク設定
