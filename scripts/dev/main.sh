@@ -133,30 +133,32 @@ SETUP_MODE="auto"  # auto | force | skip
 DETACHED="false"
 SHOW_HELP="false"
 
+# Check if required argument is provided
+check_required_arg() {
+    local option_name="$1"
+    local arg_value="${2:-}"
+
+    if [[ -z "$arg_value" ]]; then
+        log_error "$option_name requires an argument"
+        exit 1
+    fi
+}
+
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --mode)
-                if [[ -z "${2:-}" ]]; then
-                    log_error "--mode requires an argument"
-                    exit 1
-                fi
+                check_required_arg "--mode" "${2:-}"
                 MODE="$2"
                 shift 2
                 ;;
             --profile)
-                if [[ -z "${2:-}" ]]; then
-                    log_error "--profile requires an argument"
-                    exit 1
-                fi
+                check_required_arg "--profile" "${2:-}"
                 PROFILE="$2"
                 shift 2
                 ;;
             --services)
-                if [[ -z "${2:-}" ]]; then
-                    log_error "--services requires an argument"
-                    exit 1
-                fi
+                check_required_arg "--services" "${2:-}"
                 SERVICES="$2"
                 shift 2
                 ;;

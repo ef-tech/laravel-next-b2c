@@ -55,7 +55,7 @@ export async function loadConfig(
     } catch (error) {
       return {
         success: false,
-        error: new (ConfigLoadError as any)(
+        error: new ConfigLoadError(
           `Failed to parse services.json: ${error instanceof Error ? error.message : String(error)}`,
           servicesPath,
           error
@@ -68,7 +68,7 @@ export async function loadConfig(
     } catch (error) {
       return {
         success: false,
-        error: new (ConfigLoadError as any)(
+        error: new ConfigLoadError(
           `Failed to parse profiles.json: ${error instanceof Error ? error.message : String(error)}`,
           profilesPath,
           error
@@ -81,7 +81,7 @@ export async function loadConfig(
     } catch (error) {
       return {
         success: false,
-        error: new (ConfigLoadError as any)(
+        error: new ConfigLoadError(
           `Failed to parse ports.json: ${error instanceof Error ? error.message : String(error)}`,
           portsPath,
           error
@@ -96,7 +96,7 @@ export async function loadConfig(
   } catch (error) {
     return {
       success: false,
-      error: new (ConfigLoadError as any)(
+      error: new ConfigLoadError(
         `Failed to load configuration: ${error instanceof Error ? error.message : String(error)}`,
         configDir,
         error
@@ -125,7 +125,7 @@ export function selectServices(
       const availableProfiles = Object.keys(config.profiles.profiles).join(', ');
       return {
         success: false,
-        error: new (ServiceSelectionError as any)(
+        error: new ServiceSelectionError(
           `Profile '${profileName}' not found. Available profiles: ${availableProfiles}`
         ),
       };
@@ -137,7 +137,7 @@ export function selectServices(
       if (!service) {
         return {
           success: false,
-          error: new (ServiceSelectionError as any)(
+          error: new ServiceSelectionError(
             `Service '${serviceName}' referenced in profile '${profileName}' not found`,
             [serviceName]
           ),
@@ -167,7 +167,7 @@ export function selectServices(
       const availableServices = Object.keys(config.services.services).join(', ');
       return {
         success: false,
-        error: new (ServiceSelectionError as any)(
+        error: new ServiceSelectionError(
           `Invalid service names: ${invalidServices.join(', ')}. Available services: ${availableServices}`,
           invalidServices
         ),
@@ -185,7 +185,7 @@ export function selectServices(
   if (!defaultProfile) {
     return {
       success: false,
-      error: new (ServiceSelectionError as any)(
+      error: new ServiceSelectionError(
         'No profile or service names provided, and no default profile found'
       ),
     };
@@ -253,7 +253,7 @@ export function resolveDependencies(
       const cycle = Array.from(visiting).join(' -> ');
       return {
         success: false,
-        error: new (ServiceSelectionError as any)(
+        error: new ServiceSelectionError(
           `Circular dependency detected: ${cycle}`,
           Array.from(visiting)
         ),

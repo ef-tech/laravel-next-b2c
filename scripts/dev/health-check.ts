@@ -101,7 +101,7 @@ export async function checkDependencyTool(
     if (!versionMatch) {
       return {
         available: false,
-        error: new (DependencyCheckError as any)(
+        error: new DependencyCheckError(
           `Could not determine ${tool.name} version`,
           tool.name
         ),
@@ -114,7 +114,7 @@ export async function checkDependencyTool(
       return {
         available: false,
         version: actualVersion,
-        error: new (DependencyCheckError as any)(
+        error: new DependencyCheckError(
           `${tool.name} version ${actualVersion} is below required version ${tool.requiredVersion}`,
           tool.name,
           tool.requiredVersion,
@@ -127,7 +127,7 @@ export async function checkDependencyTool(
   } catch (error) {
     return {
       available: false,
-      error: new (DependencyCheckError as any)(
+      error: new DependencyCheckError(
         `${tool.name} is not installed or not in PATH`,
         tool.name
       ),
@@ -321,7 +321,7 @@ export async function waitForService(
 
   return {
     success: false,
-    error: new (HealthCheckError as any)(
+    error: new HealthCheckError(
       `Service at ${url} did not become ready within ${timeout}ms`,
       url,
       timeout
