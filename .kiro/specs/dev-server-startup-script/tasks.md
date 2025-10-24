@@ -84,14 +84,14 @@
   - _Requirements: すべてのTypeScript実装要件に対応_
 
 - [ ] 4. Bashスクリプト実装（エントリーポイント・Docker管理・プロセス管理）
-- [ ] 4.1 メインエントリーポイントスクリプト作成（main.sh）
+- [x] 4.1 メインエントリーポイントスクリプト作成（main.sh）
   - シェバング、実行権限設定
   - コマンドライン引数解析機能（--mode、--profile、--services、--logs、--setup、--skip-setup、--wait-for-health、--kill-ports、--raw、--no-color、--config-dir、--help）
   - ヘルプメッセージ表示機能（--helpオプション）
   - 不正なオプションのエラーハンドリング
   - _Requirements: 10.2, 10.3_
 
-- [ ] 4.2 初回セットアップ統合機能実装（main.sh）
+- [x] 4.2 初回セットアップ統合機能実装（main.sh）
   - セットアップ完了チェック機能（.env、vendor/、node_modules/の存在確認）
   - `make setup`自動実行機能（セットアップ未完了時）
   - セットアップ失敗時のエラーハンドリング
@@ -99,21 +99,21 @@
   - `--skip-setup`フラグによるスキップ機能
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7_
 
-- [ ] 4.3 Docker Compose管理スクリプト作成（docker-manager.sh）
+- [x] 4.3 Docker Compose管理スクリプト作成（docker-manager.sh）
   - プロファイルフラグ生成機能（get_docker_profiles関数: モードとプロファイルに応じた--profileフラグ生成）
   - Docker Compose起動機能（start_docker_compose関数: docker compose --profile ... up -d実行）
   - Docker Compose停止機能（stop_docker_compose関数: docker compose down実行）
   - Docker Composeエラーハンドリング
   - _Requirements: 11.2, 11.3, 11.4, 11.5_
 
-- [ ] 4.4 ネイティブプロセス管理スクリプト作成（process-manager.sh）
+- [x] 4.4 ネイティブプロセス管理スクリプト作成（process-manager.sh）
   - concurrentlyコマンド生成機能（build_concurrently_command関数: サービスリストからconcurrentlyコマンド生成）
   - ネイティブプロセス起動機能（start_native_processes関数: concurrently実行、カラープレフィックス設定、--kill-othersオプション）
   - シグナルハンドリング（SIGINT/SIGTERM対応、グレースフルシャットダウン）
   - concurrently未インストール時のエラーハンドリング
   - _Requirements: 1.2, 4.1, 4.2, 4.3, 8.1, 8.2, 8.3, 8.4, 8.6_
 
-- [ ] 4.5 メインスクリプトの統合フロー実装（main.sh）
+- [x] 4.5 メインスクリプトの統合フロー実装（main.sh）
   - 引数解析後のTypeScript呼び出し（dev-server.ts実行、設定読み込み、サービス選択）
   - 依存関係チェック実行（health-check.ts実行、ツールバージョン確認、ポート競合チェック）
   - モード別起動処理（Dockerモード: docker-manager.sh呼び出し、ハイブリッドモード: docker-manager.sh + process-manager.sh呼び出し、ネイティブモード: docker-manager.sh + process-manager.sh呼び出し）
@@ -123,8 +123,8 @@
   - グレースフルシャットダウン実装（SIGINT/SIGTERM トラップ、全サービス停止、終了コード0）
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 2.5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-- [ ] 5. Makefile統合とコマンドエントリーポイント整備
-- [ ] 5.1 Makefile新規ターゲット追加
+- [x] 5. Makefile統合とコマンドエントリーポイント整備
+- [x] 5.1 Makefile新規ターゲット追加
   - `dev`ターゲット追加（ハイブリッドモード、fullプロファイル、`./scripts/dev/main.sh --mode=hybrid --profile=full`）
   - `dev-docker`ターゲット追加（Dockerモード、fullプロファイル、`./scripts/dev/main.sh --mode=docker --profile=full`）
   - `dev-native`ターゲット追加（ネイティブモード、fullプロファイル、`./scripts/dev/main.sh --mode=native --profile=full`）
@@ -135,7 +135,7 @@
   - `logs`ターゲット追加（Docker Composeログ表示、`docker compose logs -f $(services)`）
   - _Requirements: 10.1_
 
-- [ ] 5.2 Makefileヘルプメッセージ更新
+- [x] 5.2 Makefileヘルプメッセージ更新
   - `make help`コマンドに新規ターゲットの説明を追加
   - 各ターゲットの簡潔な説明（1行）を追加
   - 使用例の追加（基本例: `make dev`、詳細例: `./scripts/dev/main.sh --mode=docker --services=laravel-api,admin-app`）

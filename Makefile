@@ -8,6 +8,7 @@ SCRIPTS_DIR := scripts
 .PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql
 .PHONY: docker-up docker-down docker-logs
 .PHONY: setup setup-ci setup-from
+.PHONY: dev dev-docker dev-native dev-api dev-frontend dev-infra dev-minimal dev-stop dev-env
 
 # デフォルトターゲット
 help: ## ヘルプを表示
@@ -145,10 +146,38 @@ health: ## 環境ヘルスチェック
 	@echo "✅ ヘルスチェック完了"
 
 # =============================================================================
+# 開発サーバー起動コマンド
+# =============================================================================
+
+dev: ## 開発サーバー起動（ハイブリッドモード: インフラDocker、アプリネイティブ）
+	@./scripts/dev/main.sh --mode hybrid --profile full
+
+dev-docker: ## 開発サーバー起動（Dockerモード: 全サービスDocker）
+	@./scripts/dev/main.sh --mode docker --profile full
+
+dev-native: ## 開発サーバー起動（ネイティブモード: 全サービスネイティブ）
+	@./scripts/dev/main.sh --mode native --profile full
+
+dev-api: ## 開発サーバー起動（APIのみ）
+	@./scripts/dev/main.sh --mode hybrid --profile api-only
+
+dev-frontend: ## 開発サーバー起動（フロントエンドのみ）
+	@./scripts/dev/main.sh --mode hybrid --profile frontend-only
+
+dev-infra: ## 開発サーバー起動（インフラのみ）
+	@./scripts/dev/main.sh --mode docker --profile infra-only
+
+dev-minimal: ## 開発サーバー起動（最小構成: API + フロントエンド1つ）
+	@./scripts/dev/main.sh --mode hybrid --profile minimal
+
+dev-stop: ## 開発サーバー停止
+	@docker compose down
+
+# =============================================================================
 # 開発者用クイックコマンド
 # =============================================================================
 
-dev: ## 開発環境スタート（Docker起動 + SQLite設定）
+dev-env: ## 開発環境スタート（Docker起動 + SQLite設定）
 	$(MAKE) docker-up
 	$(MAKE) test-switch-sqlite
 	@echo "✅ 開発環境の準備が完了しました！"
