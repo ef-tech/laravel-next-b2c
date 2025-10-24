@@ -383,6 +383,69 @@ parameters:
   - **プロジェクト固有イメージ命名**: laravel-next-b2c/app による他プロジェクトとの競合回避
 
 ## 開発環境
+
+### ⚡ 自動セットアップスクリプト（推奨）
+
+**`make setup` コマンド一つで完全な開発環境を15分以内に構築**:
+
+```bash
+# 1. リポジトリのクローンと移動
+git clone https://github.com/ef-tech/laravel-next-b2c.git
+cd laravel-next-b2c
+
+# 2. 一括セットアップ実行（15分以内）
+make setup
+```
+
+**セットアップ内容**:
+1. **前提条件チェック** (`check_prerequisites`):
+   - Docker、Docker Compose、Node.js、npm、Git、makeのバージョン確認
+   - 必要バージョン: Docker 20.10+、Node.js 18+、npm 9+、Git 2.30+
+   - 不足している場合は推奨インストール方法を案内
+
+2. **環境変数設定** (`setup_env`):
+   - `.env`（ルート）、`.env.local`（フロントエンドアプリ）の自動生成
+   - Laravelアプリケーションキー（APP_KEY）の自動生成
+   - 既存の`.env`ファイルは保持（冪等性保証）
+
+3. **依存関係インストール** (`install_dependencies`):
+   - Composer依存関係インストール（backend/laravel-api）
+   - npm依存関係インストール（ルート、admin-app、user-app）
+   - Dockerイメージのプル（`docker compose pull --ignore-buildable`）
+
+4. **サービス起動** (`start_services`):
+   - Docker Composeによる全サービス起動（`docker compose up -d`）
+   - 起動サービス: PostgreSQL、Redis、Mailpit、MinIO、Laravel API、User App、Admin App
+
+5. **セットアップ検証** (`verify_setup`):
+   - 全サービスのヘルスチェック（最大120秒待機）
+   - Laravel API: http://localhost:13000/api/health
+   - User App: http://localhost:13001
+   - Admin App: http://localhost:13002
+
+**部分的再実行機能**:
+```bash
+# エラーが発生した場合、指定されたステップから再実行可能
+make setup-from STEP=install_dependencies
+
+# 利用可能なステップ:
+# - check_prerequisites
+# - setup_env
+# - install_dependencies
+# - start_services
+# - verify_setup
+```
+
+**冪等性保証**:
+- 何度実行しても安全
+- 既存の`.env`ファイルやAPP_KEYは保持
+- 既存のDockerコンテナは再利用
+
+**エラーハンドリング**:
+- わかりやすいエラーメッセージ
+- 解決策の具体的な提示
+- 実行ログの詳細な記録
+
 ### Docker Compose構成（統合環境）
 ```yaml
 サービス構成:
@@ -446,6 +509,25 @@ Laravel Sailサービス:
 - **Git**: バージョン管理
 
 ## 共通開発コマンド
+
+### セットアップコマンド（初回セットアップ）
+```bash
+# 一括セットアップ（15分以内）
+make setup
+
+# 部分的再実行（エラー時）
+make setup-from STEP=install_dependencies  # 依存関係インストールから再実行
+make setup-from STEP=start_services         # サービス起動から再実行
+make setup-from STEP=verify_setup           # 検証のみ再実行
+
+# 利用可能なステップ
+# - check_prerequisites: 前提条件チェック
+# - setup_env: 環境変数設定
+# - install_dependencies: 依存関係インストール
+# - start_services: サービス起動
+# - verify_setup: セットアップ検証
+```
+
 ### Docker Compose（推奨 - 統合環境）
 ```bash
 # リポジトリルートで実行
