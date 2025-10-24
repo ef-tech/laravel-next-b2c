@@ -462,7 +462,8 @@ make setup-from STEP=install_dependencies
 - mailpit: 開発用メールサーバー - SMTP: 11025, UI: 13025
   - healthcheck: wget --spider http://127.0.0.1:8025 (10秒間隔)
 - minio: オブジェクトストレージ - API: 13900, Console: 13010
-  - healthcheck: curl http://127.0.0.1:9000/minio/health/live (10秒間隔)
+  - healthcheck: mc ready local (10秒間隔、Codex指摘対応済み)
+  - 従来のcurl healthcheck問題解消（mcコマンド使用推奨）
 
 # フロントエンド
 - admin-app: Next.js 15.5 管理者アプリ - ポート: 13002
@@ -527,6 +528,42 @@ make setup-from STEP=verify_setup           # 検証のみ再実行
 # - start_services: サービス起動
 # - verify_setup: セットアップ検証
 ```
+
+### 統合開発サーバー起動コマンド（日常開発）
+```bash
+# 基本起動コマンド（推奨）
+make dev              # ハイブリッドモード（インフラDocker、アプリネイティブ）
+make dev-docker       # Dockerモード（全サービスDocker）
+make dev-native       # ネイティブモード（全サービスネイティブ）
+
+# プロファイル別起動
+make dev-api          # APIのみ
+make dev-frontend     # フロントエンドのみ
+make dev-infra        # インフラのみ（PostgreSQL、Redis等）
+make dev-minimal      # 最小構成（API + フロントエンド1つ）
+
+# 停止コマンド
+make dev-stop         # 全サービス停止（Docker/ネイティブ統一インターフェース）
+
+# 詳細オプション（シェルスクリプト直接実行）
+./scripts/dev/main.sh --help                                    # ヘルプ表示
+./scripts/dev/main.sh --mode hybrid --profile full              # ハイブリッドモード全サービス
+./scripts/dev/main.sh --mode docker --profile api-only          # DockerモードAPI専用
+./scripts/dev/main.sh --services laravel-api,admin-app          # 特定サービスのみ
+./scripts/dev/main.sh --setup --mode docker                     # セットアップから実行
+DEBUG=1 ./scripts/dev/main.sh --mode native                     # デバッグモード
+```
+
+**起動モード説明**:
+- **ハイブリッドモード** (推奨): インフラ（PostgreSQL, Redis等）はDocker、アプリ（Laravel API, Next.js）はネイティブプロセス
+- **Dockerモード**: 全サービスDockerコンテナで起動（環境統一、E2Eテスト向け）
+- **ネイティブモード**: 全サービスネイティブプロセスで起動（最速起動）
+
+**設定駆動アーキテクチャ**:
+- YAML設定ファイル: `scripts/dev/config.yml` - サービス定義、起動コマンド、ポート設定
+- TypeScript実装: `scripts/dev/src/` - dev-server.ts、process-manager.ts、health-check.ts、log-manager.ts
+- Bash統合: `scripts/dev/main.sh` - シェルスクリプトエントリーポイント
+- Makefile統合: `Makefile` - make dev系ターゲット
 
 ### Docker Compose（推奨 - 統合環境）
 ```bash
