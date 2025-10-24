@@ -12,6 +12,8 @@ const customJestConfig = {
   setupFilesAfterEnv: ["<rootDir>/../../jest.setup.ts"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    // Security config module resolution for Jest
+    "^\\.\\./security-config$": "<rootDir>/../security-config.ts",
   },
   collectCoverageFrom: [
     "src/**/*.{ts,tsx,js,jsx}",
@@ -20,22 +22,6 @@ const customJestConfig = {
     "!src/**/index.{ts,tsx}",
     "!src/app/layout.tsx",
     "!src/app/page.tsx",
-  ],
-  // Override JUnit reporter outputName for admin-app
-  reporters: [
-    "default",
-    [
-      "jest-junit",
-      {
-        outputDirectory: "<rootDir>/../../test-results/junit",
-        outputName: "frontend-admin-results.xml",
-        suiteName: "admin-app",
-        classNameTemplate: "{classname}",
-        titleTemplate: "{title}",
-        ancestorSeparator: " › ",
-        usePathForSuiteName: "true",
-      },
-    ],
   ],
 };
 
