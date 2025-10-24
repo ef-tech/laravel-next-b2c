@@ -1,0 +1,72 @@
+{
+  "feature_name": "setup-script",
+  "created_at": "2025-10-23T09:45:00Z",
+  "updated_at": "2025-10-23T12:43:00Z",
+  "language": "ja",
+  "phase": "tasks-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 24,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/24",
+    "title": "一括セットアップスクリプト作成",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": ["Laravel 12", "PHP", "Composer"],
+      "frontend": ["Next.js 15.5", "Node.js 18+", "npm"],
+      "infrastructure": ["Docker", "Docker Compose", "PostgreSQL", "Redis", "Mailpit", "MinIO"],
+      "tools": ["Makefile", "Shell Script", "GitHub Actions"]
+    },
+    "requirements_hints": [
+      "開発者の初回環境構築時間を15分以内に短縮",
+      "環境構築の失敗率を80%削減（自動リトライ・エラーハンドリング）",
+      "セットアップ手順の標準化とドキュメント化",
+      "CI/CD統合による環境構築自動検証",
+      "冪等性保証（複数回実行可能）",
+      "部分的再実行サポート（--from <step>）",
+      "環境差異対応（macOS/Linux/WSL2）"
+    ],
+    "project_structure": [
+      "Makefile",
+      "scripts/setup/*.sh",
+      "scripts/lib.sh",
+      ".env.example",
+      "README.md"
+    ],
+    "services": {
+      "user-app": {"port": "13001"},
+      "admin-app": {"port": "13002"},
+      "laravel-api": {"port": "13000"},
+      "redis": {"port": "13379"},
+      "pgsql": {"port": "13432"},
+      "mailpit": {"smtp_port": "11025", "ui_port": "13025"},
+      "minio": {"api_port": "13900", "console_port": "13010"}
+    },
+    "todo_items": [
+      "make setup で15分以内に環境構築完了",
+      "macOS/Linux/WSL2 全環境で動作確認",
+      "エラーハンドリング・リトライ機能実装",
+      "ドキュメント整備（README, トラブルシューティング）",
+      "チーム内テスト（3名以上）完了",
+      "CI/CD統合完了"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}
