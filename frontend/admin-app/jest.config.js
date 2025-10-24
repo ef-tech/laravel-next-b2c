@@ -21,6 +21,22 @@ const customJestConfig = {
     "!src/app/layout.tsx",
     "!src/app/page.tsx",
   ],
+  // Override JUnit reporter outputName for admin-app
+  reporters: [
+    "default",
+    [
+      "jest-junit",
+      {
+        outputDirectory: "<rootDir>/../../test-results/junit",
+        outputName: "frontend-admin-results.xml",
+        suiteName: "admin-app",
+        classNameTemplate: "{classname}",
+        titleTemplate: "{title}",
+        ancestorSeparator: " › ",
+        usePathForSuiteName: "true",
+      },
+    ],
+  ],
 };
 
 module.exports = createJestConfig(customJestConfig);

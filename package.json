@@ -40,6 +40,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jest-junit": "^16.0.0",
     "lint-staged": "^15",
     "msw": "^2.11.3",
     "next-router-mock": "^0.9.13",
