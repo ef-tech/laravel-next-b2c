@@ -231,9 +231,10 @@ services:
     healthcheck:
       test:
         - CMD
-        - mc
-        - ready
-        - local
+        - sh
+        - -c
+        - 'wget --no-verbose --tries=1 --spider http://127.0.0.1:${FORWARD_MINIO_PORT:-13900}/minio/health/live || exit 1'
+      interval: 10s
       retries: 3
       timeout: 5s
     profiles:

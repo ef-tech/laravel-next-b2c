@@ -32,7 +32,7 @@
         "profile": "frontend"
       },
       "native": {
-        "command": "cd frontend/admin-app && pnpm dev --port 13002",
+        "command": "cd frontend/admin-app && npm run dev -- --port 13002",
         "env": {
           "PORT": "13002",
           "NEXT_PUBLIC_API_URL": "http://localhost:13000"
@@ -51,7 +51,7 @@
         "profile": "frontend"
       },
       "native": {
-        "command": "cd frontend/user-app && pnpm dev --port 13001",
+        "command": "cd frontend/user-app && npm run dev -- --port 13001",
         "env": {
           "PORT": "13001",
           "NEXT_PUBLIC_API_URL": "http://localhost:13000"
