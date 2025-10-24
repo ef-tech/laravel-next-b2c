@@ -1,9 +1,9 @@
 {
   "feature_name": "test-execution-script",
   "created_at": "2025-10-24T14:43:00Z",
-  "updated_at": "2025-10-24T14:55:00Z",
+  "updated_at": "2025-10-25T00:00:00Z",
   "language": "ja",
-  "phase": "requirements-generated",
+  "phase": "design-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 26,
@@ -88,10 +88,10 @@
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
+      "generated": true,
       "approved": false
     },
     "tasks": {
