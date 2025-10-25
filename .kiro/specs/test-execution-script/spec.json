@@ -1,0 +1,115 @@
+{
+  "feature_name": "test-execution-script",
+  "created_at": "2025-10-24T14:43:00Z",
+  "updated_at": "2025-10-26T01:35:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 26,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/26",
+    "title": "テスト実行スクリプト作成",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel, PHP, Pest (テストフレームワーク), PHPUnit",
+      "frontend": "Next.js, Jest, React Testing Library",
+      "infrastructure": "Docker Compose, PostgreSQL, SQLite, Redis, Mailpit, MinIO",
+      "tools": "Bash, Makefile, JUnit XML, GitHub Actions, Playwright"
+    },
+    "requirements_hints": [
+      "単一コマンドで全テストスイート（バックエンド、フロントエンド、E2E）を統合実行",
+      "テストスイート選択、DB環境選択、並列度調整などの柔軟な実行制御",
+      "JUnit/カバレッジレポートの統合生成と可視化",
+      "GitHub Actions既存ワークフローとのシームレスな連携",
+      "一部テスト失敗でも全テスト実行継続、最終的な統合結果レポート提供"
+    ],
+    "project_structure": [
+      "scripts/test/main.sh",
+      "scripts/test/test-backend.sh",
+      "scripts/test/test-frontend.sh",
+      "scripts/test/test-e2e.sh",
+      "scripts/test/test-report.sh",
+      "scripts/test/diagnose.sh",
+      "scripts/lib/colors.sh",
+      "scripts/lib/logging.sh",
+      "test-results/junit/",
+      "test-results/coverage/",
+      "test-results/reports/",
+      "test-results/logs/",
+      "docs/TESTING_EXECUTION_GUIDE.md",
+      "docs/TESTING_TROUBLESHOOTING_EXTENDED.md"
+    ],
+    "services": {
+      "laravel-api": {
+        "port": "13000",
+        "health_endpoint": "/api/health"
+      },
+      "user-app": {
+        "port": "13001",
+        "health_endpoint": "/api/health"
+      },
+      "admin-app": {
+        "port": "13002",
+        "health_endpoint": "/api/health"
+      },
+      "postgresql": {
+        "port": "13432"
+      },
+      "redis": {
+        "port": "13379"
+      }
+    },
+    "todo_items": [
+      "scripts/test/main.sh 実装",
+      "scripts/test/test-backend.sh 実装",
+      "scripts/test/test-frontend.sh 実装",
+      "scripts/test/test-e2e.sh 実装",
+      "scripts/test/test-report.sh 実装",
+      "scripts/test/diagnose.sh 実装（診断スクリプト）",
+      "scripts/lib/ 共通関数実装（colors.sh、logging.sh）",
+      "実行権限付与（chmod +x）",
+      "Makefileに新規タスク追加",
+      "test-results/ ディレクトリ構造作成",
+      "phpunit.xml JUnit出力設定追加",
+      "jest.config.js jest-junit レポータ追加",
+      "playwright.config.ts junit レポータ追加",
+      "レポート統合スクリプト動作確認",
+      ".github/workflows/test-integration.yml 作成",
+      "docs/TESTING_EXECUTION_GUIDE.md 作成",
+      "docs/TESTING_TROUBLESHOOTING_EXTENDED.md 作成",
+      "README.md 更新（新規コマンド追加）",
+      "CLAUDE.md 更新（Steering情報追加）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true,
+  "implementation_status": {
+    "phase_1_completed": true,
+    "phase_2_completed": true,
+    "phase_3_completed": true,
+    "phase_4_completed": true,
+    "phase_5_completed": true,
+    "phase_6_skipped": true,
+    "phase_6_reason": "既存のGitHub Actionsワークフロー（test.yml、php-quality.yml、frontend-test.yml、e2e-tests.yml）が存在し、正常に動作しているため、Phase 6の新規ワークフロー作成はスキップ",
+    "phase_7_completed": true,
+    "local_verification_completed": true,
+    "ci_verification_required": false
+  }
+}

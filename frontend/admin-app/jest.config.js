@@ -12,6 +12,8 @@ const customJestConfig = {
   setupFilesAfterEnv: ["<rootDir>/../../jest.setup.ts"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    // Security config module resolution for Jest
+    "^\\.\\./security-config$": "<rootDir>/../security-config.ts",
   },
   collectCoverageFrom: [
     "src/**/*.{ts,tsx,js,jsx}",

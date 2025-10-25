@@ -4,4 +4,20 @@ module.exports = {
     '<rootDir>/frontend/user-app',
     '<rootDir>/scripts',
   ],
+  // Root-level reporters configuration for all projects
+  reporters: [
+    'default',
+    [
+      'jest-junit',
+      {
+        outputDirectory: '<rootDir>/test-results/junit',
+        // outputName can be set via JEST_JUNIT_OUTPUT_NAME environment variable
+        suiteNameTemplate: '{filepath}',
+        classNameTemplate: '{classname}',
+        titleTemplate: '{title}',
+        ancestorSeparator: ' › ',
+        usePathForSuiteName: 'true',
+      },
+    ],
+  ],
 };
