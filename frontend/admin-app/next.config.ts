@@ -38,6 +38,7 @@ try {
   securityConfig = securityConfigModule.getAdminSecurityConfig(isDev);
   buildCSPString = securityConfigModule.buildCSPString;
   buildPermissionsPolicyString = securityConfigModule.buildPermissionsPolicyString;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 } catch (_error) {
   // Fallback for environments where security-config.js is not available
   console.warn("Failed to load security-config.js, using fallback config");
