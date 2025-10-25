@@ -1301,10 +1301,76 @@ npx playwright test security-headers.spec.ts --ui
 - ✅ CSP 違反検出テスト (2 テスト)
 - ✅ CORS 統合テスト (2 テスト)
 
+#### 統合テスト実行
+
+プロジェクトルートから全テストスイートを実行できます:
+
+```bash
+# 全テストスイート実行（SQLite高速モード、約30秒）
+make test-all
+
+# PostgreSQL環境で全テスト実行（本番同等、約5-10分）
+make test-all-pgsql
+
+# バックエンドテストのみ（約2秒）
+make quick-test
+make test-backend-only  # 同じ
+
+# フロントエンドテストのみ（約15秒）
+make test-frontend-only
+
+# E2Eテストのみ（約2-5分）
+make test-e2e-only
+
+# PR前推奨テスト（Lint + PostgreSQL + カバレッジ、約3-5分）
+make test-pr
+
+# テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
+make test-diagnose
+```
+
+**利用可能なテストコマンド**:
+
+| コマンド | 内容 | 所要時間 | 用途 |
+|---------|------|----------|------|
+| `make test-all` | 全テストスイート（SQLite） | 約30秒 | 日常開発 |
+| `make test-all-pgsql` | 全テストスイート（PostgreSQL並列） | 約5-10分 | 本番同等検証 |
+| `make quick-test` | バックエンド高速テスト（SQLite） | 約2秒 | デバッグ |
+| `make test-pgsql` | バックエンド本番同等テスト | 約5-10秒 | 機能完成時 |
+| `make test-parallel` | バックエンド並列テスト（4 Shard） | 約3-5分 | 本番環境検証 |
+| `make test-coverage` | カバレッジレポート生成 | 約5-10分 | カバレッジ確認 |
+| `make test-frontend-only` | フロントエンドテスト（Jest） | 約15秒 | フロントエンド開発 |
+| `make test-e2e-only` | E2Eテスト（Playwright） | 約2-5分 | 統合動作確認 |
+| `make test-with-coverage` | 全テスト + カバレッジ（PostgreSQL） | 約5-10分 | PR前完全チェック |
+| `make test-pr` | Lint + PostgreSQL + カバレッジ | 約3-5分 | **PR作成前推奨** |
+| `make test-smoke` | スモークテスト（高速ヘルスチェック） | 約5秒 | デプロイ前確認 |
+| `make test-diagnose` | テスト環境診断 | 約5秒 | トラブルシューティング |
+
+**テスト環境管理**:
+
+```bash
+# SQLite環境に切り替え（高速開発）
+make test-switch-sqlite
+
+# PostgreSQL環境に切り替え（本番同等）
+make test-switch-pgsql
+
+# 並列テスト環境セットアップ（PostgreSQL test DBs作成）
+make test-setup
+
+# テスト環境クリーンアップ（test DBs削除）
+make test-cleanup
+
+# テスト用DB存在確認
+make test-db-check
+```
+
 ### 関連ドキュメント
 
 | ドキュメント | 内容 |
 |------------|------|
+| **[テスト実行ガイド](docs/TESTING_EXECUTION_GUIDE.md)** | テスト実行方法、クイックスタート、ローカル/CI/CD環境でのテスト実行、診断スクリプト |
+| **[テストトラブルシューティング](docs/TESTING_TROUBLESHOOTING_EXTENDED.md)** | よくある問題と解決策、ログ分析方法、エスカレーション手順 |
 | **[実装ガイド](SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md)** | Laravel/Next.js 実装手順、環境変数設定、CSP カスタマイズ方法 |
 | **[運用マニュアル](docs/SECURITY_HEADERS_OPERATION.md)** | 日常運用、Report-Only モード運用、Enforce モード切り替え手順 |
 | **[トラブルシューティング](docs/SECURITY_HEADERS_TROUBLESHOOTING.md)** | よくある問題、CSP 違反デバッグ、CORS エラー対処 |
