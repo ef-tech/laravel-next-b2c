@@ -1,19 +1,44 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+// Type definitions for security config
+interface CSPConfig {
+  defaultSrc?: string[];
+  scriptSrc?: string[];
+  styleSrc?: string[];
+  imgSrc?: string[];
+  connectSrc?: string[];
+  fontSrc?: string[];
+  objectSrc?: string[];
+  frameAncestors?: string[];
+  upgradeInsecureRequests?: boolean;
+}
+
+interface SecurityConfig {
+  xFrameOptions: string;
+  xContentTypeOptions: string;
+  referrerPolicy: string;
+  csp: CSPConfig;
+  permissionsPolicy: Record<string, unknown>;
+  hsts?: {
+    maxAge: number;
+  };
+}
+
 // Load security config with error handling for test environment
-let securityConfig: any;
-let buildCSPString: any;
-let buildPermissionsPolicyString: any;
+let securityConfig: SecurityConfig;
+let buildCSPString: (config: CSPConfig) => string;
+let buildPermissionsPolicyString: (config: Record<string, unknown>) => string;
 
 try {
   // Try to load actual security config
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const securityConfigModule = require("../security-config.js");
   const isDev = process.env.NODE_ENV === "development";
   securityConfig = securityConfigModule.getAdminSecurityConfig(isDev);
   buildCSPString = securityConfigModule.buildCSPString;
   buildPermissionsPolicyString = securityConfigModule.buildPermissionsPolicyString;
-} catch (error) {
+} catch (_error) {
   // Fallback for environments where security-config.js is not available
   console.warn("Failed to load security-config.js, using fallback config");
   securityConfig = {
@@ -33,8 +58,8 @@ try {
     },
     permissionsPolicy: {},
   };
-  buildCSPString = (config: any) => "default-src 'self'";
-  buildPermissionsPolicyString = (config: any) => "";
+  buildCSPString = (_config: CSPConfig) => "default-src 'self'";
+  buildPermissionsPolicyString = (_config: Record<string, unknown>) => "";
 }
 
 const nextConfig: NextConfig = {
