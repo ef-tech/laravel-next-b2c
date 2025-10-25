@@ -20,6 +20,9 @@ ENABLE_REPORT="false"
 CI_MODE="${CI:-false}"
 FAST_MODE="false"
 
+# Port definitions for conflict checking
+readonly TEST_PORTS=(13000 13001 13002 13432 13379)
+
 # Exit codes tracking
 BACKEND_EXIT=0
 FRONTEND_EXIT=0
@@ -85,10 +88,9 @@ validate_env_vars() {
 check_port_conflicts() {
     log_info "Checking for port conflicts..."
 
-    local ports=(13000 13001 13002 13432 13379)
     local conflicts=()
 
-    for port in "${ports[@]}"; do
+    for port in "${TEST_PORTS[@]}"; do
         if lsof -Pi :${port} -sTCP:LISTEN -t > /dev/null 2>&1; then
             local process_info
             process_info=$(lsof -Pi :${port} -sTCP:LISTEN | tail -1)
@@ -212,12 +214,14 @@ run_tests() {
     # Setup test results directory
     bash "${PROJECT_ROOT}/scripts/test/setup-test-results.sh"
 
+    # Disable errexit for test execution (we want to run all tests even if some fail)
+    set +e
+
     case "${SUITE}" in
         all)
             log_info "Running all test suites in parallel..."
 
             # Run backend and frontend in parallel
-            set +e
             run_backend_suite &
             local backend_pid=$!
 
@@ -226,38 +230,30 @@ run_tests() {
 
             # Wait for parallel tests
             wait ${backend_pid}
-            local backend_exit=$?
-
             wait ${frontend_pid}
-            local frontend_exit=$?
 
             # Run E2E tests sequentially (requires services)
             run_e2e_suite
-            local e2e_exit=$?
-
-            set -e
             ;;
         backend)
-            set +e
             run_backend_suite
-            set -e
             ;;
         frontend)
-            set +e
             run_frontend_suite
-            set -e
             ;;
         e2e)
-            set +e
             run_e2e_suite
-            set -e
             ;;
         *)
             log_error "Invalid test suite: ${SUITE}"
             log_error "Valid options: all, backend, frontend, e2e"
+            set -e
             return 1
             ;;
     esac
+
+    # Re-enable errexit
+    set -e
 }
 
 # Print summary
@@ -327,9 +323,7 @@ main() {
     check_port_conflicts
 
     # Run tests
-    set +e
     run_tests
-    set -e
 
     # Print summary
     print_summary
@@ -338,8 +332,14 @@ main() {
     # Generate report if requested
     if [[ "${ENABLE_REPORT}" == "true" ]]; then
         log_info "Generating integrated test report..."
-        # Report generation will be implemented in Phase 4
-        log_warn "Report generation not yet implemented"
+        bash "${PROJECT_ROOT}/scripts/test/test-report.sh"
+        local report_exit=$?
+
+        if [[ ${report_exit} -ne 0 ]]; then
+            log_warn "Report generation failed (exit code: ${report_exit})"
+        else
+            log_success "Test report generated successfully"
+        fi
     fi
 
     exit ${final_exit}

@@ -24,82 +24,55 @@ USER_JUNIT_OUTPUT="${PROJECT_ROOT}/test-results/junit/frontend-user-test-results
 ADMIN_COVERAGE_OUTPUT="${PROJECT_ROOT}/test-results/coverage/frontend-admin"
 USER_COVERAGE_OUTPUT="${PROJECT_ROOT}/test-results/coverage/frontend-user"
 
-# Run Admin App tests
-run_admin_tests() {
-    log_info "Running Admin App tests (Coverage: ${ENABLE_COVERAGE})"
+# Common test execution function
+run_app_tests() {
+    local app_name="$1"
+    local app_dir="$2"
+    local log_file="$3"
 
-    # Change to admin-app directory
-    cd "${ADMIN_APP_DIR}" || {
-        log_error "Failed to change to admin-app directory: ${ADMIN_APP_DIR}"
+    log_info "Running ${app_name} tests (Coverage: ${ENABLE_COVERAGE})"
+
+    # Change to app directory
+    cd "${app_dir}" || {
+        log_error "Failed to change to ${app_name} directory: ${app_dir}"
         return 1
     }
 
     # Prepare test command
     local test_cmd="npm run test"
-
-    # Add coverage option if enabled
     if [[ "${ENABLE_COVERAGE}" == "true" ]]; then
-        log_info "Enabling coverage reporting for Admin App..."
+        log_info "Enabling coverage reporting for ${app_name}..."
         test_cmd="npm run test:coverage"
     fi
 
     # Execute tests with error handling
-    log_info "Executing: ${test_cmd} (Admin App)"
+    log_info "Executing: ${test_cmd} (${app_name})"
 
     # Disable exit-on-error for this section to capture exit code
     set +e
-    ${test_cmd} 2>&1 | tee "${ADMIN_LOG_FILE}"
+    ${test_cmd} 2>&1 | tee "${log_file}"
     local exit_code=$?
     set -e
 
     # Check test result
     if [[ ${exit_code} -eq 0 ]]; then
-        log_success "Admin App tests passed"
+        log_success "${app_name} tests passed"
         return 0
     else
-        log_error "Admin App tests failed with exit code: ${exit_code}"
-        log_error "Check log file: ${ADMIN_LOG_FILE}"
+        log_error "${app_name} tests failed with exit code: ${exit_code}"
+        log_error "Check log file: ${log_file}"
         return ${exit_code}
     fi
 }
 
+# Run Admin App tests
+run_admin_tests() {
+    run_app_tests "Admin App" "${ADMIN_APP_DIR}" "${ADMIN_LOG_FILE}"
+}
+
 # Run User App tests
 run_user_tests() {
-    log_info "Running User App tests (Coverage: ${ENABLE_COVERAGE})"
-
-    # Change to user-app directory
-    cd "${USER_APP_DIR}" || {
-        log_error "Failed to change to user-app directory: ${USER_APP_DIR}"
-        return 1
-    }
-
-    # Prepare test command
-    local test_cmd="npm run test"
-
-    # Add coverage option if enabled
-    if [[ "${ENABLE_COVERAGE}" == "true" ]]; then
-        log_info "Enabling coverage reporting for User App..."
-        test_cmd="npm run test:coverage"
-    fi
-
-    # Execute tests with error handling
-    log_info "Executing: ${test_cmd} (User App)"
-
-    # Disable exit-on-error for this section to capture exit code
-    set +e
-    ${test_cmd} 2>&1 | tee "${USER_LOG_FILE}"
-    local exit_code=$?
-    set -e
-
-    # Check test result
-    if [[ ${exit_code} -eq 0 ]]; then
-        log_success "User App tests passed"
-        return 0
-    else
-        log_error "User App tests failed with exit code: ${exit_code}"
-        log_error "Check log file: ${USER_LOG_FILE}"
-        return ${exit_code}
-    fi
+    run_app_tests "User App" "${USER_APP_DIR}" "${USER_LOG_FILE}"
 }
 
 # Run frontend tests in parallel
@@ -135,11 +108,6 @@ run_frontend_tests_parallel() {
         return ${user_exit}
     fi
 }
-
-# Export functions
-export -f run_admin_tests
-export -f run_user_tests
-export -f run_frontend_tests_parallel
 
 # If script is executed directly (not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

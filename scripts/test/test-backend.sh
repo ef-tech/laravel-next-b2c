@@ -100,11 +100,6 @@ run_backend_tests() {
     fi
 }
 
-# Export functions
-export -f run_backend_tests
-export -f validate_db_env
-export -f validate_parallel
-
 # If script is executed directly (not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     run_backend_tests
