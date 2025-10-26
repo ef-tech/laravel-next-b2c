@@ -27,22 +27,23 @@ USER_COVERAGE_OUTPUT="${PROJECT_ROOT}/test-results/coverage/frontend-user"
 # Common test execution function
 run_app_tests() {
     local app_name="$1"
-    local app_dir="$2"
-    local log_file="$3"
+    local project_name="$2"
+    local junit_output_name="$3"
+    local log_file="$4"
 
     log_info "Running ${app_name} tests (Coverage: ${ENABLE_COVERAGE})"
 
-    # Change to app directory
-    cd "${app_dir}" || {
-        log_error "Failed to change to ${app_name} directory: ${app_dir}"
+    # Change to project root to use root jest.config.js with reporters
+    cd "${PROJECT_ROOT}" || {
+        log_error "Failed to change to project root: ${PROJECT_ROOT}"
         return 1
     }
 
-    # Prepare test command
-    local test_cmd="npm run test"
+    # Prepare test command using root Jest with project selection
+    local test_cmd="JEST_JUNIT_OUTPUT_NAME=${junit_output_name} npx jest --selectProjects=${project_name}"
     if [[ "${ENABLE_COVERAGE}" == "true" ]]; then
         log_info "Enabling coverage reporting for ${app_name}..."
-        test_cmd="npm run test:coverage"
+        test_cmd="${test_cmd} --coverage"
     fi
 
     # Execute tests with error handling
@@ -67,12 +68,12 @@ run_app_tests() {
 
 # Run Admin App tests
 run_admin_tests() {
-    run_app_tests "Admin App" "${ADMIN_APP_DIR}" "${ADMIN_LOG_FILE}"
+    run_app_tests "Admin App" "admin-app" "frontend-admin-results.xml" "${ADMIN_LOG_FILE}"
 }
 
 # Run User App tests
 run_user_tests() {
-    run_app_tests "User App" "${USER_APP_DIR}" "${USER_LOG_FILE}"
+    run_app_tests "User App" "user-app" "frontend-user-results.xml" "${USER_LOG_FILE}"
 }
 
 # Run frontend tests in parallel
