@@ -41,6 +41,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `api-rate-limit-setup` - APIレート制限設定強化（エンドポイント分類細分化、Redis障害時フェイルオーバー、DDD準拠、テストカバレッジ85%以上）
 - `setup-script` - 一括セットアップスクリプト作成（make setup自動化、15分以内環境構築、冪等性保証、エラーハンドリング）
 - `dev-server-startup-script` - 開発サーバー起動スクリプト作成（単一コマンド起動、Docker/ネイティブ/ハイブリッドモード、設定駆動アーキテクチャ）
+- `test-execution-script` - テスト実行スクリプト作成（全テストスイート統合実行、JUnit/カバレッジレポート統合、CI/CD連携、エラーハンドリング）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

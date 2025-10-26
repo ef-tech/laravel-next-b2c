@@ -23,7 +23,12 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'reports/html' }],
-    ['junit', { outputFile: 'reports/junit.xml' }],
+    [
+      'junit',
+      {
+        outputFile: '../test-results/junit/e2e-test-results.xml',
+      },
+    ],
   ],
   use: {
     trace: 'retain-on-failure',
