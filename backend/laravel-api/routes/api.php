@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TokenController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\V1\Admin\LoginController as AdminLoginController;
 use App\Http\Controllers\CspReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,4 +36,15 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/tokens', [TokenController::class, 'index']);
     Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
     Route::delete('/tokens', [TokenController::class, 'destroyAll']);
+});
+
+// API v1 routes (APIバージョニング戦略)
+Route::prefix('v1')->name('v1.')->group(function () {
+    // Admin authentication routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Login with rate limiting (5 attempts per minute)
+        Route::middleware('throttle:5,1')->group(function () {
+            Route::post('/login', AdminLoginController::class)->name('login');
+        });
+    });
 });

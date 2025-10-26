@@ -19,6 +19,18 @@ final class DddServiceProvider extends ServiceProvider
             \Ddd\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository::class
         );
 
+        // Admin Repository binding
+        $this->app->bind(
+            \Ddd\Domain\Admin\Repositories\AdminRepository::class,
+            \Ddd\Infrastructure\Admin\Repositories\EloquentAdminRepository::class
+        );
+
+        // Token Service binding
+        $this->app->bind(
+            \Ddd\Domain\Admin\Services\TokenService::class,
+            \Ddd\Infrastructure\Admin\Services\SanctumTokenService::class
+        );
+
         // Infrastructure services (singleton)
         $this->app->singleton(
             \Ddd\Application\Shared\Services\TransactionManager\TransactionManager::class,

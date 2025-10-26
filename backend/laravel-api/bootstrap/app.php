@@ -104,4 +104,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => $e->getMessage(),
             ], $e->getStatusCode());
         });
+
+        // Handle Validation Exceptions（統一エラーレスポンス形式）
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, \Illuminate\Http\Request $request) {
+            return response()->json([
+                'code' => 'VALIDATION_ERROR',
+                'message' => '入力内容に誤りがあります',
+                'errors' => $e->errors(),
+                'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
+            ], 422);
+        });
     })->create();

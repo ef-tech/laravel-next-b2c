@@ -1,7 +1,7 @@
 # 実装計画
 
-- [ ] 1. データベース基盤とSeeder準備
-- [ ] 1.1 管理者専用テーブルを作成
+- [x] 1. データベース基盤とSeeder準備
+- [x] 1.1 管理者専用テーブルを作成
   - adminsテーブルマイグレーション作成（id、name、email、email_verified_at、password、role、is_active、remember_token、created_at、updated_at、deleted_atカラム含む）
   - admins.emailにUNIQUE制約を設定
   - admins.is_activeにINDEXを設定
@@ -9,7 +9,7 @@
   - roleカラムはデフォルト'admin'、is_activeカラムはデフォルトtrueに設定
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 1.2 開発用管理者データSeederを作成
+- [x] 1.2 開発用管理者データSeederを作成
   - AdminSeeder作成（admin@example.com / password / super_admin）
   - 開発用スタッフアカウント作成（staff@example.com / password / admin）
   - パスワードはbcryptでハッシュ化
@@ -17,7 +17,7 @@
   - _Requirements: 1.4, 1.5, 1.6_
 
 - [ ] 2. Domain層実装（DDD 4層構造の中核）
-- [ ] 2.1 Admin集約のEntityとValueObjectを実装
+- [x] 2.1 Admin集約のEntityとValueObjectを実装
   - Admin Entity作成（id、name、email、role、isActiveプロパティ）
   - canAccessAdminPanel()ビジネスメソッド実装（isActive=trueの場合のみtrueを返す）
   - equals()メソッド実装（id比較による等価性判定）
@@ -28,7 +28,7 @@
   - Email ValueObject（User集約と共有、既存実装を活用）
   - _Requirements: 2.1, 2.2, 2.3, 2.6_
 
-- [ ] 2.2 AdminRepository Interfaceを定義
+- [x] 2.2 AdminRepository Interfaceを定義
   - findByEmail(Email $email): ?Admin メソッド宣言
   - verifyCredentials(Email $email, string $password): ?Admin メソッド宣言
   - save(Admin $admin): void メソッド宣言
@@ -36,7 +36,7 @@
   - _Requirements: 2.4, 2.5, 2.6_
 
 - [ ] 3. Application層実装（ユースケースとDTO）
-- [ ] 3.1 LoginAdminUseCaseを実装
+- [x] 3.1 LoginAdminUseCaseを実装
   - LoginAdminInput DTOを作成（email、password）
   - LoginAdminOutput DTOを作成（token、adminDTO）
   - AdminDTO作成（id、name、email、role、isActive）
@@ -47,14 +47,14 @@
   - AdminDTOマッピング
   - _Requirements: 3.1, 3.2, 3.3, 3.6_
 
-- [ ] 3.2 LogoutAdminUseCaseを実装
+- [x] 3.2 LogoutAdminUseCaseを実装
   - LogoutAdminInput DTOを作成（tokenId）
   - execute()メソッド実装（指定されたtokenIdのトークンを失効）
   - personal_access_tokens.deleted_at設定によるトークン失効
   - トランザクション内で実行
   - _Requirements: 3.4_
 
-- [ ] 3.3 GetAuthenticatedAdminUseCaseを実装
+- [x] 3.3 GetAuthenticatedAdminUseCaseを実装
   - GetAuthenticatedAdminInput DTOを作成（adminId）
   - GetAuthenticatedAdminOutput DTOを作成（admin: AdminDTO）
   - execute()メソッド実装（AdminRepository::findById呼び出し）
@@ -63,7 +63,7 @@
   - _Requirements: 3.5_
 
 - [ ] 4. Infrastructure層実装（永続化とEloquent統合）
-- [ ] 4.1 Admin Eloquentモデルを作成
+- [x] 4.1 Admin Eloquentモデルを作成
   - HasApiTokens、HasFactory、SoftDeletesトレイト使用
   - $fillable設定（name、email、password、role、is_active）
   - $hidden設定（password、remember_token）
@@ -71,7 +71,7 @@
   - adminsテーブルとのORMマッピング
   - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 4.2 EloquentAdminRepositoryを実装
+- [x] 4.2 EloquentAdminRepositoryを実装
   - AdminRepository Interfaceを完全実装
   - findByEmail()実装（Eloquent where('email')->first()）
   - verifyCredentials()実装（パスワードハッシュ検証、is_activeチェック）
@@ -80,7 +80,7 @@
   - 永続化層の詳細（created_at、updated_at等）をDomain層に漏らさない
   - _Requirements: 4.4, 4.5, 4.6_
 
-- [ ] 4.3 DI Container（DddServiceProvider）にAdminRepository登録
+- [x] 4.3 DI Container（DddServiceProvider）にAdminRepository登録
   - app/Providers/DddServiceProvider.php更新
   - AdminRepositoryInterface → EloquentAdminRepository バインディング追加
   - 既存UserRepositoryバインディングのパターンを踏襲
