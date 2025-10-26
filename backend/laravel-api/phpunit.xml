@@ -15,6 +15,9 @@
             <directory>tests/Architecture</directory>
         </testsuite>
     </testsuites>
+    <logging>
+        <junit outputFile="../../test-results/junit/backend-test-results.xml"/>
+    </logging>
     <source>
         <include>
             <directory>app</directory>
