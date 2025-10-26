@@ -35,11 +35,20 @@ laravel-next-b2c/
 │                        #   - make dev-native: ネイティブモード起動
 │                        #   - make dev-api, dev-frontend, dev-infra, dev-minimal: プロファイル別起動
 │                        #   - make dev-stop: 全サービス停止
-│                        # 🧪 テストインフラ管理タスク:
+│                        # 🧪 テスト実行統合コマンド（全テストスイート）:
+│                        #   - make test-all: 全テスト実行（SQLite、約30秒）
+│                        #   - make test-all-pgsql: 全テスト実行（PostgreSQL並列、約5-10分）
+│                        #   - make test-backend-only: バックエンドテストのみ（約2秒）
+│                        #   - make test-frontend-only: フロントエンドテストのみ（約15秒）
+│                        #   - make test-e2e-only: E2Eテストのみ（約2-5分）
+│                        #   - make test-pr: Lint + PostgreSQL + カバレッジ（約3-5分、PR前推奨）
+│                        #   - make test-smoke: スモークテスト（高速ヘルスチェック、約5秒）
+│                        #   - make test-diagnose: テスト環境診断（ポート・環境変数・Docker・DB等確認）
+│                        # 🧪 テストインフラ管理タスク（バックエンドテストDB）:
 │                        #   - make quick-test, test-pgsql, test-parallel, test-setup, etc.
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
 ├── node_modules/        # 共通依存関係
-├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint、CORS設定、セキュリティヘッダー、テストDB運用）
+├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint、CORS設定、セキュリティヘッダー、テスト運用）
 │   ├── JEST_ESLINT_INTEGRATION_GUIDE.md  # Jest/Testing Library ESLint統合ガイド（設定概要、プラグイン詳細、適用ルール）
 │   ├── JEST_ESLINT_QUICKSTART.md         # Jest/ESLintクイックスタートガイド（5分セットアップ、基本ワークフロー）
 │   ├── JEST_ESLINT_TROUBLESHOOTING.md    # Jest/ESLintトラブルシューティング（設定問題、実行エラー、ルール調整）
@@ -48,7 +57,9 @@ laravel-next-b2c/
 │   ├── SECURITY_HEADERS_OPERATION.md     # 🔐 セキュリティヘッダー運用マニュアル（日常運用、Report-Onlyモード運用、Enforceモード切り替え）
 │   ├── SECURITY_HEADERS_TROUBLESHOOTING.md  # 🔐 セキュリティヘッダートラブルシューティング（CSP違反デバッグ、CORSエラー対処）
 │   ├── CSP_DEPLOYMENT_CHECKLIST.md       # 🔐 CSP本番デプロイチェックリスト（段階的導入フローガイド）
-│   └── TESTING_DATABASE_WORKFLOW.md      # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
+│   ├── TESTING_DATABASE_WORKFLOW.md      # テストDB運用ワークフローガイド（SQLite/PostgreSQL切り替え、並列テスト実行）
+│   ├── TESTING_EXECUTION_GUIDE.md        # 🧪 テスト実行ガイド（全テストスイート実行方法、クイックスタート、ローカル/CI/CD環境テスト実行、診断スクリプト）
+│   └── TESTING_TROUBLESHOOTING_EXTENDED.md  # 🧪 テストトラブルシューティング拡張版（よくある問題と解決策、ログ分析方法、エスカレーション手順）
 ├── scripts/             # プロジェクトスクリプト
 │   ├── dev/                              # 🚀 開発サーバー起動スクリプト（Phase 1-6完了、テスト95% Pass）
 │   │   ├── main.sh                       # シェルエントリーポイント、CLI実装
@@ -63,6 +74,13 @@ laravel-next-b2c/
 │   │   ├── tsconfig.json                 # TypeScript設定
 │   │   ├── TESTING.md                    # テスト手順書
 │   │   └── TEST_RESULTS.md               # テスト結果（95% Pass記録）
+│   ├── test/                             # 🧪 テスト実行スクリプト（Phase 1-7完了、60サブタスク完了）
+│   │   ├── run-all-tests.sh              # 統合オーケストレーションスクリプト（全テストスイート統括）
+│   │   ├── run-backend-tests.sh          # バックエンドテスト実行（Pest 4、SQLite/PostgreSQL切替）
+│   │   ├── run-frontend-tests.sh         # フロントエンドテスト実行（Jest 29、2アプリ並列、JUnit XML出力）
+│   │   ├── run-e2e-tests.sh              # E2Eテスト実行（Playwright 4 Shard並列、JUnit XML出力）
+│   │   ├── generate-test-report.sh       # テストレポート生成（JUnit XML統合、カバレッジ集約、サマリー出力）
+│   │   └── diagnose-test-env.sh          # テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
 │   ├── analyze-csp-violations.sh         # 🔐 CSP違反ログ分析スクリプト
 │   ├── validate-security-headers.sh      # 🔐 セキュリティヘッダー検証スクリプト（Laravel/Next.js対応）
 │   └── validate-cors-config.sh           # 🌐 CORS設定整合性確認スクリプト
@@ -321,6 +339,11 @@ laravel-next-b2c/
 │   ├── router.ts        # Next.js Router モック設定
 │   └── env.ts           # 環境変数モック
 ├── coverage/            # 統合カバレッジレポート
+├── test-results/        # テスト実行結果（JUnit XML統合レポート）
+│   ├── backend-results.xml      # バックエンドテスト結果（Pest JUnit出力）
+│   ├── frontend-admin-results.xml  # Admin Appテスト結果（Jest JUnit出力）
+│   ├── frontend-user-results.xml   # User Appテスト結果（Jest JUnit出力）
+│   └── e2e-results.xml             # E2Eテスト結果（Playwright JUnit出力）
 ├── .husky/              # Gitフック自動化 (husky v9推奨方法: 直接フック配置)
 │   ├── pre-commit       # コミット前にlint-staged実行
 │   ├── pre-push         # プッシュ前にcomposer quality実行

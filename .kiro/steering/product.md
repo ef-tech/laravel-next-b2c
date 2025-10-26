@@ -29,6 +29,14 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **ヘルスチェック統合**: 全サービス起動待機、タイムアウト設定
   - **npm使用**: package.jsonベース依存管理（pnpm非推奨、Codex指摘対応済み）
   - **MinIOヘルスチェック対応**: mc readyコマンド追加、起動確認強化
+- **🧪 統合テスト実行スクリプト実装**: `make test-all` コマンドによる全テストスイート統一実行（Phase 1-7完了、60サブタスク完了）
+  - **バックエンドテスト**: Pest 4による高速SQLite/PostgreSQL並列実行対応（`scripts/test/run-backend-tests.sh`）
+  - **フロントエンドテスト**: Jest 29による2アプリ並列実行、JUnit XML出力対応（`scripts/test/run-frontend-tests.sh`）
+  - **E2Eテスト**: Playwright 4 Shard並列実行、JUnit XML出力対応（`scripts/test/run-e2e-tests.sh`）
+  - **統合オーケストレーション**: メインスクリプトによる全テスト統括実行（`scripts/test/run-all-tests.sh`）
+  - **レポート生成**: JUnit XML統合、カバレッジレポート生成、サマリー出力（`scripts/test/generate-test-report.sh`）
+  - **診断スクリプト**: ポート使用状況、環境変数、Docker状態、DB接続、ディスク・メモリ確認（`scripts/test/diagnose-test-env.sh`）
+  - **Makefile統合**: 9種類のテストタスク（test-all、test-backend-only、test-frontend-only、test-e2e-only、test-pr、test-smoke、test-diagnose等）
 - **最適化済みAPI専用Laravel**: 必要最小限4パッケージ構成による超高速起動
 - **🏗️ DDD/クリーンアーキテクチャ実装**: 4層構造（Domain/Application/Infrastructure/HTTP）によるビジネスロジック分離、Repository Pattern採用、SOLID原則準拠
 - **デュアルフロントエンド構成**: 管理者用ダッシュボードとユーザー向けアプリの分離
@@ -101,7 +109,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **本番環境対応**: Dockerベースの構成とステートレス設計による環境差異の最小化
 - **移行容易性**: 詳細ドキュメントによる他プロジェクトへの最適化手法適用可能
 - **品質管理の自動化**: Git Hooks + CI/CDによる自動品質チェック、人的エラー削減
-- **完全なテスト戦略**: ユニット（Jest/Pest）→統合（Testing Library）→E2E（Playwright + Docker）の3層テスト体制、テストDB環境管理（SQLite/PostgreSQL切り替え、並列実行）
+- **完全なテスト戦略**: ユニット（Jest/Pest）→統合（Testing Library）→E2E（Playwright + Docker）の3層テスト体制、テストDB環境管理（SQLite/PostgreSQL切り替え、並列実行）、統合テスト実行スクリプトによる全テストスイート一括実行（JUnit XML/カバレッジレポート統合、診断スクリプト完備）
 - **高速CI/CDパイプライン**: Composerキャッシング、並列実行最適化、タイムアウト短縮による開発効率向上
 - **インテリジェントCI/CD**: Paths設定による必要最小限のワークフロー実行、Concurrencyによる重複実行自動キャンセル、API契約変更の早期検出
 - **本番環境セキュリティ対応**: OWASP準拠セキュリティヘッダー実装、XSS/CSRF/クリックジャッキング攻撃防御、段階的CSP導入による既存機能への影響最小化、環境変数駆動設定による柔軟なポリシー管理

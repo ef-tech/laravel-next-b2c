@@ -726,6 +726,38 @@ cd backend/laravel-api
 ./vendor/bin/sail composer <command>
 ```
 
+### 統合テスト実行コマンド（全テストスイート）
+```bash
+# 全テストスイート統合実行（プロジェクトルートから）
+make test-all                # 全テスト実行（SQLite、約30秒）
+make test-all-pgsql          # 全テスト実行（PostgreSQL並列、約5-10分）
+
+# 個別テストスイート実行
+make test-backend-only       # バックエンドテストのみ（約2秒）
+make test-frontend-only      # フロントエンドテストのみ（約15秒）
+make test-e2e-only           # E2Eテストのみ（約2-5分）
+
+# PR前推奨テスト
+make test-pr                 # Lint + PostgreSQL + カバレッジ（約3-5分）
+make test-with-coverage      # 全テスト + カバレッジ（約5-10分）
+
+# スモークテスト・診断
+make test-smoke              # 高速ヘルスチェック（約5秒）
+make test-diagnose           # テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
+
+# テスト実行スクリプト直接実行
+./scripts/test/run-all-tests.sh         # 全テストオーケストレーション
+./scripts/test/run-backend-tests.sh     # バックエンドテスト（SQLite/PostgreSQL切替）
+./scripts/test/run-frontend-tests.sh    # フロントエンドテスト（Jest並列実行）
+./scripts/test/run-e2e-tests.sh         # E2Eテスト（Playwright 4 Shard）
+./scripts/test/generate-test-report.sh  # テストレポート生成（JUnit XML統合）
+./scripts/test/diagnose-test-env.sh     # テスト環境診断
+
+# レポート出力先
+# - JUnit XML: test-results/*.xml（バックエンド/フロントエンド/E2E統合）
+# - カバレッジ: coverage/（Jest/Pest統合カバレッジ）
+```
+
 ## 環境変数設定
 ### ポート設定 (カスタマイズ済み)
 
