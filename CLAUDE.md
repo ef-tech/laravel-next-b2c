@@ -42,6 +42,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `setup-script` - 一括セットアップスクリプト作成（make setup自動化、15分以内環境構築、冪等性保証、エラーハンドリング）
 - `dev-server-startup-script` - 開発サーバー起動スクリプト作成（単一コマンド起動、Docker/ネイティブ/ハイブリッドモード、設定駆動アーキテクチャ）
 - `test-execution-script` - テスト実行スクリプト作成（全テストスイート統合実行、JUnit/カバレッジレポート統合、CI/CD連携、エラーハンドリング）
+- `auth-sample` - 認証機能サンプル（User/Admin完全分離認証、DDD実装、APIバージョニング、統一エラーハンドリング、包括的テスト）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

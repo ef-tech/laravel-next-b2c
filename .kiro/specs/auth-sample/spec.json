@@ -1,0 +1,114 @@
+{
+  "feature_name": "auth-sample",
+  "created_at": "2025-10-27T00:00:00Z",
+  "updated_at": "2025-10-26T17:37:19Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 40,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/40",
+    "title": "認証機能サンプル（ログイン・ログアウト）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, Sanctum 4.0, Pest 4, DDD/クリーンアーキテクチャ",
+      "frontend": "Next.js 15.5, React 19, TypeScript, Jest 29, Testing Library 16",
+      "infrastructure": "PostgreSQL 17, Docker Compose, Playwright 1.47.2",
+      "tools": "OpenAPI 3.0.0, Mermaid"
+    },
+    "requirements_hints": [
+      "User/Admin完全分離認証システム（別テーブル、別ガード、別ミドルウェア）",
+      "Next.js 15.5フロントエンド（user-app/admin-app）との認証連携パターン確立",
+      "DDD/クリーンアーキテクチャに準拠した実装パターン",
+      "APIバージョニング戦略の実装（v1プレフィックス、将来の破壊的変更対応）",
+      "統一エラーハンドリングとセキュリティベストプラクティスの実装",
+      "包括的なテスト戦略（Unit/Feature/E2E）"
+    ],
+    "project_structure": [
+      "ddd/Domain/User/Entities/User.php",
+      "ddd/Domain/Admin/Entities/Admin.php",
+      "ddd/Application/User/UseCases/LoginUser/LoginUserUseCase.php",
+      "ddd/Application/Admin/UseCases/LoginAdmin/LoginAdminUseCase.php",
+      "ddd/Infrastructure/Persistence/Eloquent/Repositories/EloquentAdminRepository.php",
+      "app/Models/Admin.php",
+      "app/Http/Controllers/Api/V1/User/LoginController.php",
+      "app/Http/Controllers/Api/V1/Admin/LoginController.php",
+      "app/Http/Middleware/AdminGuard.php",
+      "app/Http/Middleware/UserGuard.php",
+      "frontend/user-app/src/contexts/AuthContext.tsx",
+      "frontend/admin-app/src/contexts/AdminAuthContext.tsx",
+      "frontend/user-app/src/app/login/page.tsx",
+      "frontend/admin-app/src/app/login/page.tsx",
+      "e2e/projects/user/tests/auth.spec.ts",
+      "e2e/projects/admin/tests/auth.spec.ts"
+    ],
+    "services": {
+      "User App": {"port": "13001"},
+      "Admin App": {"port": "13002"},
+      "Laravel API": {"port": "13000"}
+    },
+    "todo_items": [
+      "Adminsテーブルマイグレーション作成",
+      "AdminSeeder作成",
+      "Admin Entity作成（Domain層）",
+      "AdminRole ValueObject作成",
+      "AdminRepository Interface作成",
+      "Admin Eloquentモデル作成（Infrastructure層）",
+      "EloquentAdminRepository実装",
+      "LoginAdminUseCase実装（Application層）",
+      "LogoutAdminUseCase実装",
+      "AdminLoginController実装（Presentation層）",
+      "AdminGuardミドルウェア作成",
+      "UserGuardミドルウェア作成",
+      "config/auth.php更新（adminガード追加）",
+      "routes/api.php更新（/v1/* ルート追加）",
+      "統一エラーレスポンス形式定義",
+      "カスタム例外クラス作成（InvalidCredentialsException等）",
+      "グローバルエラーハンドラー更新",
+      "User App AuthContext作成",
+      "User App useAuth hooks作成",
+      "User App APIクライアント実装（apiEndpoints定義）",
+      "User App ログイン画面作成",
+      "Admin App AdminAuthContext作成",
+      "Admin App useAdminAuth hooks作成",
+      "Admin App APIクライアント実装（apiEndpoints定義）",
+      "Admin App ログイン画面作成",
+      "User/Admin .env.local設定（NEXT_PUBLIC_API_VERSION追加）",
+      "Admin LoginTest（Feature）",
+      "AdminTest（Unit - Domain）",
+      "LoginAdminUseCaseTest（Unit - Application）",
+      "API Versioning Test（Feature）",
+      "LoginPage.test.tsx（User App）",
+      "AuthContext.test.tsx（User App）",
+      "LoginPage.test.tsx（Admin App）",
+      "AdminAuthContext.test.tsx（Admin App）",
+      "User認証フローE2Eテスト（Playwright）",
+      "Admin認証フローE2Eテスト（Playwright）",
+      "ガード分離検証E2Eテスト",
+      "認証フロー図作成（Mermaid）",
+      "API仕様書作成（OpenAPI 3.0.0、v1プレフィックス明記）",
+      "APIバージョニング戦略ドキュメント作成",
+      "セットアップガイド作成",
+      "トラブルシューティングガイド作成"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
