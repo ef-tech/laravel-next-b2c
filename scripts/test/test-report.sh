@@ -16,6 +16,29 @@ JUNIT_DIR="${PROJECT_ROOT}/test-results/junit"
 REPORTS_DIR="${PROJECT_ROOT}/test-results/reports"
 LOGS_DIR="${PROJECT_ROOT}/test-results/logs"
 
+# Check for XML parsing tools availability
+HAS_XMLLINT=false
+if command -v xmllint >/dev/null 2>&1; then
+    HAS_XMLLINT=true
+    log_debug "xmllint available - using robust XML parsing"
+else
+    log_debug "xmllint not available - using grep/sed fallback"
+fi
+
+# Parse JUnit XML attributes (robust version with xmllint fallback)
+parse_junit_xml_attribute() {
+    local xml_file="$1"
+    local attribute="$2"
+
+    if [[ "${HAS_XMLLINT}" == "true" ]]; then
+        # Use xmllint for robust parsing
+        xmllint --xpath "string(//testsuites/@${attribute} | //testsuite/@${attribute})" "${xml_file}" 2>/dev/null || echo "0"
+    else
+        # Fallback to grep/sed for portability
+        grep -o "${attribute}=\"[0-9]*\"" "${xml_file}" | head -1 | grep -o '[0-9]*' || echo "0"
+    fi
+}
+
 # Collect JUnit XML reports
 collect_junit_reports() {
     log_info "Collecting JUnit XML reports..."
@@ -55,17 +78,17 @@ generate_test_summary_json() {
     local end_time
     local duration=0
 
-    # Parse JUnit XML reports using basic grep/sed (portable approach)
-    # Note: This is a simplified parser. For production, consider using xmllint or similar tool
+    # Parse JUnit XML reports
+    # Uses xmllint if available for robust parsing, falls back to grep/sed for portability
 
     local suite_results="{"
 
     # Backend tests
     if [[ -f "${JUNIT_DIR}/backend-test-results.xml" ]]; then
         local backend_tests backend_failures
-        # Extract test count and failures from testsuite tag
-        backend_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/backend-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
-        backend_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/backend-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
+        # Extract test count and failures using helper function
+        backend_tests=$(parse_junit_xml_attribute "${JUNIT_DIR}/backend-test-results.xml" "tests")
+        backend_failures=$(parse_junit_xml_attribute "${JUNIT_DIR}/backend-test-results.xml" "failures")
         local backend_passed=$((backend_tests - backend_failures))
 
         total_tests=$((total_tests + backend_tests))
@@ -78,8 +101,8 @@ generate_test_summary_json() {
     # Frontend Admin tests
     if [[ -f "${JUNIT_DIR}/frontend-admin-results.xml" ]]; then
         local admin_tests admin_failures
-        admin_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/frontend-admin-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
-        admin_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/frontend-admin-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
+        admin_tests=$(parse_junit_xml_attribute "${JUNIT_DIR}/frontend-admin-results.xml" "tests")
+        admin_failures=$(parse_junit_xml_attribute "${JUNIT_DIR}/frontend-admin-results.xml" "failures")
         local admin_passed=$((admin_tests - admin_failures))
 
         total_tests=$((total_tests + admin_tests))
@@ -92,8 +115,8 @@ generate_test_summary_json() {
     # Frontend User tests
     if [[ -f "${JUNIT_DIR}/frontend-user-results.xml" ]]; then
         local user_tests user_failures
-        user_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/frontend-user-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
-        user_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/frontend-user-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
+        user_tests=$(parse_junit_xml_attribute "${JUNIT_DIR}/frontend-user-results.xml" "tests")
+        user_failures=$(parse_junit_xml_attribute "${JUNIT_DIR}/frontend-user-results.xml" "failures")
         local user_passed=$((user_tests - user_failures))
 
         total_tests=$((total_tests + user_tests))
@@ -106,8 +129,8 @@ generate_test_summary_json() {
     # E2E tests
     if [[ -f "${JUNIT_DIR}/e2e-test-results.xml" ]]; then
         local e2e_tests e2e_failures
-        e2e_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/e2e-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
-        e2e_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/e2e-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
+        e2e_tests=$(parse_junit_xml_attribute "${JUNIT_DIR}/e2e-test-results.xml" "tests")
+        e2e_failures=$(parse_junit_xml_attribute "${JUNIT_DIR}/e2e-test-results.xml" "failures")
         local e2e_passed=$((e2e_tests - e2e_failures))
 
         total_tests=$((total_tests + e2e_tests))
