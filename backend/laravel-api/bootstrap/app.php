@@ -129,6 +129,15 @@ return Application::configure(basePath: dirname(__DIR__))
             ], $e->getStatusCode());
         });
 
+        // Handle EmailAlreadyExistsException（メールアドレス重複: 422）
+        $exceptions->render(function (\Ddd\Shared\Exceptions\EmailAlreadyExistsException $e, \Illuminate\Http\Request $request) {
+            return response()->json([
+                'error' => $e->getErrorCode(),
+                'message' => $e->getMessage(),
+                'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
+            ], $e->getStatusCode());
+        });
+
         // Handle Validation Exceptions（統一エラーレスポンス形式）
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, \Illuminate\Http\Request $request) {
             return response()->json([

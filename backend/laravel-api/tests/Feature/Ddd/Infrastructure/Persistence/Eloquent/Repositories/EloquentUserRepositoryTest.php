@@ -41,8 +41,8 @@ test('can save and find user by ID', function (): void {
 test('returns null when user not found by ID', function (): void {
     $repository = app(UserRepository::class);
 
-    // Generate a valid UUID that doesn't exist in DB
-    $nonExistentId = UserId::fromString('99999999-9999-4999-9999-999999999999');
+    // Use a large ID that doesn't exist in DB
+    $nonExistentId = UserId::fromInt(999999);
 
     $user = $repository->find($nonExistentId);
 

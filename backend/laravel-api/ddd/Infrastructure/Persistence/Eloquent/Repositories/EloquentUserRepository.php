@@ -10,7 +10,6 @@ use Ddd\Domain\User\Repositories\UserRepository;
 use Ddd\Domain\User\ValueObjects\Email;
 use Ddd\Domain\User\ValueObjects\UserId;
 use Ddd\Infrastructure\Persistence\Eloquent\Mappers\UserMapper;
-use Illuminate\Support\Str;
 
 final readonly class EloquentUserRepository implements UserRepository
 {
@@ -20,7 +19,10 @@ final readonly class EloquentUserRepository implements UserRepository
 
     public function nextId(): UserId
     {
-        return UserId::fromString((string) Str::uuid());
+        // Get next auto-increment ID
+        $maxId = EloquentUser::max('id') ?? 0;
+
+        return UserId::fromInt($maxId + 1);
     }
 
     public function find(UserId $id): ?User

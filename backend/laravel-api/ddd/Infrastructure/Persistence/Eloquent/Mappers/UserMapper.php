@@ -22,7 +22,7 @@ final class UserMapper
 
         // Set private properties using reflection
         $idProperty = $reflection->getProperty('id');
-        $idProperty->setValue($entity, UserId::fromString($model->id));
+        $idProperty->setValue($entity, UserId::fromInt($model->id));
 
         $emailProperty = $reflection->getProperty('email');
         $emailProperty->setValue($entity, Email::fromString($model->email));

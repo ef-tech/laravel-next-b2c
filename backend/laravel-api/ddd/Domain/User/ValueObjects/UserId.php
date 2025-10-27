@@ -9,20 +9,29 @@ use Ddd\Shared\Exceptions\ValidationException;
 final readonly class UserId
 {
     private function __construct(
-        private string $value
+        private int $value
     ) {
-        // UUID v4 format validation
-        if (! preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $value)) {
-            throw ValidationException::invalidUserId($value);
+        // Validate positive integer
+        if ($value <= 0) {
+            throw ValidationException::invalidUserId((string) $value);
         }
     }
 
-    public static function fromString(string $value): self
+    public static function fromInt(int $value): self
     {
         return new self($value);
     }
 
-    public function value(): string
+    public static function fromString(string $value): self
+    {
+        if (! is_numeric($value) || (int) $value != $value) {
+            throw ValidationException::invalidUserId($value);
+        }
+
+        return new self((int) $value);
+    }
+
+    public function value(): int
     {
         return $this->value;
     }
