@@ -446,47 +446,73 @@
   - **注**: Docker Compose統合は既存ワークフローで不要（ネイティブ実行で十分）
   - _Requirements: 14.6_
 
-- [ ] 15. 技術ドキュメント作成
-- [ ] 15.1 認証フロー図を作成
-  - Mermaidシーケンスダイアグラム作成
-  - User/Admin別認証フローを図示
-  - トークン発行・検証フロー記載
+- [x] 15. 技術ドキュメント作成
+- [x] 15.1 認証フロー図を作成
+  - **完了**: docs/auth/AUTHENTICATION_FLOW.md作成 ✅
+    - Mermaidシーケンスダイアグラム5つ実装
+    - User認証フロー（ログイン→プロフィール→トークン検証）
+    - Admin認証フロー（ログイン→ダッシュボード→有効性検証）
+    - トークン検証フロー（Sanctum詳細フロー）
+    - ログアウトフロー（トークン削除）
+    - ガード分離の仕組み（完全分離アーキテクチャ図）
   - _Requirements: 15.1_
 
-- [ ] 15.2 API仕様書を作成
-  - OpenAPI 3.0.0形式で文書化
-  - 全v1エンドポイント記載（POST /api/v1/admin/login、POST /api/v1/user/login等）
-  - パラメーター、レスポンス形式、エラーコード記載
-  - 統一エラーレスポンス形式のスキーマ定義
+- [x] 15.2 API仕様書を作成
+  - **完了**: docs/auth/API_SPECIFICATION.md作成 ✅
+    - OpenAPI 3.0.0形式で完全文書化
+    - 全v1エンドポイント記載（User 3エンドポイント、Admin 3エンドポイント）
+    - リクエスト/レスポンススキーマ定義
+    - 統一エラーレスポンス形式定義（9種類のエラーコード）
+    - CURLサンプル提供（6パターン）
+    - レート制限仕様記載
   - _Requirements: 15.2_
 
-- [ ] 15.3 APIバージョニング戦略ドキュメントを作成
-  - 破壊的変更定義
-  - バージョンサポート期間（v1: 最低6ヶ月）
-  - v2移行手順
-  - 後方互換性ルール記載
+- [x] 15.3 APIバージョニング戦略ドキュメントを作成
+  - **完了**: docs/auth/API_VERSIONING_STRATEGY.md作成 ✅
+    - URL Pathバージョニング方式採用理由説明
+    - 破壊的変更5カテゴリー定義（レスポンス/リクエスト/エンドポイント/ステータスコード/エラーレスポンス）
+    - バージョンサポート期間明確化（Current/Maintenance/Deprecated/EOL）
+    - v1→v2移行手順5フェーズ詳細化
+    - 後方互換性ルール（許可される変更4種類、禁止される変更4種類）
+    - 実装ガイド（ディレクトリ構造、ルート定義、フロントエンド設定）
   - _Requirements: 15.3_
 
-- [ ] 15.4 セットアップガイドを作成
-  - マイグレーション実行手順（php artisan migrate）
-  - Seeder実行手順（php artisan db:seed --class=AdminSeeder）
-  - 環境変数設定（.env、.env.local）
-  - 開発サーバー起動手順（make dev）
-  - 管理者アカウント初期情報記載
+- [x] 15.4 セットアップガイドを作成
+  - **完了**: docs/auth/SETUP_GUIDE.md作成 ✅
+    - 前提条件（必須/オプションソフトウェア一覧）
+    - 環境セットアップ手順（Laravel/.env、Next.js/.env.local）
+    - データベースセットアップ（マイグレーション、Seeder実行）
+    - 認証機能セットアップ（Sanctum設定、ミドルウェア確認）
+    - フロントエンドセットアップ（User App/Admin App起動）
+    - 動作確認（ヘルスチェック、ログインテスト、ガード分離テスト）
+    - 管理者アカウント情報（デフォルトアカウント、追加作成方法）
+    - ポート一覧、サービス停止手順
   - _Requirements: 15.4_
 
-- [ ] 15.5 トラブルシューティングガイドを作成
-  - トークン認証失敗
-  - CORSエラー
-  - Admin無効化エラー
-  - APIバージョンエラー
-  - よくある問題と解決策記載
+- [x] 15.5 トラブルシューティングガイドを作成
+  - **完了**: docs/auth/TROUBLESHOOTING.md作成 ✅
+    - トークン認証失敗（3症状：UNAUTHORIZED/TOKEN_EXPIRED/ガード不一致）
+    - CORSエラー（Preflight失敗、CORS設定不足）
+    - Admin無効化エラー（is_active=false対応）
+    - APIバージョンエラー（404 Not Found対応）
+    - ログインできない（INVALID_CREDENTIALS/VALIDATION_FAILED）
+    - セッション・Cookie問題（自動ログアウト対応）
+    - データベース接続エラー（PostgreSQL起動確認）
+    - 環境変数エラー（ENV_VALIDATION_FAILED対応）
+    - レート制限エラー（429 Too Many Requests対応）
+    - パフォーマンス問題（N+1クエリ対策）
   - _Requirements: 15.5_
 
-- [ ] 15.6 セキュリティベストプラクティスドキュメントを作成
-  - トークンストレージ（localStorage vs HttpOnly Cookie比較）
-  - CSRF対策（Sanctumステートレストークン説明）
-  - XSS対策（CSP設定推奨）
-  - パスワードハッシュ化（bcryptアルゴリズム、コスト係数10以上）
-  - レート制限（DynamicRateLimit middleware活用）
+- [x] 15.6 セキュリティベストプラクティスドキュメントを作成
+  - **完了**: docs/auth/SECURITY_BEST_PRACTICES.md作成 ✅
+    - トークンストレージ比較（HttpOnly Cookie vs LocalStorage）
+    - CSRF対策（Sanctumステートレストークン説明）
+    - XSS対策（CSP設定詳細、入力サニタイゼーション）
+    - パスワードハッシュ化（bcryptコスト係数12推奨）
+    - レート制限（DynamicRateLimit middleware活用、推奨値一覧）
+    - セッションセキュリティ（セッション固定攻撃対策）
+    - HTTPS/TLS（本番環境強制設定）
+    - セキュリティヘッダー（10種類のヘッダー設定）
+    - 脆弱性対策（SQLインジェクション、マスアサインメント、認可チェック）
+    - セキュリティチェックリスト（開発/本番環境）
   - _Requirements: 15.6_
