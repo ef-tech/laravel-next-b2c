@@ -3,23 +3,42 @@
 declare(strict_types=1);
 
 use Ddd\Domain\Admin\ValueObjects\AdminId;
+use Ddd\Shared\Exceptions\ValidationException;
 
-test('AdminId can be created with valid string', function () {
-    $id = new AdminId('123');
+test('can create valid admin ID from int', function (): void {
+    $adminId = AdminId::fromInt(1);
 
-    expect($id->value)->toBe('123');
+    expect($adminId->value())->toBe(1);
 });
 
-test('AdminId equals returns true for same value', function () {
-    $id1 = new AdminId('123');
-    $id2 = new AdminId('123');
+test('can create valid admin ID from string', function (): void {
+    $adminId = AdminId::fromString('123');
 
-    expect($id1->equals($id2))->toBeTrue();
+    expect($adminId->value())->toBe(123);
 });
 
-test('AdminId equals returns false for different value', function () {
-    $id1 = new AdminId('123');
-    $id2 = new AdminId('456');
+test('throws exception for zero', function (): void {
+    AdminId::fromInt(0);
+})->throws(ValidationException::class, 'Invalid admin ID');
 
-    expect($id1->equals($id2))->toBeFalse();
+test('throws exception for negative integer', function (): void {
+    AdminId::fromInt(-1);
+})->throws(ValidationException::class, 'Invalid admin ID');
+
+test('throws exception for invalid string', function (): void {
+    AdminId::fromString('invalid');
+})->throws(ValidationException::class, 'Invalid admin ID');
+
+test('equals returns true for same admin ID', function (): void {
+    $adminId1 = AdminId::fromInt(1);
+    $adminId2 = AdminId::fromInt(1);
+
+    expect($adminId1->equals($adminId2))->toBeTrue();
+});
+
+test('equals returns false for different admin ID', function (): void {
+    $adminId1 = AdminId::fromInt(1);
+    $adminId2 = AdminId::fromInt(2);
+
+    expect($adminId1->equals($adminId2))->toBeFalse();
 });

@@ -42,7 +42,7 @@ final readonly class LoginAdminUseCase
 
         // AdminDTO にマッピング
         $adminDTO = new AdminDTO(
-            id: $admin->id->value,
+            id: $admin->id->value(),
             email: $admin->email->value,
             name: $admin->name,
             role: $admin->role->value,

@@ -19,7 +19,7 @@ final readonly class GetAuthenticatedAdminUseCase
 
     public function execute(GetAuthenticatedAdminInput $input): GetAuthenticatedAdminOutput
     {
-        $admin = $this->adminRepository->findById(new AdminId($input->adminId));
+        $admin = $this->adminRepository->findById(AdminId::fromString($input->adminId));
 
         if ($admin === null) {
             throw new AdminNotFoundException;
@@ -27,7 +27,7 @@ final readonly class GetAuthenticatedAdminUseCase
 
         // AdminDTO にマッピング（isActive=false でも取得可能）
         $adminDTO = new AdminDTO(
-            id: $admin->id->value,
+            id: $admin->id->value(),
             email: $admin->email->value,
             name: $admin->name,
             role: $admin->role->value,

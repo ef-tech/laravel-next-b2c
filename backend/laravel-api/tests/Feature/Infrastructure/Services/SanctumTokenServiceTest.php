@@ -24,7 +24,7 @@ test('SanctumTokenService can create token for admin', function () {
     ]);
 
     $admin = new Admin(
-        id: new AdminId((string) $eloquentAdmin->id),
+        id: AdminId::fromInt($eloquentAdmin->id),
         email: new Email('test@example.com'),
         name: 'Test Admin',
         role: new AdminRole('admin'),

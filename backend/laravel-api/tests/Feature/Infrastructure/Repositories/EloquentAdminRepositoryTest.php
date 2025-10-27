@@ -59,11 +59,11 @@ test('EloquentAdminRepository can find admin by id', function () {
     $repository = new EloquentAdminRepository;
 
     // Act
-    $admin = $repository->findById(new AdminId((string) $eloquentAdmin->id));
+    $admin = $repository->findById(AdminId::fromInt($eloquentAdmin->id));
 
     // Assert
     expect($admin)->toBeInstanceOf(Admin::class)
-        ->and($admin->id->value)->toBe((string) $eloquentAdmin->id)
+        ->and($admin->id->value())->toBe($eloquentAdmin->id)
         ->and($admin->email->value)->toBe('test@example.com')
         ->and($admin->role->value)->toBe('super_admin');
 });
@@ -73,7 +73,7 @@ test('EloquentAdminRepository returns null when admin not found by id', function
     $repository = new EloquentAdminRepository;
 
     // Act
-    $admin = $repository->findById(new AdminId('99999'));
+    $admin = $repository->findById(AdminId::fromInt(99999));
 
     // Assert
     expect($admin)->toBeNull();

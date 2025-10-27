@@ -14,10 +14,10 @@ final class SanctumTokenService implements TokenService
     public function createToken(Admin $admin): string
     {
         // Eloquent Model を取得
-        $eloquentAdmin = EloquentAdmin::find($admin->id->value);
+        $eloquentAdmin = EloquentAdmin::find($admin->id->value());
 
         if (! $eloquentAdmin) {
-            throw new \RuntimeException("Admin not found for token creation: {$admin->id->value}");
+            throw new \RuntimeException("Admin not found for token creation: {$admin->id->value()}");
         }
 
         // Sanctum トークンを生成

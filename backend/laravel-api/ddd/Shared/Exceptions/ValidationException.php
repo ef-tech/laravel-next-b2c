@@ -13,7 +13,12 @@ final class ValidationException extends DomainException
 
     public static function invalidUserId(string $value): self
     {
-        return new self("Invalid user ID (must be UUID v4): {$value}");
+        return new self("Invalid user ID: {$value}");
+    }
+
+    public static function invalidAdminId(string $value): self
+    {
+        return new self("Invalid admin ID: {$value}");
     }
 
     public static function invalidName(string $reason): self

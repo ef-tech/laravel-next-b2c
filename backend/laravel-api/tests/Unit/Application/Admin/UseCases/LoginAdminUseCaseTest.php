@@ -21,7 +21,7 @@ test('LoginAdminUseCase can login with valid credentials', function () {
     $mockTokenService = Mockery::mock(TokenService::class);
 
     $admin = new Admin(
-        id: new AdminId('123'),
+        id: AdminId::fromInt(123),
         email: new Email('admin@example.com'),
         name: 'Admin User',
         role: new AdminRole('super_admin'),
@@ -48,7 +48,7 @@ test('LoginAdminUseCase can login with valid credentials', function () {
     expect($output)->toBeInstanceOf(LoginAdminOutput::class)
         ->and($output->token)->toBe('test-token-12345')
         ->and($output->adminDTO)->toBeInstanceOf(AdminDTO::class)
-        ->and($output->adminDTO->id)->toBe('123')
+        ->and($output->adminDTO->id)->toBe(123)
         ->and($output->adminDTO->email)->toBe('admin@example.com')
         ->and($output->adminDTO->name)->toBe('Admin User')
         ->and($output->adminDTO->role)->toBe('super_admin')
@@ -78,7 +78,7 @@ test('LoginAdminUseCase throws AccountDisabledException for disabled account', f
     $mockTokenService = Mockery::mock(TokenService::class);
 
     $admin = new Admin(
-        id: new AdminId('123'),
+        id: AdminId::fromInt(123),
         email: new Email('admin@example.com'),
         name: 'Admin User',
         role: new AdminRole('admin'),

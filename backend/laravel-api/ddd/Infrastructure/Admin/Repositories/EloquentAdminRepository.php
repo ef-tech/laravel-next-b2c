@@ -16,7 +16,7 @@ final class EloquentAdminRepository implements AdminRepository
 {
     public function findById(AdminId $id): ?Admin
     {
-        $eloquentAdmin = EloquentAdmin::find($id->value);
+        $eloquentAdmin = EloquentAdmin::find($id->value());
 
         return $eloquentAdmin ? $this->toDomainEntity($eloquentAdmin) : null;
     }
@@ -47,7 +47,7 @@ final class EloquentAdminRepository implements AdminRepository
     public function save(Admin $admin): void
     {
         EloquentAdmin::updateOrCreate(
-            ['id' => $admin->id->value],
+            ['id' => $admin->id->value()],
             [
                 'name' => $admin->name,
                 'email' => $admin->email->value,
@@ -63,7 +63,7 @@ final class EloquentAdminRepository implements AdminRepository
     private function toDomainEntity(EloquentAdmin $eloquentAdmin): Admin
     {
         return new Admin(
-            id: new AdminId((string) $eloquentAdmin->id),
+            id: AdminId::fromInt($eloquentAdmin->id),
             email: new Email($eloquentAdmin->email),
             name: $eloquentAdmin->name,
             role: new AdminRole($eloquentAdmin->role),
