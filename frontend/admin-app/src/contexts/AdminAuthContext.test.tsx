@@ -60,6 +60,7 @@ describe("AdminAuthContext", () => {
     it("ログイン成功時に管理者情報とトークンを保存する", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => mockLoginResponse,
       });
 
@@ -128,6 +129,7 @@ describe("AdminAuthContext", () => {
       mockFetch.mockReturnValueOnce(
         loginPromise.then(() => ({
           ok: true,
+          status: 200,
           json: async () => mockLoginResponse,
         })),
       );
@@ -171,6 +173,7 @@ describe("AdminAuthContext", () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => mockLoginResponse,
       });
 
@@ -186,6 +189,7 @@ describe("AdminAuthContext", () => {
       // ログアウトAPIのモック設定
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => ({ message: "ログアウトしました" }),
       });
 
@@ -225,6 +229,7 @@ describe("AdminAuthContext", () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => mockLoginResponse,
       });
 
@@ -241,6 +246,7 @@ describe("AdminAuthContext", () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
+        statusText: "Internal Server Error",
         json: async () => ({
           code: "INTERNAL_ERROR",
           message: "サーバーエラー",
@@ -278,6 +284,7 @@ describe("AdminAuthContext", () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => mockLoginResponse,
       });
 
@@ -293,6 +300,7 @@ describe("AdminAuthContext", () => {
       // 管理者情報取得APIのモック設定
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => mockAdminInfo,
       });
 
@@ -337,6 +345,7 @@ describe("AdminAuthContext", () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => mockLoginResponse,
       });
 
@@ -353,6 +362,7 @@ describe("AdminAuthContext", () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
+        statusText: "Unauthorized",
         json: async () => ({
           code: "AUTH.TOKEN_EXPIRED",
           message: "トークンの有効期限が切れています",
@@ -374,6 +384,7 @@ describe("AdminAuthContext", () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: async () => ({
           id: 1,
           name: "Restored Admin",
@@ -404,6 +415,7 @@ describe("AdminAuthContext", () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
+        statusText: "Unauthorized",
         json: async () => ({
           code: "AUTH.TOKEN_EXPIRED",
           message: "トークンの有効期限が切れています",

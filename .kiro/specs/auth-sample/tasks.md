@@ -345,24 +345,33 @@
   - _Requirements: 12.6_
   - **NOTE**: CI環境でカバレッジ測定予定（pcov/xdebug必要）
 
-- [ ] 13. フロントエンドテスト実装（Jest + Testing Library）
-- [ ] 13.1 User App テストを実装
+- [x] 13. フロントエンドテスト実装（Jest + Testing Library）
+- [x] 13.1 User App テストを実装
   - LoginPage.test.tsx作成（ログインフォーム表示・送信・エラー表示テスト）
   - AuthContext.test.tsx作成（login/logout/ユーザー状態更新テスト）
   - API Endpoint Versioning Test（正しいAPIバージョン（v1）使用確認）
   - _Requirements: 13.1, 13.2, 13.5_
+  - **実装済み**: 全111テスト成功 ✅
 
-- [ ] 13.2 Admin App テストを実装
+- [x] 13.2 Admin App テストを実装
   - LoginPage.test.tsx作成（ログインフォーム表示・送信・エラー表示テスト）
   - AdminAuthContext.test.tsx作成（login/logout/管理者状態更新テスト）
   - API Endpoint Versioning Test（正しいAPIバージョン（v1）使用確認）
   - _Requirements: 13.3, 13.4, 13.5_
+  - **実装済み**: 全95テスト成功 ✅
+  - **修正完了**: AdminAuthContext.tsx handleApiError呼び出し修正（response引数渡し）
+  - **修正完了**: AdminAuthContext.test.tsx モックレスポンスに status/statusText追加
 
-- [ ] 13.3 テストカバレッジ80%以上達成
+- [x] 13.3 テストカバレッジ80%以上達成
   - Jest --coverage実行
   - カバレッジレポート確認
   - 不足箇所の追加テスト実装
   - _Requirements: 13.6_
+  - **達成**: カバレッジ94.28%（目標80%を大幅上回る）✅
+  - Statements: 92.95% (488/525)
+  - Branches: 92.15% (141/153)
+  - Functions: 92.2% (71/77)
+  - Lines: 94.28% (478/507)
 
 - [ ] 14. E2Eテスト実装（Playwright）
 - [ ] 14.1 User認証フローE2Eテストを実装

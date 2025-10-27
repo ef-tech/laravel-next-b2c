@@ -87,8 +87,7 @@ export function AdminAuthProvider({ children }: AdminAuthProviderProps) {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw handleApiError(errorData, response.status);
+          await handleApiError(response);
         }
 
         const adminData = await response.json();
@@ -123,8 +122,7 @@ export function AdminAuthProvider({ children }: AdminAuthProviderProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw handleApiError(errorData, response.status);
+        await handleApiError(response);
       }
 
       const data = await response.json();
@@ -157,8 +155,7 @@ export function AdminAuthProvider({ children }: AdminAuthProviderProps) {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw handleApiError(errorData, response.status);
+          await handleApiError(response);
         }
       }
     } catch (error) {
@@ -193,8 +190,7 @@ export function AdminAuthProvider({ children }: AdminAuthProviderProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw handleApiError(errorData, response.status);
+        await handleApiError(response);
       }
 
       const adminData = await response.json();
