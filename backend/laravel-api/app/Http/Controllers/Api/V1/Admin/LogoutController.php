@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Admin;
 use Ddd\Application\Admin\DTOs\LogoutAdminInput;
 use Ddd\Application\Admin\UseCases\LogoutAdminUseCase;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +21,7 @@ class LogoutController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        /** @var Admin $admin */
+        /** @var \App\Models\Admin $admin */
         $admin = $request->user('admin');
 
         $input = new LogoutAdminInput(

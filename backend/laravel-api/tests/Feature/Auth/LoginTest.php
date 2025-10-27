@@ -7,16 +7,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-describe('POST /api/login', function () {
+describe('POST /api/v1/user/login', function () {
     it('returns token and user data when credentials are valid', function () {
         // Arrange
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => bcrypt('password123'),
         ]);
 
         // Act
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/user/login', [
             'email' => 'test@example.com',
             'password' => 'password123',
         ]);
@@ -26,10 +26,8 @@ describe('POST /api/login', function () {
             ->assertJsonStructure([
                 'token',
                 'user' => ['id', 'name', 'email'],
-                'token_type',
             ])
             ->assertJson([
-                'token_type' => 'Bearer',
                 'user' => [
                     'id' => $user->id,
                     'email' => 'test@example.com',
@@ -43,45 +41,55 @@ describe('POST /api/login', function () {
         // Arrange
         User::factory()->create([
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => bcrypt('password123'),
         ]);
 
         // Act
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/user/login', [
             'email' => 'invalid@example.com',
             'password' => 'password123',
         ]);
 
         // Assert
         $response->assertUnauthorized()
-            ->assertJson([
-                'message' => 'Invalid credentials',
+            ->assertJsonStructure([
+                'code',
+                'message',
+                'errors',
+                'trace_id',
             ]);
+
+        expect($response->json('code'))->toBe('AUTH.INVALID_CREDENTIALS');
     });
 
     it('returns 401 when password is invalid', function () {
         // Arrange
         User::factory()->create([
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => bcrypt('password123'),
         ]);
 
         // Act
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/user/login', [
             'email' => 'test@example.com',
             'password' => 'wrongpassword',
         ]);
 
         // Assert
         $response->assertUnauthorized()
-            ->assertJson([
-                'message' => 'Invalid credentials',
+            ->assertJsonStructure([
+                'code',
+                'message',
+                'errors',
+                'trace_id',
             ]);
+
+        expect($response->json('code'))->toBe('AUTH.INVALID_CREDENTIALS');
     });
 
     it('returns 422 when email format is invalid', function () {
         // Act
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/user/login', [
             'email' => 'invalid-email',
             'password' => 'password123',
         ]);
@@ -93,7 +101,7 @@ describe('POST /api/login', function () {
 
     it('returns 422 when password is too short', function () {
         // Act
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/user/login', [
             'email' => 'test@example.com',
             'password' => 'short',
         ]);
@@ -105,7 +113,7 @@ describe('POST /api/login', function () {
 
     it('returns 422 when email is missing', function () {
         // Act
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/user/login', [
             'password' => 'password123',
         ]);
 
@@ -116,7 +124,7 @@ describe('POST /api/login', function () {
 
     it('returns 422 when password is missing', function () {
         // Act
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/user/login', [
             'email' => 'test@example.com',
         ]);
 
