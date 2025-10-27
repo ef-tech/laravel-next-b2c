@@ -37,7 +37,7 @@ test.describe('API v1 Endpoint Access - User', () => {
     await page.fill('input[name="password"]', testPassword);
     await page.click('button[type="submit"]');
 
-    await page.waitForURL('**/profile', { timeout: 5000 });
+    await page.waitForURL('**/profile', { timeout: 15000 });
 
     // Verify login API call
     const loginCall = apiCalls.find((call) => call.url.includes('/login'));

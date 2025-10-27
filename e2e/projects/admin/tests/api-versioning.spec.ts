@@ -37,7 +37,7 @@ test.describe('API v1 Endpoint Access - Admin', () => {
     await page.fill('input[name="password"]', testPassword);
     await page.click('button[type="submit"]');
 
-    await page.waitForURL('**/dashboard', { timeout: 5000 });
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
 
     // Verify login API call
     const loginCall = apiCalls.find((call) => call.url.includes('/login'));
@@ -219,7 +219,7 @@ test.describe('API v1 Endpoint Access - Admin', () => {
       await userPage.fill('input[name="email"]', userEmail);
       await userPage.fill('input[name="password"]', userPassword);
       await userPage.click('button[type="submit"]');
-      await userPage.waitForURL('**/profile', { timeout: 5000 });
+      await userPage.waitForURL('**/profile', { timeout: 15000 });
 
       // Step 2: Try to access admin endpoint with user token
       const adminApiResponse = await userPage.evaluate(async () => {

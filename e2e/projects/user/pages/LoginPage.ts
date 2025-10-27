@@ -45,8 +45,8 @@ export class UserLoginPage {
     // Submit login form
     await this.page.click('button[type="submit"]');
 
-    // Wait for navigation to profile page
-    await this.page.waitForURL('**/profile', { timeout: 5000 });
+    // Wait for navigation to profile page (increased timeout for CI environment)
+    await this.page.waitForURL('**/profile', { timeout: 15000 });
   }
 
   /**

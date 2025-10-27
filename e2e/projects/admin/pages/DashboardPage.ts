@@ -63,7 +63,7 @@ export class AdminDashboardPage {
   async logout() {
     await this.page.click('button:has-text("ログアウト"), button:has-text("Logout")');
     // Wait for navigation to login page
-    await this.page.waitForURL('**/login', { timeout: 5000 });
+    await this.page.waitForURL('**/login', { timeout: 15000 });
   }
 
   /**

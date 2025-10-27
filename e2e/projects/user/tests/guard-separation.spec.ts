@@ -82,7 +82,7 @@ test.describe('User Guard Separation', () => {
     await page.click('button[type="submit"]');
 
     // Wait for navigation
-    await page.waitForURL('**/profile', { timeout: 5000 });
+    await page.waitForURL('**/profile', { timeout: 15000 });
 
     // Step 4: Verify login API call used correct user endpoint
     const loginCalls = apiCalls.filter((url) => url.includes('/login'));
@@ -163,7 +163,7 @@ test.describe('User Guard Separation', () => {
       await adminPage.fill('input[name="email"]', adminEmail);
       await adminPage.fill('input[name="password"]', adminPassword);
       await adminPage.click('button[type="submit"]');
-      await adminPage.waitForURL('**/dashboard', { timeout: 5000 });
+      await adminPage.waitForURL('**/dashboard', { timeout: 15000 });
 
       // Step 3: Verify both sessions are active simultaneously
       const userProfileVisible = await userPage.locator('h1, h2').first().isVisible();

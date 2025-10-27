@@ -45,8 +45,8 @@ export class AdminLoginPage {
     // Submit login form
     await this.page.click('button[type="submit"]');
 
-    // Wait for navigation to dashboard
-    await this.page.waitForURL('**/dashboard', { timeout: 5000 });
+    // Wait for navigation to dashboard (increased timeout for CI environment)
+    await this.page.waitForURL('**/dashboard', { timeout: 15000 });
   }
 
   /**

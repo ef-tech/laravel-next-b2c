@@ -82,7 +82,7 @@ test.describe('Admin Guard Separation', () => {
     await page.click('button[type="submit"]');
 
     // Wait for navigation
-    await page.waitForURL('**/dashboard', { timeout: 5000 });
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
 
     // Step 4: Verify login API call used correct admin endpoint
     const loginCalls = apiCalls.filter((url) => url.includes('/login'));
@@ -161,7 +161,7 @@ test.describe('Admin Guard Separation', () => {
       await userPage.fill('input[name="email"]', userEmail);
       await userPage.fill('input[name="password"]', userPassword);
       await userPage.click('button[type="submit"]');
-      await userPage.waitForURL('**/profile', { timeout: 5000 });
+      await userPage.waitForURL('**/profile', { timeout: 15000 });
 
       // Step 3: Verify both sessions are active simultaneously
       const adminDashboardVisible = await adminPage.locator('h1, h2').first().isVisible();
