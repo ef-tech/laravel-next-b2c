@@ -94,6 +94,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'idempotent' => \App\Http\Middleware\IdempotencyKey::class,
             'cache.headers' => \App\Http\Middleware\CacheHeaders::class,
             'etag' => \App\Http\Middleware\ETag::class,
+            'admin.guard' => \App\Http\Middleware\AdminGuard::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

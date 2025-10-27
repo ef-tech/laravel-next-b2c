@@ -64,7 +64,7 @@ test('GET /api/v1/admin/dashboard → 無効なトークンの場合に401 Unaut
     $response->assertStatus(401);
 });
 
-test('GET /api/v1/admin/dashboard → 非アクティブ管理者でもダッシュボード情報を取得できる', function (): void {
+test('GET /api/v1/admin/dashboard → 非アクティブ管理者は403 Forbiddenを返す', function (): void {
     // 非アクティブ管理者を作成
     $inactiveAdmin = Admin::factory()->create([
         'email' => 'inactive@example.com',
@@ -77,13 +77,8 @@ test('GET /api/v1/admin/dashboard → 非アクティブ管理者でもダッシ
     $response = $this->withHeader('Authorization', "Bearer {$inactiveToken}")
         ->getJson('/api/v1/admin/dashboard');
 
-    $response->assertStatus(200)
+    $response->assertStatus(403)
         ->assertJson([
-            'admin' => [
-                'id' => $inactiveAdmin->id,
-                'email' => 'inactive@example.com',
-                'role' => 'admin',
-                'isActive' => false,
-            ],
+            'message' => 'Account is disabled',
         ]);
 });

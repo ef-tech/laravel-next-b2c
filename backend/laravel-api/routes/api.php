@@ -50,7 +50,7 @@ Route::prefix('v1')->name('v1.')->group(function () {
         });
 
         // Protected routes (authentication required)
-        Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+        Route::middleware(['auth:sanctum', 'admin.guard', 'throttle:60,1'])->group(function () {
             Route::post('/logout', AdminLogoutController::class)->name('logout');
             Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         });
