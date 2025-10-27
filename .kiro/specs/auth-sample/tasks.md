@@ -124,25 +124,31 @@
   - tokenable_typeがApp\Models\Adminであることを保証
   - _Requirements: 6.3, 6.4, 6.5, 11.1, 11.4_
 
-- [ ] 6.3 UserGuard Middlewareを実装
+- [x] 6.3 UserGuard Middlewareを実装
   - $request->user('api')で認証確認
   - User型チェック（instanceof User）
   - 非User型の場合: 401 Unauthorizedをスロー
   - tokenable_typeがApp\Models\Userであることを保証
   - _Requirements: 6.6, 11.2, 11.5_
 
-- [ ] 7. APIバージョニング戦略実装（v1プレフィックス）
-- [ ] 7.1 routes/api.phpにv1ルート追加
+- [x] 7. APIバージョニング戦略実装（v1プレフィックス）
+- [x] 7.1 routes/api.phpにv1ルート追加
   - Route::prefix('v1')->name('v1.')でv1グループ作成
   - 全認証エンドポイントをv1グループ内に配置
   - ルート名に'v1.'プレフィックス付与（例: v1.admin.login）
   - バージョン無しエンドポイント（/api/admin/login）から/api/v1/admin/loginへの308 Permanent Redirect設定
+  - User v1 Controllers作成（LoginController, LogoutController, ProfileController）
+  - Admin v1 エンドポイント実装済み
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 7.2 フロントエンド環境変数NEXT_PUBLIC_API_VERSIONを設定
+- [x] 7.2 フロントエンド環境変数NEXT_PUBLIC_API_VERSIONを設定
   - User App .env.local に NEXT_PUBLIC_API_VERSION=v1 追加
   - Admin App .env.local に NEXT_PUBLIC_API_VERSION=v1 追加
-  - APIクライアント初期化時に環境変数を使用してエンドポイントURL構築
+  - User App .env.example に NEXT_PUBLIC_API_VERSION=v1 追加
+  - Admin App .env.example に NEXT_PUBLIC_API_VERSION=v1 追加
+  - env.ts（User App/Admin App）にNEXT_PUBLIC_API_VERSION追加（Zodバリデーション）
+  - buildApiUrl()ヘルパー関数作成（api.ts）でエンドポイントURL構築
+  - buildApiUrl()のユニットテスト作成（api.test.ts）
   - _Requirements: 7.4, 7.5, 7.6_
 
 - [ ] 8. 統一エラーハンドリング実装

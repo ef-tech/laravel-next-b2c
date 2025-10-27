@@ -14,6 +14,7 @@ import { z } from "zod";
  *
  * Admin App で使用される環境変数を定義します。
  * - NEXT_PUBLIC_API_URL: Laravel APIのベースURL（クライアント側で使用）
+ * - NEXT_PUBLIC_API_VERSION: APIバージョン（エンドポイントURL構築に使用）
  * - NODE_ENV: Next.js実行環境
  */
 const envSchema = z.object({
@@ -21,6 +22,11 @@ const envSchema = z.object({
     .string()
     .url("NEXT_PUBLIC_API_URL は有効なURL形式である必要があります")
     .default("http://localhost:13000"),
+
+  NEXT_PUBLIC_API_VERSION: z
+    .string()
+    .regex(/^v\d+$/, "NEXT_PUBLIC_API_VERSION は 'v1', 'v2' のような形式である必要があります")
+    .default("v1"),
 
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
@@ -33,6 +39,7 @@ const envSchema = z.object({
  */
 const parsedEnv = envSchema.safeParse({
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  NEXT_PUBLIC_API_VERSION: process.env.NEXT_PUBLIC_API_VERSION,
   NODE_ENV: process.env.NODE_ENV as "development" | "production" | "test",
 });
 

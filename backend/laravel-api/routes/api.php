@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\V1\Admin\LoginController as AdminLoginController;
 use App\Http\Controllers\Api\V1\Admin\LogoutController as AdminLogoutController;
+use App\Http\Controllers\Api\V1\User\LoginController as UserLoginController;
+use App\Http\Controllers\Api\V1\User\LogoutController as UserLogoutController;
+use App\Http\Controllers\Api\V1\User\ProfileController as UserProfileController;
 use App\Http\Controllers\CspReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,8 +43,33 @@ Route::middleware(['auth:sanctum', 'user.guard', 'throttle:60,1'])->group(functi
     Route::delete('/tokens', [TokenController::class, 'destroyAll']);
 });
 
+// Legacy endpoints - Permanent redirect to v1 (Backward compatibility)
+// User legacy endpoints
+Route::permanentRedirect('/login', '/api/v1/user/login');
+Route::permanentRedirect('/logout', '/api/v1/user/logout');
+Route::permanentRedirect('/user', '/api/v1/user/profile');
+
+// Admin legacy endpoints
+Route::permanentRedirect('/admin/login', '/api/v1/admin/login');
+Route::permanentRedirect('/admin/logout', '/api/v1/admin/logout');
+Route::permanentRedirect('/admin/dashboard', '/api/v1/admin/dashboard');
+
 // API v1 routes (APIバージョニング戦略)
 Route::prefix('v1')->name('v1.')->group(function () {
+    // User authentication routes
+    Route::prefix('user')->name('user.')->group(function () {
+        // Login with rate limiting (5 attempts per minute)
+        Route::middleware('throttle:5,1')->group(function () {
+            Route::post('/login', UserLoginController::class)->name('login');
+        });
+
+        // Protected routes (authentication required)
+        Route::middleware(['auth:sanctum', 'user.guard', 'throttle:60,1'])->group(function () {
+            Route::post('/logout', UserLogoutController::class)->name('logout');
+            Route::get('/profile', UserProfileController::class)->name('profile');
+        });
+    });
+
     // Admin authentication routes
     Route::prefix('admin')->name('admin.')->group(function () {
         // Login with rate limiting (5 attempts per minute)

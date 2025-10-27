@@ -1,4 +1,24 @@
-import { fetchUsers } from "./api";
+import { buildApiUrl, fetchUsers } from "./api";
+
+describe("buildApiUrl", () => {
+  it("builds versioned API URL correctly", () => {
+    const loginUrl = buildApiUrl("user/login");
+    expect(loginUrl).toBe("http://localhost:13000/api/v1/user/login");
+
+    const profileUrl = buildApiUrl("user/profile");
+    expect(profileUrl).toBe("http://localhost:13000/api/v1/user/profile");
+  });
+
+  it("handles endpoints with leading slash", () => {
+    const url = buildApiUrl("/user/login");
+    expect(url).toBe("http://localhost:13000/api/v1/user/login");
+  });
+
+  it("handles endpoints without leading slash", () => {
+    const url = buildApiUrl("user/logout");
+    expect(url).toBe("http://localhost:13000/api/v1/user/logout");
+  });
+});
 
 describe("API Functions", () => {
   beforeEach(() => {
