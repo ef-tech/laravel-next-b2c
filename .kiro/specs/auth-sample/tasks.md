@@ -188,40 +188,66 @@
   - 注: トーストUI表示は Task 9/10 の認証Context実装時に統合
 
 - [ ] 9. User App認証機能実装
-- [ ] 9.1 User App AuthContextを作成
+- [x] 9.1 User App AuthContextを作成
   - React Context API使用
   - login(email, password)メソッド実装（POST /api/v1/user/login）
   - logout()メソッド実装（POST /api/v1/user/logout）
   - fetchUserProfile()メソッド実装（GET /api/v1/user/profile）
   - user、token、isLoading、isAuthenticated状態管理
   - トークンをlocalStorage保存（key: user_token）
+  - トークン復元処理実装（初回ロード時）
+  - 全11テスト成功（AuthContext.test.tsx）
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.7_
 
-- [ ] 9.2 User App useAuth hooksを作成
-  - useAuthContext()フック実装
+- [x] 9.2 User App useAuth hooksを作成
+  - useAuth()フック実装（AuthContext.tsx内で実装完了）
   - ログイン・ログアウト・認証状態確認のAPI提供
   - _Requirements: 9.1, 9.2, 9.4, 9.5_
 
-- [ ] 9.3 User App APIクライアントを実装
-  - apiEndpoints.user.login定義（POST /api/v1/user/login）
-  - apiEndpoints.user.logout定義（POST /api/v1/user/logout）
-  - apiEndpoints.user.profile定義（GET /api/v1/user/profile）
-  - NEXT_PUBLIC_API_VERSION環境変数を使用したURL構築
-  - Authorizationヘッダー自動付与（Bearer token）
-  - _Requirements: 9.2, 9.3, 9.4_
-
-- [ ] 9.4 User App ログイン画面を作成
+- [x] 9.3 User App LoginPageを作成
   - LoginPageコンポーネント作成（email/passwordフォーム）
-  - フォームバリデーション（email形式、password最低8文字）
+  - クライアント側バリデーション実装（email形式、password最低8文字）
   - ログインボタンクリック時にAuthContext.login()呼び出し
-  - エラー時にトーストUI表示
-  - 成功時にダッシュボードにリダイレクト
+  - エラーハンドリング統合（Task 8.3のErrorHandlers使用）
+  - ログイン成功時にホーム画面（/）へリダイレクト
+  - ログイン処理中のUI無効化
+  - 全11テスト成功（LoginPage.test.tsx）
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 9.5 User App 保護されたページのリダイレクト実装
-  - 認証済みでない場合、ログイン画面にリダイレクト
-  - useAuthContext()フックで認証状態確認
+- [x] 9.4 User App LogoutButton実装
+  - LogoutButtonコンポーネント作成
+  - logout()関数呼び出し（useAuth hooks使用）
+  - トークン削除（AuthContext内で処理）
+  - ログイン画面へリダイレクト（成功時・エラー時両方）
+  - カスタムclassName・children props対応
+  - 全7テスト成功（LogoutButton.test.tsx）
+  - _Requirements: 9.1, 9.2_
+
+- [x] 9.5 User App 認証ルート保護
+  - Next.js middleware実装（middleware.ts）
+  - 認証が必要なページリスト定義（/profile）
+  - Cookieからuser_tokenトークン検証
+  - 未認証時にログイン画面（/login）へリダイレクト
+  - 静的ファイル・APIルートは処理スキップ
+  - 全8テスト成功（middleware.test.ts）
   - _Requirements: 9.6_
+
+- [x] 9.6 User App ProfilePageを作成
+  - ProfilePageコンポーネント作成
+  - 初回表示時にfetchUserProfile()呼び出し
+  - 認証済みユーザー情報表示（id、name、email）
+  - 未認証時にログイン画面へリダイレクト
+  - エラーハンドリング実装
+  - LogoutButton統合
+  - 全5テスト成功（profile/page.test.tsx）
+  - _Requirements: 9.4_
+
+- [x] 9.7 User App 初回ロード時のトークン復元
+  - localStorageからトークン読み込み
+  - トークン検証（GET /api/v1/user/profile）
+  - 無効なトークンの場合はクリア
+  - AuthContext.tsx内で実装完了
+  - _Requirements: 9.7_
 
 - [ ] 10. Admin App認証機能実装
 - [ ] 10.1 Admin App AdminAuthContextを作成

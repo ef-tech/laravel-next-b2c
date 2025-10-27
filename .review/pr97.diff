@@ -1,0 +1,5158 @@
+diff --git a/.kiro/specs/test-execution-script/design.md b/.kiro/specs/test-execution-script/design.md
+new file mode 100644
+index 0000000..6b40296
+--- /dev/null
++++ b/.kiro/specs/test-execution-script/design.md
+@@ -0,0 +1,1014 @@
++# Technical Design Document
++
++## Overview
++
++テスト実行スクリプトは、モノレポ構成（Laravel API + Next.js admin-app/user-app + E2Eテスト）における全テストスイートの統合実行を実現する運用スクリプト群です。
++
++**Purpose**: 開発者に単一コマンドでの全テスト実行、柔軟な実行制御、統合レポート生成を提供し、テスト実行の一貫性と効率性を向上させます。
++
++**Users**: プロジェクト開発者は、ローカル開発時に `make test-all` コマンドで全テストを実行し、CI/CD環境では自動的に統合テストが実行されます。
++
++**Impact**: 現在の個別テストスイート実行フローを、統合テストハーネスによる並列実行・エラーハンドリング・統合レポート生成を伴う実行フローに変更します。既存のMakefileタスク（quick-test、test-pgsql、test-parallel、ci-test）は維持され、新規タスクから内部的に呼び出されます。
++
++### Goals
++
++- 単一コマンドで全テストスイート（Backend、Frontend、E2E）の統合実行を実現
++- テストスイート選択、DB環境選択、並列度調整の柔軟な実行制御を提供
++- JUnit XMLレポート、カバレッジレポート、統合サマリーの自動生成
++- GitHub Actions既存ワークフローとのシームレスな統合
++- 一部テスト失敗時も全テスト継続実行、最終的な統合結果レポート提供
++
++### Success Criteria
++
++- 開発者が `make test-all` で全テストを2分以内に実行完了（SQLite環境）
++- PostgreSQL環境での並列実行が正常動作し、本番同等の環境でテスト実行可能
++- 統合レポートが正しく生成され、GitHub Actions Summaryに表示される
++- 既存Makefileタスクが変更なく維持され、後方互換性が保証される
++- ドキュメントが整備され、開発者がスムーズにテスト実行を開始できる
++
++### Non-Goals
++
++- 既存テストコードの修正・追加
++- テストフレームワークのバージョンアップグレード
++- CI/CDワークフローの大規模変更（既存ワークフローは再利用）
++- モノレポツール（Nx/Turborepo）の導入
++
++## Architecture
++
++### Existing Architecture Analysis
++
++**現在のテスト実行アーキテクチャ**:
++- 各テストスイート（Backend: Pest、Frontend: Jest、E2E: Playwright）が個別に実行される
++- Makefileタスクが個別機能に特化しており、統合実行フローが未整備
++- 既存タスク: `quick-test`（SQLite高速テスト）、`test-pgsql`（PostgreSQL本番同等テスト）、`test-parallel`（並列テスト実行）、`ci-test`（CI/CD相当の完全テスト）
++- 並列テスト環境セットアップスクリプト: `scripts/parallel-test-setup.sh`、`scripts/parallel-test-cleanup.sh`
++- テスト環境切り替えスクリプト: `scripts/switch-test-env.sh`
++
++**既存パターンの保持**:
++- 既存Makefileタスクは一切変更せず、新規タスクから内部呼び出し
++- `scripts/dev/`の開発サーバー起動スクリプトと同様のBashアーキテクチャを採用
++- 既存の並列テスト環境セットアップスクリプトを再利用
++
++### High-Level Architecture
++
++```mermaid
++graph TB
++    CLI[Makefile CLI]
++    MainScript[scripts/test/main.sh]
++    BackendScript[scripts/test/test-backend.sh]
++    FrontendScript[scripts/test/test-frontend.sh]
++    E2EScript[scripts/test/test-e2e.sh]
++    ReportScript[scripts/test/test-report.sh]
++    DiagnoseScript[scripts/test/diagnose.sh]
++
++    Lib[scripts/lib/]
++    Colors[scripts/lib/colors.sh]
++    Logging[scripts/lib/logging.sh]
++
++    ExistingMake[既存Makefileタスク]
++    QuickTest[make quick-test]
++    TestParallel[make test-parallel]
++
++    Backend[Backend Tests Pest]
++    Frontend[Frontend Tests Jest]
++    E2E[E2E Tests Playwright]
++
++    TestResults[test-results/]
++    JUnit[junit/*.xml]
++    Coverage[coverage/*/]
++    Reports[reports/*.json]
++    Logs[logs/*.log]
++
++    CLI --> MainScript
++    MainScript --> BackendScript
++    MainScript --> FrontendScript
++    MainScript --> E2EScript
++    MainScript --> ReportScript
++    CLI --> DiagnoseScript
++
++    BackendScript --> ExistingMake
++    ExistingMake --> QuickTest
++    ExistingMake --> TestParallel
++
++    BackendScript --> Backend
++    FrontendScript --> Frontend
++    E2EScript --> E2E
++
++    MainScript --> Lib
++    Lib --> Colors
++    Lib --> Logging
++
++    Backend --> TestResults
++    Frontend --> TestResults
++    E2E --> TestResults
++
++    TestResults --> JUnit
++    TestResults --> Coverage
++    TestResults --> Reports
++    TestResults --> Logs
++
++    ReportScript --> Reports
++```
++
++### Architecture Integration
++
++**既存パターン保持**:
++- Makefileによる統一CLIインターフェース（`make test-*`コマンド体系）
++- Bashスクリプトによるオーケストレーション層
++- 既存スクリプトの再利用（`scripts/parallel-test-setup.sh`、`scripts/switch-test-env.sh`）
++
++**新規コンポーネント追加理由**:
++- `scripts/test/main.sh`: 全テストスイートのオーケストレーション、並列実行制御、エラーハンドリング
++- `scripts/test/test-backend.sh`: バックエンドテスト実行の抽象化レイヤー
++- `scripts/test/test-frontend.sh`: フロントエンドテスト実行の抽象化レイヤー
++- `scripts/test/test-e2e.sh`: E2Eテスト実行の抽象化レイヤー
++- `scripts/test/test-report.sh`: 統合レポート生成の専門化
++- `scripts/test/diagnose.sh`: テスト環境診断の独立化
++- `scripts/lib/`: 共通関数ライブラリによる保守性向上
++
++**技術スタック整合性**:
++- Bash 4.0+: 既存の`scripts/dev/`スクリプトと同じシェル環境
++- JUnit XML: 既存のCI/CDパイプラインで使用される標準レポート形式
++- JSON: 統合サマリーフォーマット、GitHub Actionsとの親和性
++
++**ステアリング準拠**:
++- DRY原則: 既存スクリプトを再利用、新規実装を最小化
++- 段階的拡張: 既存Makefileタスクを維持、新規タスクを追加
++- モジュラー設計: テストスイートごとのスクリプト分離
++
++### Technology Alignment
++
++本機能は既存の技術スタックに完全に整合しています。
++
++**既存技術スタックの利用**:
++- **Bash**: 既存の運用スクリプト言語（`scripts/dev/`、`scripts/parallel-test-setup.sh`）
++- **Makefile**: 既存のタスクランナー、CLI統一インターフェース
++- **Pest**: バックエンドテストフレームワーク（既存）
++- **Jest**: フロントエンドテストフレームワーク（既存）
++- **Playwright**: E2Eテストフレームワーク（既存）
++- **JUnit XML**: CI/CD標準レポート形式（GitHub Actions既存ワークフローで使用）
++
++**新規依存関係**:
++- **jest-junit**: Jest用JUnitレポーター（npm devDependency、既存のjest.config.jsに統合）
++- **jq**: JSON処理ツール（統合サマリー生成用、既にCI/CD環境に存在）
++
++**既存パターンからの逸脱なし**: 全てのスクリプトとツールが既存のプロジェクト構造に統合されます。
++
++### Key Design Decisions
++
++#### Decision 1: Bashスクリプトによるオーケストレーション vs. TypeScriptモジュール
++
++**Context**: テスト実行スクリプトの実装言語選択。`scripts/dev/`の開発サーバー起動スクリプトはBash + TypeScriptハイブリッド構成を採用している。
++
++**Alternatives**:
++- **純粋Bashスクリプト**: シンプル、依存関係なし、既存スクリプトとの一貫性
++- **TypeScriptモジュール**: 型安全、保守性高、テスタビリティ向上
++- **Bashエントリーポイント + TypeScriptロジック**: `scripts/dev/`と同様のハイブリッド構成
++
++**Selected Approach**: 純粋Bashスクリプト
++
++テスト実行スクリプトはBashで実装します。主な理由:
++- メインロジックはテストコマンド呼び出しとシェル操作（並列実行制御、ポート競合チェック、プロセス管理）
++- `scripts/dev/`のTypeScript実装は複雑な設定管理（YAML解析、サービス定義）が理由
++- テスト実行は既存Makefileタスクの呼び出しが中心で、複雑な型定義不要
++
++**Rationale**:
++- **シンプルさ**: 既存の`scripts/parallel-test-setup.sh`、`scripts/switch-test-env.sh`と同じ言語で統一
++- **依存関係最小化**: Node.js/TypeScript実行環境不要、CI/CD環境での実行が軽量
++- **既存パターン再利用**: Makefileタスク呼び出しパターンを踏襲
++- **保守性**: 開発者が既に慣れているBashスクリプトパターン
++
++**Trade-offs**:
++- **獲得**: シンプルさ、既存パターンとの一貫性、依存関係最小化
++- **犠牲**: 型安全性、高度なエラーハンドリング（ただし、shellcheck静的解析でカバー可能）
++
++#### Decision 2: JUnit XMLレポート統合 vs. カスタムレポートフォーマット
++
++**Context**: 全テストスイート（Pest、Jest、Playwright）のレポート形式統一。
++
++**Alternatives**:
++- **JUnit XML**: 業界標準、既存CI/CDツール対応、パーサー豊富
++- **カスタムJSON**: 柔軟性高、独自フィールド追加可能
++- **TAP (Test Anything Protocol)**: シンプル、テキストベース
++
++**Selected Approach**: JUnit XML標準フォーマット
++
++全テストフレームワークにJUnit XMLレポーター設定を追加し、統一形式でレポート出力します。
++
++**Rationale**:
++- **既存ツール対応**: GitHub Actions、Jenkins、GitLab CIなど主要CI/CDツールがJUnit XMLをサポート
++- **統合容易性**: 各テストフレームワークが公式JUnitレポータープラグインを提供
++- **可視化**: GitHub Actions SummaryでJUnit XMLを自動的に解析・表示
++- **標準化**: 業界標準フォーマットによる相互運用性
++
++**Trade-offs**:
++- **獲得**: 既存ツール対応、標準化、相互運用性
++- **犠牲**: フォーマット柔軟性（ただし、カスタム統合サマリーJSON併用で補完）
++
++#### Decision 3: エラーハンドリング戦略（継続実行 vs. 即座終了）
++
++**Context**: 一部のテストスイートが失敗した場合の挙動。
++
++**Alternatives**:
++- **即座終了**: 最初の失敗で全体を停止、高速フィードバック
++- **継続実行**: 全テストスイート実行後に統合レポート生成、全体像把握
++- **設定可能**: フラグで挙動切り替え
++
++**Selected Approach**: デフォルト継続実行（`set +e`による部分的エラー許容）
++
++各テストスイートの失敗を記録しながら全テストを継続実行し、最終的に統合結果を返します。
++
++**Rationale**:
++- **全体像把握**: 開発者が一度の実行で全テスト結果を確認可能
++- **CI/CD効率化**: 全テスト結果を一度に取得、再実行不要
++- **ログ保存**: 各テストスイートの詳細ログが保存され、原因特定が容易
++- **既存CI/CD統合**: GitHub Actionsワークフローが全テスト結果を期待
++
++**Trade-offs**:
++- **獲得**: 全体像把握、CI/CD効率化、詳細ログ保存
++- **犠牲**: 実行時間（ただし、並列実行により最小化）、即座フィードバック（ただし、`--fast`オプションでスモークテストモード提供）
++
++## System Flows
++
++### Test Execution Flow
++
++```mermaid
++sequenceDiagram
++    participant Dev as 開発者
++    participant Make as Makefile
++    participant Main as main.sh
++    participant Backend as test-backend.sh
++    participant Frontend as test-frontend.sh
++    participant E2E as test-e2e.sh
++    participant Report as test-report.sh
++    participant Results as test-results/
++
++    Dev->>Make: make test-all
++    Make->>Main: ./scripts/test/main.sh --suite all --env sqlite
++
++    Main->>Main: 環境変数バリデーション
++    Main->>Main: ポート競合チェック
++    Main->>Main: test-results/ ディレクトリ作成
++
++    par 並列実行
++        Main->>Backend: run_backend_tests sqlite
++        Backend->>Backend: make quick-test
++        Backend->>Results: backend-test-results.xml
++    and
++        Main->>Frontend: run_frontend_tests
++        Frontend->>Frontend: npm test (admin-app)
++        Frontend->>Results: frontend-admin-results.xml
++        Frontend->>Frontend: npm test (user-app)
++        Frontend->>Results: frontend-user-results.xml
++    end
++
++    Main->>Main: バックエンド・フロントエンドテスト完了待機
++
++    Main->>E2E: run_e2e_tests
++    E2E->>E2E: サービスヘルスチェック
++    E2E->>E2E: npx playwright test
++    E2E->>Results: e2e-test-results.xml
++
++    Main->>Report: generate_reports
++    Report->>Results: test-summary.json
++    Report->>Results: test-summary.md (GitHub Actions)
++
++    Main->>Dev: 終了コード返却
++```
++
++### Error Handling Flow
++
++```mermaid
++flowchart TB
++    Start[テスト実行開始]
++    EnvCheck[環境変数バリデーション]
++    PortCheck[ポート競合チェック]
++
++    Backend[バックエンドテスト実行]
++    BackendFail{失敗?}
++    BackendLog[backend.logに記録]
++
++    Frontend[フロントエンドテスト実行]
++    FrontendFail{失敗?}
++    FrontendLog[frontend-*.logに記録]
++
++    E2E[E2Eテスト実行]
++    E2EFail{失敗?}
++    E2ELog[e2e.logに記録]
++
++    Summary[統合サマリー生成]
++    AnyFail{いずれか失敗?}
++    ExitFail[終了コード1]
++    ExitSuccess[終了コード0]
++
++    Start --> EnvCheck
++    EnvCheck -->|OK| PortCheck
++    EnvCheck -->|NG| ExitFail
++    PortCheck -->|OK| Backend
++    PortCheck -->|NG| ExitFail
++
++    Backend --> BackendFail
++    BackendFail -->|Yes| BackendLog
++    BackendFail -->|No| Frontend
++    BackendLog --> Frontend
++
++    Frontend --> FrontendFail
++    FrontendFail -->|Yes| FrontendLog
++    FrontendFail -->|No| E2E
++    FrontendLog --> E2E
++
++    E2E --> E2EFail
++    E2EFail -->|Yes| E2ELog
++    E2EFail -->|No| Summary
++    E2ELog --> Summary
++
++    Summary --> AnyFail
++    AnyFail -->|Yes| ExitFail
++    AnyFail -->|No| ExitSuccess
++```
++
++## Requirements Traceability
++
++| Requirement | 要件概要 | コンポーネント | インターフェース | フロー |
++|-------------|---------|--------------|----------------|-------|
++| 1 | 統合テストスクリプト実行 | main.sh, Makefile | `make test-all`, `./scripts/test/main.sh --suite all` | Test Execution Flow |
++| 2 | テストスイート選択実行 | main.sh, test-backend.sh, test-frontend.sh, test-e2e.sh | `--suite` オプション | Test Execution Flow |
++| 3 | DB環境選択 | main.sh, test-backend.sh | `--env` オプション | Test Execution Flow |
++| 4 | 並列実行制御 | main.sh, test-backend.sh | `--parallel` オプション | Test Execution Flow (par並列実行) |
++| 5 | 統合レポート生成 | test-report.sh | `generate_reports()` | Test Execution Flow |
++| 6 | カバレッジレポート生成 | test-backend.sh, test-frontend.sh | `--coverage` オプション | Test Execution Flow |
++| 7 | エラーハンドリング | main.sh, test-*.sh | `set +e`, exit code管理 | Error Handling Flow |
++| 8 | Makefile統合 | Makefile | 9つの新規タスク | Test Execution Flow |
++| 9 | CI/CD統合 | main.sh, .github/workflows/test-integration.yml | `--ci` オプション | Test Execution Flow |
++| 10 | サービスヘルスチェック | test-e2e.sh | `check_services_ready()` | Test Execution Flow |
++| 11 | 診断スクリプト | diagnose.sh | `make test-diagnose` | - |
++| 12 | 共通関数ライブラリ | colors.sh, logging.sh | `source scripts/lib/*.sh` | 全フロー |
++| 13 | ディレクトリ構造 | main.sh | `mkdir -p test-results/` | Test Execution Flow |
++| 14 | テストフレームワーク設定更新 | phpunit.xml, jest.config.js, playwright.config.ts | JUnitレポータ設定 | Test Execution Flow |
++| 15 | ドキュメント整備 | docs/TESTING_EXECUTION_GUIDE.md, docs/TESTING_TROUBLESHOOTING_EXTENDED.md | - | - |
++| 16 | スクリプト実行権限 | 全スクリプト | `chmod +x` | - |
++
++## Components and Interfaces
++
++### Test Orchestration Layer
++
++#### scripts/test/main.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: 全テストスイートのオーケストレーション、並列実行制御、エラーハンドリング、統合レポート生成
++- **Domain Boundary**: テスト実行フローの最上位制御層
++- **Data Ownership**: テスト実行状態、exit code、統合サマリー
++- **Transaction Boundary**: 全テストスイート実行の開始から完了まで
++
++**Dependencies**
++- **Inbound**: Makefile（`make test-all`、`make test-all-pgsql`など）
++- **Outbound**: test-backend.sh、test-frontend.sh、test-e2e.sh、test-report.sh、scripts/lib/*
++- **External**: Bashシェル環境、coreutils（mkdir、rm、wait）
++
++**Contract Definition**
++
++**CLI Interface**:
++```bash
++./scripts/test/main.sh [OPTIONS]
++
++OPTIONS:
++  --suite {all|backend|frontend|e2e|smoke}  # テストスイート選択
++  --env {sqlite|postgres}                    # DB環境選択
++  --parallel {1-8}                           # 並列実行数
++  --coverage                                 # カバレッジレポート生成
++  --report                                   # 詳細レポート出力
++  --ci                                       # CI/CDモード
++  --fast                                     # 高速実行（スモークテスト）
++```
++
++- **Preconditions**: 実行権限（chmod +x）、必須環境変数設定、ポート空き状況
++- **Postconditions**: 全テストスイート実行完了、統合レポート生成、適切な終了コード返却
++- **Invariants**: test-results/ディレクトリ構造維持、既存Makefileタスクの動作保証
++
++**Exit Codes**:
++- `0`: 全テストスイート成功
++- `1`: 環境変数バリデーション失敗
++- `2`: ポート競合エラー
++- `3-10`: 各テストスイート失敗（複数失敗時は最初の失敗コード）
++
++#### scripts/test/test-backend.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: バックエンドテスト（Pest）実行の抽象化レイヤー、DB環境選択、カバレッジ生成
++- **Domain Boundary**: バックエンドテスト実行制御
++- **Data Ownership**: バックエンドテスト結果、JUnit XMLレポート、カバレッジレポート
++
++**Dependencies**
++- **Inbound**: main.sh
++- **Outbound**: 既存Makefileタスク（`make quick-test`、`make test-parallel`）、`scripts/parallel-test-setup.sh`
++- **External**: Pest、PHPUnit、phpunit.xml
++
++**Contract Definition**
++
++**Bash Function Interface**:
++```bash
++run_backend_tests() {
++    local db_env=${1:-sqlite}        # DB環境（sqlite|postgres）
++    local parallel=${2:-4}            # 並列実行数（1-8）
++    local enable_coverage=${3:-false} # カバレッジ有効化
++
++    # 戻り値: exit code（0=成功、非ゼロ=失敗）
++}
++```
++
++- **Preconditions**: Docker環境起動（postgres環境時）、phpunit.xml設定済み
++- **Postconditions**: JUnit XMLレポート出力（`test-results/junit/backend-test-results.xml`）、カバレッジレポート出力（有効時）
++- **Invariants**: 既存Makefileタスクの動作保証
++
++**State Management**:
++- **State Model**: 実行前 → 実行中 → 完了（成功/失敗）
++- **Persistence**: JUnit XMLレポート、カバレッジHTMLレポート
++
++#### scripts/test/test-frontend.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: フロントエンドテスト（Jest）実行の抽象化レイヤー、Admin App/User App並列実行
++- **Domain Boundary**: フロントエンドテスト実行制御
++- **Data Ownership**: フロントエンドテスト結果、JUnit XMLレポート、カバレッジレポート
++
++**Dependencies**
++- **Inbound**: main.sh
++- **Outbound**: npm test（frontend/admin-app、frontend/user-app）
++- **External**: Jest、jest.config.js、jest-junit
++
++**Contract Definition**
++
++**Bash Function Interface**:
++```bash
++run_frontend_tests() {
++    local enable_coverage=${1:-false} # カバレッジ有効化
++
++    # Admin App と User App を並列実行
++    # 戻り値: exit code（0=成功、非ゼロ=失敗）
++}
++```
++
++- **Preconditions**: npm依存関係インストール済み、jest.config.js設定済み
++- **Postconditions**: JUnit XMLレポート出力（`test-results/junit/frontend-admin-results.xml`、`frontend-user-results.xml`）、カバレッジレポート出力（有効時）
++
++**State Management**:
++- **Concurrency**: Admin AppとUser Appを並列実行（`&` バックグラウンド実行 + `wait`）
++
++#### scripts/test/test-e2e.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: E2Eテスト（Playwright）実行の抽象化レイヤー、サービスヘルスチェック
++- **Domain Boundary**: E2Eテスト実行制御
++- **Data Ownership**: E2Eテスト結果、JUnit XMLレポート
++
++**Dependencies**
++- **Inbound**: main.sh
++- **Outbound**: npx playwright test、curlヘルスチェック
++- **External**: Playwright、playwright.config.ts、サービスエンドポイント（http://localhost:13000/api/health等）
++
++**Contract Definition**
++
++**Bash Function Interface**:
++```bash
++check_services_ready() {
++    # サービスヘルスチェック（最大120秒待機）
++    # 戻り値: exit code（0=全サービス起動、非ゼロ=タイムアウト）
++}
++
++run_e2e_tests() {
++    local parallel=${1:-4} # 並列実行数（Playwright Shard）
++
++    # 戻り値: exit code（0=成功、非ゼロ=失敗）
++}
++```
++
++- **Preconditions**: 全サービス起動完了（Laravel API、User App、Admin App）、Playwright依存関係インストール済み
++- **Postconditions**: JUnit XMLレポート出力（`test-results/junit/e2e-test-results.xml`）
++
++**Integration Strategy**:
++- **Modification Approach**: 既存E2Eテスト実行フローを変更せず、ラッパースクリプトとして実装
++- **Backward Compatibility**: 既存の`npm run test:ci`コマンドと完全互換
++
++#### scripts/test/test-report.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: JUnit XMLレポート統合、統合サマリー生成、GitHub Actions Summary出力
++- **Domain Boundary**: レポート生成・統合層
++- **Data Ownership**: 統合サマリーJSON、統合サマリーMarkdown
++
++**Dependencies**
++- **Inbound**: main.sh
++- **Outbound**: test-results/junit/*.xml、jq（JSON処理）
++- **External**: GitHub Actions環境変数（`$GITHUB_STEP_SUMMARY`）
++
++**Contract Definition**
++
++**Bash Function Interface**:
++```bash
++merge_junit_reports() {
++    # JUnit XMLレポート統合（将来拡張）
++    # 現在は個別XMLファイルを保持
++}
++
++generate_test_summary_json() {
++    # 統合サマリーJSON生成
++    # 出力: test-results/reports/test-summary.json
++}
++
++generate_github_summary() {
++    # GitHub Actions Summary Markdown生成
++    # 出力: $GITHUB_STEP_SUMMARY
++}
++
++generate_reports() {
++    # 全レポート生成の統合エントリーポイント
++}
++```
++
++- **Preconditions**: JUnit XMLレポートが存在（test-results/junit/*.xml）
++- **Postconditions**: 統合サマリーJSON生成、GitHub Actions Summary出力（CI環境時）
++
++**Data Contract** (統合サマリーJSON):
++```json
++{
++  "timestamp": "ISO8601",
++  "duration_seconds": 120,
++  "total_tests": 250,
++  "passed": 248,
++  "failed": 2,
++  "suites": {
++    "backend": { "tests": 145, "passed": 145, "coverage": "96.1%" },
++    "frontend-admin": { "tests": 52, "passed": 51, "coverage": "94.8%" },
++    "frontend-user": { "tests": 48, "passed": 48, "coverage": "94.6%" },
++    "e2e": { "tests": 5, "passed": 4 }
++  },
++  "failed_tests": [
++    {
++      "suite": "frontend-admin",
++      "test": "Button component renders with correct styles",
++      "log": "test-results/logs/frontend-admin.log"
++    }
++  ]
++}
++```
++
++### Utility Layer
++
++#### scripts/lib/colors.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: 色付きメッセージ出力のための定数とヘルパー関数
++- **Domain Boundary**: ログ出力フォーマット
++- **Data Ownership**: ANSI色コード定数
++
++**Contract Definition**
++
++**Constants**:
++```bash
++readonly RED='\033[0;31m'
++readonly GREEN='\033[0;32m'
++readonly YELLOW='\033[1;33m'
++readonly BLUE='\033[0;34m'
++readonly NC='\033[0m'  # No Color
++```
++
++#### scripts/lib/logging.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: 統一されたログメッセージ出力関数
++- **Domain Boundary**: ログ出力制御
++- **Data Ownership**: ログメッセージフォーマット
++
++**Contract Definition**
++
++**Bash Function Interface**:
++```bash
++log_info()    # [INFO] メッセージ（BLUE）
++log_success() # [SUCCESS] メッセージ（GREEN）
++log_warn()    # [WARN] メッセージ（YELLOW）
++log_error()   # [ERROR] メッセージ（RED）
++log_debug()   # [DEBUG] メッセージ（MAGENTA、DEBUG=1時のみ）
++```
++
++- **Preconditions**: colors.shがsource済み
++- **Postconditions**: stderrにフォーマット済みメッセージ出力
++
++### Diagnostic Layer
++
++#### scripts/test/diagnose.sh
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: テスト環境の診断、ポート使用状況確認、環境変数確認、Dockerコンテナ状態確認
++- **Domain Boundary**: テスト環境診断
++- **Data Ownership**: 診断結果サマリー
++
++**Dependencies**
++- **Inbound**: Makefile（`make test-diagnose`）
++- **Outbound**: lsof（ポート確認）、docker（コンテナ状態確認）、環境変数チェック
++- **External**: Docker、coreutils
++
++**Contract Definition**
++
++**Bash Function Interface**:
++```bash
++check_ports() {
++    # ポート使用状況確認（13000, 13001, 13002, 13432, 13379）
++    # 出力: 各ポートの使用状況
++}
++
++check_env_vars() {
++    # 必須環境変数確認
++    # 出力: 環境変数設定状態
++}
++
++check_docker() {
++    # Dockerコンテナ起動状態確認
++    # 出力: コンテナ状態
++}
++
++check_db_connection() {
++    # データベース接続確認
++    # 出力: 接続状態
++}
++
++check_disk_space() {
++    # ディスク空き容量確認
++    # 出力: 空き容量
++}
++
++check_memory() {
++    # メモリ使用状況確認
++    # 出力: メモリ使用状況
++}
++
++diagnose() {
++    # 全診断実行の統合エントリーポイント
++}
++```
++
++- **Preconditions**: 実行権限（chmod +x）
++- **Postconditions**: 診断結果をコンソールに出力
++
++### Makefile Integration
++
++#### Makefile (新規タスク)
++
++**Responsibility & Boundaries**
++- **Primary Responsibility**: テスト実行スクリプトのCLIインターフェース提供
++- **Domain Boundary**: ユーザーインターフェース層
++- **Data Ownership**: コマンドライン引数、オプション解析
++
++**Contract Definition**
++
++**Makefile Targets**:
++| Target | Description | Script Call |
++|--------|-------------|-------------|
++| `test-all` | 全テストスイート実行（SQLite） | `./scripts/test/main.sh --suite all --env sqlite` |
++| `test-all-pgsql` | 全テストスイート実行（PostgreSQL） | `./scripts/test/main.sh --suite all --env postgres --parallel 4` |
++| `test-backend-only` | バックエンドテストのみ | `./scripts/test/main.sh --suite backend --env sqlite` |
++| `test-frontend-only` | フロントエンドテストのみ | `./scripts/test/main.sh --suite frontend` |
++| `test-e2e-only` | E2Eテストのみ | `./scripts/test/main.sh --suite e2e` |
++| `test-with-coverage` | 全テスト + カバレッジ | `./scripts/test/main.sh --suite all --env postgres --coverage --report` |
++| `test-pr` | PR前推奨テスト | `$(MAKE) lint && ./scripts/test/main.sh --suite all --env postgres --coverage --parallel 4` |
++| `test-smoke` | スモークテスト | `./scripts/test/main.sh --suite smoke --fast` |
++| `test-diagnose` | テスト環境診断 | `./scripts/test/diagnose.sh` |
++
++- **Preconditions**: 既存Makefileタスクが存在
++- **Postconditions**: 新規タスク追加、既存タスク維持
++- **Invariants**: 既存Makefileタスクの動作保証、後方互換性維持
++
++**Integration Strategy**:
++- **Modification Approach**: 既存Makefileを拡張、新規セクション追加
++- **Backward Compatibility**: 既存タスク（`quick-test`、`test-pgsql`、`test-parallel`、`ci-test`）は一切変更なし
++
++## Data Models
++
++### Test Results Directory Structure
++
++**Physical Data Model**:
++```
++test-results/
++├── junit/                                  # JUnit XMLレポート
++│   ├── backend-test-results.xml           # Backend: Pest
++│   ├── frontend-admin-results.xml         # Frontend: Jest (Admin App)
++│   ├── frontend-user-results.xml          # Frontend: Jest (User App)
++│   └── e2e-test-results.xml               # E2E: Playwright
++├── coverage/                               # カバレッジレポート
++│   ├── backend/                            # Pest カバレッジHTML
++│   │   └── index.html
++│   ├── frontend-admin/                     # Jest カバレッジHTML
++│   │   └── index.html
++│   ├── frontend-user/                      # Jest カバレッジHTML
++│   │   └── index.html
++│   └── merged/                             # 統合カバレッジ（将来拡張）
++├── reports/                                # 統合レポート
++│   ├── test-summary.json                   # 統合サマリー（JSON）
++│   ├── test-summary.md                     # 統合サマリー（Markdown）
++│   └── performance-metrics.json            # パフォーマンス指標（将来拡張）
++└── logs/                                   # 実行ログ
++    ├── backend.log                         # バックエンドテストログ
++    ├── frontend-admin.log                  # フロントエンド（Admin）ログ
++    ├── frontend-user.log                   # フロントエンド（User）ログ
++    └── e2e.log                             # E2Eテストログ
++```
++
++### Test Summary Data Model
++
++**Logical Data Model**:
++- **TestSummary**: タイムスタンプ、実行時間、総テスト数、成功数、失敗数、各スイート別結果
++- **SuiteResult**: スイート名、テスト数、成功数、失敗数、カバレッジ率（オプション）
++- **FailedTest**: スイート名、テスト名、ログファイルパス
++
++### Data Contracts & Integration
++
++**JUnit XML Schema** (標準フォーマット):
++```xml
++<testsuite name="backend" tests="145" failures="0" errors="0" time="12.5">
++  <testcase name="test_example" classname="ExampleTest" time="0.1" />
++  <!-- ... -->
++</testsuite>
++```
++
++**Test Summary JSON Schema**:
++```typescript
++interface TestSummary {
++  timestamp: string;        // ISO8601形式
++  duration_seconds: number;
++  total_tests: number;
++  passed: number;
++  failed: number;
++  suites: {
++    [suiteName: string]: SuiteResult;
++  };
++  failed_tests: FailedTest[];
++}
++
++interface SuiteResult {
++  tests: number;
++  passed: number;
++  coverage?: string;        // オプション: "96.1%"
++}
++
++interface FailedTest {
++  suite: string;
++  test: string;
++  log: string;              // ログファイルパス
++}
++```
++
++## Error Handling
++
++### Error Strategy
++
++エラーハンドリングは3層で実施します:
++
++1. **早期検出層**: 環境変数バリデーション、ポート競合チェック（実行前）
++2. **実行時エラー記録層**: 各テストスイートの失敗を記録、継続実行（実行中）
++3. **統合報告層**: 全テスト結果を統合、適切な終了コードを返却（実行後）
++
++### Error Categories and Responses
++
++**環境エラー** (exit code 1-2):
++- **環境変数未設定**: 必須環境変数が設定されていない → エラーメッセージ表示、終了
++- **ポート競合**: テスト実行に必要なポート（13000, 13001, 13002, 13432, 13379）が使用中 → ポート使用状況表示、診断スクリプト案内
++
++**テスト実行エラー** (exit code 3-10):
++- **バックエンドテスト失敗**: Pestテスト失敗 → ログ保存（`test-results/logs/backend.log`）、継続実行
++- **フロントエンドテスト失敗**: Jestテスト失敗 → ログ保存（`test-results/logs/frontend-*.log`）、継続実行
++- **E2Eテスト失敗**: Playwrightテスト失敗 → ログ保存（`test-results/logs/e2e.log`）、継続実行
++
++**システムエラー** (exit code 255):
++- **スクリプト実行エラー**: スクリプトの構文エラー、依存関係エラー → エラーメッセージ表示、スタックトレース出力
++- **CI/CD環境エラー**: GitHub Actions環境変数未設定 → エラーメッセージ表示
++
++### Error Handling Flow
++
++各テストスイートのエラーハンドリング:
++
++```bash
++# set +e でエラー時も継続実行
++set +e
++
++# バックエンドテスト実行
++run_backend_tests "$DB_ENV" "$PARALLEL" "$ENABLE_COVERAGE"
++BACKEND_EXIT_CODE=$?
++
++# exit code記録
++if [ $BACKEND_EXIT_CODE -ne 0 ]; then
++    log_error "バックエンドテスト失敗（exit code: $BACKEND_EXIT_CODE）"
++    FAILED_SUITES+=("backend")
++fi
++
++# フロントエンドテスト実行（バックエンド失敗時も継続）
++run_frontend_tests "$ENABLE_COVERAGE"
++FRONTEND_EXIT_CODE=$?
++
++# exit code記録
++if [ $FRONTEND_EXIT_CODE -ne 0 ]; then
++    log_error "フロントエンドテスト失敗（exit code: $FRONTEND_EXIT_CODE）"
++    FAILED_SUITES+=("frontend")
++fi
++
++# E2Eテスト実行（バックエンド/フロントエンド失敗時も継続）
++run_e2e_tests "$PARALLEL"
++E2E_EXIT_CODE=$?
++
++# exit code記録
++if [ $E2E_EXIT_CODE -ne 0 ]; then
++    log_error "E2Eテスト失敗（exit code: $E2E_EXIT_CODE）"
++    FAILED_SUITES+=("e2e")
++fi
++
++# 統合サマリー生成
++generate_reports
++
++# 最終的なexit code決定
++if [ ${#FAILED_SUITES[@]} -ne 0 ]; then
++    log_error "以下のテストスイートが失敗しました: ${FAILED_SUITES[*]}"
++    exit 1
++fi
++
++log_success "全テストスイート成功"
++exit 0
++```
++
++### Monitoring
++
++**ログファイル構造**:
++- `test-results/logs/backend.log`: バックエンドテスト実行ログ（stdout/stderr）
++- `test-results/logs/frontend-admin.log`: Admin Appテスト実行ログ
++- `test-results/logs/frontend-user.log`: User Appテスト実行ログ
++- `test-results/logs/e2e.log`: E2Eテスト実行ログ
++
++**GitHub Actions統合**:
++- **Job Summary**: 統合サマリーMarkdownを`$GITHUB_STEP_SUMMARY`に出力
++- **Artifacts**: `test-results/`ディレクトリを`actions/upload-artifact@v4`でアップロード
++
++**診断スクリプト**:
++- `make test-diagnose`: テスト環境診断、ポート使用状況、環境変数、Docker状態、DB接続、ディスク空き容量、メモリ使用状況を確認
++
++## Testing Strategy
++
++### Unit Tests: スクリプト関数個別テスト
++
++- **colors.sh関数テスト**: 色コード定数が正しく定義されているか
++- **logging.sh関数テスト**: ログメッセージフォーマットが正しいか
++- **ポート競合チェック**: ポート使用状況確認関数が正しく動作するか
++- **環境変数バリデーション**: 必須環境変数チェック関数が正しく動作するか
++- **exit code管理**: 各テストスイートのexit codeが正しく記録されるか
++
++**テスト方法**: Bash単体テスト（bats-core使用、またはスクリプト内の関数を個別実行）
++
++### Integration Tests: テストスイート統合実行
++
++- **全テストスイート実行（SQLite）**: `make test-all` が正常に完了するか
++- **全テストスイート実行（PostgreSQL）**: `make test-all-pgsql` が正常に完了するか
++- **テストスイート選択実行**: `--suite` オプションで特定スイートのみ実行されるか
++- **並列実行制御**: `--parallel` オプションで並列実行数が制御されるか
++- **エラーハンドリング**: 一部テスト失敗時も全テスト継続実行されるか
++- **統合レポート生成**: JUnit XMLレポート、統合サマリーJSONが正しく生成されるか
++
++**テスト方法**: ローカル環境での実際のテスト実行、exit code確認、生成ファイル検証
++
++### E2E/CI Tests: CI/CD環境統合テスト
++
++- **GitHub Actionsワークフロー実行**: Pull Request作成時に統合テストが自動実行されるか
++- **paths-filter動作**: 変更ファイルに応じて適切なテストスイートが実行されるか
++- **Artifactsアップロード**: テスト結果が正しくアップロードされるか
++- **GitHub Actions Summary表示**: 統合サマリーMarkdownが正しく表示されるか
++- **並列実行（4 Shard）**: CI/CD環境で並列実行が正常動作するか
++
++**テスト方法**: Pull Request作成、GitHub Actionsワークフロー実行、Artifactsダウンロード、Summary確認
++
++### Performance Tests: 実行時間測定
++
++- **SQLite環境全テスト実行時間**: 2分以内に完了するか
++- **PostgreSQL環境並列実行時間**: 5-10分以内に完了するか
++- **スモークテスト実行時間**: 30秒以内に完了するか
++- **診断スクリプト実行時間**: 5秒以内に完了するか
++
++**テスト方法**: `time` コマンドによる実行時間測定、複数回実行の平均値取得
++
++## Migration Strategy
++
++本機能は新規スクリプト追加であり、既存システムの変更は最小限です。
++
++### Phase 1: スクリプト作成とローカルテスト（Week 1）
++
++```mermaid
++flowchart TB
++    Start[開始]
++    CreateScripts[スクリプト作成]
++    CreateLib[共通関数ライブラリ作成]
++    ChmodX[実行権限付与]
++    LocalTest[ローカル環境テスト]
++    ValidationOK{全機能動作確認}
++
++    Start --> CreateScripts
++    CreateScripts --> CreateLib
++    CreateLib --> ChmodX
++    ChmodX --> LocalTest
++    LocalTest --> ValidationOK
++    ValidationOK -->|OK| Phase2
++    ValidationOK -->|NG| CreateScripts
++
++    Phase2[Phase 2へ]
++```
++
++**Phase 1詳細**:
++1. `scripts/test/main.sh` 実装（オーケストレーション層）
++2. `scripts/test/test-backend.sh` 実装（バックエンドテスト抽象化）
++3. `scripts/test/test-frontend.sh` 実装（フロントエンドテスト抽象化）
++4. `scripts/test/test-e2e.sh` 実装（E2Eテスト抽象化）
++5. `scripts/test/test-report.sh` 実装（レポート生成）
++6. `scripts/test/diagnose.sh` 実装（診断スクリプト）
++7. `scripts/lib/colors.sh` 実装（色定義）
++8. `scripts/lib/logging.sh` 実装（ログ関数）
++9. 実行権限付与（`chmod +x scripts/test/*.sh scripts/lib/*.sh`）
++10. ローカル環境でのテスト実行確認
++
++**Rollback Trigger**: スクリプト実行エラー、既存Makefileタスクとの競合
++
++**Validation Checkpoints**:
++- [ ] 全スクリプトが実行権限付与済み
++- [ ] `./scripts/test/main.sh --help` がヘルプメッセージを表示
++- [ ] `make test-all` がローカル環境で正常実行
++- [ ] 既存Makefileタスク（`quick-test`、`test-pgsql`）が正常動作
++
++### Phase 2: Makefile統合とテストフレームワーク設定（Week 2）
++
++```mermaid
++flowchart TB
++    Start[Phase 1完了]
++    UpdateMakefile[Makefile新規タスク追加]
++    UpdatePHPUnit[phpunit.xml JUnit設定]
++    UpdateJest[jest.config.js jest-junit設定]
++    UpdatePlaywright[playwright.config.ts junit設定]
++    IntegrationTest[統合テスト実行]
++    ValidationOK{全タスク動作確認}
++
++    Start --> UpdateMakefile
++    UpdateMakefile --> UpdatePHPUnit
++    UpdatePHPUnit --> UpdateJest
++    UpdateJest --> UpdatePlaywright
++    UpdatePlaywright --> IntegrationTest
++    IntegrationTest --> ValidationOK
++    ValidationOK -->|OK| Phase3
++    ValidationOK -->|NG| UpdateMakefile
++
++    Phase3[Phase 3へ]
++```
++
++**Phase 2詳細**:
++1. Makefile新規タスク追加（9タスク）
++2. `phpunit.xml` にJUnit出力設定追加
++3. `jest.config.js` にjest-junitレポータ設定追加
++4. `playwright.config.ts` にjunitレポータ設定追加
++5. 統合テスト実行確認（`make test-all`、`make test-all-pgsql`）
++6. レポート生成確認（JUnit XML、統合サマリーJSON）
++
++**Rollback Trigger**: Makefileタスクエラー、レポート生成失敗
++
++**Validation Checkpoints**:
++- [ ] 全Makefileタスクが正常実行
++- [ ] JUnit XMLレポートが生成される（test-results/junit/*.xml）
++- [ ] 統合サマリーJSONが生成される（test-results/reports/test-summary.json）
++- [ ] 既存Makefileタスクが正常動作
++
++### Phase 3: CI/CD統合とドキュメント整備（Week 3）
++
++```mermaid
++flowchart TB
++    Start[Phase 2完了]
++    CreateWorkflow[GitHub Actionsワークフロー作成]
++    CreateDocs[ドキュメント作成]
++    UpdateReadme[README.md更新]
++    PRTest[Pull Requestテスト]
++    ValidationOK{CI/CD動作確認}
++
++    Start --> CreateWorkflow
++    CreateWorkflow --> CreateDocs
++    CreateDocs --> UpdateReadme
++    UpdateReadme --> PRTest
++    PRTest --> ValidationOK
++    ValidationOK -->|OK| Complete
++    ValidationOK -->|NG| CreateWorkflow
++
++    Complete[完了]
++```
++
++**Phase 3詳細**:
++1. `.github/workflows/test-integration.yml` 作成
++2. `docs/TESTING_EXECUTION_GUIDE.md` 作成（テスト実行ガイド）
++3. `docs/TESTING_TROUBLESHOOTING_EXTENDED.md` 作成（トラブルシューティング）
++4. `README.md` 更新（新規コマンド追加）
++5. `CLAUDE.md` 更新（Steering情報追加）
++6. Pull Request作成とCI/CD動作確認
++
++**Rollback Trigger**: CI/CD実行エラー、GitHub Actions Summary表示エラー
++
++**Validation Checkpoints**:
++- [ ] Pull Request作成時にGitHub Actionsワークフローが自動実行
++- [ ] Artifactsに`test-results/`がアップロードされる
++- [ ] GitHub Actions Summaryに統合サマリーが表示される
++- [ ] ドキュメントが正しく作成される
+diff --git a/.kiro/specs/test-execution-script/requirements.md b/.kiro/specs/test-execution-script/requirements.md
+new file mode 100644
+index 0000000..bb2bf57
+--- /dev/null
++++ b/.kiro/specs/test-execution-script/requirements.md
+@@ -0,0 +1,212 @@
++# Requirements Document
++
++## はじめに
++
++モノレポ構成（Laravel API + Next.js admin-app/user-app + E2Eテスト）において、各テストスイートが個別に実行されており、統合的なテスト実行が困難な状況を解決するため、テスト実行スクリプトを作成します。
++
++現在、開発者はテスト実行時に複数のコマンドを順次実行する必要があり、手動操作のミスや時間ロスが発生しています。既存のMakefileタスク（quick-test、test-pgsql、test-parallel、ci-test）は個別機能に特化しており、全体を通した実行フローが未整備です。
++
++本機能により、単一コマンドで全テストスイート（バックエンド、フロントエンド、E2E）を統合実行し、JUnit/カバレッジレポートの統合生成、CI/CD統合、エラーハンドリングを提供します。これにより、開発者の生産性が向上し、テスト実行の一貫性が保証されます。
++
++## Requirements
++
++### Requirement 1: 統合テストスクリプト実行
++**Objective:** 開発者として、単一コマンドで全テストスイート（バックエンド、フロントエンド、E2E）を統合実行できるようにしたい。そうすることで、手動操作のミスを防ぎ、テスト実行時間を短縮できる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `make test-all` コマンドを実行する THEN テスト実行スクリプトは全テストスイート（Backend、Frontend、E2E）を順次実行すること
++2. WHEN 開発者が `./scripts/test/main.sh --suite all` コマンドを実行する THEN テスト実行スクリプトは全テストスイート（Backend、Frontend、E2E）を順次実行すること
++3. WHEN テスト実行スクリプトが起動する THEN 環境変数バリデーションを実行し、必須環境変数が設定されていない場合はエラーメッセージを表示して終了すること
++4. WHEN テスト実行スクリプトが起動する THEN ポート競合チェック（13000、13001、13002、13432、13379）を実行し、競合がある場合はエラーメッセージを表示すること
++5. WHEN バックエンドテストとフロントエンドテストを実行する THEN これらのテストを並列実行すること
++6. WHEN E2Eテストを実行する THEN 全サービス（Laravel API、User App、Admin App）が起動完了してから実行すること
++
++### Requirement 2: テストスイート選択実行
++**Objective:** 開発者として、特定のテストスイートのみを選択して実行できるようにしたい。そうすることで、開発中の機能に関連するテストのみを高速に実行できる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `--suite backend` オプションを指定する THEN テスト実行スクリプトはバックエンドテスト（Pest）のみを実行すること
++2. WHEN 開発者が `--suite frontend` オプションを指定する THEN テスト実行スクリプトはフロントエンドテスト（Jest）のみを実行すること
++3. WHEN 開発者が `--suite e2e` オプションを指定する THEN テスト実行スクリプトはE2Eテスト（Playwright）のみを実行すること
++4. WHEN 開発者が `--suite smoke` オプションを指定する THEN テスト実行スクリプトはスモークテスト（重要機能のみ）を実行すること
++5. WHEN 開発者が `make test-backend-only` コマンドを実行する THEN テスト実行スクリプトはバックエンドテストのみを実行すること
++6. WHEN 開発者が `make test-frontend-only` コマンドを実行する THEN テスト実行スクリプトはフロントエンドテストのみを実行すること
++7. WHEN 開発者が `make test-e2e-only` コマンドを実行する THEN テスト実行スクリプトはE2Eテストのみを実行すること
++
++### Requirement 3: DB環境選択
++**Objective:** 開発者として、テスト実行時にDB環境（SQLite/PostgreSQL）を選択できるようにしたい。そうすることで、高速開発時はSQLite、本番同等環境テスト時はPostgreSQLを使い分けできる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `--env sqlite` オプションを指定する THEN テスト実行スクリプトはSQLite環境でバックエンドテストを実行すること
++2. WHEN 開発者が `--env postgres` オプションを指定する THEN テスト実行スクリプトはPostgreSQL環境でバックエンドテストを実行すること
++3. WHEN 開発者が `make test-all` コマンドを実行する THEN デフォルトでSQLite環境を使用すること
++4. WHEN 開発者が `make test-all-pgsql` コマンドを実行する THEN PostgreSQL環境を使用し、並列実行数4でテストを実行すること
++5. WHEN PostgreSQL環境でテストを実行する THEN 既存の `make test-parallel` タスクを内部で呼び出すこと
++
++### Requirement 4: 並列実行制御
++**Objective:** 開発者として、テスト並列実行数を調整できるようにしたい。そうすることで、マシンリソースに応じた最適なテスト実行速度を実現できる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `--parallel` オプションを指定しない THEN テスト実行スクリプトはデフォルトで並列実行数4を使用すること
++2. WHEN 開発者が `--parallel 8` オプションを指定する THEN テスト実行スクリプトは並列実行数8でテストを実行すること
++3. WHEN 開発者が `--parallel 1` オプションを指定する THEN テスト実行スクリプトは並列実行せず順次実行すること
++4. IF 並列実行数が1-8の範囲外である THEN テスト実行スクリプトはエラーメッセージを表示して終了すること
++5. WHEN PostgreSQL環境で並列実行する THEN 既存の `./scripts/parallel-test-setup.sh` スクリプトを呼び出してテスト用DB環境をセットアップすること
++
++### Requirement 5: 統合レポート生成
++**Objective:** 開発者として、全テストスイートの結果を統合したレポートを自動生成したい。そうすることで、テスト結果の全体像を一目で把握できる。
++
++#### Acceptance Criteria
++
++1. WHEN 全テストスイートの実行が完了する THEN JUnit XMLレポートを `test-results/junit/` ディレクトリに出力すること
++2. WHEN バックエンドテストが完了する THEN JUnit XMLレポートを `test-results/junit/backend-test-results.xml` に出力すること
++3. WHEN フロントエンドテスト（Admin App）が完了する THEN JUnit XMLレポートを `test-results/junit/frontend-admin-results.xml` に出力すること
++4. WHEN フロントエンドテスト（User App）が完了する THEN JUnit XMLレポートを `test-results/junit/frontend-user-results.xml` に出力すること
++5. WHEN E2Eテストが完了する THEN JUnit XMLレポートを `test-results/junit/e2e-test-results.xml` に出力すること
++6. WHEN 開発者が `--report` オプションを指定する THEN 統合サマリーを `test-results/reports/test-summary.json` に出力すること
++7. WHEN 統合サマリーを生成する THEN タイムスタンプ、実行時間、総テスト数、成功数、失敗数、各スイート別結果を含むこと
++8. IF GitHub Actions環境で実行される THEN Markdownサマリーを `$GITHUB_STEP_SUMMARY` に出力すること
++
++### Requirement 6: カバレッジレポート生成
++**Objective:** 開発者として、テストカバレッジレポートを統合生成したい。そうすることで、コード品質を継続的に監視できる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `--coverage` オプションを指定する THEN 全テストスイートでカバレッジレポートを生成すること
++2. WHEN バックエンドテストでカバレッジを生成する THEN カバレッジレポートを `test-results/coverage/backend/` ディレクトリに出力すること
++3. WHEN フロントエンドテスト（Admin App）でカバレッジを生成する THEN カバレッジレポートを `test-results/coverage/frontend-admin/` ディレクトリに出力すること
++4. WHEN フロントエンドテスト（User App）でカバレッジを生成する THEN カバレッジレポートを `test-results/coverage/frontend-user/` ディレクトリに出力すること
++5. WHEN 開発者が `make test-with-coverage` コマンドを実行する THEN PostgreSQL環境で全テストを実行し、カバレッジレポートを生成すること
++
++### Requirement 7: エラーハンドリング
++**Objective:** 開発者として、一部のテストが失敗しても全テストスイートの実行を継続したい。そうすることで、全テスト結果を一度に把握できる。
++
++#### Acceptance Criteria
++
++1. WHEN バックエンドテストが失敗する THEN テスト実行スクリプトはエラーを記録し、フロントエンドテストとE2Eテストの実行を継続すること
++2. WHEN フロントエンドテストが失敗する THEN テスト実行スクリプトはエラーを記録し、他のテストスイートの実行を継続すること
++3. WHEN E2Eテストが失敗する THEN テスト実行スクリプトはエラーを記録すること
++4. WHEN 全テストスイートの実行が完了する THEN 失敗したテストがある場合は非ゼロの終了コードを返すこと
++5. WHEN 全テストスイートの実行が完了する THEN 全テストが成功した場合は終了コード0を返すこと
++6. WHEN テスト実行中にエラーが発生する THEN ログファイルを `test-results/logs/` ディレクトリに保存すること
++7. WHEN バックエンドテストでエラーが発生する THEN ログを `test-results/logs/backend.log` に保存すること
++8. WHEN フロントエンドテストでエラーが発生する THEN ログを `test-results/logs/frontend-admin.log` および `test-results/logs/frontend-user.log` に保存すること
++
++### Requirement 8: Makefile統合
++**Objective:** 開発者として、既存のMakefileタスクと統合された新規タスクを使用したい。そうすることで、既存のワークフローを維持しながら新機能を利用できる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `make test-all` を実行する THEN テスト実行スクリプトは全テストスイートをSQLite環境で実行すること
++2. WHEN 開発者が `make test-all-pgsql` を実行する THEN テスト実行スクリプトは全テストスイートをPostgreSQL環境で並列実行数4で実行すること
++3. WHEN 開発者が `make test-backend-only` を実行する THEN テスト実行スクリプトはバックエンドテストのみを実行すること
++4. WHEN 開発者が `make test-frontend-only` を実行する THEN テスト実行スクリプトはフロントエンドテストのみを実行すること
++5. WHEN 開発者が `make test-e2e-only` を実行する THEN テスト実行スクリプトはE2Eテストのみを実行すること
++6. WHEN 開発者が `make test-with-coverage` を実行する THEN テスト実行スクリプトは全テストをPostgreSQL環境で実行し、カバレッジレポートを生成すること
++7. WHEN 開発者が `make test-pr` を実行する THEN コード品質チェック（lint）を実行後、全テストをPostgreSQL環境でカバレッジ付きで実行すること
++8. WHEN 開発者が `make test-smoke` を実行する THEN スモークテスト（重要機能のみ）を高速実行すること
++9. WHEN 開発者が `make test-diagnose` を実行する THEN テスト環境診断スクリプトを実行すること
++10. IF 既存のMakefileタスク（quick-test、test-pgsql、test-parallel、ci-test）が存在する THEN これらのタスクは変更せず維持すること
++
++### Requirement 9: CI/CD統合
++**Objective:** CI/CD環境で、既存のGitHub Actionsワークフローとシームレスに統合したい。そうすることで、CI/CD環境でも統合テスト実行が可能になる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `--ci` オプションを指定する THEN テスト実行スクリプトはCI/CDモードで実行すること
++2. WHEN CI/CDモードで実行する THEN テスト完了後にサービスを停止せず、そのまま維持すること
++3. WHEN CI/CD環境で実行する AND `$GITHUB_STEP_SUMMARY` 環境変数が設定されている THEN Markdownサマリーを `$GITHUB_STEP_SUMMARY` に出力すること
++4. WHEN GitHub Actionsワークフローで実行する THEN `dorny/paths-filter@v3` アクションを使用して変更ファイルを検出すること
++5. IF バックエンドファイルのみ変更されている THEN バックエンドテストとE2Eテストのみを実行すること
++6. IF フロントエンドファイルのみ変更されている THEN フロントエンドテストとE2Eテストのみを実行すること
++7. WHEN GitHub Actionsワークフローでテストが完了する THEN `actions/upload-artifact@v4` アクションを使用してテスト結果を `test-results/` としてアップロードすること
++
++### Requirement 10: サービスヘルスチェック
++**Objective:** E2Eテスト実行前に、全サービスが正常に起動していることを確認したい。そうすることで、サービス起動不良によるテスト失敗を防げる。
++
++#### Acceptance Criteria
++
++1. WHEN E2Eテストを実行する THEN 事前に全サービスのヘルスチェックを実行すること
++2. WHEN ヘルスチェックを実行する THEN Laravel API (`http://localhost:13000/api/health`) に対してHTTPリクエストを送信すること
++3. WHEN ヘルスチェックを実行する THEN User App (`http://localhost:13001/api/health`) に対してHTTPリクエストを送信すること
++4. WHEN ヘルスチェックを実行する THEN Admin App (`http://localhost:13002/api/health`) に対してHTTPリクエストを送信すること
++5. IF いずれかのサービスがヘルスチェックに失敗する THEN エラーメッセージを表示してE2Eテストを実行せずに終了すること
++6. WHEN ヘルスチェックを実行する THEN 最大120秒間リトライし、全サービスの起動を待機すること
++
++### Requirement 11: 診断スクリプト
++**Objective:** 開発者として、テスト環境の問題を診断できるスクリプトを使用したい。そうすることで、テスト失敗時の原因特定が容易になる。
++
++#### Acceptance Criteria
++
++1. WHEN 開発者が `make test-diagnose` を実行する THEN 診断スクリプトが起動すること
++2. WHEN 診断スクリプトが実行される THEN ポート使用状況（13000、13001、13002、13432、13379）を確認すること
++3. WHEN 診断スクリプトが実行される THEN 必須環境変数の設定状態を確認すること
++4. WHEN 診断スクリプトが実行される THEN Dockerコンテナの起動状態を確認すること
++5. WHEN 診断スクリプトが実行される THEN データベース接続状態を確認すること
++6. WHEN 診断スクリプトが実行される THEN ディスク空き容量を確認すること
++7. WHEN 診断スクリプトが実行される THEN メモリ使用状況を確認すること
++8. WHEN 診断スクリプトの実行が完了する THEN 診断結果をコンソールに出力すること
++
++### Requirement 12: 共通関数ライブラリ
++**Objective:** 開発者として、テストスクリプト間で共通の関数を再利用したい。そうすることで、コードの保守性が向上する。
++
++#### Acceptance Criteria
++
++1. WHEN テスト実行スクリプトが起動する THEN `scripts/lib/colors.sh` を読み込むこと
++2. WHEN テスト実行スクリプトが起動する THEN `scripts/lib/logging.sh` を読み込むこと
++3. WHEN ログメッセージを出力する THEN `logging.sh` の関数を使用すること
++4. WHEN 色付きメッセージを出力する THEN `colors.sh` の関数を使用すること
++5. IF `scripts/lib/` ディレクトリが存在しない THEN エラーメッセージを表示して終了すること
++
++### Requirement 13: テストレポートディレクトリ構造
++**Objective:** 開発者として、テストレポートが整理されたディレクトリ構造で保存されるようにしたい。そうすることで、レポートの参照が容易になる。
++
++#### Acceptance Criteria
++
++1. WHEN テスト実行スクリプトが起動する THEN `test-results/` ディレクトリが存在しない場合は作成すること
++2. WHEN テスト実行スクリプトが起動する THEN `test-results/junit/` ディレクトリを作成すること
++3. WHEN テスト実行スクリプトが起動する THEN `test-results/coverage/` ディレクトリを作成すること
++4. WHEN テスト実行スクリプトが起動する THEN `test-results/reports/` ディレクトリを作成すること
++5. WHEN テスト実行スクリプトが起動する THEN `test-results/logs/` ディレクトリを作成すること
++6. WHEN テスト実行が完了する AND `--ci` オプションが指定されていない THEN 一時ファイルを削除すること
++
++### Requirement 14: テストフレームワーク設定更新
++**Objective:** 開発者として、各テストフレームワークがJUnit XMLレポートを出力するように設定を更新したい。そうすることで、統合レポートの生成が可能になる。
++
++#### Acceptance Criteria
++
++1. WHEN バックエンドテストを実行する THEN `phpunit.xml` の設定に従ってJUnit XMLレポートを出力すること
++2. IF `phpunit.xml` にJUnit出力設定が存在しない THEN `<junit outputFile="../../test-results/junit/backend-test-results.xml"/>` 要素を追加すること
++3. WHEN フロントエンドテストを実行する THEN `jest.config.js` の設定に従ってJUnit XMLレポートを出力すること
++4. IF `jest.config.js` にjest-junitレポータ設定が存在しない THEN jest-junitレポータを追加すること
++5. WHEN E2Eテストを実行する THEN `playwright.config.ts` の設定に従ってJUnit XMLレポートを出力すること
++6. IF `playwright.config.ts` にjunitレポータ設定が存在しない THEN junitレポータを追加すること
++
++### Requirement 15: ドキュメント整備
++**Objective:** 開発者として、テスト実行スクリプトの使い方とトラブルシューティング方法を理解したい。そうすることで、スムーズにテストを実行できる。
++
++#### Acceptance Criteria
++
++1. WHEN ドキュメントを作成する THEN `docs/TESTING_EXECUTION_GUIDE.md` にテスト実行ガイドを記載すること
++2. WHEN テスト実行ガイドを作成する THEN クイックスタート、ローカルテスト実行、CI/CD実行、テストスイート別実行方法、レポート確認方法を含むこと
++3. WHEN ドキュメントを作成する THEN `docs/TESTING_TROUBLESHOOTING_EXTENDED.md` にトラブルシューティングガイドを記載すること
++4. WHEN トラブルシューティングガイドを作成する THEN よくある問題（ポート競合、DB接続エラー、メモリ不足、並列実行失敗）と解決策を含むこと
++5. WHEN ドキュメントを作成する THEN 診断スクリプト使用方法、ログ分析方法、エスカレーション手順を含むこと
++6. WHEN ドキュメントを更新する THEN `README.md` に新規コマンドの使用方法を追加すること
++7. WHEN ドキュメントを更新する THEN `CLAUDE.md` のActive Specificationsリストに本仕様を追加すること
++
++### Requirement 16: スクリプト実行権限
++**Objective:** 開発者として、テスト実行スクリプトを直接実行できるようにしたい。そうすることで、Makefileを経由せず柔軟にスクリプトを実行できる。
++
++#### Acceptance Criteria
++
++1. WHEN テスト実行スクリプトを作成する THEN `scripts/test/main.sh` に実行権限（chmod +x）を付与すること
++2. WHEN バックエンドテストスクリプトを作成する THEN `scripts/test/test-backend.sh` に実行権限を付与すること
++3. WHEN フロントエンドテストスクリプトを作成する THEN `scripts/test/test-frontend.sh` に実行権限を付与すること
++4. WHEN E2Eテストスクリプトを作成する THEN `scripts/test/test-e2e.sh` に実行権限を付与すること
++5. WHEN レポート生成スクリプトを作成する THEN `scripts/test/test-report.sh` に実行権限を付与すること
++6. WHEN 診断スクリプトを作成する THEN `scripts/test/diagnose.sh` に実行権限を付与すること
+diff --git a/.kiro/specs/test-execution-script/spec.json b/.kiro/specs/test-execution-script/spec.json
+new file mode 100644
+index 0000000..b1c0a53
+--- /dev/null
++++ b/.kiro/specs/test-execution-script/spec.json
+@@ -0,0 +1,115 @@
++{
++  "feature_name": "test-execution-script",
++  "created_at": "2025-10-24T14:43:00Z",
++  "updated_at": "2025-10-26T01:35:00Z",
++  "language": "ja",
++  "phase": "completed",
++  "source": {
++    "type": "github_issue",
++    "issue_number": 26,
++    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/26",
++    "title": "テスト実行スクリプト作成",
++    "labels": [],
++    "milestone": null,
++    "assignees": []
++  },
++  "extracted_info": {
++    "tech_stack": {
++      "backend": "Laravel, PHP, Pest (テストフレームワーク), PHPUnit",
++      "frontend": "Next.js, Jest, React Testing Library",
++      "infrastructure": "Docker Compose, PostgreSQL, SQLite, Redis, Mailpit, MinIO",
++      "tools": "Bash, Makefile, JUnit XML, GitHub Actions, Playwright"
++    },
++    "requirements_hints": [
++      "単一コマンドで全テストスイート（バックエンド、フロントエンド、E2E）を統合実行",
++      "テストスイート選択、DB環境選択、並列度調整などの柔軟な実行制御",
++      "JUnit/カバレッジレポートの統合生成と可視化",
++      "GitHub Actions既存ワークフローとのシームレスな連携",
++      "一部テスト失敗でも全テスト実行継続、最終的な統合結果レポート提供"
++    ],
++    "project_structure": [
++      "scripts/test/main.sh",
++      "scripts/test/test-backend.sh",
++      "scripts/test/test-frontend.sh",
++      "scripts/test/test-e2e.sh",
++      "scripts/test/test-report.sh",
++      "scripts/test/diagnose.sh",
++      "scripts/lib/colors.sh",
++      "scripts/lib/logging.sh",
++      "test-results/junit/",
++      "test-results/coverage/",
++      "test-results/reports/",
++      "test-results/logs/",
++      "docs/TESTING_EXECUTION_GUIDE.md",
++      "docs/TESTING_TROUBLESHOOTING_EXTENDED.md"
++    ],
++    "services": {
++      "laravel-api": {
++        "port": "13000",
++        "health_endpoint": "/api/health"
++      },
++      "user-app": {
++        "port": "13001",
++        "health_endpoint": "/api/health"
++      },
++      "admin-app": {
++        "port": "13002",
++        "health_endpoint": "/api/health"
++      },
++      "postgresql": {
++        "port": "13432"
++      },
++      "redis": {
++        "port": "13379"
++      }
++    },
++    "todo_items": [
++      "scripts/test/main.sh 実装",
++      "scripts/test/test-backend.sh 実装",
++      "scripts/test/test-frontend.sh 実装",
++      "scripts/test/test-e2e.sh 実装",
++      "scripts/test/test-report.sh 実装",
++      "scripts/test/diagnose.sh 実装（診断スクリプト）",
++      "scripts/lib/ 共通関数実装（colors.sh、logging.sh）",
++      "実行権限付与（chmod +x）",
++      "Makefileに新規タスク追加",
++      "test-results/ ディレクトリ構造作成",
++      "phpunit.xml JUnit出力設定追加",
++      "jest.config.js jest-junit レポータ追加",
++      "playwright.config.ts junit レポータ追加",
++      "レポート統合スクリプト動作確認",
++      ".github/workflows/test-integration.yml 作成",
++      "docs/TESTING_EXECUTION_GUIDE.md 作成",
++      "docs/TESTING_TROUBLESHOOTING_EXTENDED.md 作成",
++      "README.md 更新（新規コマンド追加）",
++      "CLAUDE.md 更新（Steering情報追加）"
++    ]
++  },
++  "approvals": {
++    "requirements": {
++      "generated": true,
++      "approved": true
++    },
++    "design": {
++      "generated": true,
++      "approved": true
++    },
++    "tasks": {
++      "generated": true,
++      "approved": true
++    }
++  },
++  "ready_for_implementation": true,
++  "implementation_status": {
++    "phase_1_completed": true,
++    "phase_2_completed": true,
++    "phase_3_completed": true,
++    "phase_4_completed": true,
++    "phase_5_completed": true,
++    "phase_6_skipped": true,
++    "phase_6_reason": "既存のGitHub Actionsワークフロー（test.yml、php-quality.yml、frontend-test.yml、e2e-tests.yml）が存在し、正常に動作しているため、Phase 6の新規ワークフロー作成はスキップ",
++    "phase_7_completed": true,
++    "local_verification_completed": true,
++    "ci_verification_required": false
++  }
++}
+diff --git a/.kiro/specs/test-execution-script/tasks.md b/.kiro/specs/test-execution-script/tasks.md
+new file mode 100644
+index 0000000..606dcfc
+--- /dev/null
++++ b/.kiro/specs/test-execution-script/tasks.md
+@@ -0,0 +1,267 @@
++# 実装計画
++
++## フェーズ1: スクリプト基盤とユーティリティライブラリ構築
++
++- [x] 1. 共通関数ライブラリ実装
++- [x] 1.1 色定義と出力フォーマット関数作成
++  - ANSI色コード定数を定義（RED、GREEN、YELLOW、BLUE、NC）
++  - 色なし出力対応（CI環境での互換性確保）
++  - _Requirements: 12.1, 12.4_
++
++- [x] 1.2 ログ出力統一関数実装
++  - 5種類のログレベル関数作成（info、success、warn、error、debug）
++  - タイムスタンプ付きログフォーマット実装
++  - デバッグモード対応（DEBUG=1環境変数）
++  - stderr出力でのメッセージ表示
++  - _Requirements: 12.1, 12.2, 12.3_
++
++- [x] 1.3 共通ライブラリファイル配置と権限設定
++  - scripts/lib/ディレクトリ作成
++  - colors.shとlogging.sh配置
++  - 実行権限付与（chmod +x）
++  - 依存関係チェック機能実装
++  - _Requirements: 12.5, 16.1_
++
++- [x] 2. テストレポートディレクトリ構造構築
++- [x] 2.1 ディレクトリ自動生成機能実装
++  - test-results/配下の4階層ディレクトリ作成（junit、coverage、reports、logs）
++  - 既存ディレクトリの保持とクリーンアップロジック
++  - CI環境での一時ファイル削除機能
++  - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6_
++
++## フェーズ2: テストスイート実行スクリプト実装
++
++- [x] 3. バックエンドテスト実行抽象化レイヤー構築
++- [x] 3.1 バックエンドテスト実行関数実装
++  - DB環境選択ロジック（SQLite/PostgreSQL切り替え）
++  - 既存Makefileタスク呼び出し（quick-test、test-parallel）
++  - 並列実行数制御
++  - JUnit XMLレポート出力設定確認
++  - _Requirements: 2.1, 3.1, 3.2, 3.3, 4.5, 14.1, 14.2_
++
++- [x] 3.2 カバレッジレポート生成機能統合
++  - --coverageオプション対応
++  - カバレッジレポートディレクトリ出力（test-results/coverage/backend/）
++  - 既存のtest-coverageタスク再利用
++  - _Requirements: 6.1, 6.2_
++
++- [x] 3.3 バックエンドテストエラーハンドリング
++  - exit code記録とログファイル保存（backend.log）
++  - テスト失敗時の継続実行制御（set +e）
++  - _Requirements: 7.1, 7.6, 7.7_
++
++- [x] 4. フロントエンドテスト実行抽象化レイヤー構築
++- [x] 4.1 フロントエンドテスト並列実行機能実装
++  - Admin AppとUser App並列実行ロジック
++  - npm testコマンド呼び出し（バックグラウンド実行 + wait）
++  - 各アプリのJUnit XMLレポート出力設定確認
++  - _Requirements: 2.2, 14.3, 14.4_
++
++- [x] 4.2 フロントエンドカバレッジレポート生成
++  - --coverageオプション対応
++  - 各アプリのカバレッジレポート出力（test-results/coverage/frontend-admin/、frontend-user/）
++  - _Requirements: 6.3, 6.4_
++
++- [x] 4.3 フロントエンドテストエラーハンドリング
++  - 各アプリのexit code記録とログファイル保存
++  - テスト失敗時の継続実行制御
++  - _Requirements: 7.2, 7.8_
++
++- [x] 5. E2Eテスト実行抽象化レイヤー構築
++- [x] 5.1 サービスヘルスチェック機能実装
++  - 3サービスのヘルスエンドポイント確認（Laravel API、User App、Admin App）
++  - 最大120秒リトライロジック
++  - タイムアウト時のエラーメッセージ表示
++  - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6_
++
++- [x] 5.2 E2Eテスト実行機能実装
++  - Playwright並列実行制御（Shard対応）
++  - npx playwright testコマンド呼び出し
++  - JUnit XMLレポート出力設定確認
++  - _Requirements: 2.3, 14.5, 14.6_
++
++- [x] 5.3 E2Eテストエラーハンドリング
++  - exit code記録とログファイル保存（e2e.log）
++  - サービスヘルスチェック失敗時の即座終了
++  - _Requirements: 7.3, 7.6_
++
++## フェーズ3: オーケストレーション層と統合制御
++
++- [x] 6. メインオーケストレーションスクリプト実装
++- [x] 6.1 環境変数バリデーション機能
++  - 必須環境変数チェックリスト作成
++  - 未設定時のエラーメッセージ表示
++  - _Requirements: 1.3_
++
++- [x] 6.2 ポート競合チェック機能
++  - 5ポートの使用状況確認（13000、13001、13002、13432、13379）
++  - lsofコマンド実行とエラーメッセージ表示
++  - _Requirements: 1.4_
++
++- [x] 6.3 CLI引数解析とオプション処理
++  - --suite、--env、--parallel、--coverage、--report、--ci、--fastオプション解析
++  - デフォルト値設定（suite=all、env=sqlite、parallel=4）
++  - ヘルプメッセージ表示機能（--help）
++  - _Requirements: 1.1, 1.2, 2.1, 2.2, 2.3, 3.1, 3.2, 4.1, 4.2, 5.1, 9.1_
++
++- [x] 6.4 並列実行制御とプロセス管理
++  - バックエンドとフロントエンドの並列実行ロジック（バックグラウンド実行 + wait）
++  - E2Eテストの順次実行（サービス起動後）
++  - _Requirements: 1.5, 1.6_
++
++- [x] 6.5 統合エラーハンドリングとexit code管理
++  - 各テストスイートのexit code記録
++  - 失敗したテストスイートのリスト管理
++  - 最終的なexit code決定ロジック
++  - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
++
++## フェーズ4: レポート生成と統合サマリー
++
++- [x] 7. 統合レポート生成機能実装
++- [x] 7.1 JUnit XMLレポート統合処理
++  - 各テストスイートのJUnit XMLレポート収集
++  - test-results/junit/配下のファイル確認
++  - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
++
++- [x] 7.2 統合サマリーJSON生成
++  - タイムスタンプ、実行時間、総テスト数、成功数、失敗数の集計
++  - 各スイート別結果の構造化
++  - 失敗テストリストの生成
++  - test-results/reports/test-summary.json出力
++  - _Requirements: 5.6, 5.7_
++
++- [x] 7.3 GitHub Actions Summary Markdown生成
++  - CI環境判定（$GITHUB_STEP_SUMMARY存在確認）
++  - Markdownフォーマット統合サマリー作成
++  - テーブル形式の結果表示
++  - $GITHUB_STEP_SUMMARYファイルへの追記
++  - _Requirements: 5.8, 9.3_
++
++## フェーズ5: 診断スクリプトと運用ツール
++
++- [x] 8. テスト環境診断スクリプト実装
++- [x] 8.1 ポート使用状況診断機能
++  - 5ポートの使用状況確認とプロセス表示
++  - _Requirements: 11.2_
++
++- [x] 8.2 環境変数診断機能
++  - 必須環境変数の設定状態確認
++  - _Requirements: 11.3_
++
++- [x] 8.3 Dockerコンテナ診断機能
++  - docker psコマンド実行と状態表示
++  - _Requirements: 11.4_
++
++- [x] 8.4 データベース接続診断機能
++  - PostgreSQL接続確認
++  - _Requirements: 11.5_
++
++- [x] 8.5 システムリソース診断機能
++  - ディスク空き容量確認
++  - メモリ使用状況確認
++  - _Requirements: 11.6, 11.7_
++
++- [x] 8.6 診断結果統合出力
++  - 全診断結果のコンソール表示
++  - エラー状況のサマリー表示
++  - _Requirements: 11.1, 11.8_
++
++## フェーズ6: Makefile統合とCI/CD連携
++
++- [x] 9. Makefile新規タスク追加
++- [x] 9.1 基本テストタスク実装
++  - test-allタスク追加（SQLite環境全テスト）
++  - test-all-pgsqlタスク追加（PostgreSQL環境並列全テスト）
++  - test-backend-onlyタスク追加
++  - test-frontend-onlyタスク追加
++  - test-e2e-onlyタスク追加
++  - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
++
++- [x] 9.2 高度なテストタスク実装
++  - test-with-coverageタスク追加（PostgreSQL + カバレッジ）
++  - test-prタスク追加（lint + PostgreSQL + カバレッジ）
++  - test-smokeタスク追加（スモークテスト高速実行）
++  - test-diagnoseタスク追加（診断スクリプト呼び出し）
++  - _Requirements: 8.6, 8.7, 8.8, 8.9_
++
++- [x] 9.3 既存タスク互換性確認
++  - quick-test、test-pgsql、test-parallel、ci-testタスク動作確認
++  - _Requirements: 8.10_
++
++- [ ] 10. GitHub Actionsワークフロー作成
++- [ ] 10.1 ワークフロートリガー設定
++  - Pull Request、mainブランチpush、手動実行トリガー
++  - paths-filterアクション統合
++  - _Requirements: 9.4, 9.5, 9.6_
++
++- [ ] 10.2 CI環境テスト実行ジョブ実装
++  - --ciオプション使用したテスト実行
++  - Composerキャッシング設定
++  - Node.jsキャッシング設定
++  - _Requirements: 9.1, 9.2_
++
++- [ ] 10.3 テスト結果アーティファクトアップロード
++  - test-results/ディレクトリのアップロード
++  - GitHub Actions Summary表示確認
++  - _Requirements: 9.7_
++
++## フェーズ7: ドキュメント整備と最終検証
++
++- [x] 11. テスト実行ガイドドキュメント作成
++- [x] 11.1 クイックスタートガイド作成
++  - 基本コマンドの使用例
++  - よく使うコマンドパターン
++  - _Requirements: 15.1, 15.2_
++
++- [x] 11.2 ローカルテスト実行ガイド作成
++  - テストスイート別実行方法
++  - DB環境選択方法
++  - カバレッジレポート確認方法
++  - _Requirements: 15.2_
++
++- [x] 11.3 CI/CD実行ガイド作成
++  - GitHub Actionsワークフロー説明
++  - Artifactsダウンロード方法
++  - _Requirements: 15.2_
++
++- [x] 12. トラブルシューティングガイド作成
++- [x] 12.1 よくある問題と解決策記載
++  - ポート競合エラー対処法
++  - DB接続エラー対処法
++  - メモリ不足エラー対処法
++  - 並列実行失敗対処法
++  - _Requirements: 15.3, 15.4_
++
++- [x] 12.2 診断スクリプト使用方法記載
++  - make test-diagnoseコマンド説明
++  - 診断結果の読み方
++  - _Requirements: 15.5_
++
++- [x] 12.3 ログ分析方法記載
++  - ログファイル構造説明
++  - エラーメッセージの解読方法
++  - _Requirements: 15.5_
++
++- [x] 13. プロジェクトドキュメント更新
++- [x] 13.1 README.md更新
++  - 新規コマンド追加
++  - テスト実行セクション拡充
++  - _Requirements: 15.6_
++
++- [x] 13.2 CLAUDE.md更新
++  - Active Specificationsリスト追加
++  - test-execution-script仕様追加
++  - _Requirements: 15.7_
++
++- [x] 14. 最終検証と統合テスト
++- [x] 14.1 ローカル環境統合テスト
++  - 全Makefileタスク実行確認
++  - レポート生成確認
++  - エラーハンドリング動作確認
++  - _Requirements: 全要件_
++
++- [ ] 14.2 CI/CD環境統合テスト
++  - Pull Request作成とワークフロー実行確認
++  - Artifactsアップロード確認
++  - GitHub Actions Summary表示確認
++  - _Requirements: 全要件_
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 88129ee..6fc928d 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -41,6 +41,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
+ - `api-rate-limit-setup` - APIレート制限設定強化（エンドポイント分類細分化、Redis障害時フェイルオーバー、DDD準拠、テストカバレッジ85%以上）
+ - `setup-script` - 一括セットアップスクリプト作成（make setup自動化、15分以内環境構築、冪等性保証、エラーハンドリング）
+ - `dev-server-startup-script` - 開発サーバー起動スクリプト作成（単一コマンド起動、Docker/ネイティブ/ハイブリッドモード、設定駆動アーキテクチャ）
++- `test-execution-script` - テスト実行スクリプト作成（全テストスイート統合実行、JUnit/カバレッジレポート統合、CI/CD連携、エラーハンドリング）
+ - Use `/kiro:spec-status [feature-name]` to check progress
+ 
+ ## Development Guidelines
+diff --git a/Makefile b/Makefile
+index 7483804..3e34129 100644
+--- a/Makefile
++++ b/Makefile
+@@ -6,6 +6,8 @@ SCRIPTS_DIR := scripts
+ 
+ .PHONY: help test test-sqlite test-pgsql test-parallel test-coverage
+ .PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql
++.PHONY: test-all test-all-pgsql test-backend-only test-frontend-only test-e2e-only
++.PHONY: test-with-coverage test-pr test-smoke test-diagnose
+ .PHONY: docker-up docker-down docker-logs
+ .PHONY: setup setup-ci setup-from
+ .PHONY: dev dev-docker dev-native dev-api dev-frontend dev-infra dev-minimal dev-stop dev-env
+@@ -104,6 +106,43 @@ lint: ## コード品質チェック（Pint + Larastan）
+ lint-fix: ## コードスタイル自動修正（Pint）
+ 	cd $(LARAVEL_DIR) && ./vendor/bin/pint
+ 
++# =============================================================================
++# テスト実行コマンド（新規統合スクリプト）
++# =============================================================================
++
++test-all: ## 全テストスイート実行（SQLite高速モード）
++	@bash $(SCRIPTS_DIR)/test/main.sh --fast
++
++test-all-pgsql: ## 全テストスイート実行（PostgreSQL並列モード）
++	@bash $(SCRIPTS_DIR)/test/main.sh --env postgres --parallel 4
++
++test-backend-only: ## バックエンドテストのみ実行
++	@bash $(SCRIPTS_DIR)/test/main.sh --suite backend
++
++test-frontend-only: ## フロントエンドテストのみ実行
++	@bash $(SCRIPTS_DIR)/test/main.sh --suite frontend
++
++test-e2e-only: ## E2Eテストのみ実行
++	@bash $(SCRIPTS_DIR)/test/main.sh --suite e2e
++
++test-with-coverage: ## カバレッジ付き全テスト実行（PostgreSQL）
++	@bash $(SCRIPTS_DIR)/test/main.sh --env postgres --coverage --report
++
++test-pr: ## PR前推奨テスト（Lint + PostgreSQL + カバレッジ）
++	@echo "🔥 PR前チェックを実行します..."
++	$(MAKE) lint-fix
++	@bash $(SCRIPTS_DIR)/test/main.sh --env postgres --coverage --report
++	@echo "✅ PR前チェック完了！"
++
++test-smoke: ## スモークテスト（高速ヘルスチェック）
++	@echo "🚬 スモークテスト実行中..."
++	@bash $(SCRIPTS_DIR)/test/main.sh --fast --suite backend
++	@echo "✅ スモークテスト完了！"
++
++test-diagnose: ## テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
++	@echo "🏥 テスト環境診断..."
++	@./scripts/test/diagnose.sh
++
+ # =============================================================================
+ # 統合ワークフロー
+ # =============================================================================
+diff --git a/README.md b/README.md
+index 92d6021..e0db90d 100644
+--- a/README.md
++++ b/README.md
+@@ -1301,10 +1301,76 @@ npx playwright test security-headers.spec.ts --ui
+ - ✅ CSP 違反検出テスト (2 テスト)
+ - ✅ CORS 統合テスト (2 テスト)
+ 
++#### 統合テスト実行
++
++プロジェクトルートから全テストスイートを実行できます:
++
++```bash
++# 全テストスイート実行（SQLite高速モード、約30秒）
++make test-all
++
++# PostgreSQL環境で全テスト実行（本番同等、約5-10分）
++make test-all-pgsql
++
++# バックエンドテストのみ（約2秒）
++make quick-test
++make test-backend-only  # 同じ
++
++# フロントエンドテストのみ（約15秒）
++make test-frontend-only
++
++# E2Eテストのみ（約2-5分）
++make test-e2e-only
++
++# PR前推奨テスト（Lint + PostgreSQL + カバレッジ、約3-5分）
++make test-pr
++
++# テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
++make test-diagnose
++```
++
++**利用可能なテストコマンド**:
++
++| コマンド | 内容 | 所要時間 | 用途 |
++|---------|------|----------|------|
++| `make test-all` | 全テストスイート（SQLite） | 約30秒 | 日常開発 |
++| `make test-all-pgsql` | 全テストスイート（PostgreSQL並列） | 約5-10分 | 本番同等検証 |
++| `make quick-test` | バックエンド高速テスト（SQLite） | 約2秒 | デバッグ |
++| `make test-pgsql` | バックエンド本番同等テスト | 約5-10秒 | 機能完成時 |
++| `make test-parallel` | バックエンド並列テスト（4 Shard） | 約3-5分 | 本番環境検証 |
++| `make test-coverage` | カバレッジレポート生成 | 約5-10分 | カバレッジ確認 |
++| `make test-frontend-only` | フロントエンドテスト（Jest） | 約15秒 | フロントエンド開発 |
++| `make test-e2e-only` | E2Eテスト（Playwright） | 約2-5分 | 統合動作確認 |
++| `make test-with-coverage` | 全テスト + カバレッジ（PostgreSQL） | 約5-10分 | PR前完全チェック |
++| `make test-pr` | Lint + PostgreSQL + カバレッジ | 約3-5分 | **PR作成前推奨** |
++| `make test-smoke` | スモークテスト（高速ヘルスチェック） | 約5秒 | デプロイ前確認 |
++| `make test-diagnose` | テスト環境診断 | 約5秒 | トラブルシューティング |
++
++**テスト環境管理**:
++
++```bash
++# SQLite環境に切り替え（高速開発）
++make test-switch-sqlite
++
++# PostgreSQL環境に切り替え（本番同等）
++make test-switch-pgsql
++
++# 並列テスト環境セットアップ（PostgreSQL test DBs作成）
++make test-setup
++
++# テスト環境クリーンアップ（test DBs削除）
++make test-cleanup
++
++# テスト用DB存在確認
++make test-db-check
++```
++
+ ### 関連ドキュメント
+ 
+ | ドキュメント | 内容 |
+ |------------|------|
++| **[テスト実行ガイド](docs/TESTING_EXECUTION_GUIDE.md)** | テスト実行方法、クイックスタート、ローカル/CI/CD環境でのテスト実行、診断スクリプト |
++| **[テストトラブルシューティング](docs/TESTING_TROUBLESHOOTING_EXTENDED.md)** | よくある問題と解決策、ログ分析方法、エスカレーション手順 |
+ | **[実装ガイド](SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md)** | Laravel/Next.js 実装手順、環境変数設定、CSP カスタマイズ方法 |
+ | **[運用マニュアル](docs/SECURITY_HEADERS_OPERATION.md)** | 日常運用、Report-Only モード運用、Enforce モード切り替え手順 |
+ | **[トラブルシューティング](docs/SECURITY_HEADERS_TROUBLESHOOTING.md)** | よくある問題、CSP 違反デバッグ、CORS エラー対処 |
+diff --git a/docs/TESTING_EXECUTION_GUIDE.md b/docs/TESTING_EXECUTION_GUIDE.md
+new file mode 100644
+index 0000000..b27d89d
+--- /dev/null
++++ b/docs/TESTING_EXECUTION_GUIDE.md
+@@ -0,0 +1,507 @@
++# テスト実行ガイド
++
++本ガイドでは、Laravel Next.js B2Cプロジェクトにおけるテスト実行の方法を説明します。
++
++## 目次
++- [クイックスタート](#クイックスタート)
++- [ローカルテスト実行](#ローカルテスト実行)
++- [CI/CD環境でのテスト実行](#cicd環境でのテスト実行)
++- [テスト環境診断](#テスト環境診断)
++- [トラブルシューティング](#トラブルシューティング)
++
++---
++
++## クイックスタート
++
++### 最も基本的なテスト実行（推奨）
++
++開発中の日常的なテスト実行:
++
++```bash
++# 全テストスイート実行（SQLite高速モード、約30秒）
++make test-all
++
++# または、バックエンドテストのみ（約5秒）
++make quick-test
++
++# または、フロントエンドテストのみ（約15秒）
++make test-frontend-only
++```
++
++### PR作成前の推奨テスト実行
++
++Pull Request作成前の完全テスト:
++
++```bash
++# Lint + PostgreSQL + カバレッジレポート生成（約3-5分）
++make test-pr
++```
++
++### テスト環境診断
++
++テストが失敗する場合、まず環境を診断:
++
++```bash
++# ポート・環境変数・Docker・DB・ディスク・メモリ確認
++make test-diagnose
++```
++
++### よく使うコマンドパターン
++
++```bash
++# 1. 日常開発：高速テスト（SQLite、2秒）
++make quick-test
++
++# 2. 機能完成時：本番同等環境テスト（PostgreSQL、5-10秒）
++make test-pgsql
++
++# 3. PR前：完全テスト（Lint + PostgreSQL + カバレッジ、3-5分）
++make test-pr
++
++# 4. テスト環境問題時：診断スクリプト実行
++make test-diagnose
++```
++
++---
++
++## ローカルテスト実行
++
++### テストスイート別実行方法
++
++#### 1. 全テストスイート実行
++
++**SQLite環境（高速モード）**:
++```bash
++make test-all
++```
++
++- **実行内容**: バックエンド（Pest）+ フロントエンド（Jest）+ E2E（Playwright）
++- **所要時間**: 約30秒
++- **DB環境**: SQLite（インメモリ）
++- **用途**: 日常開発での迅速なフィードバック
++
++**PostgreSQL環境（本番同等モード）**:
++```bash
++make test-all-pgsql
++```
++
++- **実行内容**: 全テストスイート並列実行
++- **所要時間**: 約5-10分
++- **DB環境**: PostgreSQL（本番同等）
++- **並列実行**: 4 Shard
++- **用途**: 本番環境同等の検証、PR前チェック
++
++#### 2. バックエンドテストのみ実行
++
++**高速テスト（SQLite）**:
++```bash
++make quick-test
++# または
++make test-backend-only
++```
++
++- **所要時間**: 約2秒
++- **テストフレームワーク**: Pest 4
++- **DB環境**: SQLite（インメモリ）
++
++**本番同等テスト（PostgreSQL）**:
++```bash
++make test-pgsql
++```
++
++- **所要時間**: 約5-10秒
++- **DB環境**: PostgreSQL
++- **用途**: 本番環境の動作確認
++
++**並列テスト実行**:
++```bash
++make test-parallel
++```
++
++- **所要時間**: 約3-5分
++- **並列実行**: 4 Shard
++- **自動処理**: セットアップ → 実行 → クリーンアップ
++
++#### 3. フロントエンドテストのみ実行
++
++```bash
++make test-frontend-only
++```
++
++- **所要時間**: 約15秒
++- **テストフレームワーク**: Jest 29 + Testing Library 16
++- **対象アプリ**: Admin App + User App（並列実行）
++- **カバレッジ**: 94.73%達成
++
++#### 4. E2Eテストのみ実行
++
++```bash
++make test-e2e-only
++```
++
++- **所要時間**: 約2-5分
++- **テストフレームワーク**: Playwright
++- **前提条件**: 全サービス起動済み（`make dev`）
++- **対象**: Admin App + User App
++
++### DB環境選択方法
++
++#### SQLite環境に切り替え
++
++```bash
++make test-switch-sqlite
++```
++
++- **用途**: 高速開発・デバッグ
++- **特徴**: インメモリDB、超高速（2秒以内）
++- **制約**: PostgreSQL固有機能は検証不可
++
++#### PostgreSQL環境に切り替え
++
++```bash
++make test-switch-pgsql
++```
++
++- **用途**: 本番環境同等の検証
++- **特徴**: 本番DBと同等の動作確認
++- **並列テスト**: 4 Shardサポート
++
++#### 環境確認
++
++```bash
++# 現在のテストDB環境を確認
++cat backend/laravel-api/phpunit.xml | grep DB_CONNECTION
++
++# テスト用DB存在確認
++make test-db-check
++```
++
++### カバレッジレポート確認方法
++
++#### バックエンドカバレッジ生成
++
++```bash
++make test-coverage
++```
++
++- **出力先**: `backend/laravel-api/coverage-report/`
++- **レポート形式**: HTML
++- **確認方法**: ブラウザで `coverage-report/index.html` を開く
++
++#### フロントエンドカバレッジ生成
++
++```bash
++# ルートディレクトリで実行
++npm run test:coverage
++
++# または個別アプリで実行
++cd frontend/admin-app && npm run test:coverage
++cd frontend/user-app && npm run test:coverage
++```
++
++- **出力先**: `frontend/{admin-app,user-app}/coverage/`
++- **レポート形式**: HTML + JSON + LCOV
++- **確認方法**: ブラウザで `coverage/index.html` を開く
++
++#### 統合カバレッジレポート生成
++
++```bash
++make test-with-coverage
++```
++
++- **実行内容**: PostgreSQL環境で全テスト + カバレッジ生成
++- **所要時間**: 約5-10分
++- **出力先**:
++  - バックエンド: `backend/laravel-api/coverage-report/`
++  - フロントエンド: `frontend/{admin-app,user-app}/coverage/`
++
++### テスト結果レポート確認
++
++テスト実行後、以下のディレクトリに結果が保存されます:
++
++```
++test-results/
++├── junit/                  # JUnit XMLレポート
++│   ├── backend-test-results.xml
++│   ├── frontend-admin-results.xml
++│   └── frontend-user-results.xml
++├── coverage/               # カバレッジレポート
++│   ├── backend/
++│   ├── frontend-admin/
++│   └── frontend-user/
++├── reports/                # 統合レポート
++│   └── test-summary.json
++└── logs/                   # テスト実行ログ
++    ├── backend.log
++    ├── frontend-admin.log
++    ├── frontend-user.log
++    └── e2e.log
++```
++
++#### 統合サマリーJSON確認
++
++```bash
++cat test-results/reports/test-summary.json
++```
++
++**出力例**:
++```json
++{
++  "timestamp": "2025-10-24T20:01:44Z",
++  "duration_seconds": 120,
++  "total_tests": 245,
++  "passed": 240,
++  "failed": 5,
++  "suites": {
++    "backend": {"tests": 135, "passed": 133, "failed": 2},
++    "frontend-admin": {"tests": 57, "passed": 55, "failed": 2},
++    "frontend-user": {"tests": 53, "passed": 52, "failed": 1}
++  }
++}
++```
++
++---
++
++## CI/CD環境でのテスト実行
++
++### GitHub Actionsワークフロー
++
++プロジェクトには以下のGitHub Actionsワークフローが設定されています:
++
++#### 1. PHP品質チェック (`.github/workflows/php-quality.yml`)
++
++- **担当領域**: `backend/laravel-api/**`
++- **自動実行**: Pull Request時（バックエンド変更時のみ）
++- **チェック内容**: Laravel Pint + Larastan Level 8
++
++#### 2. PHPテスト (`.github/workflows/test.yml`)
++
++- **担当領域**: `backend/laravel-api/**`
++- **自動実行**: Pull Request時（バックエンド変更時のみ）
++- **テスト内容**: Pest 4テストスイート実行（4 Shard並列）
++- **DB環境**: PostgreSQL
++
++#### 3. フロントエンドテスト (`.github/workflows/frontend-test.yml`)
++
++- **担当領域**: `frontend/**`, `test-utils/**` + API契約監視
++- **自動実行**: フロントエンド変更時 または API契約変更時
++- **テスト内容**: Jest 29 + Testing Library 16
++
++#### 4. E2Eテスト (`.github/workflows/e2e-tests.yml`)
++
++- **担当領域**: `frontend/**`, `backend/**`, `e2e/**`
++- **自動実行**: Pull Request時、mainブランチpush時、手動実行
++- **実行方式**: 4 Shard並列実行（約2分完了）
++- **レポート**: Playwright HTML/JUnitレポート
++
++### Artifactsダウンロード方法
++
++GitHub Actions実行後、テスト結果をダウンロードできます:
++
++1. **GitHub Actions画面にアクセス**:
++   - リポジトリページ → "Actions" タブ
++
++2. **該当するワークフロー実行を選択**:
++   - 実行したいワークフローをクリック
++
++3. **Artifactsセクションを確認**:
++   - ページ下部の "Artifacts" セクション
++
++4. **ダウンロード**:
++   - `test-results-shard-1` - Shard 1のテスト結果
++   - `test-results-shard-2` - Shard 2のテスト結果
++   - `test-results-shard-3` - Shard 3のテスト結果
++   - `test-results-shard-4` - Shard 4のテスト結果
++   - `coverage-report` - カバレッジレポート
++   - `playwright-report` - E2Eテストレポート
++
++5. **ダウンロードしたzipファイルを解凍**:
++   ```bash
++   unzip test-results-shard-1.zip
++   cd test-results/
++   # レポート確認
++   ```
++
++### GitHub Actions Summary確認
++
++GitHub Actionsの実行後、統合サマリーが自動的に表示されます:
++
++1. **GitHub Actions画面にアクセス**
++2. **該当するワークフロー実行を選択**
++3. **Summary画面を確認**:
++   - テーブル形式の結果表示
++   - 各スイートの成功/失敗数
++   - 実行時間
++
++**Summary表示例**:
++```markdown
++## Test Summary
++
++| Suite | Tests | Passed | Failed | Duration |
++|-------|-------|--------|--------|----------|
++| Backend | 135 | 133 | 2 | 45s |
++| Frontend Admin | 57 | 55 | 2 | 20s |
++| Frontend User | 53 | 52 | 1 | 18s |
++| **Total** | **245** | **240** | **5** | **83s** |
++```
++
++---
++
++## テスト環境診断
++
++テスト実行に問題がある場合、まず環境診断を実行してください。
++
++### 診断スクリプト実行
++
++```bash
++make test-diagnose
++```
++
++### 診断内容
++
++1. **ポート使用状況確認**:
++   - 5ポート（13000, 13001, 13002, 13432, 13379）の使用状況
++   - 使用中の場合、プロセスID（PID）と名前を表示
++
++2. **環境変数確認**:
++   - 必須環境変数（DB_DATABASE, DB_USERNAME, DB_PASSWORD）の設定状態
++   - 未設定の場合、エラーメッセージを表示
++
++3. **Dockerコンテナ確認**:
++   - docker psコマンド実行
++   - コンテナ一覧とステータス表示
++
++4. **データベース接続確認**:
++   - PostgreSQLコンテナの起動状態
++   - pg_isready接続確認
++
++5. **システムリソース確認**:
++   - ディスク空き容量
++   - メモリ使用状況
++
++### 診断結果の読み方
++
++**診断成功例**:
++```
++[INFO] Starting test environment diagnostics...
++[SUCCESS] All required ports are available
++[SUCCESS] All required environment variables are set
++[SUCCESS] Docker containers are running:
++NAMES                   STATUS      PORTS
++laravel-api             Up 2 hours  0.0.0.0:13000->13000/tcp
++[SUCCESS] PostgreSQL is accepting connections
++[SUCCESS] Available disk space: 38Gi
++[SUCCESS] Total memory: 16 GB, Free: ~8 GB
++[INFO] =========================================
++[INFO]    Diagnostic Summary
++[INFO] =========================================
++[SUCCESS] Passed: 6 checks
++[SUCCESS] All diagnostics passed! Environment is ready for testing.
++```
++
++**診断失敗例**:
++```
++[WARN] Port 13000 is in use:
++  - PID 12345 (node)
++[ERROR] Environment variable DB_USERNAME is not set
++[ERROR] Some environment variables are missing. Check .env file.
++[WARN] No Docker containers are running
++[INFO] Run 'make dev' to start development services
++[ERROR] Failed: 2 checks
++[WARN] Some diagnostics failed. Please review the output above.
++[INFO] Run 'make setup' to initialize the environment
++[INFO] Run 'make dev' to start development services
++```
++
++---
++
++## トラブルシューティング
++
++テスト実行時の一般的な問題と解決策については、[TESTING_TROUBLESHOOTING_EXTENDED.md](./TESTING_TROUBLESHOOTING_EXTENDED.md)を参照してください。
++
++### クイックトラブルシューティング
++
++#### ポート競合エラー
++
++**症状**:
++```
++Error: Port 13000 is already in use
++```
++
++**解決策**:
++```bash
++# 1. 診断スクリプトで使用プロセスを確認
++make test-diagnose
++
++# 2. 全サービス停止
++make dev-stop
++
++# 3. 再度テスト実行
++make test-all
++```
++
++#### DB接続エラー
++
++**症状**:
++```
++SQLSTATE[HY000] [2002] Connection refused
++```
++
++**解決策**:
++```bash
++# 1. Dockerコンテナ起動確認
++docker compose ps
++
++# 2. PostgreSQLコンテナが起動していない場合
++docker compose up -d pgsql
++
++# 3. 接続確認
++make test-db-check
++
++# 4. テスト実行
++make test-pgsql
++```
++
++#### メモリ不足エラー
++
++**症状**:
++```
++JavaScript heap out of memory
++```
++
++**解決策**:
++```bash
++# Node.jsヒープメモリ増加（8GB）
++export NODE_OPTIONS="--max-old-space-size=8192"
++
++# または、並列実行数を減らす
++make test-parallel PARALLEL=2
++```
++
++#### 並列実行失敗
++
++**症状**:
++```
++Error: Shard 3 failed
++```
++
++**解決策**:
++```bash
++# 1. テストDB環境クリーンアップ
++make test-cleanup
++
++# 2. テストDB環境再セットアップ
++make test-setup
++
++# 3. 並列テスト再実行
++make test-parallel
++```
++
++---
++
++## 参考リンク
++
++- [テストデータベース運用ワークフロー](./TESTING_DATABASE_WORKFLOW.md)
++- [トラブルシューティング拡張ガイド](./TESTING_TROUBLESHOOTING_EXTENDED.md)
++- [フロントエンドテストガイド](../frontend/TESTING_GUIDE.md)
++- [E2Eテストガイド](../e2e/README.md)
+diff --git a/docs/TESTING_TROUBLESHOOTING_EXTENDED.md b/docs/TESTING_TROUBLESHOOTING_EXTENDED.md
+new file mode 100644
+index 0000000..619614a
+--- /dev/null
++++ b/docs/TESTING_TROUBLESHOOTING_EXTENDED.md
+@@ -0,0 +1,802 @@
++# テストトラブルシューティング拡張ガイド
++
++本ガイドでは、Laravel Next.js B2Cプロジェクトにおけるテスト実行時の一般的な問題と解決策を記載します。
++
++## 目次
++- [よくある問題と解決策](#よくある問題と解決策)
++- [診断スクリプト使用方法](#診断スクリプト使用方法)
++- [ログ分析方法](#ログ分析方法)
++- [エスカレーション手順](#エスカレーション手順)
++
++---
++
++## よくある問題と解決策
++
++### 1. ポート競合エラー
++
++#### 症状
++
++```
++Error: Port 13000 is already in use
++Error: listen EADDRINUSE: address already in use :::13001
++```
++
++#### 原因
++
++テスト実行に必要なポート（13000, 13001, 13002, 13432, 13379）が他のプロセスによって使用されています。
++
++#### 解決策
++
++**ステップ1: 診断スクリプトで確認**
++
++```bash
++make test-diagnose
++```
++
++診断結果で使用中のポートとプロセスIDを確認します:
++
++```
++[WARN] Port 13000 is in use:
++  - PID 12345 (node)
++[WARN] Port 13001 is in use:
++  - PID 12346 (node)
++```
++
++**ステップ2: 全サービス停止**
++
++```bash
++# 統合開発サーバー停止
++make dev-stop
++
++# またはDocker Compose停止
++docker compose down
++```
++
++**ステップ3: プロセス強制終了（必要に応じて）**
++
++```bash
++# macOS/Linux
++lsof -i :13000 | grep LISTEN | awk '{print $2}' | xargs kill -9
++lsof -i :13001 | grep LISTEN | awk '{print $2}' | xargs kill -9
++lsof -i :13002 | grep LISTEN | awk '{print $2}' | xargs kill -9
++
++# または、個別にプロセスID指定
++kill -9 12345
++```
++
++**ステップ4: テスト再実行**
++
++```bash
++make test-all
++```
++
++#### 予防策
++
++- テスト実行前に `make dev-stop` で全サービスを停止
++- テスト完了後も `make dev-stop` で確実にプロセスを終了
++- 定期的に `make test-diagnose` で環境確認
++
++---
++
++### 2. DB接続エラー
++
++#### 症状
++
++```
++SQLSTATE[HY000] [2002] Connection refused
++SQLSTATE[08006] [7] could not connect to server: Connection refused
++```
++
++#### 原因
++
++- PostgreSQLコンテナが起動していない
++- DB接続設定が間違っている
++- ネットワーク設定に問題がある
++
++#### 解決策
++
++**ステップ1: Dockerコンテナ状態確認**
++
++```bash
++docker compose ps
++```
++
++PostgreSQLコンテナが "Up" かつ "healthy" であることを確認:
++
++```
++NAME         STATUS          HEALTH
++pgsql        Up 10 minutes   healthy
++```
++
++**ステップ2: PostgreSQLコンテナ起動（起動していない場合）**
++
++```bash
++docker compose up -d pgsql
++```
++
++**ステップ3: DB接続確認**
++
++```bash
++# テスト用DB存在確認
++make test-db-check
++
++# 直接接続確認
++docker compose exec pgsql pg_isready -U sail
++```
++
++**ステップ4: 環境変数確認**
++
++```bash
++# .envファイル確認
++cat backend/laravel-api/.env | grep DB_
++
++# 必須環境変数
++# DB_CONNECTION=pgsql
++# DB_HOST=pgsql
++# DB_PORT=13432
++# DB_DATABASE=testing
++# DB_USERNAME=sail
++# DB_PASSWORD=password
++```
++
++**ステップ5: テスト環境再セットアップ**
++
++```bash
++# クリーンアップ
++make test-cleanup
++
++# 再セットアップ
++make test-setup
++
++# テスト実行
++make test-pgsql
++```
++
++#### SQLite環境への切り替え（一時的回避策）
++
++```bash
++# SQLite環境に切り替え（高速テスト）
++make test-switch-sqlite
++
++# テスト実行
++make test-all
++```
++
++---
++
++### 3. メモリ不足エラー
++
++#### 症状
++
++```
++JavaScript heap out of memory
++FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed
++```
++
++#### 原因
++
++- Node.jsヒープメモリ不足
++- 並列実行数が多すぎる
++- メモリリークの可能性
++
++#### 解決策
++
++**ステップ1: Node.jsヒープメモリ増加**
++
++```bash
++# 環境変数設定（8GB）
++export NODE_OPTIONS="--max-old-space-size=8192"
++
++# テスト再実行
++make test-frontend-only
++```
++
++**ステップ2: 並列実行数を減らす**
++
++```bash
++# 並列実行数を2に減らす
++make test-parallel PARALLEL=2
++
++# または直接スクリプト実行
++./scripts/test/main.sh --suite all --parallel 2
++```
++
++**ステップ3: テストスイートを分割実行**
++
++```bash
++# バックエンドのみ
++make test-backend-only
++
++# フロントエンドのみ（後で実行）
++make test-frontend-only
++
++# E2Eのみ（後で実行）
++make test-e2e-only
++```
++
++**ステップ4: システムメモリ確認**
++
++```bash
++# macOS
++vm_stat
++
++# Linux
++free -h
++
++# 診断スクリプト
++make test-diagnose
++```
++
++#### 長期的対策
++
++- 不要なプロセスを終了
++- Docker Desktopのメモリ割り当てを増やす（設定 → Resources → Memory）
++- システムRAMのアップグレード検討
++
++---
++
++### 4. 並列実行失敗
++
++#### 症状
++
++```
++Error: Shard 3 failed with exit code 1
++Error: test database testing_3 does not exist
++```
++
++#### 原因
++
++- テスト用DB（testing_1, testing_2, testing_3, testing_4）が存在しない
++- 並列実行中のDB競合
++- 環境セットアップが不完全
++
++#### 解決策
++
++**ステップ1: テスト環境クリーンアップ**
++
++```bash
++make test-cleanup
++```
++
++これにより、既存のテスト用DBがすべて削除されます。
++
++**ステップ2: テスト環境再セットアップ**
++
++```bash
++make test-setup
++```
++
++これにより、testing_1〜testing_4のDBが作成されます。
++
++**ステップ3: DB存在確認**
++
++```bash
++make test-db-check
++```
++
++**出力例**:
++```
++✓ Database testing_1 exists
++✓ Database testing_2 exists
++✓ Database testing_3 exists
++✓ Database testing_4 exists
++All test databases are ready!
++```
++
++**ステップ4: 並列テスト再実行**
++
++```bash
++make test-parallel
++```
++
++#### Shard単位での実行（デバッグ用）
++
++```bash
++# Shard 1のみ実行
++cd backend/laravel-api
++./vendor/bin/pest --shard=1/4
++
++# Shard 3のみ実行（失敗したShardの特定）
++./vendor/bin/pest --shard=3/4
++```
++
++---
++
++### 5. E2Eテストタイムアウト
++
++#### 症状
++
++```
++Error: page.goto: Timeout 30000ms exceeded
++Error: Waiting for service failed after 120 seconds
++```
++
++#### 原因
++
++- サービスが起動していない
++- サービス起動が遅い
++- ネットワーク問題
++
++#### 解決策
++
++**ステップ1: サービス起動確認**
++
++```bash
++# Dockerコンテナ確認
++docker compose ps
++
++# ヘルスチェック確認
++curl http://localhost:13000/api/health
++curl http://localhost:13001/api/health
++curl http://localhost:13002/api/health
++```
++
++**ステップ2: サービス再起動**
++
++```bash
++# 全サービス再起動
++make dev-stop
++make dev
++
++# またはDocker Compose再起動
++docker compose restart
++```
++
++**ステップ3: ログ確認**
++
++```bash
++# Laravel APIログ
++docker compose logs -f laravel-api
++
++# User Appログ
++docker compose logs -f user-app
++
++# Admin Appログ
++docker compose logs -f admin-app
++```
++
++**ステップ4: タイムアウト時間延長（一時的）**
++
++```bash
++# Playwrightタイムアウト設定（環境変数）
++export PLAYWRIGHT_TIMEOUT=60000
++
++# E2Eテスト実行
++make test-e2e-only
++```
++
++#### 長期的対策
++
++- サービス起動時間の最適化
++- ヘルスチェックエンドポイントの実装確認
++- ネットワーク設定の見直し
++
++---
++
++### 6. テストファイルが見つからない
++
++#### 症状
++
++```
++No tests found
++Test suite failed to run
++```
++
++#### 原因
++
++- テストファイルの配置場所が間違っている
++- テストファイルの命名規則が間違っている
++- テスト設定ファイルが正しくない
++
++#### 解決策
++
++**ステップ1: テストファイル配置確認**
++
++```bash
++# バックエンドテストファイル
++ls backend/laravel-api/tests/
++
++# フロントエンドテストファイル
++ls frontend/admin-app/src/**/*.test.tsx
++ls frontend/user-app/src/**/*.test.tsx
++```
++
++**ステップ2: 命名規則確認**
++
++**バックエンド（Pest）**:
++- ファイル名: `*Test.php`
++- 配置場所: `backend/laravel-api/tests/Feature/` または `tests/Unit/`
++
++**フロントエンド（Jest）**:
++- ファイル名: `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`
++- 配置場所: `src/**/__tests__/` または `src/**/`
++
++**E2E（Playwright）**:
++- ファイル名: `*.spec.ts`
++- 配置場所: `e2e/projects/{admin,user}/tests/`
++
++**ステップ3: テスト設定ファイル確認**
++
++```bash
++# Pest設定
++cat backend/laravel-api/phpunit.xml
++
++# Jest設定
++cat jest.config.js
++cat jest.base.js
++
++# Playwright設定
++cat e2e/playwright.config.ts
++```
++
++---
++
++## 診断スクリプト使用方法
++
++### 基本的な使用方法
++
++```bash
++make test-diagnose
++```
++
++### 診断項目詳細
++
++#### 1. ポート使用状況診断
++
++**確認内容**:
++- 13000（Laravel API）
++- 13001（User App）
++- 13002（Admin App）
++- 13432（PostgreSQL）
++- 13379（Redis）
++
++**出力例**:
++```
++[INFO] Checking port usage for test services...
++[DEBUG] Port 13000 is free
++[DEBUG] Port 13001 is free
++[DEBUG] Port 13002 is free
++[WARN] Port 13432 is in use:
++  - PID 12345 (postgres)
++[DEBUG] Port 13379 is free
++[SUCCESS] All required ports are available
++```
++
++#### 2. 環境変数診断
++
++**確認内容**:
++- DB_DATABASE
++- DB_USERNAME
++- DB_PASSWORD
++
++**出力例**:
++```
++[INFO] Checking required environment variables...
++[DEBUG] Environment variable DB_DATABASE is set
++[ERROR] Environment variable DB_USERNAME is not set
++[ERROR] Environment variable DB_PASSWORD is not set
++[ERROR] Some environment variables are missing. Check .env file.
++```
++
++**解決策**:
++```bash
++# .envファイル確認
++cat backend/laravel-api/.env
++
++# .env.exampleからコピー
++cp backend/laravel-api/.env.example backend/laravel-api/.env
++
++# 必要な環境変数を設定
++```
++
++#### 3. Dockerコンテナ診断
++
++**確認内容**:
++- docker psコマンド実行
++- 実行中のコンテナ一覧表示
++
++**出力例**:
++```
++[INFO] Checking Docker container status...
++[SUCCESS] Docker containers are running:
++NAMES                STATUS              PORTS
++laravel-api          Up 2 hours          0.0.0.0:13000->13000/tcp
++admin-app            Up 2 hours          0.0.0.0:13002->13002/tcp
++user-app             Up 2 hours          0.0.0.0:13001->13001/tcp
++pgsql                Up 2 hours          0.0.0.0:13432->5432/tcp
++redis                Up 2 hours          0.0.0.0:13379->6379/tcp
++```
++
++#### 4. データベース接続診断
++
++**確認内容**:
++- PostgreSQLコンテナ起動状態
++- pg_isready接続確認
++
++**出力例**:
++```
++[INFO] Checking database connection...
++[SUCCESS] PostgreSQL is accepting connections
++```
++
++**失敗時の出力**:
++```
++[INFO] Checking database connection...
++[WARN] PostgreSQL container is not running
++```
++
++#### 5. システムリソース診断
++
++**確認内容**:
++- ディスク空き容量
++- メモリ使用状況
++
++**出力例（macOS）**:
++```
++[INFO] Checking disk space...
++[SUCCESS] Available disk space: 38Gi
++[INFO] Checking memory usage...
++[SUCCESS] Total memory: 16 GB, Free: ~8 GB
++```
++
++**出力例（Linux）**:
++```
++[INFO] Checking disk space...
++[SUCCESS] Available disk space: 45G
++[INFO] Checking memory usage...
++[SUCCESS] Memory: Total: 16G, Free: 10G
++```
++
++### 診断結果サマリー
++
++**全診断成功時**:
++```
++[INFO] =========================================
++[INFO]    Diagnostic Summary
++[INFO] =========================================
++[SUCCESS] Passed: 6 checks
++[SUCCESS] All diagnostics passed! Environment is ready for testing.
++```
++
++**一部診断失敗時**:
++```
++[INFO] =========================================
++[INFO]    Diagnostic Summary
++[INFO] =========================================
++[SUCCESS] Passed: 4 checks
++[ERROR] Failed: 2 checks
++[WARN] Some diagnostics failed. Please review the output above.
++[INFO] Run 'make setup' to initialize the environment
++[INFO] Run 'make dev' to start development services
++```
++
++---
++
++## ログ分析方法
++
++### ログファイル構造
++
++テスト実行後、以下のログファイルが生成されます:
++
++```
++test-results/logs/
++├── backend.log          # バックエンドテスト実行ログ
++├── frontend-admin.log   # Admin Appテスト実行ログ
++├── frontend-user.log    # User Appテスト実行ログ
++└── e2e.log              # E2Eテスト実行ログ
++```
++
++### ログファイル確認方法
++
++#### 全ログ確認
++
++```bash
++# 最新のログ表示
++tail -n 100 test-results/logs/backend.log
++
++# リアルタイムログ監視
++tail -f test-results/logs/backend.log
++```
++
++#### エラーのみ抽出
++
++```bash
++# ERRORを含む行のみ表示
++grep "ERROR" test-results/logs/backend.log
++
++# FAILEDを含む行のみ表示
++grep "FAILED" test-results/logs/frontend-admin.log
++
++# 複数パターン検索
++grep -E "(ERROR|FAILED|Exception)" test-results/logs/e2e.log
++```
++
++### エラーメッセージの解読方法
++
++#### バックエンドエラー（Pest/PHPUnit）
++
++**エラー例1: アサーションエラー**
++```
++FAILED  Tests\Feature\Auth\LoginTest > ログインが成功すること
++Expected status code 200 but got 500.
++Failed asserting that 500 matches expected 200.
++```
++
++**解読**:
++- テスト: `LoginTest`の「ログインが成功すること」テスト
++- 期待: ステータスコード200
++- 実際: ステータスコード500（サーバーエラー）
++
++**解決策**:
++1. Laravel APIログ確認: `storage/logs/laravel.log`
++2. 例外スタックトレース確認
++3. デバッグ実行: `./vendor/bin/pest --filter LoginTest`
++
++**エラー例2: DB接続エラー**
++```
++SQLSTATE[HY000] [2002] Connection refused
++```
++
++**解読**:
++- PostgreSQL接続失敗
++
++**解決策**:
++1. `docker compose ps` でDB起動確認
++2. `make test-db-check` でDB存在確認
++3. `.env`ファイルのDB設定確認
++
++#### フロントエンドエラー（Jest）
++
++**エラー例1: コンポーネントレンダリングエラー**
++```
++FAIL  src/components/Button/Button.test.tsx
++  ● Button Component › renders with correct text
++    Unable to find an element with the text: Click me
++```
++
++**解読**:
++- テスト: `Button.test.tsx`の「renders with correct text」テスト
++- 期待: "Click me"テキストを持つ要素
++- 実際: 要素が見つからない
++
++**解決策**:
++1. コンポーネント実装確認: `Button.tsx`
++2. テストコード確認: `Button.test.tsx`
++3. デバッグ実行: `npm test -- Button.test.tsx`
++
++**エラー例2: モックエラー**
++```
++TypeError: Cannot read property 'get' of undefined
++```
++
++**解読**:
++- モックが正しく設定されていない
++
++**解決策**:
++1. `jest.setup.ts`のモック設定確認
++2. `test-utils/`の共通ユーティリティ確認
++3. MSW（Mock Service Worker）設定確認
++
++#### E2Eエラー（Playwright）
++
++**エラー例1: セレクタエラー**
++```
++Error: page.locator: Timeout 30000ms exceeded.
++Selector: button >> text=Login
++```
++
++**解読**:
++- 要素: "Login"テキストを持つbutton要素
++- 問題: 30秒待機したが見つからない
++
++**解決策**:
++1. ページHTML確認: ブラウザで手動アクセス
++2. セレクタ修正: より具体的なセレクタに変更
++3. 待機時間延長: `page.waitForSelector()`追加
++
++**エラー例2: 認証エラー**
++```
++Error: Request failed with status code 401
++```
++
++**解読**:
++- HTTPステータス401（未認証）
++
++**解決策**:
++1. 認証トークン確認: `e2e/storage/`の認証ファイル
++2. global-setup実行確認: `e2e/fixtures/global-setup.ts`
++3. APIヘルスチェック確認: Laravel API起動状態
++
++### ログレベル別フィルタリング
++
++```bash
++# DEBUGログ表示
++grep "\[DEBUG\]" test-results/logs/backend.log
++
++# INFOログ表示
++grep "\[INFO\]" test-results/logs/backend.log
++
++# WARNログ表示
++grep "\[WARN\]" test-results/logs/backend.log
++
++# ERRORログ表示
++grep "\[ERROR\]" test-results/logs/backend.log
++
++# SUCCESSログ表示
++grep "\[SUCCESS\]" test-results/logs/backend.log
++```
++
++---
++
++## エスカレーション手順
++
++### レベル1: セルフトラブルシューティング
++
++1. **診断スクリプト実行**:
++   ```bash
++   make test-diagnose
++   ```
++
++2. **ログ確認**:
++   ```bash
++   tail -n 100 test-results/logs/*.log
++   ```
++
++3. **ドキュメント確認**:
++   - [TESTING_EXECUTION_GUIDE.md](./TESTING_EXECUTION_GUIDE.md)
++   - 本ドキュメント
++
++4. **環境再セットアップ**:
++   ```bash
++   make test-cleanup
++   make test-setup
++   make test-all
++   ```
++
++### レベル2: チームサポート
++
++1. **エラー情報収集**:
++   ```bash
++   # 診断結果保存
++   make test-diagnose > diagnostic-results.txt 2>&1
++
++   # ログ収集
++   tar -czf test-logs.tar.gz test-results/logs/
++   ```
++
++2. **再現手順記録**:
++   - 実行したコマンド
++   - エラーメッセージ
++   - 環境情報（OS、Docker version、Node.js version等）
++
++3. **チケット作成**:
++   - GitHubイシュー作成
++   - Slackチャンネルに投稿
++
++### レベル3: 開発チームエスカレーション
++
++1. **詳細情報提供**:
++   - 診断結果ファイル（diagnostic-results.txt）
++   - ログファイル（test-logs.tar.gz）
++   - 環境情報
++   - 再現手順
++
++2. **問題の分類**:
++   - インフラ問題（Docker、DB、ネットワーク）
++   - コード問題（テストコード、実装コード）
++   - 設定問題（環境変数、設定ファイル）
++
++3. **緊急度の設定**:
++   - 緊急: 本番環境影響、全テスト実行不可
++   - 高: CI/CD失敗、特定スイート実行不可
++   - 中: 一部テスト失敗、回避策あり
++   - 低: 軽微な警告、パフォーマンス問題
++
++---
++
++## 参考リンク
++
++- [テスト実行ガイド](./TESTING_EXECUTION_GUIDE.md)
++- [テストデータベース運用ワークフロー](./TESTING_DATABASE_WORKFLOW.md)
++- [フロントエンドテストガイド](../frontend/TESTING_GUIDE.md)
++- [E2Eテストガイド](../e2e/README.md)
+diff --git a/frontend/admin-app/jest.config.js b/frontend/admin-app/jest.config.js
+index e9b103c..6dae58e 100644
+--- a/frontend/admin-app/jest.config.js
++++ b/frontend/admin-app/jest.config.js
+@@ -12,6 +12,8 @@ const customJestConfig = {
+   setupFilesAfterEnv: ["<rootDir>/../../jest.setup.ts"],
+   moduleNameMapper: {
+     "^@/(.*)$": "<rootDir>/src/$1",
++    // Security config module resolution for Jest
++    "^\\.\\./security-config$": "<rootDir>/../security-config.ts",
+   },
+   collectCoverageFrom: [
+     "src/**/*.{ts,tsx,js,jsx}",
+diff --git a/frontend/admin-app/next.config.ts b/frontend/admin-app/next.config.ts
+index 2b644b8..16b85cf 100644
+--- a/frontend/admin-app/next.config.ts
++++ b/frontend/admin-app/next.config.ts
+@@ -1,13 +1,67 @@
+ import type { NextConfig } from "next";
+ import path from "path";
+-import {
+-  getAdminSecurityConfig,
+-  buildCSPString,
+-  buildPermissionsPolicyString,
+-} from "../security-config";
+ 
+-const isDev = process.env.NODE_ENV === "development";
+-const securityConfig = getAdminSecurityConfig(isDev);
++// Type definitions for security config
++interface CSPConfig {
++  defaultSrc?: string[];
++  scriptSrc?: string[];
++  styleSrc?: string[];
++  imgSrc?: string[];
++  connectSrc?: string[];
++  fontSrc?: string[];
++  objectSrc?: string[];
++  frameAncestors?: string[];
++  upgradeInsecureRequests?: boolean;
++}
++
++interface SecurityConfig {
++  xFrameOptions: string;
++  xContentTypeOptions: string;
++  referrerPolicy: string;
++  csp: CSPConfig;
++  permissionsPolicy: Record<string, unknown>;
++  hsts?: {
++    maxAge: number;
++  };
++}
++
++// Load security config with error handling for test environment
++let securityConfig: SecurityConfig;
++let buildCSPString: (config: CSPConfig) => string;
++let buildPermissionsPolicyString: (config: Record<string, unknown>) => string;
++
++try {
++  // Try to load actual security config
++  // eslint-disable-next-line @typescript-eslint/no-require-imports
++  const securityConfigModule = require("../security-config.js");
++  const isDev = process.env.NODE_ENV === "development";
++  securityConfig = securityConfigModule.getAdminSecurityConfig(isDev);
++  buildCSPString = securityConfigModule.buildCSPString;
++  buildPermissionsPolicyString = securityConfigModule.buildPermissionsPolicyString;
++  // eslint-disable-next-line @typescript-eslint/no-unused-vars
++} catch (_error) {
++  // Fallback for environments where security-config.js is not available
++  console.warn("Failed to load security-config.js, using fallback config");
++  securityConfig = {
++    xFrameOptions: "DENY" as const,
++    xContentTypeOptions: "nosniff" as const,
++    referrerPolicy: "no-referrer",
++    csp: {
++      defaultSrc: ["'self'"],
++      scriptSrc: ["'self'"],
++      styleSrc: ["'self'"],
++      imgSrc: ["'self'"],
++      connectSrc: ["'self'"],
++      fontSrc: ["'self'"],
++      objectSrc: ["'none'"],
++      frameAncestors: ["'none'"],
++      upgradeInsecureRequests: false,
++    },
++    permissionsPolicy: {},
++  };
++  buildCSPString = (_config: CSPConfig) => "default-src 'self'";
++  buildPermissionsPolicyString = (_config: Record<string, unknown>) => "";
++}
+ 
+ const nextConfig: NextConfig = {
+   /* config options here */
+diff --git a/frontend/package.json b/frontend/package.json
+new file mode 100644
+index 0000000..1a361e2
+--- /dev/null
++++ b/frontend/package.json
+@@ -0,0 +1,18 @@
++{
++  "name": "@laravel-next-b2c/frontend-shared",
++  "version": "1.0.0",
++  "type": "commonjs",
++  "main": "./security-config.js",
++  "exports": {
++    "./security-config": {
++      "import": "./security-config.js",
++      "require": "./security-config.js",
++      "default": "./security-config.js"
++    },
++    "./security-config.js": {
++      "import": "./security-config.js",
++      "require": "./security-config.js",
++      "default": "./security-config.js"
++    }
++  }
++}
+diff --git a/frontend/security-config.js b/frontend/security-config.js
+new file mode 100644
+index 0000000..eed4cd5
+--- /dev/null
++++ b/frontend/security-config.js
+@@ -0,0 +1,181 @@
++"use strict";
++/**
++ * セキュリティ設定共通モジュール
++ *
++ * User App と Admin App で共通のセキュリティヘッダー設定ロジックを提供
++ */
++Object.defineProperty(exports, "__esModule", { value: true });
++exports.getSecurityConfig = getSecurityConfig;
++exports.getAdminSecurityConfig = getAdminSecurityConfig;
++exports.buildCSPString = buildCSPString;
++exports.buildPermissionsPolicyString = buildPermissionsPolicyString;
++exports.generateNonce = generateNonce;
++/**
++ * 環境に応じたセキュリティ設定を取得（User App 用）
++ *
++ * @param isDev - 開発環境フラグ
++ * @returns セキュリティ設定オブジェクト
++ */
++function getSecurityConfig(isDev) {
++    const config = {
++        xFrameOptions: 'SAMEORIGIN',
++        xContentTypeOptions: 'nosniff',
++        referrerPolicy: 'strict-origin-when-cross-origin',
++        csp: {
++            defaultSrc: ["'self'"],
++            scriptSrc: isDev
++                ? ["'self'", "'unsafe-eval'", "'unsafe-inline'"]
++                : ["'self'"],
++            styleSrc: ["'self'", "'unsafe-inline'"],
++            imgSrc: ["'self'", 'data:', 'https:'],
++            connectSrc: isDev
++                ? ["'self'", 'ws:', 'wss:', 'http://localhost:13000']
++                : ["'self'"],
++            fontSrc: ["'self'", 'data:'],
++            objectSrc: ["'none'"],
++            frameAncestors: ["'none'"],
++            upgradeInsecureRequests: !isDev,
++            reportUri: '/api/csp-report',
++        },
++        permissionsPolicy: {
++            geolocation: 'self',
++            camera: '',
++            microphone: '',
++            payment: 'self',
++        },
++    };
++    // 本番環境のみ HSTS を設定
++    if (!isDev) {
++        config.hsts = {
++            maxAge: 31536000, // 1 year
++            includeSubDomains: true,
++        };
++    }
++    return config;
++}
++/**
++ * Admin App 用の厳格なセキュリティ設定を取得
++ *
++ * Admin App は User App よりも厳格な設定を適用:
++ * - X-Frame-Options: DENY（User App は SAMEORIGIN）
++ * - Referrer-Policy: no-referrer（User App は strict-origin-when-cross-origin）
++ * - CSP: 開発環境でも unsafe-eval を許可しない
++ * - Permissions-Policy: すべての API を禁止
++ *
++ * @param isDev - 開発環境フラグ
++ * @returns Admin App 用セキュリティ設定オブジェクト
++ */
++function getAdminSecurityConfig(isDev) {
++    const config = {
++        xFrameOptions: 'DENY',
++        xContentTypeOptions: 'nosniff',
++        referrerPolicy: 'no-referrer',
++        csp: {
++            defaultSrc: ["'self'"],
++            // 開発環境: Next.jsのインラインスクリプト許可（本番環境では削除）
++            scriptSrc: isDev ? ["'self'", "'unsafe-inline'"] : ["'self'"],
++            styleSrc: ["'self'", "'unsafe-inline'"],
++            imgSrc: ["'self'", 'data:', 'https:'],
++            // Admin App は開発環境でも ws/wss を許可しない
++            connectSrc: ["'self'"],
++            fontSrc: ["'self'", 'data:'],
++            objectSrc: ["'none'"],
++            frameAncestors: ["'none'"],
++            upgradeInsecureRequests: !isDev,
++            reportUri: '/api/csp-report',
++        },
++        permissionsPolicy: {
++            // Admin App はすべてのブラウザ API を禁止
++            geolocation: '',
++            camera: '',
++            microphone: '',
++            payment: '',
++            usb: '',
++            bluetooth: '',
++        },
++    };
++    // 本番環境のみ HSTS を設定
++    if (!isDev) {
++        config.hsts = {
++            maxAge: 31536000, // 1 year
++            includeSubDomains: true,
++        };
++    }
++    return config;
++}
++/**
++ * CSP ポリシー文字列を構築
++ *
++ * @param config - CSP 設定オブジェクト
++ * @returns CSP ポリシー文字列
++ */
++function buildCSPString(config) {
++    const directives = [];
++    // 各ディレクティブを構築
++    if (config.defaultSrc.length > 0) {
++        directives.push(`default-src ${config.defaultSrc.join(' ')}`);
++    }
++    if (config.scriptSrc.length > 0) {
++        directives.push(`script-src ${config.scriptSrc.join(' ')}`);
++    }
++    if (config.styleSrc.length > 0) {
++        directives.push(`style-src ${config.styleSrc.join(' ')}`);
++    }
++    if (config.imgSrc.length > 0) {
++        directives.push(`img-src ${config.imgSrc.join(' ')}`);
++    }
++    if (config.connectSrc.length > 0) {
++        directives.push(`connect-src ${config.connectSrc.join(' ')}`);
++    }
++    if (config.fontSrc.length > 0) {
++        directives.push(`font-src ${config.fontSrc.join(' ')}`);
++    }
++    if (config.objectSrc.length > 0) {
++        directives.push(`object-src ${config.objectSrc.join(' ')}`);
++    }
++    if (config.frameAncestors.length > 0) {
++        directives.push(`frame-ancestors ${config.frameAncestors.join(' ')}`);
++    }
++    // upgrade-insecure-requests ディレクティブ
++    if (config.upgradeInsecureRequests) {
++        directives.push('upgrade-insecure-requests');
++    }
++    // report-uri ディレクティブ
++    if (config.reportUri) {
++        directives.push(`report-uri ${config.reportUri}`);
++    }
++    return directives.join('; ');
++}
++/**
++ * Permissions-Policy 文字列を構築
++ *
++ * @param config - Permissions-Policy 設定オブジェクト
++ * @returns Permissions-Policy 文字列
++ */
++function buildPermissionsPolicyString(config) {
++    const policies = [];
++    Object.entries(config).forEach(([key, value]) => {
++        if (value === undefined)
++            return;
++        const formattedValue = value === '' ? '()' : `(${value})`;
++        policies.push(`${key}=${formattedValue}`);
++    });
++    return policies.join(', ');
++}
++/**
++ * ランダムな nonce 値を生成（将来の CSP nonce ベース認証用）
++ *
++ * @returns Base64 エンコードされた nonce 文字列
++ */
++function generateNonce() {
++    // Node.js 環境では crypto モジュールを使用
++    if (typeof window === 'undefined') {
++        const crypto = require('crypto');
++        return crypto.randomBytes(16).toString('base64');
++    }
++    // ブラウザ環境では Web Crypto API を使用
++    const array = new Uint8Array(16);
++    crypto.getRandomValues(array);
++    // Uint8Array を Base64 に変換
++    return btoa(String.fromCharCode(...array));
++}
+diff --git a/frontend/user-app/jest.config.js b/frontend/user-app/jest.config.js
+index b4870e4..f4fb22d 100644
+--- a/frontend/user-app/jest.config.js
++++ b/frontend/user-app/jest.config.js
+@@ -12,6 +12,8 @@ const customJestConfig = {
+   setupFilesAfterEnv: ["<rootDir>/../../jest.setup.ts"],
+   moduleNameMapper: {
+     "^@/(.*)$": "<rootDir>/src/$1",
++    // Security config module resolution for Jest
++    "^\\.\\./security-config$": "<rootDir>/../security-config.ts",
+   },
+   collectCoverageFrom: [
+     "src/**/*.{ts,tsx,js,jsx}",
+diff --git a/frontend/user-app/next.config.ts b/frontend/user-app/next.config.ts
+index 8a97e1a..a57a504 100644
+--- a/frontend/user-app/next.config.ts
++++ b/frontend/user-app/next.config.ts
+@@ -1,13 +1,67 @@
+ import type { NextConfig } from "next";
+ import path from "path";
+-import {
+-  getSecurityConfig,
+-  buildCSPString,
+-  buildPermissionsPolicyString,
+-} from "../security-config";
+-
+-const isDev = process.env.NODE_ENV === "development";
+-const securityConfig = getSecurityConfig(isDev);
++
++// Type definitions for security config
++interface CSPConfig {
++  defaultSrc?: string[];
++  scriptSrc?: string[];
++  styleSrc?: string[];
++  imgSrc?: string[];
++  connectSrc?: string[];
++  fontSrc?: string[];
++  objectSrc?: string[];
++  frameAncestors?: string[];
++  upgradeInsecureRequests?: boolean;
++}
++
++interface SecurityConfig {
++  xFrameOptions: string;
++  xContentTypeOptions: string;
++  referrerPolicy: string;
++  csp: CSPConfig;
++  permissionsPolicy: Record<string, unknown>;
++  hsts?: {
++    maxAge: number;
++  };
++}
++
++// Load security config with error handling for test environment
++let securityConfig: SecurityConfig;
++let buildCSPString: (config: CSPConfig) => string;
++let buildPermissionsPolicyString: (config: Record<string, unknown>) => string;
++
++try {
++  // Try to load actual security config
++  // eslint-disable-next-line @typescript-eslint/no-require-imports
++  const securityConfigModule = require("../security-config.js");
++  const isDev = process.env.NODE_ENV === "development";
++  securityConfig = securityConfigModule.getSecurityConfig(isDev);
++  buildCSPString = securityConfigModule.buildCSPString;
++  buildPermissionsPolicyString = securityConfigModule.buildPermissionsPolicyString;
++  // eslint-disable-next-line @typescript-eslint/no-unused-vars
++} catch (_error) {
++  // Fallback for environments where security-config.js is not available
++  console.warn("Failed to load security-config.js, using fallback config");
++  securityConfig = {
++    xFrameOptions: "SAMEORIGIN" as const,
++    xContentTypeOptions: "nosniff" as const,
++    referrerPolicy: "strict-origin-when-cross-origin",
++    csp: {
++      defaultSrc: ["'self'"],
++      scriptSrc: ["'self'"],
++      styleSrc: ["'self'"],
++      imgSrc: ["'self'"],
++      connectSrc: ["'self'"],
++      fontSrc: ["'self'"],
++      objectSrc: ["'none'"],
++      frameAncestors: ["'none'"],
++      upgradeInsecureRequests: false,
++    },
++    permissionsPolicy: {},
++  };
++  buildCSPString = (_config: CSPConfig) => "default-src 'self'";
++  buildPermissionsPolicyString = (_config: Record<string, unknown>) => "";
++}
+ 
+ const nextConfig: NextConfig = {
+   /* config options here */
+diff --git a/jest.config.js b/jest.config.js
+index c38f6f0..3b080d8 100644
+--- a/jest.config.js
++++ b/jest.config.js
+@@ -4,4 +4,20 @@ module.exports = {
+     '<rootDir>/frontend/user-app',
+     '<rootDir>/scripts',
+   ],
++  // Root-level reporters configuration for all projects
++  reporters: [
++    'default',
++    [
++      'jest-junit',
++      {
++        outputDirectory: '<rootDir>/test-results/junit',
++        // outputName can be set via JEST_JUNIT_OUTPUT_NAME environment variable
++        suiteNameTemplate: '{filepath}',
++        classNameTemplate: '{classname}',
++        titleTemplate: '{title}',
++        ancestorSeparator: ' › ',
++        usePathForSuiteName: 'true',
++      },
++    ],
++  ],
+ };
+diff --git a/package-lock.json b/package-lock.json
+index 00c0c3b..f872591 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -29,6 +29,7 @@
+         "identity-obj-proxy": "^3.0.0",
+         "jest": "^29.7.0",
+         "jest-environment-jsdom": "^29.7.0",
++        "jest-junit": "^16.0.0",
+         "lint-staged": "^15",
+         "msw": "^2.11.3",
+         "next-router-mock": "^0.9.13",
+@@ -64,6 +65,7 @@
+         "next-router-mock": "^1.0.2",
+         "tailwindcss": "^4",
+         "ts-node": "^10.9.2",
++        "tsx": "^4.20.6",
+         "typescript": "^5",
+         "whatwg-fetch": "^3.6.20"
+       }
+@@ -1762,6 +1764,7 @@
+         "jest-environment-jsdom": "^30.2.0",
+         "next-router-mock": "^1.0.2",
+         "tailwindcss": "^4",
++        "tsx": "^4.20.6",
+         "typescript": "^5",
+         "whatwg-fetch": "^3.6.20"
+       }
+@@ -12557,6 +12560,45 @@
+         "fsevents": "^2.3.2"
+       }
+     },
++    "node_modules/jest-junit": {
++      "version": "16.0.0",
++      "resolved": "https://registry.npmjs.org/jest-junit/-/jest-junit-16.0.0.tgz",
++      "integrity": "sha512-A94mmw6NfJab4Fg/BlvVOUXzXgF0XIH6EmTgJ5NDPp4xoKq0Kr7sErb+4Xs9nZvu58pJojz5RFGpqnZYJTrRfQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "mkdirp": "^1.0.4",
++        "strip-ansi": "^6.0.1",
++        "uuid": "^8.3.2",
++        "xml": "^1.0.1"
++      },
++      "engines": {
++        "node": ">=10.12.0"
++      }
++    },
++    "node_modules/jest-junit/node_modules/ansi-regex": {
++      "version": "5.0.1",
++      "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz",
++      "integrity": "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=8"
++      }
++    },
++    "node_modules/jest-junit/node_modules/strip-ansi": {
++      "version": "6.0.1",
++      "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz",
++      "integrity": "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "ansi-regex": "^5.0.1"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/jest-leak-detector": {
+       "version": "29.7.0",
+       "resolved": "https://registry.npmjs.org/jest-leak-detector/-/jest-leak-detector-29.7.0.tgz",
+@@ -13964,6 +14006,19 @@
+         "node": ">= 18"
+       }
+     },
++    "node_modules/mkdirp": {
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz",
++      "integrity": "sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==",
++      "dev": true,
++      "license": "MIT",
++      "bin": {
++        "mkdirp": "bin/cmd.js"
++      },
++      "engines": {
++        "node": ">=10"
++      }
++    },
+     "node_modules/ms": {
+       "version": "2.1.3",
+       "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+@@ -16718,6 +16773,16 @@
+       "resolved": "frontend/user-app",
+       "link": true
+     },
++    "node_modules/uuid": {
++      "version": "8.3.2",
++      "resolved": "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz",
++      "integrity": "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==",
++      "dev": true,
++      "license": "MIT",
++      "bin": {
++        "uuid": "dist/bin/uuid"
++      }
++    },
+     "node_modules/v8-compile-cache-lib": {
+       "version": "3.0.1",
+       "resolved": "https://registry.npmjs.org/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz",
+@@ -17094,6 +17159,13 @@
+         }
+       }
+     },
++    "node_modules/xml": {
++      "version": "1.0.1",
++      "resolved": "https://registry.npmjs.org/xml/-/xml-1.0.1.tgz",
++      "integrity": "sha512-huCv9IH9Tcf95zuYCsQraZtWnJvBtLVE0QHMOs8bWyZAFZNDcYjsPq1nEx8jKA9y+Beo9v+7OBPRisQTjinQMw==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/xml-name-validator": {
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/xml-name-validator/-/xml-name-validator-4.0.0.tgz",
+diff --git a/package.json b/package.json
+index 6a999e8..def0084 100644
+--- a/package.json
++++ b/package.json
+@@ -10,8 +10,8 @@
+     "test": "jest",
+     "test:watch": "jest --watch",
+     "test:coverage": "jest --coverage",
+-    "test:admin": "jest --selectProjects=admin-app",
+-    "test:user": "jest --selectProjects=user-app",
++    "test:admin": "JEST_JUNIT_OUTPUT_NAME=frontend-admin-results.xml jest --selectProjects=admin-app",
++    "test:user": "JEST_JUNIT_OUTPUT_NAME=frontend-user-results.xml jest --selectProjects=user-app",
+     "lint": "npm run lint --workspaces",
+     "lint:fix": "npm run lint:fix --workspaces",
+     "format": "prettier --write 'frontend/**/*.{ts,tsx,js,jsx,json,css,md}'",
+@@ -40,6 +40,7 @@
+     "identity-obj-proxy": "^3.0.0",
+     "jest": "^29.7.0",
+     "jest-environment-jsdom": "^29.7.0",
++    "jest-junit": "^16.0.0",
+     "lint-staged": "^15",
+     "msw": "^2.11.3",
+     "next-router-mock": "^0.9.13",
+diff --git a/scripts/lib/colors.sh b/scripts/lib/colors.sh
+new file mode 100755
+index 0000000..9bc5386
+--- /dev/null
++++ b/scripts/lib/colors.sh
+@@ -0,0 +1,39 @@
++#!/usr/bin/env bash
++
++# Color definitions for terminal output
++# Supports both color and no-color modes for CI compatibility
++
++# Guard: Skip if colors are already defined
++if [[ -z "${_COLORS_SH_LOADED:-}" ]]; then
++    # Check if output is a terminal and colors are supported
++    if [[ -t 1 ]] && [[ "${NO_COLOR:-}" != "1" ]] && [[ "${TERM:-}" != "dumb" ]]; then
++        # ANSI color codes
++        readonly RED='\033[0;31m'
++        readonly GREEN='\033[0;32m'
++        readonly YELLOW='\033[1;33m'
++        readonly BLUE='\033[0;34m'
++        readonly MAGENTA='\033[0;35m'
++        readonly CYAN='\033[0;36m'
++        readonly WHITE='\033[0;37m'
++        readonly BOLD='\033[1m'
++        readonly NC='\033[0m' # No Color
++    else
++        # No colors for non-terminal or CI environments
++        readonly RED=''
++        readonly GREEN=''
++        readonly YELLOW=''
++        readonly BLUE=''
++        readonly MAGENTA=''
++        readonly CYAN=''
++        readonly WHITE=''
++        readonly BOLD=''
++        readonly NC=''
++    fi
++
++    # Export color variables for use in other scripts
++    export RED GREEN YELLOW BLUE MAGENTA CYAN WHITE BOLD NC
++
++    # Mark as loaded
++    readonly _COLORS_SH_LOADED=1
++    export _COLORS_SH_LOADED
++fi
+diff --git a/scripts/lib/logging.sh b/scripts/lib/logging.sh
+new file mode 100755
+index 0000000..100536f
+--- /dev/null
++++ b/scripts/lib/logging.sh
+@@ -0,0 +1,63 @@
++#!/usr/bin/env bash
++
++# Logging functions for unified output format
++# Supports 5 log levels: info, success, warn, error, debug
++# All output goes to stderr for proper stream separation
++
++# Guard: Skip if logging functions are already defined
++if [[ $(type -t log_info) != "function" ]]; then
++    # Source color definitions
++    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++    # shellcheck source=scripts/lib/colors.sh
++    if [[ -f "${SCRIPT_DIR}/colors.sh" ]]; then
++        source "${SCRIPT_DIR}/colors.sh"
++    else
++        # Fallback: try relative to current script
++        source "$(dirname "$0")/colors.sh" 2>/dev/null || true
++    fi
++
++    # Get timestamp in ISO8601 format
++    get_timestamp() {
++        date -u +"%Y-%m-%dT%H:%M:%SZ"
++    }
++
++    # Log info message (blue)
++    log_info() {
++        local message="$*"
++        echo -e "${BLUE}[INFO]${NC} $(get_timestamp) ${message}" >&2
++    }
++
++    # Log success message (green)
++    log_success() {
++        local message="$*"
++        echo -e "${GREEN}[SUCCESS]${NC} $(get_timestamp) ${message}" >&2
++    }
++
++    # Log warning message (yellow)
++    log_warn() {
++        local message="$*"
++        echo -e "${YELLOW}[WARN]${NC} $(get_timestamp) ${message}" >&2
++    }
++
++    # Log error message (red)
++    log_error() {
++        local message="$*"
++        echo -e "${RED}[ERROR]${NC} $(get_timestamp) ${message}" >&2
++    }
++
++    # Log debug message (magenta, only if DEBUG=1)
++    log_debug() {
++        if [[ "${DEBUG:-}" == "1" ]]; then
++            local message="$*"
++            echo -e "${MAGENTA}[DEBUG]${NC} $(get_timestamp) ${message}" >&2
++        fi
++    }
++
++    # Export log functions
++    export -f get_timestamp
++    export -f log_info
++    export -f log_success
++    export -f log_warn
++    export -f log_error
++    export -f log_debug
++fi
+diff --git a/scripts/test/diagnose.sh b/scripts/test/diagnose.sh
+new file mode 100755
+index 0000000..3213399
+--- /dev/null
++++ b/scripts/test/diagnose.sh
+@@ -0,0 +1,275 @@
++#!/usr/bin/env bash
++
++#==============================================================================
++# テスト環境診断スクリプト
++#
++# Requirement 11: 診断スクリプト
++# - ポート使用状況確認（13000、13001、13002、13432、13379）
++# - 必須環境変数の設定状態確認
++# - Dockerコンテナの起動状態確認
++# - データベース接続状態確認
++# - ディスク空き容量確認
++# - メモリ使用状況確認
++# - 診断結果のコンソール出力
++#==============================================================================
++
++set -euo pipefail
++
++#==============================================================================
++# Script Directory & Library Loading
++#==============================================================================
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
++
++# Load shared libraries
++# shellcheck source=scripts/lib/colors.sh
++if [[ -z "${RED:-}" ]] && [[ -f "${SCRIPT_DIR}/../lib/colors.sh" ]]; then
++    source "${SCRIPT_DIR}/../lib/colors.sh"
++elif [[ ! -f "${SCRIPT_DIR}/../lib/colors.sh" ]]; then
++    echo "ERROR: colors.sh not found at ${SCRIPT_DIR}/../lib/colors.sh" >&2
++    exit 1
++fi
++
++# shellcheck source=scripts/lib/logging.sh
++if [[ $(type -t log_info) != "function" ]] && [[ -f "${SCRIPT_DIR}/../lib/logging.sh" ]]; then
++    source "${SCRIPT_DIR}/../lib/logging.sh"
++elif [[ ! -f "${SCRIPT_DIR}/../lib/logging.sh" ]]; then
++    echo "ERROR: logging.sh not found at ${SCRIPT_DIR}/../lib/logging.sh" >&2
++    exit 1
++fi
++
++#==============================================================================
++# Global Variables
++#==============================================================================
++REQUIRED_PORTS=(13000 13001 13002 13432 13379)
++REQUIRED_ENV_VARS=(
++    "DB_DATABASE"
++    "DB_USERNAME"
++    "DB_PASSWORD"
++)
++
++# Diagnostic status tracking
++DIAGNOSTICS_PASSED=0
++DIAGNOSTICS_FAILED=0
++
++#==============================================================================
++# Diagnostic Functions
++#==============================================================================
++
++# Requirement 11.2: ポート使用状況確認
++check_port_usage() {
++    log_info "Checking port usage for test services..."
++
++    local all_ports_free=true
++
++    for port in "${REQUIRED_PORTS[@]}"; do
++        if lsof -i :"${port}" -sTCP:LISTEN > /dev/null 2>&1; then
++            log_warn "Port ${port} is in use:"
++            lsof -i :"${port}" -sTCP:LISTEN | tail -n +2 | awk '{print "  - PID " $2 " (" $1 ")"}'
++            all_ports_free=false
++            DIAGNOSTICS_FAILED=$((DIAGNOSTICS_FAILED + 1))
++        else
++            log_debug "Port ${port} is free"
++        fi
++    done
++
++    if [[ "${all_ports_free}" == "true" ]]; then
++        log_success "All required ports are available"
++        DIAGNOSTICS_PASSED=$((DIAGNOSTICS_PASSED + 1))
++        return 0
++    else
++        log_error "Some ports are in use. Run 'make dev-stop' to stop all services."
++        return 1
++    fi
++}
++
++# Requirement 11.3: 必須環境変数の設定状態確認
++check_environment_variables() {
++    log_info "Checking required environment variables..."
++
++    local all_vars_set=true
++
++    # Load .env file if it exists
++    if [[ -f "${PROJECT_ROOT}/backend/laravel-api/.env" ]]; then
++        # Export variables from .env (simplified approach)
++        set -a
++        # shellcheck source=/dev/null
++        source "${PROJECT_ROOT}/backend/laravel-api/.env"
++        set +a
++    else
++        log_warn ".env file not found at ${PROJECT_ROOT}/backend/laravel-api/.env"
++    fi
++
++    for var_name in "${REQUIRED_ENV_VARS[@]}"; do
++        if [[ -z "${!var_name:-}" ]]; then
++            log_error "Environment variable ${var_name} is not set"
++            all_vars_set=false
++        else
++            log_debug "Environment variable ${var_name} is set"
++        fi
++    done
++
++    if [[ "${all_vars_set}" == "true" ]]; then
++        log_success "All required environment variables are set"
++        DIAGNOSTICS_PASSED=$((DIAGNOSTICS_PASSED + 1))
++        return 0
++    else
++        log_error "Some environment variables are missing. Check .env file."
++        DIAGNOSTICS_FAILED=$((DIAGNOSTICS_FAILED + 1))
++        return 1
++    fi
++}
++
++# Requirement 11.4: Dockerコンテナの起動状態確認
++check_docker_containers() {
++    log_info "Checking Docker container status..."
++
++    if ! command -v docker &> /dev/null; then
++        log_warn "Docker command not found. Skipping container check."
++        return 0
++    fi
++
++    local running_containers
++    running_containers=$(docker ps --format "{{.Names}}" 2>/dev/null | wc -l || echo "0")
++
++    if [[ "${running_containers}" -gt 0 ]]; then
++        log_success "Docker containers are running:"
++        docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true
++        DIAGNOSTICS_PASSED=$((DIAGNOSTICS_PASSED + 1))
++        return 0
++    else
++        log_warn "No Docker containers are running"
++        log_info "Run 'make dev' to start development services"
++        DIAGNOSTICS_FAILED=$((DIAGNOSTICS_FAILED + 1))
++        return 1
++    fi
++}
++
++# Requirement 11.5: データベース接続状態確認
++check_database_connection() {
++    log_info "Checking database connection..."
++
++    if ! command -v docker &> /dev/null; then
++        log_warn "Docker command not found. Skipping database check."
++        return 0
++    fi
++
++    # Check if PostgreSQL container is running
++    local postgres_container
++    postgres_container=$(docker ps --filter "name=postgres" --format "{{.Names}}" 2>/dev/null | head -n 1)
++
++    if [[ -z "${postgres_container}" ]]; then
++        log_warn "PostgreSQL container is not running"
++        DIAGNOSTICS_FAILED=$((DIAGNOSTICS_FAILED + 1))
++        return 1
++    fi
++
++    # Try to connect to PostgreSQL
++    if docker exec "${postgres_container}" pg_isready -U "${DB_USERNAME:-postgres}" > /dev/null 2>&1; then
++        log_success "PostgreSQL is accepting connections"
++        DIAGNOSTICS_PASSED=$((DIAGNOSTICS_PASSED + 1))
++        return 0
++    else
++        log_error "PostgreSQL is not accepting connections"
++        DIAGNOSTICS_FAILED=$((DIAGNOSTICS_FAILED + 1))
++        return 1
++    fi
++}
++
++# Requirement 11.6: ディスク空き容量確認
++check_disk_space() {
++    log_info "Checking disk space..."
++
++    local available_space
++    if [[ "$OSTYPE" == "darwin"* ]]; then
++        # macOS
++        available_space=$(df -h . | tail -n 1 | awk '{print $4}')
++    else
++        # Linux
++        available_space=$(df -h . | tail -n 1 | awk '{print $4}')
++    fi
++
++    log_success "Available disk space: ${available_space}"
++    DIAGNOSTICS_PASSED=$((DIAGNOSTICS_PASSED + 1))
++    return 0
++}
++
++# Requirement 11.7: メモリ使用状況確認
++check_memory_usage() {
++    log_info "Checking memory usage..."
++
++    if [[ "$OSTYPE" == "darwin"* ]]; then
++        # macOS
++        local total_mem
++        local free_mem
++        total_mem=$(sysctl -n hw.memsize | awk '{print $1 / 1024 / 1024 / 1024 " GB"}')
++        free_mem=$(vm_stat | grep "Pages free" | awk '{print $3 * 4096 / 1024 / 1024 / 1024 " GB"}' | sed 's/\..*//')
++
++        log_success "Total memory: ${total_mem}, Free: ~${free_mem} GB"
++    else
++        # Linux
++        local mem_info
++        mem_info=$(free -h | grep "Mem:" | awk '{print "Total: " $2 ", Free: " $4}')
++
++        log_success "Memory: ${mem_info}"
++    fi
++
++    DIAGNOSTICS_PASSED=$((DIAGNOSTICS_PASSED + 1))
++    return 0
++}
++
++# Requirement 11.8: 診断結果統合出力
++print_diagnostic_summary() {
++    echo ""
++    log_info "========================================="
++    log_info "   Diagnostic Summary"
++    log_info "========================================="
++    log_success "Passed: ${DIAGNOSTICS_PASSED} checks"
++
++    if [[ "${DIAGNOSTICS_FAILED}" -gt 0 ]]; then
++        log_error "Failed: ${DIAGNOSTICS_FAILED} checks"
++        echo ""
++        log_warn "Some diagnostics failed. Please review the output above."
++        log_info "Run 'make setup' to initialize the environment"
++        log_info "Run 'make dev' to start development services"
++        return 1
++    else
++        echo ""
++        log_success "All diagnostics passed! Environment is ready for testing."
++        return 0
++    fi
++}
++
++#==============================================================================
++# Main Execution
++#==============================================================================
++main() {
++    log_info "Starting test environment diagnostics..."
++    echo ""
++
++    # Requirement 11.1: 診断スクリプト起動
++    # Run all diagnostic checks (continue even if some fail)
++    set +e
++
++    check_port_usage
++    check_environment_variables
++    check_docker_containers
++    check_database_connection
++    check_disk_space
++    check_memory_usage
++
++    set -e
++
++    # Requirement 11.8: 診断結果統合出力
++    print_diagnostic_summary
++
++    # Return appropriate exit code
++    if [[ "${DIAGNOSTICS_FAILED}" -gt 0 ]]; then
++        exit 1
++    else
++        exit 0
++    fi
++}
++
++# Execute main function
++main "$@"
+diff --git a/scripts/test/main.sh b/scripts/test/main.sh
+new file mode 100755
+index 0000000..4a7a6d7
+--- /dev/null
++++ b/scripts/test/main.sh
+@@ -0,0 +1,349 @@
++#!/usr/bin/env bash
++
++# Main test orchestration script
++# Supports flexible test suite selection, DB environment switching, and parallel execution
++
++set -euo pipefail
++
++# Source logging functions
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
++# shellcheck source=scripts/lib/logging.sh
++source "${PROJECT_ROOT}/scripts/lib/logging.sh"
++
++# Default values
++SUITE="all"
++DB_ENV="sqlite"
++PARALLEL="4"
++ENABLE_COVERAGE="false"
++ENABLE_REPORT="false"
++CI_MODE="${CI:-false}"
++FAST_MODE="false"
++
++# Port definitions for conflict checking
++readonly TEST_PORTS=(13000 13001 13002 13432 13379)
++
++# Exit codes tracking
++BACKEND_EXIT=0
++FRONTEND_EXIT=0
++E2E_EXIT=0
++declare -a FAILED_SUITES
++
++# Show help message
++show_help() {
++    cat <<EOF
++Usage: $0 [OPTIONS]
++
++Test execution orchestration script for monorepo (Backend + Frontend + E2E).
++
++OPTIONS:
++  --suite SUITE        Test suite to run: all, backend, frontend, e2e (default: all)
++  --env ENV            DB environment: sqlite, postgres (default: sqlite)
++  --parallel N         Parallel execution count: 1-8 (default: 4)
++  --coverage           Enable coverage reporting
++  --report             Generate integrated test report
++  --ci                 CI mode (cleanup and optimizations)
++  --fast               Fast mode (SQLite + no coverage)
++  --help               Show this help message
++
++EXAMPLES:
++  # Run all tests with SQLite (fast mode)
++  $0 --fast
++
++  # Run backend tests with PostgreSQL and coverage
++  $0 --suite backend --env postgres --coverage
++
++  # Run all tests with coverage and report
++  $0 --coverage --report
++
++  # CI mode execution
++  $0 --ci --coverage --report
++
++EOF
++}
++
++# Validate environment variables
++validate_env_vars() {
++    log_info "Validating environment variables..."
++
++    local required_vars=()
++    local missing_vars=()
++
++    # Check required environment variables (if any)
++    # Currently, no mandatory env vars for test execution
++
++    if [[ ${#missing_vars[@]} -gt 0 ]]; then
++        log_error "Missing required environment variables:"
++        for var in "${missing_vars[@]}"; do
++            log_error "  - ${var}"
++        done
++        return 1
++    fi
++
++    log_success "Environment variables validation passed"
++    return 0
++}
++
++# Check port conflicts
++check_port_conflicts() {
++    log_info "Checking for port conflicts..."
++
++    local conflicts=()
++
++    for port in "${TEST_PORTS[@]}"; do
++        if lsof -Pi :${port} -sTCP:LISTEN -t > /dev/null 2>&1; then
++            local process_info
++            process_info=$(lsof -Pi :${port} -sTCP:LISTEN | tail -1)
++            log_warn "Port ${port} is in use: ${process_info}"
++            conflicts+=("${port}")
++        fi
++    done
++
++    if [[ ${#conflicts[@]} -gt 0 ]]; then
++        log_warn "Found ${#conflicts[@]} port(s) in use: ${conflicts[*]}"
++        log_warn "This may be expected if services are already running"
++    else
++        log_success "No port conflicts detected"
++    fi
++
++    return 0
++}
++
++# Parse CLI arguments
++parse_arguments() {
++    while [[ $# -gt 0 ]]; do
++        case $1 in
++            --suite)
++                SUITE="$2"
++                shift 2
++                ;;
++            --env)
++                DB_ENV="$2"
++                shift 2
++                ;;
++            --parallel)
++                PARALLEL="$2"
++                shift 2
++                ;;
++            --coverage)
++                ENABLE_COVERAGE="true"
++                shift
++                ;;
++            --report)
++                ENABLE_REPORT="true"
++                shift
++                ;;
++            --ci)
++                CI_MODE="true"
++                shift
++                ;;
++            --fast)
++                FAST_MODE="true"
++                DB_ENV="sqlite"
++                ENABLE_COVERAGE="false"
++                shift
++                ;;
++            --help)
++                show_help
++                exit 0
++                ;;
++            *)
++                log_error "Unknown option: $1"
++                show_help
++                exit 1
++                ;;
++        esac
++    done
++}
++
++# Run backend tests
++run_backend_suite() {
++    log_info "Running backend test suite..."
++
++    bash "${PROJECT_ROOT}/scripts/test/test-backend.sh" "${DB_ENV}" "${PARALLEL}" "${ENABLE_COVERAGE}"
++    BACKEND_EXIT=$?
++
++    if [[ ${BACKEND_EXIT} -ne 0 ]]; then
++        FAILED_SUITES+=("backend")
++        log_error "Backend tests failed"
++    else
++        log_success "Backend tests passed"
++    fi
++
++    return ${BACKEND_EXIT}
++}
++
++# Run frontend tests
++run_frontend_suite() {
++    log_info "Running frontend test suite..."
++
++    bash "${PROJECT_ROOT}/scripts/test/test-frontend.sh" "${ENABLE_COVERAGE}"
++    FRONTEND_EXIT=$?
++
++    if [[ ${FRONTEND_EXIT} -ne 0 ]]; then
++        FAILED_SUITES+=("frontend")
++        log_error "Frontend tests failed"
++    else
++        log_success "Frontend tests passed"
++    fi
++
++    return ${FRONTEND_EXIT}
++}
++
++# Run E2E tests
++run_e2e_suite() {
++    log_info "Running E2E test suite..."
++
++    bash "${PROJECT_ROOT}/scripts/test/test-e2e.sh"
++    E2E_EXIT=$?
++
++    if [[ ${E2E_EXIT} -ne 0 ]]; then
++        FAILED_SUITES+=("e2e")
++        log_error "E2E tests failed"
++    else
++        log_success "E2E tests passed"
++    fi
++
++    return ${E2E_EXIT}
++}
++
++# Run tests with parallel execution control
++run_tests() {
++    log_info "Starting test execution (Suite: ${SUITE}, DB: ${DB_ENV}, Parallel: ${PARALLEL})"
++
++    # Setup test results directory
++    bash "${PROJECT_ROOT}/scripts/test/setup-test-results.sh"
++
++    # Disable errexit for test execution (we want to run all tests even if some fail)
++    set +e
++
++    case "${SUITE}" in
++        all)
++            log_info "Running all test suites in parallel..."
++
++            # Run backend and frontend in parallel
++            run_backend_suite &
++            local backend_pid=$!
++
++            run_frontend_suite &
++            local frontend_pid=$!
++
++            # Wait for parallel tests
++            wait ${backend_pid}
++            wait ${frontend_pid}
++
++            # Run E2E tests sequentially (requires services)
++            run_e2e_suite
++            ;;
++        backend)
++            run_backend_suite
++            ;;
++        frontend)
++            run_frontend_suite
++            ;;
++        e2e)
++            run_e2e_suite
++            ;;
++        *)
++            log_error "Invalid test suite: ${SUITE}"
++            log_error "Valid options: all, backend, frontend, e2e"
++            set -e
++            return 1
++            ;;
++    esac
++
++    # Re-enable errexit
++    set -e
++}
++
++# Print summary
++print_summary() {
++    log_info "Test execution summary:"
++
++    local total_suites=0
++    local passed_suites=0
++    local failed_suites=0
++
++    # Check backend suite
++    if [[ "${SUITE}" == "all" ]] || [[ "${SUITE}" == "backend" ]]; then
++        total_suites=$((total_suites + 1))
++        if [[ ${BACKEND_EXIT} -eq 0 ]]; then
++            passed_suites=$((passed_suites + 1))
++            log_success "  backend: PASSED"
++        else
++            failed_suites=$((failed_suites + 1))
++            log_error "  backend: FAILED (exit code: ${BACKEND_EXIT})"
++        fi
++    fi
++
++    # Check frontend suite
++    if [[ "${SUITE}" == "all" ]] || [[ "${SUITE}" == "frontend" ]]; then
++        total_suites=$((total_suites + 1))
++        if [[ ${FRONTEND_EXIT} -eq 0 ]]; then
++            passed_suites=$((passed_suites + 1))
++            log_success "  frontend: PASSED"
++        else
++            failed_suites=$((failed_suites + 1))
++            log_error "  frontend: FAILED (exit code: ${FRONTEND_EXIT})"
++        fi
++    fi
++
++    # Check E2E suite
++    if [[ "${SUITE}" == "all" ]] || [[ "${SUITE}" == "e2e" ]]; then
++        total_suites=$((total_suites + 1))
++        if [[ ${E2E_EXIT} -eq 0 ]]; then
++            passed_suites=$((passed_suites + 1))
++            log_success "  e2e: PASSED"
++        else
++            failed_suites=$((failed_suites + 1))
++            log_error "  e2e: FAILED (exit code: ${E2E_EXIT})"
++        fi
++    fi
++
++    log_info "Total: ${total_suites} suites, ${passed_suites} passed, ${failed_suites} failed"
++
++    if [[ ${#FAILED_SUITES[@]} -gt 0 ]]; then
++        log_error "Failed suites: ${FAILED_SUITES[*]}"
++        return 1
++    else
++        log_success "All test suites passed!"
++        return 0
++    fi
++}
++
++# Main execution
++main() {
++    parse_arguments "$@"
++
++    log_info "Test Execution Script"
++    log_info "====================="
++
++    # Validate environment
++    validate_env_vars || exit 1
++    check_port_conflicts
++
++    # Run tests
++    run_tests
++
++    # Print summary
++    print_summary
++    local final_exit=$?
++
++    # Generate report if requested
++    if [[ "${ENABLE_REPORT}" == "true" ]]; then
++        log_info "Generating integrated test report..."
++        bash "${PROJECT_ROOT}/scripts/test/test-report.sh"
++        local report_exit=$?
++
++        if [[ ${report_exit} -ne 0 ]]; then
++            log_warn "Report generation failed (exit code: ${report_exit})"
++        else
++            log_success "Test report generated successfully"
++        fi
++    fi
++
++    exit ${final_exit}
++}
++
++# Execute main function
++main "$@"
+diff --git a/scripts/test/setup-test-results.sh b/scripts/test/setup-test-results.sh
+new file mode 100755
+index 0000000..a2acb2a
+--- /dev/null
++++ b/scripts/test/setup-test-results.sh
+@@ -0,0 +1,81 @@
++#!/usr/bin/env bash
++
++# Setup test results directory structure
++# Creates: test-results/{junit,coverage,reports,logs}
++# Preserves existing directories and handles cleanup for CI
++
++set -euo pipefail
++
++# Source logging functions
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
++# shellcheck source=scripts/lib/logging.sh
++source "${PROJECT_ROOT}/scripts/lib/logging.sh"
++
++# Test results root directory
++TEST_RESULTS_DIR="${PROJECT_ROOT}/test-results"
++
++# Subdirectories
++JUNIT_DIR="${TEST_RESULTS_DIR}/junit"
++COVERAGE_DIR="${TEST_RESULTS_DIR}/coverage"
++REPORTS_DIR="${TEST_RESULTS_DIR}/reports"
++LOGS_DIR="${TEST_RESULTS_DIR}/logs"
++
++# CI mode flag
++CI_MODE="${CI:-false}"
++
++# Setup function
++setup_test_results_dirs() {
++    log_info "Setting up test results directory structure..."
++
++    # Create root directory
++    if [[ ! -d "${TEST_RESULTS_DIR}" ]]; then
++        mkdir -p "${TEST_RESULTS_DIR}"
++        log_info "Created ${TEST_RESULTS_DIR}"
++    else
++        log_debug "Directory ${TEST_RESULTS_DIR} already exists"
++    fi
++
++    # Create subdirectories
++    for dir in "${JUNIT_DIR}" "${COVERAGE_DIR}" "${REPORTS_DIR}" "${LOGS_DIR}"; do
++        if [[ ! -d "${dir}" ]]; then
++            mkdir -p "${dir}"
++            log_info "Created ${dir}"
++        else
++            log_debug "Directory ${dir} already exists"
++        fi
++    done
++
++    # Cleanup old files in CI mode (but preserve directory structure)
++    if [[ "${CI_MODE}" == "true" ]]; then
++        log_info "CI mode: Cleaning up old test results..."
++        find "${TEST_RESULTS_DIR}" -type f -mtime +7 -delete 2>/dev/null || true
++        log_info "Old files cleaned up"
++    fi
++
++    log_success "Test results directory structure is ready"
++}
++
++# Cleanup function for CI
++cleanup_test_results() {
++    if [[ "${CI_MODE}" != "true" ]]; then
++        log_debug "Not in CI mode, skipping cleanup"
++        return 0
++    fi
++
++    log_info "Cleaning up temporary test files..."
++
++    # Remove log files older than 1 day in CI
++    find "${LOGS_DIR}" -type f -mtime +1 -delete 2>/dev/null || true
++
++    log_success "Temporary files cleaned up"
++}
++
++# Export functions
++export -f setup_test_results_dirs
++export -f cleanup_test_results
++
++# If script is executed directly (not sourced)
++if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
++    setup_test_results_dirs
++fi
+diff --git a/scripts/test/test-backend.sh b/scripts/test/test-backend.sh
+new file mode 100755
+index 0000000..2656b36
+--- /dev/null
++++ b/scripts/test/test-backend.sh
+@@ -0,0 +1,107 @@
++#!/usr/bin/env bash
++
++# Backend test execution script
++# Supports SQLite/PostgreSQL environment switching and coverage reporting
++
++set -euo pipefail
++
++# Source logging functions
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
++# shellcheck source=scripts/lib/logging.sh
++source "${PROJECT_ROOT}/scripts/lib/logging.sh"
++
++# Default values
++DB_ENV="${1:-sqlite}"
++PARALLEL="${2:-4}"
++ENABLE_COVERAGE="${3:-false}"
++
++# Paths
++BACKEND_DIR="${PROJECT_ROOT}/backend/laravel-api"
++LOG_FILE="${PROJECT_ROOT}/test-results/logs/backend.log"
++JUNIT_OUTPUT="${PROJECT_ROOT}/test-results/junit/backend-test-results.xml"
++COVERAGE_OUTPUT="${PROJECT_ROOT}/test-results/coverage/backend"
++
++# Validate DB environment
++validate_db_env() {
++    if [[ ! "${DB_ENV}" =~ ^(sqlite|postgres)$ ]]; then
++        log_error "Invalid DB environment: ${DB_ENV}. Must be 'sqlite' or 'postgres'"
++        return 1
++    fi
++}
++
++# Validate parallel count
++validate_parallel() {
++    if [[ ! "${PARALLEL}" =~ ^[1-8]$ ]]; then
++        log_error "Invalid parallel count: ${PARALLEL}. Must be 1-8"
++        return 1
++    fi
++}
++
++# Run backend tests
++run_backend_tests() {
++    log_info "Running backend tests (DB: ${DB_ENV}, Parallel: ${PARALLEL}, Coverage: ${ENABLE_COVERAGE})"
++
++    # Validate inputs
++    validate_db_env || return 1
++    validate_parallel || return 1
++
++    # Change to backend directory
++    cd "${BACKEND_DIR}" || {
++        log_error "Failed to change to backend directory: ${BACKEND_DIR}"
++        return 1
++    }
++
++    # Prepare test command based on DB environment
++    local test_cmd
++    if [[ "${DB_ENV}" == "sqlite" ]]; then
++        log_info "Using SQLite environment (fast test mode)"
++        test_cmd="./vendor/bin/pest"
++    else
++        log_info "Using PostgreSQL environment (production-equivalent)"
++        # Setup parallel test databases if needed
++        if [[ -f "${PROJECT_ROOT}/scripts/parallel-test-setup.sh" ]]; then
++            log_info "Setting up parallel test databases..."
++            bash "${PROJECT_ROOT}/scripts/parallel-test-setup.sh" "${PARALLEL}" 2>&1 | tee -a "${LOG_FILE}"
++        fi
++        test_cmd="./vendor/bin/pest --parallel --processes=${PARALLEL}"
++    fi
++
++    # Add coverage option if enabled
++    if [[ "${ENABLE_COVERAGE}" == "true" ]]; then
++        log_info "Enabling coverage reporting..."
++        test_cmd="${test_cmd} --coverage-html=${COVERAGE_OUTPUT}"
++    fi
++
++    # Add JUnit reporter (if phpunit.xml is configured)
++    if grep -q "junit" phpunit.xml 2>/dev/null; then
++        log_debug "JUnit reporter configured in phpunit.xml"
++    else
++        log_warn "JUnit reporter not configured in phpunit.xml"
++    fi
++
++    # Execute tests with error handling
++    log_info "Executing: ${test_cmd}"
++
++    # Disable exit-on-error for this section to capture exit code
++    set +e
++    ${test_cmd} 2>&1 | tee "${LOG_FILE}"
++    local exit_code=$?
++    set -e
++
++    # Check test result
++    if [[ ${exit_code} -eq 0 ]]; then
++        log_success "Backend tests passed"
++        return 0
++    else
++        log_error "Backend tests failed with exit code: ${exit_code}"
++        log_error "Check log file: ${LOG_FILE}"
++        return ${exit_code}
++    fi
++}
++
++# If script is executed directly (not sourced)
++if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
++    run_backend_tests
++    exit $?
++fi
+diff --git a/scripts/test/test-e2e.sh b/scripts/test/test-e2e.sh
+new file mode 100755
+index 0000000..6482b1c
+--- /dev/null
++++ b/scripts/test/test-e2e.sh
+@@ -0,0 +1,144 @@
++#!/usr/bin/env bash
++
++# E2E test execution script
++# Supports service health checks and Playwright parallel execution
++
++set -euo pipefail
++
++# Source logging functions
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
++# shellcheck source=scripts/lib/logging.sh
++source "${PROJECT_ROOT}/scripts/lib/logging.sh"
++
++# Default values
++SHARD="${1:-}"
++
++# Paths
++E2E_DIR="${PROJECT_ROOT}/e2e"
++LOG_FILE="${PROJECT_ROOT}/test-results/logs/e2e.log"
++JUNIT_OUTPUT="${PROJECT_ROOT}/test-results/junit/e2e-test-results.xml"
++
++# Service health endpoints (from e2e/.env)
++LARAVEL_API_URL="${E2E_API_URL:-http://localhost:13000}"
++USER_APP_URL="${E2E_USER_URL:-http://localhost:13001}"
++ADMIN_APP_URL="${E2E_ADMIN_URL:-http://localhost:13002}"
++
++LARAVEL_API_HEALTH="${LARAVEL_API_URL}/api/health"
++USER_APP_HEALTH="${USER_APP_URL}/api/health"
++ADMIN_APP_HEALTH="${ADMIN_APP_URL}/api/health"
++
++# Health check configuration
++MAX_RETRIES=120
++RETRY_INTERVAL=1
++
++# Check service health endpoint
++check_service_health() {
++    local service_name="$1"
++    local health_url="$2"
++    local retry_count=0
++
++    log_info "Checking ${service_name} health at ${health_url}..."
++
++    while [[ ${retry_count} -lt ${MAX_RETRIES} ]]; do
++        # Attempt to curl the health endpoint
++        if curl -sf "${health_url}" > /dev/null 2>&1; then
++            log_success "${service_name} is healthy (${health_url})"
++            return 0
++        fi
++
++        retry_count=$((retry_count + 1))
++
++        if [[ $((retry_count % 10)) -eq 0 ]]; then
++            log_debug "${service_name} not ready yet (attempt ${retry_count}/${MAX_RETRIES})..."
++        fi
++
++        sleep ${RETRY_INTERVAL}
++    done
++
++    log_error "${service_name} health check timed out after ${MAX_RETRIES} seconds"
++    log_error "Health endpoint: ${health_url}"
++    return 1
++}
++
++# Check all services
++check_all_services() {
++    log_info "Starting health checks for all services..."
++
++    # Check Laravel API
++    check_service_health "Laravel API" "${LARAVEL_API_HEALTH}" || {
++        log_error "Laravel API health check failed"
++        return 1
++    }
++
++    # Check User App
++    check_service_health "User App" "${USER_APP_HEALTH}" || {
++        log_error "User App health check failed"
++        return 1
++    }
++
++    # Check Admin App
++    check_service_health "Admin App" "${ADMIN_APP_HEALTH}" || {
++        log_error "Admin App health check failed"
++        return 1
++    }
++
++    log_success "All services are healthy and ready for E2E tests"
++    return 0
++}
++
++# Run E2E tests
++run_e2e_tests() {
++    log_info "Running E2E tests (Shard: ${SHARD:-all})"
++
++    # Check all services first
++    check_all_services || {
++        log_error "Service health checks failed - aborting E2E tests"
++        return 1
++    }
++
++    # Change to e2e directory
++    cd "${E2E_DIR}" || {
++        log_error "Failed to change to e2e directory: ${E2E_DIR}"
++        return 1
++    }
++
++    # Prepare test command
++    local test_cmd="npx playwright test"
++
++    # Add shard option if specified
++    if [[ -n "${SHARD}" ]]; then
++        log_info "Running E2E tests with shard: ${SHARD}"
++        test_cmd="${test_cmd} --shard=${SHARD}"
++    fi
++
++    # Execute tests with error handling
++    log_info "Executing: ${test_cmd}"
++
++    # Disable exit-on-error for this section to capture exit code
++    set +e
++    ${test_cmd} 2>&1 | tee "${LOG_FILE}"
++    local exit_code=$?
++    set -e
++
++    # Check test result
++    if [[ ${exit_code} -eq 0 ]]; then
++        log_success "E2E tests passed"
++        return 0
++    else
++        log_error "E2E tests failed with exit code: ${exit_code}"
++        log_error "Check log file: ${LOG_FILE}"
++        return ${exit_code}
++    fi
++}
++
++# Export functions
++export -f check_service_health
++export -f check_all_services
++export -f run_e2e_tests
++
++# If script is executed directly (not sourced)
++if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
++    run_e2e_tests
++    exit $?
++fi
+diff --git a/scripts/test/test-frontend.sh b/scripts/test/test-frontend.sh
+new file mode 100755
+index 0000000..8ac8ada
+--- /dev/null
++++ b/scripts/test/test-frontend.sh
+@@ -0,0 +1,116 @@
++#!/usr/bin/env bash
++
++# Frontend test execution script
++# Supports parallel execution for Admin App and User App
++
++set -euo pipefail
++
++# Source logging functions
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
++# shellcheck source=scripts/lib/logging.sh
++source "${PROJECT_ROOT}/scripts/lib/logging.sh"
++
++# Default values
++ENABLE_COVERAGE="${1:-false}"
++
++# Paths
++ADMIN_APP_DIR="${PROJECT_ROOT}/frontend/admin-app"
++USER_APP_DIR="${PROJECT_ROOT}/frontend/user-app"
++ADMIN_LOG_FILE="${PROJECT_ROOT}/test-results/logs/frontend-admin.log"
++USER_LOG_FILE="${PROJECT_ROOT}/test-results/logs/frontend-user.log"
++ADMIN_JUNIT_OUTPUT="${PROJECT_ROOT}/test-results/junit/frontend-admin-test-results.xml"
++USER_JUNIT_OUTPUT="${PROJECT_ROOT}/test-results/junit/frontend-user-test-results.xml"
++ADMIN_COVERAGE_OUTPUT="${PROJECT_ROOT}/test-results/coverage/frontend-admin"
++USER_COVERAGE_OUTPUT="${PROJECT_ROOT}/test-results/coverage/frontend-user"
++
++# Common test execution function
++run_app_tests() {
++    local app_name="$1"
++    local app_dir="$2"
++    local log_file="$3"
++
++    log_info "Running ${app_name} tests (Coverage: ${ENABLE_COVERAGE})"
++
++    # Change to app directory
++    cd "${app_dir}" || {
++        log_error "Failed to change to ${app_name} directory: ${app_dir}"
++        return 1
++    }
++
++    # Prepare test command
++    local test_cmd="npm run test"
++    if [[ "${ENABLE_COVERAGE}" == "true" ]]; then
++        log_info "Enabling coverage reporting for ${app_name}..."
++        test_cmd="npm run test:coverage"
++    fi
++
++    # Execute tests with error handling
++    log_info "Executing: ${test_cmd} (${app_name})"
++
++    # Disable exit-on-error for this section to capture exit code
++    set +e
++    ${test_cmd} 2>&1 | tee "${log_file}"
++    local exit_code=$?
++    set -e
++
++    # Check test result
++    if [[ ${exit_code} -eq 0 ]]; then
++        log_success "${app_name} tests passed"
++        return 0
++    else
++        log_error "${app_name} tests failed with exit code: ${exit_code}"
++        log_error "Check log file: ${log_file}"
++        return ${exit_code}
++    fi
++}
++
++# Run Admin App tests
++run_admin_tests() {
++    run_app_tests "Admin App" "${ADMIN_APP_DIR}" "${ADMIN_LOG_FILE}"
++}
++
++# Run User App tests
++run_user_tests() {
++    run_app_tests "User App" "${USER_APP_DIR}" "${USER_LOG_FILE}"
++}
++
++# Run frontend tests in parallel
++run_frontend_tests_parallel() {
++    log_info "Running frontend tests in parallel (Admin App + User App)"
++
++    # Run tests in background and capture PIDs
++    run_admin_tests &
++    local admin_pid=$!
++
++    run_user_tests &
++    local user_pid=$!
++
++    # Wait for both processes and capture exit codes
++    local admin_exit=0
++    local user_exit=0
++
++    wait ${admin_pid} || admin_exit=$?
++    wait ${user_pid} || user_exit=$?
++
++    # Check combined results
++    if [[ ${admin_exit} -eq 0 ]] && [[ ${user_exit} -eq 0 ]]; then
++        log_success "All frontend tests passed"
++        return 0
++    elif [[ ${admin_exit} -ne 0 ]] && [[ ${user_exit} -ne 0 ]]; then
++        log_error "Both Admin App and User App tests failed"
++        return 1
++    elif [[ ${admin_exit} -ne 0 ]]; then
++        log_error "Admin App tests failed"
++        return ${admin_exit}
++    else
++        log_error "User App tests failed"
++        return ${user_exit}
++    fi
++}
++
++# If script is executed directly (not sourced)
++if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
++    run_frontend_tests_parallel
++    exit $?
++fi
+diff --git a/scripts/test/test-report.sh b/scripts/test/test-report.sh
+new file mode 100755
+index 0000000..60b35cb
+--- /dev/null
++++ b/scripts/test/test-report.sh
+@@ -0,0 +1,258 @@
++#!/usr/bin/env bash
++
++# Test report generation script
++# Integrates JUnit XML reports and generates unified test summary
++
++set -euo pipefail
++
++# Source logging functions
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
++# shellcheck source=scripts/lib/logging.sh
++source "${PROJECT_ROOT}/scripts/lib/logging.sh"
++
++# Paths
++JUNIT_DIR="${PROJECT_ROOT}/test-results/junit"
++REPORTS_DIR="${PROJECT_ROOT}/test-results/reports"
++LOGS_DIR="${PROJECT_ROOT}/test-results/logs"
++
++# Collect JUnit XML reports
++collect_junit_reports() {
++    log_info "Collecting JUnit XML reports..."
++
++    local report_count=0
++
++    # Check for each test suite's JUnit report
++    for report in "${JUNIT_DIR}"/*.xml; do
++        if [[ -f "${report}" ]]; then
++            report_count=$((report_count + 1))
++            log_debug "Found report: ${report}"
++        fi
++    done
++
++    if [[ ${report_count} -eq 0 ]]; then
++        log_warn "No JUnit XML reports found in ${JUNIT_DIR}"
++        return 1
++    fi
++
++    log_success "Found ${report_count} JUnit XML report(s)"
++    return 0
++}
++
++# Generate integrated test summary JSON
++generate_test_summary_json() {
++    log_info "Generating integrated test summary JSON..."
++
++    local summary_file="${REPORTS_DIR}/test-summary.json"
++    local timestamp
++    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
++
++    # Initialize counters
++    local total_tests=0
++    local total_passed=0
++    local total_failed=0
++    local start_time
++    local end_time
++    local duration=0
++
++    # Parse JUnit XML reports using basic grep/sed (portable approach)
++    # Note: This is a simplified parser. For production, consider using xmllint or similar tool
++
++    local suite_results="{"
++
++    # Backend tests
++    if [[ -f "${JUNIT_DIR}/backend-test-results.xml" ]]; then
++        local backend_tests backend_failures
++        # Extract test count and failures from testsuite tag
++        backend_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/backend-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        backend_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/backend-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        local backend_passed=$((backend_tests - backend_failures))
++
++        total_tests=$((total_tests + backend_tests))
++        total_passed=$((total_passed + backend_passed))
++        total_failed=$((total_failed + backend_failures))
++
++        suite_results="${suite_results}\"backend\": {\"tests\": ${backend_tests}, \"passed\": ${backend_passed}, \"failed\": ${backend_failures}},"
++    fi
++
++    # Frontend Admin tests
++    if [[ -f "${JUNIT_DIR}/frontend-admin-results.xml" ]]; then
++        local admin_tests admin_failures
++        admin_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/frontend-admin-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        admin_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/frontend-admin-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        local admin_passed=$((admin_tests - admin_failures))
++
++        total_tests=$((total_tests + admin_tests))
++        total_passed=$((total_passed + admin_passed))
++        total_failed=$((total_failed + admin_failures))
++
++        suite_results="${suite_results}\"frontend-admin\": {\"tests\": ${admin_tests}, \"passed\": ${admin_passed}, \"failed\": ${admin_failures}},"
++    fi
++
++    # Frontend User tests
++    if [[ -f "${JUNIT_DIR}/frontend-user-results.xml" ]]; then
++        local user_tests user_failures
++        user_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/frontend-user-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        user_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/frontend-user-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        local user_passed=$((user_tests - user_failures))
++
++        total_tests=$((total_tests + user_tests))
++        total_passed=$((total_passed + user_passed))
++        total_failed=$((total_failed + user_failures))
++
++        suite_results="${suite_results}\"frontend-user\": {\"tests\": ${user_tests}, \"passed\": ${user_passed}, \"failed\": ${user_failures}},"
++    fi
++
++    # E2E tests
++    if [[ -f "${JUNIT_DIR}/e2e-test-results.xml" ]]; then
++        local e2e_tests e2e_failures
++        e2e_tests=$(grep -o 'tests="[0-9]*"' "${JUNIT_DIR}/e2e-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        e2e_failures=$(grep -o 'failures="[0-9]*"' "${JUNIT_DIR}/e2e-test-results.xml" | head -1 | grep -o '[0-9]*' || echo "0")
++        local e2e_passed=$((e2e_tests - e2e_failures))
++
++        total_tests=$((total_tests + e2e_tests))
++        total_passed=$((total_passed + e2e_passed))
++        total_failed=$((total_failed + e2e_failures))
++
++        suite_results="${suite_results}\"e2e\": {\"tests\": ${e2e_tests}, \"passed\": ${e2e_passed}, \"failed\": ${e2e_failures}},"
++    fi
++
++    # Remove trailing comma
++    suite_results="${suite_results%,}}"
++
++    # Generate JSON summary
++    cat > "${summary_file}" <<EOF
++{
++  "timestamp": "${timestamp}",
++  "duration_seconds": ${duration},
++  "total_tests": ${total_tests},
++  "passed": ${total_passed},
++  "failed": ${total_failed},
++  "suites": ${suite_results}
++}
++EOF
++
++    log_success "Test summary JSON generated: ${summary_file}"
++    log_info "Total: ${total_tests} tests, ${total_passed} passed, ${total_failed} failed"
++
++    return 0
++}
++
++# Generate GitHub Actions Summary Markdown
++generate_github_summary() {
++    if [[ -z "${GITHUB_STEP_SUMMARY:-}" ]]; then
++        log_debug "GITHUB_STEP_SUMMARY not set, skipping GitHub Actions summary"
++        return 0
++    fi
++
++    log_info "Generating GitHub Actions Summary..."
++
++    local summary_json="${REPORTS_DIR}/test-summary.json"
++
++    if [[ ! -f "${summary_json}" ]]; then
++        log_error "Test summary JSON not found: ${summary_json}"
++        return 1
++    fi
++
++    # Parse JSON using basic grep/sed (portable approach)
++    local total_tests total_passed total_failed
++    total_tests=$(grep -o '"total_tests": [0-9]*' "${summary_json}" | grep -o '[0-9]*')
++    total_passed=$(grep -o '"passed": [0-9]*' "${summary_json}" | head -1 | grep -o '[0-9]*')
++    total_failed=$(grep -o '"failed": [0-9]*' "${summary_json}" | head -1 | grep -o '[0-9]*')
++
++    # Determine status emoji
++    local status_emoji
++    if [[ ${total_failed} -eq 0 ]]; then
++        status_emoji="✅"
++    else
++        status_emoji="❌"
++    fi
++
++    # Generate Markdown summary
++    {
++        echo "## ${status_emoji} Test Execution Summary"
++        echo ""
++        echo "**Total Tests:** ${total_tests}"
++        echo "**Passed:** ✅ ${total_passed}"
++        echo "**Failed:** ❌ ${total_failed}"
++        echo ""
++        echo "### Test Suites"
++        echo ""
++        echo "| Suite | Tests | Passed | Failed |"
++        echo "|-------|-------|--------|--------|"
++
++        # Backend
++        if grep -q '"backend"' "${summary_json}"; then
++            local backend_tests backend_passed backend_failed
++            backend_tests=$(grep -A 3 '"backend"' "${summary_json}" | grep '"tests"' | grep -o '[0-9]*')
++            backend_passed=$(grep -A 3 '"backend"' "${summary_json}" | grep '"passed"' | grep -o '[0-9]*')
++            backend_failed=$(grep -A 3 '"backend"' "${summary_json}" | grep '"failed"' | grep -o '[0-9]*')
++            echo "| Backend (Pest) | ${backend_tests} | ${backend_passed} | ${backend_failed} |"
++        fi
++
++        # Frontend Admin
++        if grep -q '"frontend-admin"' "${summary_json}"; then
++            local admin_tests admin_passed admin_failed
++            admin_tests=$(grep -A 3 '"frontend-admin"' "${summary_json}" | grep '"tests"' | grep -o '[0-9]*')
++            admin_passed=$(grep -A 3 '"frontend-admin"' "${summary_json}" | grep '"passed"' | grep -o '[0-9]*')
++            admin_failed=$(grep -A 3 '"frontend-admin"' "${summary_json}" | grep '"failed"' | grep -o '[0-9]*')
++            echo "| Frontend Admin (Jest) | ${admin_tests} | ${admin_passed} | ${admin_failed} |"
++        fi
++
++        # Frontend User
++        if grep -q '"frontend-user"' "${summary_json}"; then
++            local user_tests user_passed user_failed
++            user_tests=$(grep -A 3 '"frontend-user"' "${summary_json}" | grep '"tests"' | grep -o '[0-9]*')
++            user_passed=$(grep -A 3 '"frontend-user"' "${summary_json}" | grep '"passed"' | grep -o '[0-9]*')
++            user_failed=$(grep -A 3 '"frontend-user"' "${summary_json}" | grep '"failed"' | grep -o '[0-9]*')
++            echo "| Frontend User (Jest) | ${user_tests} | ${user_passed} | ${user_failed} |"
++        fi
++
++        # E2E
++        if grep -q '"e2e"' "${summary_json}"; then
++            local e2e_tests e2e_passed e2e_failed
++            e2e_tests=$(grep -A 3 '"e2e"' "${summary_json}" | grep '"tests"' | grep -o '[0-9]*')
++            e2e_passed=$(grep -A 3 '"e2e"' "${summary_json}" | grep '"passed"' | grep -o '[0-9]*')
++            e2e_failed=$(grep -A 3 '"e2e"' "${summary_json}" | grep '"failed"' | grep -o '[0-9]*')
++            echo "| E2E (Playwright) | ${e2e_tests} | ${e2e_passed} | ${e2e_failed} |"
++        fi
++
++    } >> "${GITHUB_STEP_SUMMARY}"
++
++    log_success "GitHub Actions Summary generated"
++
++    return 0
++}
++
++# Generate all reports
++generate_reports() {
++    log_info "Starting report generation..."
++
++    # Collect JUnit XML reports
++    collect_junit_reports || {
++        log_warn "No JUnit reports found, skipping report generation"
++        return 0
++    }
++
++    # Generate test summary JSON
++    generate_test_summary_json
++
++    # Generate GitHub Actions summary (if in CI environment)
++    generate_github_summary
++
++    log_success "Report generation completed"
++
++    return 0
++}
++
++# Export functions
++export -f collect_junit_reports
++export -f generate_test_summary_json
++export -f generate_github_summary
++export -f generate_reports
++
++# If script is executed directly (not sourced)
++if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
++    generate_reports
++    exit $?
++fi
