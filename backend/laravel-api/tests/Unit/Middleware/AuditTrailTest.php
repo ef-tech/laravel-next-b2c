@@ -22,7 +22,7 @@ describe('AuditTrail', function () {
             ->once()
             ->with(Mockery::on(function ($event) {
                 return isset($event['user_id'])
-                    && $event['user_id'] === '123'
+                    && $event['user_id'] === 123
                     && isset($event['action'])
                     && $event['action'] === 'POST'
                     && isset($event['resource'])
@@ -40,7 +40,7 @@ describe('AuditTrail', function () {
         $request->server->set('REMOTE_ADDR', '192.168.1.1');
 
         $user = new User;
-        $user->id = '123';
+        $user->id = 123;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -68,7 +68,7 @@ describe('AuditTrail', function () {
         ]);
 
         $user = new User;
-        $user->id = '456';
+        $user->id = 456;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -92,7 +92,7 @@ describe('AuditTrail', function () {
         $request = Request::create('/api/users', 'GET');
 
         $user = new User;
-        $user->id = '789';
+        $user->id = 789;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -151,7 +151,7 @@ describe('AuditTrail', function () {
         ]);
 
         $user = new User;
-        $user->id = '123';
+        $user->id = 123;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -177,7 +177,7 @@ describe('AuditTrail', function () {
         $request = Request::create('/api/users', 'DELETE');
 
         $user = new User;
-        $user->id = '999';
+        $user->id = 999;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });

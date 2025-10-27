@@ -107,7 +107,7 @@ describe('RequestLogging', function () {
 
         // 認証済みユーザーをモック
         $user = new \App\Models\User;
-        $user->id = '123';
+        $user->id = 123;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
