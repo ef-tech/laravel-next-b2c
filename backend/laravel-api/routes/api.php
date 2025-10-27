@@ -29,7 +29,7 @@ Route::middleware('throttle:5,1')->group(function () {
 });
 
 // Protected routes with rate limiting (60 requests per minute)
-Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+Route::middleware(['auth:sanctum', 'user.guard', 'throttle:60,1'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 

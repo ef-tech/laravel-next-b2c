@@ -95,6 +95,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'cache.headers' => \App\Http\Middleware\CacheHeaders::class,
             'etag' => \App\Http\Middleware\ETag::class,
             'admin.guard' => \App\Http\Middleware\AdminGuard::class,
+            'user.guard' => \App\Http\Middleware\UserGuard::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
