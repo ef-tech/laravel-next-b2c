@@ -86,8 +86,8 @@
   - 既存UserRepositoryバインディングのパターンを踏襲
   - _Requirements: 4.4_
 
-- [ ] 5. Presentation層実装（API Controller とミドルウェア）
-- [ ] 5.1 AdminLoginControllerを実装
+- [x] 5. Presentation層実装（API Controller とミドルウェア）
+- [x] 5.1 AdminLoginControllerを実装
   - POST /api/v1/admin/login エンドポイント処理
   - LoginRequest作成（email必須・email形式、password必須・最低8文字バリデーション）
   - LoginAdminUseCaseを呼び出し
@@ -95,28 +95,28 @@
   - 失敗時: 統一エラーレスポンス形式（code、message、errors、trace_id）
   - _Requirements: 5.1, 5.2, 5.3, 5.6_
 
-- [ ] 5.2 AdminLogoutControllerを実装
+- [x] 5.2 AdminLogoutControllerを実装
   - POST /api/v1/admin/logout エンドポイント処理
   - auth:admin middleware保護
   - LogoutAdminUseCaseを呼び出し
   - 成功時: 200 OK（空レスポンス）
   - _Requirements: 5.4, 5.6_
 
-- [ ] 5.3 AdminDashboardControllerを実装
+- [x] 5.3 AdminDashboardControllerを実装
   - GET /api/v1/admin/dashboard エンドポイント処理
   - auth:admin + AdminGuard middleware保護
   - GetAuthenticatedAdminUseCaseを呼び出し
   - 成功時: 200 OK（admin リソース）
   - _Requirements: 5.5, 5.6_
 
-- [ ] 6. Sanctumマルチガード認証設定とミドルウェア
-- [ ] 6.1 config/auth.phpにadminガード追加
+- [x] 6. Sanctumマルチガード認証設定とミドルウェア
+- [x] 6.1 config/auth.phpにadminガード追加
   - 'api'ガード定義（provider: users、既存実装）
   - 'admin'ガード定義（provider: admins、新規追加）
   - adminプロバイダー定義（driver: eloquent、model: App\Models\Admin）
   - _Requirements: 6.1, 6.2_
 
-- [ ] 6.2 AdminGuard Middlewareを実装
+- [x] 6.2 AdminGuard Middlewareを実装
   - $request->user('admin')で認証確認
   - Admin型チェック（instanceof Admin）
   - 非Admin型の場合: 401 Unauthorizedをスロー
