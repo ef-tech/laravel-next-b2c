@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import LogoutButton from "@/components/LogoutButton";
 
-// Force dynamic rendering to prevent static generation
-export const dynamic = "force-dynamic";
-
 /**
  * プロフィールページ
  *
