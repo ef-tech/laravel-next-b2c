@@ -1,4 +1,5 @@
 import { env } from "./env";
+import { handleApiError, ApiError } from "./api-error-handler";
 
 /**
  * APIバージョニングされたエンドポイントURLを構築
@@ -23,6 +24,51 @@ export function buildApiUrl(endpoint: string): string {
   return `${baseUrl}/api/${version}/${cleanEndpoint}`;
 }
 
+/**
+ * エラーコード別処理分岐ヘルパー
+ */
+export const ErrorHandlers = {
+  /**
+   * 認証エラーかどうかを判定
+   */
+  isAuthError(error: unknown): boolean {
+    return (
+      error instanceof ApiError &&
+      (error.code === "AUTH.INVALID_CREDENTIALS" ||
+        error.code === "AUTH.TOKEN_EXPIRED" ||
+        error.code === "AUTH.ACCOUNT_DISABLED")
+    );
+  },
+
+  /**
+   * バリデーションエラーかどうかを判定
+   */
+  isValidationError(error: unknown): boolean {
+    return error instanceof ApiError && error.code === "VALIDATION_ERROR";
+  },
+
+  /**
+   * 認証情報不正エラーかどうかを判定
+   */
+  isInvalidCredentials(error: unknown): boolean {
+    return error instanceof ApiError && error.code === "AUTH.INVALID_CREDENTIALS";
+  },
+
+  /**
+   * アカウント無効化エラーかどうかを判定
+   */
+  isAccountDisabled(error: unknown): boolean {
+    return error instanceof ApiError && error.code === "AUTH.ACCOUNT_DISABLED";
+  },
+
+  /**
+   * トークン期限切れエラーかどうかを判定
+   */
+  isTokenExpired(error: unknown): boolean {
+    return error instanceof ApiError && error.code === "AUTH.TOKEN_EXPIRED";
+  },
+};
+
 interface User {
   id: number;
   name: string;
@@ -33,9 +79,12 @@ export async function fetchUsers(): Promise<User[]> {
   const response = await fetch("/api/users");
 
   if (!response.ok) {
-    throw new Error("Failed to fetch users");
+    await handleApiError(response);
   }
 
   const users = await response.json();
   return users;
 }
+
+// Re-export for convenience
+export { ApiError, handleApiError };

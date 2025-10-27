@@ -173,11 +173,19 @@
   - Featureテスト完了（5テスト成功）
   - _Requirements: 8.1, 8.4, 8.6_
 
-- [ ] 8.3 フロントエンドAPIクライアントエラーハンドリングを実装
-  - トーストUIでエラーメッセージ表示
-  - trace_idをログに記録（デバッグ用）
-  - エラーコード別処理分岐（AUTH.INVALID_CREDENTIALS、AUTH.ACCOUNT_DISABLED等）
+- [x] 8.3 フロントエンドAPIクライアントエラーハンドリングを実装
+  - ApiError class作成（code, message, statusCode, traceId, errors）
+  - handleApiError()関数実装（統一エラーレスポンス処理）
+  - trace_idをconsole.errorでログに記録（デバッグ用）
+  - ErrorHandlersヘルパー実装（エラーコード別処理分岐）
+    - isAuthError(): AUTH.INVALID_CREDENTIALS | AUTH.TOKEN_EXPIRED | AUTH.ACCOUNT_DISABLED
+    - isValidationError(): VALIDATION_ERROR
+    - isInvalidCredentials(), isAccountDisabled(), isTokenExpired()
+  - admin-app: 18テスト成功（api-error-handler.test.ts: 7, api.test.ts: 11）
+  - user-app: 18テスト成功（api-error-handler.test.ts: 7, api.test.ts: 11）
+  - 全テストスイート成功（admin-app: 73, user-app: 69）
   - _Requirements: 8.5, 8.6_
+  - 注: トーストUI表示は Task 9/10 の認証Context実装時に統合
 
 - [ ] 9. User App認証機能実装
 - [ ] 9.1 User App AuthContextを作成
