@@ -67,9 +67,8 @@ test('SanctumTokenService can revoke token', function () {
     // Act
     $tokenService->revokeToken($tokenId);
 
-    // Assert: Token should be soft-deleted
+    // Assert: Token should be deleted (hard delete)
     $this->assertDatabaseMissing('personal_access_tokens', [
         'id' => $tokenId,
-        'deleted_at' => null,
     ]);
 });

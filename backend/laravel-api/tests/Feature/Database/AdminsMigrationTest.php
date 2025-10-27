@@ -49,6 +49,6 @@ test('admins role column exists and has correct type', function () {
 
 test('admins is_active column exists and has correct type', function () {
     $columnType = Schema::getColumnType('admins', 'is_active');
-    // SQLiteでは'tinyint'として返される（booleanの内部表現）
-    expect($columnType)->toBeIn(['boolean', 'tinyint']);
+    // SQLiteでは'tinyint'、PostgreSQLでは'bool'、MySQLでは'boolean'として返される
+    expect($columnType)->toBeIn(['boolean', 'tinyint', 'bool']);
 });
