@@ -1,23 +1,23 @@
-import { type Page, expect } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
 /**
- * Admin Login Page Object
+ * User Login Page Object
  *
- * Provides methods to interact with the admin login page
+ * Provides methods to interact with the user login page
  * using the Page Object Model pattern for reusable test code.
  *
  * @example
  * ```typescript
- * const loginPage = new AdminLoginPage(page);
+ * const loginPage = new UserLoginPage(page);
  * await loginPage.goto();
- * await loginPage.login('admin@example.com', 'password123');
+ * await loginPage.login('user@example.com', 'password123');
  * ```
  */
-export class AdminLoginPage {
+export class UserLoginPage {
   constructor(private readonly page: Page) {}
 
   /**
-   * Navigate to the admin login page
+   * Navigate to the user login page
    *
    * Waits for the login form to be visible before proceeding
    */
@@ -30,7 +30,7 @@ export class AdminLoginPage {
    * Perform login with email and password
    *
    * Fills in the login form and submits, then waits for
-   * successful navigation to the dashboard.
+   * successful navigation to the profile page.
    *
    * @param email - User email address
    * @param password - User password
@@ -45,8 +45,8 @@ export class AdminLoginPage {
     // Submit login form
     await this.page.click('button[type="submit"]');
 
-    // Wait for navigation to dashboard
-    await this.page.waitForURL('**/dashboard', { timeout: 5000 });
+    // Wait for navigation to profile page
+    await this.page.waitForURL('**/profile', { timeout: 5000 });
   }
 
   /**
