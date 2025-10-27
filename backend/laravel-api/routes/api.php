@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TokenController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\V1\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\V1\Admin\LoginController as AdminLoginController;
 use App\Http\Controllers\Api\V1\Admin\LogoutController as AdminLogoutController;
 use App\Http\Controllers\CspReportController;
@@ -51,6 +52,7 @@ Route::prefix('v1')->name('v1.')->group(function () {
         // Protected routes (authentication required)
         Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('/logout', AdminLogoutController::class)->name('logout');
+            Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         });
     });
 });
