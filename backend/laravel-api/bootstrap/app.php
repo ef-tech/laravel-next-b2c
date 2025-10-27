@@ -99,11 +99,30 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Handle DDD Domain Exceptions
-        $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e, \Illuminate\Http\Request $request) {
+        // Handle InvalidCredentialsException（認証エラー: 401）
+        $exceptions->render(function (\Ddd\Domain\Admin\Exceptions\InvalidCredentialsException $e, \Illuminate\Http\Request $request) {
             return response()->json([
-                'error' => $e->getErrorCode(),
+                'code' => $e->getErrorCode(),
                 'message' => $e->getMessage(),
+                'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
+            ], $e->getStatusCode());
+        });
+
+        // Handle AccountDisabledException（アカウント無効化: 403）
+        $exceptions->render(function (\Ddd\Domain\Admin\Exceptions\AccountDisabledException $e, \Illuminate\Http\Request $request) {
+            return response()->json([
+                'code' => $e->getErrorCode(),
+                'message' => $e->getMessage(),
+                'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
+            ], $e->getStatusCode());
+        });
+
+        // Handle AdminNotFoundException（管理者未検出: 404）
+        $exceptions->render(function (\Ddd\Domain\Admin\Exceptions\AdminNotFoundException $e, \Illuminate\Http\Request $request) {
+            return response()->json([
+                'code' => $e->getErrorCode(),
+                'message' => $e->getMessage(),
+                'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
             ], $e->getStatusCode());
         });
 

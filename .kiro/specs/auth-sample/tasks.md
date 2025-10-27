@@ -152,19 +152,25 @@
   - _Requirements: 7.4, 7.5, 7.6_
 
 - [ ] 8. 統一エラーハンドリング実装
-- [ ] 8.1 カスタム例外クラスを作成
+- [x] 8.1 カスタム例外クラスを作成
   - InvalidCredentialsException作成（DomainException継承、code: AUTH.INVALID_CREDENTIALS）
   - AccountDisabledException作成（DomainException継承、code: AUTH.ACCOUNT_DISABLED）
   - AdminNotFoundException作成（DomainException継承、code: ADMIN_NOT_FOUND）
   - ApplicationExceptionベースクラス作成
+  - getErrorCode()メソッド実装（文字列エラーコード取得）
+  - ユニットテスト完了（7テスト成功）
   - _Requirements: 8.2, 8.3_
 
-- [ ] 8.2 グローバルエラーハンドラーを更新
-  - app/Exceptions/Handler.phpのrenderable()メソッド更新
+- [x] 8.2 グローバルエラーハンドラーを更新
+  - bootstrap/app.phpのwithExceptions()クロージャ更新（Laravel 12はHandlerクラスなし）
   - 統一エラーレスポンス形式実装（code、message、errors、trace_id）
   - trace_idとしてリクエストUUIDを含める（SetRequestId middleware連携）
-  - バリデーションエラー時: 422 Unprocessable Entity（code: VALIDATION_ERROR、errors: フィールド別エラー配列）
-  - 認証エラー時: 401 OK（code別メッセージ）
+  - InvalidCredentialsException: 401 Unauthorized（code: AUTH.INVALID_CREDENTIALS）
+  - AccountDisabledException: 403 Forbidden（code: AUTH.ACCOUNT_DISABLED）
+  - AdminNotFoundException: 404 Not Found（code: ADMIN_NOT_FOUND）
+  - ValidationException: 422 Unprocessable Entity（code: VALIDATION_ERROR、errors: フィールド別エラー配列）
+  - getStatusCode()メソッド実装（各例外クラスに適切なHTTPステータスコード）
+  - Featureテスト完了（5テスト成功）
   - _Requirements: 8.1, 8.4, 8.6_
 
 - [ ] 8.3 フロントエンドAPIクライアントエラーハンドリングを実装
