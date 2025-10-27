@@ -147,7 +147,7 @@ describe('AuthorizationCheck', function () {
                 return isset($context['request_id'])
                     && $context['request_id'] === 'test-request-id-999'
                     && isset($context['user_id'])
-                    && $context['user_id'] === '789'
+                    && $context['user_id'] === 789
                     && isset($context['permission'])
                     && $context['permission'] === 'user'
                     && isset($context['result'])

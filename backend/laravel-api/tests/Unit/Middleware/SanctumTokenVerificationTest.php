@@ -115,7 +115,7 @@ describe('SanctumTokenVerification', function () {
                 return isset($context['request_id'])
                     && $context['request_id'] === 'test-request-id-789'
                     && isset($context['user_id'])
-                    && $context['user_id'] === '456';
+                    && $context['user_id'] === 456;
             }));
 
         $response = $middleware->handle($request, function ($req) {
