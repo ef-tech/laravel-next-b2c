@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ErrorHandlers } from "@/lib/api";
 
+// Force dynamic rendering to prevent static generation
+export const dynamic = "force-dynamic";
+
 /**
  * バリデーションエラーの型定義
  */
