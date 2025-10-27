@@ -69,8 +69,8 @@ export default function LoginPage() {
     try {
       await login(email, password);
 
-      // ログイン成功時にホーム画面へリダイレクト
-      router.push("/");
+      // ログイン成功時にプロフィール画面へリダイレクト
+      router.push("/profile");
     } catch (error) {
       // エラーハンドリング（Task 8.3のErrorHandlers使用）
       if (ErrorHandlers.isInvalidCredentials(error)) {
