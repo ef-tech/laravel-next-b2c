@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Models\Admin;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminGuard
@@ -23,14 +24,20 @@ class AdminGuard
         // Admin型チェック
         if (! $admin instanceof Admin) {
             return response()->json([
-                'message' => 'Unauthorized',
+                'code' => 'AUTH.UNAUTHORIZED',
+                'message' => '認証が必要です',
+                'errors' => null,
+                'trace_id' => $request->header('X-Request-Id') ?? Str::uuid()->toString(),
             ], 401);
         }
 
         // is_activeチェック
         if (! $admin->is_active) {
             return response()->json([
-                'message' => 'Account is disabled',
+                'code' => 'AUTH.ACCOUNT_DISABLED',
+                'message' => 'アカウントが無効です',
+                'errors' => null,
+                'trace_id' => $request->header('X-Request-Id') ?? Str::uuid()->toString(),
             ], 403);
         }
 

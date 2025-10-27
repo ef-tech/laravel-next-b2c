@@ -78,7 +78,14 @@ test('GET /api/v1/admin/dashboard → 非アクティブ管理者は403 Forbidde
         ->getJson('/api/v1/admin/dashboard');
 
     $response->assertStatus(403)
+        ->assertJsonStructure([
+            'code',
+            'message',
+            'errors',
+            'trace_id',
+        ])
         ->assertJson([
-            'message' => 'Account is disabled',
+            'code' => 'AUTH.ACCOUNT_DISABLED',
+            'message' => 'アカウントが無効です',
         ]);
 });

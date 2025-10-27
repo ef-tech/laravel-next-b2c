@@ -47,8 +47,14 @@ test('AdminGuard → is_active=falseのAdminの場合に403 Forbiddenを返す',
         ->getJson('/api/v1/admin/dashboard');
 
     $response->assertStatus(403)
+        ->assertJsonStructure([
+            'code',
+            'message',
+            'trace_id',
+        ])
         ->assertJson([
-            'message' => 'Account is disabled',
+            'code' => 'AUTH.ACCOUNT_DISABLED',
+            'message' => 'アカウントが無効です',
         ]);
 });
 
@@ -57,8 +63,14 @@ test('AdminGuard → User型トークンの場合に401 Unauthorizedを返す', 
         ->getJson('/api/v1/admin/dashboard');
 
     $response->assertStatus(401)
+        ->assertJsonStructure([
+            'code',
+            'message',
+            'trace_id',
+        ])
         ->assertJson([
-            'message' => 'Unauthorized',
+            'code' => 'AUTH.UNAUTHORIZED',
+            'message' => '認証が必要です',
         ]);
 });
 

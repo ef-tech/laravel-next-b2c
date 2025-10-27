@@ -104,6 +104,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'code' => $e->getErrorCode(),
                 'message' => $e->getMessage(),
+                'errors' => null,
                 'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
             ], $e->getStatusCode());
         });
@@ -113,6 +114,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'code' => $e->getErrorCode(),
                 'message' => $e->getMessage(),
+                'errors' => null,
                 'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
             ], $e->getStatusCode());
         });
@@ -122,6 +124,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'code' => $e->getErrorCode(),
                 'message' => $e->getMessage(),
+                'errors' => null,
                 'trace_id' => $request->header('X-Request-Id') ?? \Illuminate\Support\Str::uuid()->toString(),
             ], $e->getStatusCode());
         });

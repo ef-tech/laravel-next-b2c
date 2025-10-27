@@ -9,6 +9,7 @@ use App\Http\Requests\Api\LoginRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -22,7 +23,10 @@ class LoginController extends Controller
 
         if (! $user || ! Hash::check($request->password, $user->password ?? '')) {
             return response()->json([
-                'message' => 'Invalid credentials',
+                'code' => 'AUTH.INVALID_CREDENTIALS',
+                'message' => '認証情報が無効です',
+                'errors' => null,
+                'trace_id' => $request->header('X-Request-Id') ?? Str::uuid()->toString(),
             ], 401);
         }
 
