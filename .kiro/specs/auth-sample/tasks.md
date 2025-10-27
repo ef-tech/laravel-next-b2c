@@ -290,13 +290,16 @@
   - AdminAuthContextで認証状態管理済み
   - _Requirements: 10.6_
 
-- [ ] 11. 権限分離検証実装
-- [ ] 11.1 personal_access_tokensテーブルのtokenable_type検証
-  - UserトークンでAdmin APIエンドポイントアクセス時に401 Unauthorizedを返す
-  - AdminトークンでUser専用APIエンドポイントアクセス時に401 Unauthorizedを返す
-  - tokenable_typeカラムでApp\Models\UserまたはApp\Models\Adminを区別
-  - AdminGuard middlewareでtokenable_type=App\Models\Admin検証
-  - UserGuard middlewareでtokenable_type=App\Models\User検証
+- [x] 11. 権限分離検証実装
+- [x] 11.1 personal_access_tokensテーブルのtokenable_type検証
+  - UserトークンでAdmin APIエンドポイントアクセス時に401 Unauthorizedを返す ✅
+  - AdminトークンでUser専用APIエンドポイントアクセス時に401 Unauthorizedを返す ✅
+  - tokenable_typeカラムでApp\Models\UserまたはApp\Models\Adminを区別 ✅
+  - AdminGuard middlewareでtokenable_type=App\Models\Admin検証 ✅
+  - UserGuard middlewareでtokenable_type=App\Models\User検証 ✅
+  - AdminGuardTest.php: 5テスト成功（Admin型チェック、is_activeチェック、tokenable_type検証）
+  - UserGuardTest.php: 4テスト成功（User型チェック、tokenable_type検証）
+  - 全9テスト成功（0.48秒）
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
 - [ ] 12. バックエンドテスト実装（Pest 4）
