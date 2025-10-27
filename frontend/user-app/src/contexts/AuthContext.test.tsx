@@ -120,7 +120,7 @@ describe("AuthContext", () => {
     });
 
     it("ログイン中はisLoadingがtrueになる", async () => {
-      let resolveLogin: (value: any) => void;
+      let resolveLogin: (value: unknown) => void;
       const loginPromise = new Promise((resolve) => {
         resolveLogin = resolve;
       });

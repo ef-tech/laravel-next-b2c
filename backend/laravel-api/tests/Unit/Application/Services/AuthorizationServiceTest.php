@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Models\User;
 use Ddd\Application\Shared\Services\Authorization\AuthorizationService;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * AuthorizationService ポートのテスト
@@ -20,7 +20,7 @@ describe('AuthorizationService', function () {
             ->toBeTrue('authorizeメソッドが定義されていること');
     });
 
-    it('authorizeメソッドがUser型とstring型を受け取りbool型を返すこと', function () {
+    it('authorizeメソッドがAuthenticatable型とstring型を受け取りbool型を返すこと', function () {
         $reflection = new ReflectionMethod(AuthorizationService::class, 'authorize');
 
         // パラメータ数の確認
@@ -31,7 +31,7 @@ describe('AuthorizationService', function () {
         $firstParam = $reflection->getParameters()[0];
         expect($firstParam->getName())->toBe('user', '第1パラメータ名はuserであること');
         expect($firstParam->getType())->not->toBeNull('第1パラメータに型が指定されていること');
-        expect($firstParam->getType()->getName())->toBe(User::class, '第1パラメータはUser型であること');
+        expect($firstParam->getType()->getName())->toBe(Authenticatable::class, '第1パラメータはAuthenticatable型であること');
 
         // 第2パラメータの型確認
         $secondParam = $reflection->getParameters()[1];

@@ -184,7 +184,6 @@ describe("LoginPage", () => {
   });
 
   it("ログイン処理中はボタンが無効化される", async () => {
-    const user = userEvent.setup();
     (useAuth as jest.Mock).mockReturnValue({
       login: mockLogin,
       isLoading: true,

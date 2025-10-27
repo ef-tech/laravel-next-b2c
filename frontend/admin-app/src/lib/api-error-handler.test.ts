@@ -57,16 +57,12 @@ describe("handleApiError", () => {
         }) as ApiErrorResponse,
     } as Response;
 
-    await expect(handleApiError(mockResponse)).rejects.toThrow(ApiError);
+    const error = await handleApiError(mockResponse).catch((e) => e);
 
-    try {
-      await handleApiError(mockResponse);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ApiError);
-      expect((error as ApiError).code).toBe("AUTH.INVALID_CREDENTIALS");
-      expect((error as ApiError).statusCode).toBe(401);
-      expect((error as ApiError).traceId).toBe("req-789");
-    }
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.code).toBe("AUTH.INVALID_CREDENTIALS");
+    expect(error.statusCode).toBe(401);
+    expect(error.traceId).toBe("req-789");
   });
 
   it("handles 403 AccountDisabled error", async () => {
@@ -81,15 +77,11 @@ describe("handleApiError", () => {
         }) as ApiErrorResponse,
     } as Response;
 
-    await expect(handleApiError(mockResponse)).rejects.toThrow(ApiError);
+    const error = await handleApiError(mockResponse).catch((e) => e);
 
-    try {
-      await handleApiError(mockResponse);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ApiError);
-      expect((error as ApiError).code).toBe("AUTH.ACCOUNT_DISABLED");
-      expect((error as ApiError).statusCode).toBe(403);
-    }
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.code).toBe("AUTH.ACCOUNT_DISABLED");
+    expect(error.statusCode).toBe(403);
   });
 
   it("handles 422 Validation error with field errors", async () => {
@@ -108,14 +100,12 @@ describe("handleApiError", () => {
         }) as ApiErrorResponse,
     } as Response;
 
-    try {
-      await handleApiError(mockResponse);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ApiError);
-      expect((error as ApiError).code).toBe("VALIDATION_ERROR");
-      expect((error as ApiError).errors).toHaveProperty("email");
-      expect((error as ApiError).errors).toHaveProperty("password");
-    }
+    const error = await handleApiError(mockResponse).catch((e) => e);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.code).toBe("VALIDATION_ERROR");
+    expect(error.errors).toHaveProperty("email");
+    expect(error.errors).toHaveProperty("password");
   });
 
   it("logs trace_id for debugging", async () => {
@@ -130,14 +120,14 @@ describe("handleApiError", () => {
         }) as ApiErrorResponse,
     } as Response;
 
-    try {
-      await handleApiError(mockResponse);
-    } catch (error) {
-      // trace_idがログに記録されることを確認
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        expect.stringContaining("trace_id: req-error-123"),
-      );
-    }
+    await handleApiError(mockResponse).catch(() => {
+      // Catch the error to prevent test failure
+    });
+
+    // trace_idがログに記録されることを確認
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining("trace_id: req-error-123"),
+    );
   });
 
   it("handles non-JSON error response", async () => {
@@ -150,12 +140,10 @@ describe("handleApiError", () => {
       },
     } as Response;
 
-    try {
-      await handleApiError(mockResponse);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ApiError);
-      expect((error as ApiError).code).toBe("UNKNOWN_ERROR");
-      expect((error as ApiError).message).toContain("Internal Server Error");
-    }
+    const error = await handleApiError(mockResponse).catch((e) => e);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.code).toBe("UNKNOWN_ERROR");
+    expect(error.message).toContain("Internal Server Error");
   });
 });

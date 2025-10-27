@@ -184,7 +184,6 @@ describe("LoginPage (Admin App)", () => {
   });
 
   it("ログイン処理中はボタンが無効化される", async () => {
-    const user = userEvent.setup();
     (useAdminAuth as jest.Mock).mockReturnValue({
       login: mockLogin,
       isLoading: true,

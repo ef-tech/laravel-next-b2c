@@ -102,14 +102,10 @@ describe("API Functions", () => {
       }),
     ) as jest.Mock;
 
-    await expect(fetchUsers()).rejects.toThrow(ApiError);
+    const error = await fetchUsers().catch((e) => e);
 
-    try {
-      await fetchUsers();
-    } catch (error) {
-      expect(error).toBeInstanceOf(ApiError);
-      expect((error as ApiError).code).toBe("INTERNAL_ERROR");
-      expect((error as ApiError).traceId).toBe("req-test-123");
-    }
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.code).toBe("INTERNAL_ERROR");
+    expect(error.traceId).toBe("req-test-123");
   });
 });

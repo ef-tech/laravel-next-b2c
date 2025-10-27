@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ddd\Application\Shared\Services\Authorization;
 
-use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Authorization Service Port
@@ -21,9 +21,9 @@ interface AuthorizationService
     /**
      * ユーザーが指定された権限を持つかを判定する
      *
-     * @param  User  $user  認証済みユーザー
+     * @param  Authenticatable  $user  認証済みユーザー（User または Admin）
      * @param  string  $permission  要求される権限（例: 'admin', 'user.edit', 'post.delete'）
      * @return bool 権限がある場合はtrue、ない場合はfalse
      */
-    public function authorize(User $user, string $permission): bool;
+    public function authorize(Authenticatable $user, string $permission): bool;
 }

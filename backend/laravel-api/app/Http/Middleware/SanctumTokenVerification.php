@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -65,13 +66,13 @@ final class SanctumTokenVerification
     /**
      * トークン検証成功時のログ記録
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable&\App\Models\User  $user
+     * @param  Authenticatable  $user  認証済みユーザー（User または Admin）
      */
-    private function logVerificationSuccess(Request $request, $user): void
+    private function logVerificationSuccess(Request $request, Authenticatable $user): void
     {
         Log::channel('security')->info('Token verification successful', [
             'request_id' => $request->header('X-Request-Id'),
-            'user_id' => $user->id,
+            'user_id' => $user->getAuthIdentifier(),
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'timestamp' => now()->toIso8601String(),
