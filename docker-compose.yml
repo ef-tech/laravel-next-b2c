@@ -47,62 +47,16 @@ services:
       - api
 
   # ============================================
-  # Admin App (Next.js)
+  # Next.js Apps (admin-app, user-app)
   # ============================================
-  admin-app:
-    build:
-      context: .
-      dockerfile: ./frontend/admin-app/Dockerfile
-    container_name: admin-app
-    ports:
-      - '13002:13002'
-    environment:
-      NODE_ENV: production
-      PORT: 13002
-      HOSTNAME: '0.0.0.0'
-      NEXT_PUBLIC_API_URL: 'http://laravel-api:13000'
-    networks:
-      - app-network
-    depends_on:
-      laravel-api:
-        condition: service_healthy
-    profiles:
-      - frontend
-    # Hot Reload対応（開発環境用）
-    # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
-    # volumes:
-    #   - './frontend/admin-app:/app/frontend/admin-app'
-    #   - '/app/frontend/admin-app/node_modules'
-    #   - '/app/frontend/admin-app/.next'
-
-  # ============================================
-  # User App (Next.js)
-  # ============================================
-  user-app:
-    build:
-      context: .
-      dockerfile: ./frontend/user-app/Dockerfile
-    container_name: user-app
-    ports:
-      - '13001:13001'
-    environment:
-      NODE_ENV: production
-      PORT: 13001
-      HOSTNAME: '0.0.0.0'
-      NEXT_PUBLIC_API_URL: 'http://laravel-api:13000'
-    networks:
-      - app-network
-    depends_on:
-      laravel-api:
-        condition: service_healthy
-    profiles:
-      - frontend
-    # Hot Reload対応（開発環境用）
-    # Note: volume mountsはstandaloneビルドを上書きするため本番環境では無効化
-    # volumes:
-    #   - './frontend/user-app:/app/frontend/user-app'
-    #   - '/app/frontend/user-app/node_modules'
-    #   - '/app/frontend/user-app/.next'
+  # Next.jsアプリはネイティブ起動を推奨
+  # 開発環境では以下のコマンドでネイティブ起動してください：
+  #
+  # Terminal 2: cd frontend/admin-app && npm run dev (ポート: 13002)
+  # Terminal 3: cd frontend/user-app && npm run dev (ポート: 13001)
+  #
+  # ネイティブ起動により、Turbopackの最高速パフォーマンスと
+  # 完璧なホットリロードを実現します。
 
   # ============================================
   # E2E Tests (Playwright)
@@ -112,8 +66,9 @@ services:
     container_name: e2e-tests
     working_dir: /app
     environment:
-      E2E_ADMIN_URL: 'http://admin-app:13002'
-      E2E_USER_URL: 'http://user-app:13001'
+      # Next.jsアプリはネイティブ起動のため、localhostでアクセス
+      E2E_ADMIN_URL: 'http://localhost:13002'
+      E2E_USER_URL: 'http://localhost:13001'
       E2E_API_URL: 'http://laravel-api:13000'
       E2E_ADMIN_EMAIL: '${E2E_ADMIN_EMAIL:-admin@example.com}'
       E2E_ADMIN_PASSWORD: '${E2E_ADMIN_PASSWORD:-password}'
@@ -124,10 +79,7 @@ services:
     networks:
       - app-network
     depends_on:
-      admin-app:
-        condition: service_healthy
-      user-app:
-        condition: service_healthy
+      # Next.jsアプリはネイティブ起動のため、Laravel APIのみに依存
       laravel-api:
         condition: service_healthy
     shm_size: '1gb'
