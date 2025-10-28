@@ -6,6 +6,16 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\CspReportController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Laravel API routes with Sanctum authentication and rate limiting.
+| Hot reload enabled: Code changes reflect within 1 second.
+|
+*/
+
 // Health check endpoint (no rate limiting, no authentication)
 Route::get('/health', function () {
     return response()->json(['status' => 'ok'])
