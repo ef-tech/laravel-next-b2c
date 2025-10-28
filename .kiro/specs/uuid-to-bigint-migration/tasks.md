@@ -59,7 +59,7 @@
 
 ## 4. テストファイルの修正
 
-- [ ] 4.1 UUID 前提のテストケース検索と修正
+- [x] 4.1 UUID 前提のテストケース検索と修正
   - `grep -r "Str::uuid\|toBeString.*id" tests/` で UUID 関連コードを全検出
   - `expect($user->id)->toBeString()` を `expect($user->id)->toBeInt()` に変更
   - `User::factory()->create(['id' => Str::uuid()])` を `User::factory()->create()` に変更

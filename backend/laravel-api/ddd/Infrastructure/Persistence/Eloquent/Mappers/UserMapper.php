@@ -22,7 +22,8 @@ final class UserMapper
 
         // Set private properties using reflection
         $idProperty = $reflection->getProperty('id');
-        $idProperty->setValue($entity, UserId::fromString($model->id));
+        // Changed from fromString() to fromInt() for bigint primary key migration (Issue #100)
+        $idProperty->setValue($entity, UserId::fromInt($model->id));
 
         $emailProperty = $reflection->getProperty('email');
         $emailProperty->setValue($entity, Email::fromString($model->email));
@@ -41,7 +42,12 @@ final class UserMapper
      */
     public function toModel(User $entity, EloquentUser $model): void
     {
-        $model->id = $entity->id()->value();
+        // Don't set ID if it's a placeholder (PHP_INT_MAX) for new entities
+        // Let the database auto-increment handle ID generation (Issue #100)
+        if ($entity->id()->value() !== PHP_INT_MAX) {
+            $model->id = $entity->id()->value();
+        }
+
         $model->email = $entity->email()->value();
         $model->name = $entity->name();
         $model->created_at = $entity->registeredAt();

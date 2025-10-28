@@ -22,27 +22,37 @@ test('can save and find user by ID', function (): void {
     $repository = app(UserRepository::class);
 
     $userId = $repository->nextId();
+    $email = Email::fromString('test@example.com');
     $user = User::register(
         id: $userId,
-        email: Email::fromString('test@example.com'),
+        email: $email,
         name: 'Test User'
     );
 
     $repository->save($user);
 
-    $foundUser = $repository->find($userId);
+    // For auto-increment IDs, find by email first to get the actual ID
+    $foundUser = $repository->findByEmail($email);
 
     expect($foundUser)->not->toBeNull()
-        ->and($foundUser->id()->equals($userId))->toBeTrue()
-        ->and($foundUser->email()->equals(Email::fromString('test@example.com')))->toBeTrue()
+        ->and($foundUser->id()->value())->toBeInt()
+        ->and($foundUser->id()->value())->toBeGreaterThan(0)
+        ->and($foundUser->email()->equals($email))->toBeTrue()
         ->and($foundUser->name())->toBe('Test User');
+
+    // Now test find by actual ID
+    $actualId = $foundUser->id();
+    $foundById = $repository->find($actualId);
+
+    expect($foundById)->not->toBeNull()
+        ->and($foundById->id()->equals($actualId))->toBeTrue();
 });
 
 test('returns null when user not found by ID', function (): void {
     $repository = app(UserRepository::class);
 
-    // Generate a valid UUID that doesn't exist in DB
-    $nonExistentId = UserId::fromString('99999999-9999-4999-9999-999999999999');
+    // Use a large integer ID that doesn't exist in DB
+    $nonExistentId = UserId::fromInt(999999);
 
     $user = $repository->find($nonExistentId);
 
@@ -91,16 +101,22 @@ test('can delete user', function (): void {
     $repository = app(UserRepository::class);
 
     $userId = $repository->nextId();
+    $email = Email::fromString('delete@example.com');
     $user = User::register(
         id: $userId,
-        email: Email::fromString('delete@example.com'),
+        email: $email,
         name: 'Delete User'
     );
 
     $repository->save($user);
-    $repository->delete($userId);
 
-    $foundUser = $repository->find($userId);
+    // Get actual ID from saved user
+    $savedUser = $repository->findByEmail($email);
+    $actualId = $savedUser->id();
+
+    $repository->delete($actualId);
+
+    $foundUser = $repository->find($actualId);
 
     expect($foundUser)->toBeNull();
 });
@@ -109,21 +125,23 @@ test('can update existing user', function (): void {
     $repository = app(UserRepository::class);
 
     $userId = $repository->nextId();
+    $email = Email::fromString('update@example.com');
     $user = User::register(
         id: $userId,
-        email: Email::fromString('update@example.com'),
+        email: $email,
         name: 'Original Name'
     );
 
     $repository->save($user);
 
-    // Retrieve and update
-    $retrievedUser = $repository->find($userId);
+    // Retrieve and update using email
+    $retrievedUser = $repository->findByEmail($email);
+    $actualId = $retrievedUser->id();
     $retrievedUser->changeName('Updated Name');
     $repository->save($retrievedUser);
 
     // Verify update
-    $updatedUser = $repository->find($userId);
+    $updatedUser = $repository->find($actualId);
 
     expect($updatedUser->name())->toBe('Updated Name');
 });
@@ -137,10 +155,11 @@ test('mapper converts eloquent model to domain entity correctly', function (): v
 
     $repository->save($user);
 
-    $foundUser = $repository->find($userId);
+    $foundUser = $repository->findByEmail($email);
 
     expect($foundUser)->not->toBeNull()
-        ->and($foundUser->id()->value())->toBe($userId->value())
+        ->and($foundUser->id()->value())->toBeInt()
+        ->and($foundUser->id()->value())->toBeGreaterThan(0)
         ->and($foundUser->email()->value())->toBe($email->value())
         ->and($foundUser->name())->toBe('Mapper Test')
         ->and($foundUser->registeredAt())->toBeInstanceOf(\Carbon\Carbon::class);

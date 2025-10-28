@@ -9,7 +9,7 @@ use Ddd\Domain\User\ValueObjects\UserId;
 use Ddd\Shared\Exceptions\ValidationException;
 
 test('can register user', function (): void {
-    $id = UserId::fromString('550e8400-e29b-41d4-a716-446655440000');
+    $id = UserId::fromInt(1);
     $email = Email::fromString('test@example.com');
     $name = 'Test User';
 
@@ -21,7 +21,7 @@ test('can register user', function (): void {
 });
 
 test('register records UserRegistered event', function (): void {
-    $id = UserId::fromString('550e8400-e29b-41d4-a716-446655440000');
+    $id = UserId::fromInt(1);
     $email = Email::fromString('test@example.com');
     $name = 'Test User';
 
@@ -36,7 +36,7 @@ test('register records UserRegistered event', function (): void {
 });
 
 test('pullDomainEvents clears internal collection', function (): void {
-    $id = UserId::fromString('550e8400-e29b-41d4-a716-446655440000');
+    $id = UserId::fromInt(1);
     $email = Email::fromString('test@example.com');
     $user = User::register($id, $email, 'Test User');
 
@@ -47,7 +47,7 @@ test('pullDomainEvents clears internal collection', function (): void {
 });
 
 test('can change name', function (): void {
-    $id = UserId::fromString('550e8400-e29b-41d4-a716-446655440000');
+    $id = UserId::fromInt(1);
     $email = Email::fromString('test@example.com');
     $user = User::register($id, $email, 'Test User');
 
@@ -57,14 +57,14 @@ test('can change name', function (): void {
 });
 
 test('throws exception when name is too short', function (): void {
-    $id = UserId::fromString('550e8400-e29b-41d4-a716-446655440000');
+    $id = UserId::fromInt(1);
     $email = Email::fromString('test@example.com');
 
     User::register($id, $email, 'A');
 })->throws(ValidationException::class, 'Invalid name: Name must be at least 2 characters');
 
 test('throws exception when changing name to too short', function (): void {
-    $id = UserId::fromString('550e8400-e29b-41d4-a716-446655440000');
+    $id = UserId::fromInt(1);
     $email = Email::fromString('test@example.com');
     $user = User::register($id, $email, 'Test User');
 
