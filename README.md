@@ -303,11 +303,15 @@ docker compose up -d
 ```
 
 **起動されるサービス**:
-- ✅ Laravel API (ポート: 13000)
+- ✅ Laravel API (ポート: 13000) - **ホットリロード対応**
 - ✅ PostgreSQL (ポート: 13432)
 - ✅ Redis (ポート: 13379)
 - ✅ Mailpit (SMTP: 11025, UI: 13025)
 - ✅ MinIO (API: 13900, Console: 13010)
+
+**開発体験**:
+- 🔥 Laravel APIホットリロード: コード変更が1秒以内に反映
+- ⚡ Next.js Turbopack: 超高速ホットリロード（HMR）
 
 ##### Terminal 2: Admin App起動
 
