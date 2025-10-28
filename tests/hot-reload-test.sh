@@ -101,14 +101,31 @@ check_initial_response() {
     return 0
 }
 
+get_initial_timestamp() {
+    print_step "5" "編集前のタイムスタンプ取得"
+
+    local timestamp
+    timestamp=$(docker compose ${COMPOSE_PROFILES} exec -T laravel-api \
+                stat -c %Y /var/www/html/routes/api.php 2>/dev/null || echo "0")
+
+    if [ "$timestamp" = "0" ]; then
+        print_error "ファイルタイムスタンプ取得失敗"
+        return 1
+    fi
+
+    print_success "編集前タイムスタンプ: $timestamp"
+    echo "$timestamp"
+    return 0
+}
+
 backup_routes_file() {
-    print_step "5" "routes/api.phpバックアップ作成"
+    print_step "6" "routes/api.phpバックアップ作成"
     cp "${API_ROUTES_FILE}" "${API_ROUTES_FILE}.backup"
     print_success "バックアップ作成完了"
 }
 
 modify_routes_file() {
-    print_step "6" "routes/api.php編集（テストコメント追加）"
+    print_step "7" "routes/api.php編集（テストコメント追加）"
     local timestamp
     timestamp=$(date +%s)
     echo "// Hot reload test: $timestamp" >> "${API_ROUTES_FILE}"
@@ -116,26 +133,27 @@ modify_routes_file() {
 }
 
 wait_and_check_reload() {
-    print_step "7" "変更反映待機（最大${MAX_RELOAD_WAIT}秒、${TARGET_RELOAD_TIME}秒以内を期待）"
-    sleep 1
+    local initial_timestamp=$1
 
-    print_step "8" "ホットリロード確認"
+    print_step "8" "変更反映待機（最大${MAX_RELOAD_WAIT}秒、${TARGET_RELOAD_TIME}秒以内を期待）"
 
     local start_time
     start_time=$(date +%s)
     local reload_time=0
 
     while [ $reload_time -lt $MAX_RELOAD_WAIT ]; do
-        local container_timestamp
-        container_timestamp=$(docker compose ${COMPOSE_PROFILES} exec -T laravel-api \
-                              stat -c %Y /var/www/html/routes/api.php 2>/dev/null || echo "0")
+        local current_timestamp
+        current_timestamp=$(docker compose ${COMPOSE_PROFILES} exec -T laravel-api \
+                           stat -c %Y /var/www/html/routes/api.php 2>/dev/null || echo "0")
 
-        if [ "$container_timestamp" != "0" ]; then
+        # タイムスタンプが変更されたか確認
+        if [ "$current_timestamp" != "0" ] && [ "$current_timestamp" != "$initial_timestamp" ]; then
             local end_time elapsed
             end_time=$(date +%s)
             elapsed=$((end_time - start_time))
 
             print_success "ホットリロード成功（${elapsed}秒）"
+            print_success "タイムスタンプ変更確認: $initial_timestamp → $current_timestamp"
 
             if [ $elapsed -le $TARGET_RELOAD_TIME ]; then
                 print_success "${TARGET_RELOAD_TIME}秒以内に変更が反映されました！"
@@ -150,6 +168,7 @@ wait_and_check_reload() {
     done
 
     print_error "ホットリロード失敗: コンテナ内のファイルが更新されませんでした"
+    print_error "初期タイムスタンプ: $initial_timestamp"
     return 1
 }
 
@@ -167,7 +186,7 @@ print_results() {
         echo "✅ 全ての検証が成功しました！"
         echo "   - Docker起動成功"
         echo "   - ヘルスチェック成功"
-        echo "   - ホットリロード動作確認成功"
+        echo "   - ホットリロード動作確認成功（タイムスタンプ変更検知）"
     else
         echo "❌ ホットリロード動作確認失敗"
         exit 1
@@ -184,10 +203,20 @@ main() {
     start_laravel_api
     wait_for_health
     check_initial_response
+
+    # 編集前のタイムスタンプを取得
+    local initial_timestamp
+    initial_timestamp=$(get_initial_timestamp)
+    if [ $? -ne 0 ]; then
+        print_error "初期タイムスタンプ取得失敗"
+        exit 1
+    fi
+
     backup_routes_file
     modify_routes_file
 
-    if wait_and_check_reload; then
+    # タイムスタンプを渡してホットリロード確認
+    if wait_and_check_reload "$initial_timestamp"; then
         restore_routes_file
         print_results "true"
     else
