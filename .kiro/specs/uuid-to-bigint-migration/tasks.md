@@ -2,7 +2,7 @@
 
 ## 1. マイグレーションファイルの主キー型変更
 
-- [ ] 1.1 `0001_01_01_000000_create_users_table.php` マイグレーションファイルの主キー定義変更
+- [x] 1.1 `0001_01_01_000000_create_users_table.php` マイグレーションファイルの主キー定義変更
   - `users` テーブルの主キー `id` を UUID から bigint に変更
   - `$table->uuid('id')->primary()` を `$table->id()` に置換
   - `sessions` テーブルの外部キー `user_id` を UUID から bigint に変更
@@ -10,13 +10,13 @@
   - 変更理由と日時を記載したコメントを追加
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 1.2 `2025_09_29_083259_create_personal_access_tokens_table.php` マイグレーションファイルのポリモーフィック外部キー変更
+- [x] 1.2 `2025_09_29_083259_create_personal_access_tokens_table.php` マイグレーションファイルのポリモーフィック外部キー変更
   - `personal_access_tokens` テーブルのポリモーフィック外部キー `tokenable` を UUID から bigint に変更
   - `$table->uuidMorphs('tokenable')` を `$table->morphs('tokenable')` に置換
   - 変更理由を記載したコメントを追加（`// Changed from uuidMorphs() to morphs() for bigint primary key migration (Issue #100)`）
   - _Requirements: 1.3, 1.4_
 
-- [ ] 1.3 マイグレーション実行と検証
+- [x] 1.3 マイグレーション実行と検証
   - 既存データベースを完全削除して新規マイグレーション実行（`php artisan migrate:fresh`）
   - PostgreSQL テーブル構造の確認（`users.id` が `bigint SERIAL` 型であることを検証）
   - `personal_access_tokens.tokenable_id` が `bigint UNSIGNED` 型であることを検証
@@ -25,7 +25,7 @@
 
 ## 2. Eloquent モデル設定の修正
 
-- [ ] 2.1 User モデルの主キー設定プロパティ削除
+- [x] 2.1 User モデルの主キー設定プロパティ削除
   - `public $incrementing = false;` プロパティを削除（Laravel デフォルト値 `true` を使用）
   - `protected $keyType = 'string';` プロパティを削除（Laravel デフォルト値 `'int'` を使用）
   - UUID 関連のコメントを削除
@@ -39,7 +39,7 @@
 
 ## 3. Factory/Seeder の修正
 
-- [ ] 3.1 UserFactory の UUID 生成ロジック削除
+- [x] 3.1 UserFactory の UUID 生成ロジック削除
   - `database/factories/UserFactory.php` の `definition()` メソッドを確認
   - UUID 生成ロジック（`'id' => Str::uuid()->toString()`）が存在する場合は削除
   - `definition()` メソッドが `id` フィールドを含まないことを確認（Eloquent 自動生成に委ねる）
