@@ -39,8 +39,8 @@ test('users table has bigint primary key after full reconstruction', function ()
         // SQLiteではintegerとして報告される
         expect($columnType)->toBe('integer');
     } else {
-        // PostgreSQLではbigintとして報告される
-        expect($columnType)->toBe('bigint');
+        // PostgreSQLでは'bigint'または'int8'を返す（ドライバーバージョンによる）
+        expect($columnType)->toBeIn(['bigint', 'int8']);
     }
 });
 
@@ -100,7 +100,8 @@ test('all database tables have correct schema after reconstruction', function ()
     if ($dbDriver === 'sqlite') {
         expect($tokenableIdType)->toBe('integer');
     } else {
-        expect($tokenableIdType)->toBe('bigint');
+        // PostgreSQLでは'bigint'または'int8'を返す（ドライバーバージョンによる）
+        expect($tokenableIdType)->toBeIn(['bigint', 'int8']);
     }
 
     // sessionsのuser_idがbigint/integer型であることを検証
@@ -111,6 +112,7 @@ test('all database tables have correct schema after reconstruction', function ()
     if ($dbDriver === 'sqlite') {
         expect($userIdType)->toBe('integer');
     } else {
-        expect($userIdType)->toBe('bigint');
+        // PostgreSQLでは'bigint'または'int8'を返す（ドライバーバージョンによる）
+        expect($userIdType)->toBeIn(['bigint', 'int8']);
     }
 });

@@ -23,7 +23,8 @@ test('users table has bigint primary key after migration', function () {
     if ($dbDriver === 'sqlite') {
         expect($columnType)->toBe('integer');
     } else {
-        expect($columnType)->toBe('bigint');
+        // PostgreSQLでは'bigint'または'int8'を返す（ドライバーバージョンによる）
+        expect($columnType)->toBeIn(['bigint', 'int8']);
     }
 });
 
@@ -38,7 +39,8 @@ test('sessions table has bigint foreign key for user_id', function () {
     if ($dbDriver === 'sqlite') {
         expect($columnType)->toBe('integer');
     } else {
-        expect($columnType)->toBe('bigint');
+        // PostgreSQLでは'bigint'または'int8'を返す（ドライバーバージョンによる）
+        expect($columnType)->toBeIn(['bigint', 'int8']);
     }
 });
 
@@ -54,7 +56,8 @@ test('personal_access_tokens table has bigint morphs for tokenable', function ()
     if ($dbDriver === 'sqlite') {
         expect($tokenableIdType)->toBe('integer');
     } else {
-        expect($tokenableIdType)->toBe('bigint');
+        // PostgreSQLでは'bigint'または'int8'を返す（ドライバーバージョンによる）
+        expect($tokenableIdType)->toBeIn(['bigint', 'int8']);
     }
 
     $tokenableTypeType = Schema::getColumnType('personal_access_tokens', 'tokenable_type');
