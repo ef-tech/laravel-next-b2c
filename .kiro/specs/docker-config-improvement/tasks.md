@@ -87,12 +87,13 @@
   - _Requirements: 4.8_
   - ✅ **完了**: scripts/dev/main.sh呼び出し削除完了、dev-docker/dev-native等削除完了、make -n dev正常動作確認
 
-- [ ] 5. 不要なスクリプトの整理を実施
-- [ ] 5.1 scripts/dev/ディレクトリの削除または無視を実施
+- [x] 5. 不要なスクリプトの整理を実施
+- [x] 5.1 scripts/dev/ディレクトリの削除または無視を実施
   - scripts/dev/ディレクトリを完全削除（git rm -r scripts/dev/）、またはREADME.mdに使用しない旨を明記
   - 削除した場合はREADME.mdに削除理由を追加
   - 無視する場合は.gitignoreにscripts/dev/を追加し、README.mdに「scripts/dev/は使用しません。上記の起動手順に従ってください」と明記
   - _Requirements: 5.1, 5.2_
+  - ✅ **完了**: scripts/dev/ディレクトリ完全削除完了（git rm -r）、README.mdに削除理由追加完了（複雑なTypeScript/Bash混在構成を削除し、シンプルな3ターミナル起動方式に統一）
 
 - [ ] 6. E2Eテスト環境設定の調整を実施
 - [ ] 6.1 docker-compose.ymlのe2e-testsサービスを調整

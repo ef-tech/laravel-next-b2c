@@ -714,25 +714,9 @@ make dev-stop
 - **Dockerモード**: 全サービスDockerコンテナで起動（環境統一、E2Eテスト向け）
 - **ネイティブモード**: 全サービスネイティブプロセスで起動（最速起動）
 
-**詳細オプション:**
-
-```bash
-# ヘルプ表示
-./scripts/dev/main.sh --help
-
-# カスタム起動
-./scripts/dev/main.sh --mode hybrid --profile full       # ハイブリッドモード全サービス
-./scripts/dev/main.sh --mode docker --profile api-only   # DockerモードAPI専用
-./scripts/dev/main.sh --services laravel-api,admin-app   # 特定サービスのみ
-
-# セットアップから実行
-./scripts/dev/main.sh --setup --mode docker
-
-# デバッグモード
-DEBUG=1 ./scripts/dev/main.sh --mode native
-```
-
 #### 従来方式: 全サービス同時起動（Docker Compose）
+
+> ℹ️ **注記**: 以前使用していた `scripts/dev/` ディレクトリは削除されました。複雑なTypeScript/Bash混在構成で保守が困難だったため、シンプルな3ターミナル起動方式に統一しました。上記の起動手順に従ってください。
 
 ```bash
 # リポジトリルートから全サービス起動
