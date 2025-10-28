@@ -23,7 +23,7 @@ describe('IdempotencyKey', function () {
         ]);
 
         $user = new User;
-        $user->id = '123';
+        $user->id = 123;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -58,7 +58,7 @@ describe('IdempotencyKey', function () {
         $request->headers->set('Idempotency-Key', 'test-key-123');
 
         $user = new User;
-        $user->id = '123';
+        $user->id = 123;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -94,7 +94,7 @@ describe('IdempotencyKey', function () {
         $request->headers->set('Idempotency-Key', 'test-key-456');
 
         $user = new User;
-        $user->id = '456';
+        $user->id = 456;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -130,7 +130,7 @@ describe('IdempotencyKey', function () {
         $request->headers->set('Idempotency-Key', 'test-key-789');
 
         $user = new User;
-        $user->id = '789';
+        $user->id = 789;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -150,7 +150,7 @@ describe('IdempotencyKey', function () {
         $request->headers->set('Idempotency-Key', 'test-key-get');
 
         $user = new User;
-        $user->id = '999';
+        $user->id = 999;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -217,7 +217,7 @@ describe('IdempotencyKey', function () {
         $request->headers->set('Idempotency-Key', 'webhook-key-123');
 
         $user = new User;
-        $user->id = '111';
+        $user->id = 111;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });

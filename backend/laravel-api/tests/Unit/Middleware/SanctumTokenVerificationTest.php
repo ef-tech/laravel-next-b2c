@@ -20,7 +20,7 @@ describe('SanctumTokenVerification', function () {
 
         // 認証済みユーザーをモック
         $user = new User;
-        $user->id = '123';
+        $user->id = 123;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -99,7 +99,7 @@ describe('SanctumTokenVerification', function () {
 
         // 認証済みユーザーをモック
         $user = new User;
-        $user->id = '456';
+        $user->id = 456;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -115,7 +115,8 @@ describe('SanctumTokenVerification', function () {
                 return isset($context['request_id'])
                     && $context['request_id'] === 'test-request-id-789'
                     && isset($context['user_id'])
-                    && $context['user_id'] === '456';
+                    && $context['user_id'] === 456
+                    && isset($context['timestamp']);
             }));
 
         $response = $middleware->handle($request, function ($req) {
@@ -134,7 +135,7 @@ describe('SanctumTokenVerification', function () {
 
         // auth:sanctumが既に認証を完了している状態をシミュレート
         $user = new User;
-        $user->id = '789';
+        $user->id = 789;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });

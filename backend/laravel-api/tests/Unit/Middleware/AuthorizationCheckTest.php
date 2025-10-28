@@ -29,7 +29,7 @@ describe('AuthorizationCheck', function () {
 
         // 認証済みユーザーをモック
         $user = new User;
-        $user->id = '123';
+        $user->id = 123;
         $user->email = 'admin@example.com';
         $request->setUserResolver(function () use ($user) {
             return $user;
@@ -66,7 +66,7 @@ describe('AuthorizationCheck', function () {
 
         // 認証済みユーザー（管理者権限なし）をモック
         $user = new User;
-        $user->id = '456';
+        $user->id = 456;
         $user->email = 'user@example.com';
         $request->setUserResolver(function () use ($user) {
             return $user;
@@ -130,7 +130,7 @@ describe('AuthorizationCheck', function () {
         $request->headers->set('X-Request-Id', 'test-request-id-999');
 
         $user = new User;
-        $user->id = '789';
+        $user->id = 789;
         $user->email = 'user@example.com';
         $request->setUserResolver(function () use ($user) {
             return $user;
@@ -147,11 +147,12 @@ describe('AuthorizationCheck', function () {
                 return isset($context['request_id'])
                     && $context['request_id'] === 'test-request-id-999'
                     && isset($context['user_id'])
-                    && $context['user_id'] === '789'
+                    && $context['user_id'] === 789
                     && isset($context['permission'])
                     && $context['permission'] === 'user'
                     && isset($context['result'])
-                    && $context['result'] === true;
+                    && $context['result'] === true
+                    && isset($context['timestamp']);
             }));
 
         $response = $middleware->handle($request, function ($req) {
@@ -174,7 +175,7 @@ describe('AuthorizationCheck', function () {
         $request = Request::create('/api/admin/users', 'GET');
 
         $user = new User;
-        $user->id = '123';
+        $user->id = 123;
         $user->email = 'admin@example.com';
         $request->setUserResolver(function () use ($user) {
             return $user;

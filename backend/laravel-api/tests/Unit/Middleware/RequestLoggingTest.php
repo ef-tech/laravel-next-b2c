@@ -107,7 +107,7 @@ describe('RequestLogging', function () {
 
         // 認証済みユーザーをモック
         $user = new \App\Models\User;
-        $user->id = '123';
+        $user->id = 123;
         $request->setUserResolver(function () use ($user) {
             return $user;
         });
@@ -121,7 +121,7 @@ describe('RequestLogging', function () {
             ->once()
             ->with('Request completed', \Mockery::on(function ($context) {
                 return isset($context['user_id'])
-                    && $context['user_id'] === '123';
+                    && $context['user_id'] === 123;
             }));
 
         $response = $middleware->handle($request, function ($req) {

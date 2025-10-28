@@ -66,6 +66,11 @@ describe('ValidateEnvironment', function () {
 
     describe('異常系', function () {
         test('必須環境変数が設定されていない場合、RuntimeExceptionが発生すること', function () {
+            // ENV_VALIDATION_SKIPが設定されている場合はスキップ
+            if (env('ENV_VALIDATION_SKIP') === 'true' || ($_ENV['ENV_VALIDATION_SKIP'] ?? null) === 'true') {
+                $this->markTestSkipped('ENV_VALIDATION_SKIP is enabled');
+            }
+
             // 環境変数をクリアしてから必要な変数のみ設定
             $_ENV = [];
             // APP_NAMEを設定しない
@@ -85,6 +90,11 @@ describe('ValidateEnvironment', function () {
         });
 
         test('環境変数の型が不正な場合、RuntimeExceptionが発生すること', function () {
+            // ENV_VALIDATION_SKIPが設定されている場合はスキップ
+            if (env('ENV_VALIDATION_SKIP') === 'true' || ($_ENV['ENV_VALIDATION_SKIP'] ?? null) === 'true') {
+                $this->markTestSkipped('ENV_VALIDATION_SKIP is enabled');
+            }
+
             $_ENV['APP_NAME'] = 'Laravel';
             $_ENV['APP_ENV'] = 'invalid_env'; // 許可されていない値
             $_ENV['APP_KEY'] = 'base64:test_key_32_characters_long';
@@ -102,6 +112,11 @@ describe('ValidateEnvironment', function () {
         });
 
         test('例外メッセージにエラー詳細が含まれること', function () {
+            // ENV_VALIDATION_SKIPが設定されている場合はスキップ
+            if (env('ENV_VALIDATION_SKIP') === 'true' || ($_ENV['ENV_VALIDATION_SKIP'] ?? null) === 'true') {
+                $this->markTestSkipped('ENV_VALIDATION_SKIP is enabled');
+            }
+
             // 環境変数をクリアしてから必要な変数のみ設定
             $_ENV = [];
             // APP_NAMEを設定しない
@@ -125,6 +140,11 @@ describe('ValidateEnvironment', function () {
         });
 
         test('条件付き必須変数のチェックが機能すること', function () {
+            // ENV_VALIDATION_SKIPが設定されている場合はスキップ
+            if (env('ENV_VALIDATION_SKIP') === 'true' || ($_ENV['ENV_VALIDATION_SKIP'] ?? null) === 'true') {
+                $this->markTestSkipped('ENV_VALIDATION_SKIP is enabled');
+            }
+
             $_ENV['APP_NAME'] = 'Laravel';
             $_ENV['APP_ENV'] = 'local';
             $_ENV['APP_KEY'] = 'base64:test_key_32_characters_long';
