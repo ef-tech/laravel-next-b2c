@@ -689,38 +689,9 @@ php artisan serve --port=13000
 
 ### 開発サーバーの管理
 
-#### 🚀 新: 統合開発サーバー起動（最も簡単）
+> ℹ️ **注記**: 以前使用していた `scripts/dev/` ディレクトリは削除されました。複雑なTypeScript/Bash混在構成で保守が困難だったため、シンプルな3ターミナル起動方式（「🚀 開発環境起動（日常開発）」セクション参照）に統一しました。
 
-**単一コマンドで全サービスを起動:**
-
-```bash
-# デフォルト: ハイブリッドモード（インフラDocker、アプリネイティブ）
-make dev
-
-# Dockerモード: 全サービスDocker
-make dev-docker
-
-# ネイティブモード: 全サービスネイティブ
-make dev-native
-
-# プロファイル別起動
-make dev-api        # APIのみ
-make dev-frontend   # フロントエンドのみ
-make dev-infra      # インフラのみ
-make dev-minimal    # 最小構成（API + フロントエンド1つ）
-
-# 停止
-make dev-stop
-```
-
-**起動モード説明:**
-- **ハイブリッドモード** (推奨): インフラ（PostgreSQL, Redis等）はDocker、アプリ（Laravel API, Next.js）はネイティブプロセス
-- **Dockerモード**: 全サービスDockerコンテナで起動（環境統一、E2Eテスト向け）
-- **ネイティブモード**: 全サービスネイティブプロセスで起動（最速起動）
-
-#### 従来方式: 全サービス同時起動（Docker Compose）
-
-> ℹ️ **注記**: 以前使用していた `scripts/dev/` ディレクトリは削除されました。複雑なTypeScript/Bash混在構成で保守が困難だったため、シンプルな3ターミナル起動方式に統一しました。上記の起動手順に従ってください。
+#### Docker Composeコマンド直接実行
 
 ```bash
 # リポジトリルートから全サービス起動
