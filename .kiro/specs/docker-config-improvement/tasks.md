@@ -45,25 +45,28 @@
   - _Requirements: 2.5_
   - ✅ **完了**: Next.js 15.5 + Turbopackネイティブ起動でホットリロード1秒以内保証（仕様上確認済み）
 
-- [ ] 3. 開発環境起動手順のドキュメント整備を実施
-- [ ] 3.1 README.mdに「開発環境起動」セクションを追加
+- [x] 3. 開発環境起動手順のドキュメント整備を実施
+- [x] 3.1 README.mdに「開発環境起動」セクションを追加
   - README.mdに「開発環境起動」セクションを新規作成
   - 前提条件セクションを追加（Docker Desktop、Node.js 20+、PHP 8.4+を明記）
   - _Requirements: 3.1, 3.2_
+  - ✅ **完了**: 「🚀 開発環境起動（日常開発）」セクション追加、前提条件テーブル記載完了
 
-- [ ] 3.2 README.mdに3ターミナル起動手順を追加
+- [x] 3.2 README.mdに3ターミナル起動手順を追加
   - Terminal 1: Dockerサービス起動（make dev実行）の手順を記載
   - Terminal 2: Admin App起動（cd frontend/admin-app && npm run dev）の手順を記載
   - Terminal 3: User App起動（cd frontend/user-app && npm run dev）の手順を記載
   - 各サービスのアクセスURL（Laravel API: 13000、Admin App: 13002、User App: 13001）を明記
   - _Requirements: 3.3, 3.4_
+  - ✅ **完了**: 3ターミナル起動手順（Terminal 1/2/3）記載完了、アクセスURLテーブル追加完了
 
-- [ ] 3.3 README.mdにホットリロード確認方法とトラブルシューティングを追加
+- [x] 3.3 README.mdにホットリロード確認方法とトラブルシューティングを追加
   - Laravel APIのホットリロード確認方法を記載（routes/api.php編集 → 1秒以内反映）
   - Next.jsのホットリロード確認方法を記載（app/page.tsx編集 → 1秒以内自動リロード）
   - トラブルシューティングセクションを追加（ポート競合、ホットリロード不具合対処法）
   - 停止方法セクションを追加（各ターミナルでCtrl+C、docker compose down）
   - _Requirements: 3.5, 3.6, 3.7_
+  - ✅ **完了**: ホットリロード確認方法（Laravel API/Next.js）、トラブルシューティング（ポート競合/ホットリロード不具合）、停止方法記載完了
 
 - [ ] 4. Makefileのシンプル化を実施
 - [ ] 4.1 Makefileに基本的なDockerコマンドラッパーを実装
