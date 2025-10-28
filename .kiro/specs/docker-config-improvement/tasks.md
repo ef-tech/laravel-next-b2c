@@ -69,21 +69,23 @@
   - ✅ **完了**: ホットリロード確認方法（Laravel API/Next.js）、トラブルシューティング（ポート競合/ホットリロード不具合）、停止方法記載完了
 
 - [ ] 4. Makefileのシンプル化を実施
-- [ ] 4.1 Makefileに基本的なDockerコマンドラッパーを実装
-  - make devターゲットを実装（docker compose up -d実行、次ステップガイダンス表示）
+- [x] 4.1 Makefileに基本的なDockerコマンドラッパーを実装
+  - make devターゲットを実装（docker compose --profile api --profile infra up -d実行、次ステップガイダンス表示）
   - make stopターゲットを実装（docker compose stop実行）
   - make cleanターゲットを実装（docker compose down -v実行）
   - make logsターゲットを実装（docker compose logs -f実行）
   - make psターゲットを実装（docker compose ps実行）
   - make helpターゲットを実装（利用可能コマンド一覧表示）
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
+  - ✅ **完了**: 全ターゲット実装完了、make dev実行でLaravel API + Infraサービス起動成功、次ステップガイダンス表示確認
 
-- [ ] 4.2 Makefileから複雑なスクリプト呼び出しを削除
+- [x] 4.2 Makefileから複雑なスクリプト呼び出しを削除
   - Makefileのmake devターゲットからscripts/dev/main.sh呼び出しを削除
   - 既存のmake dev-docker、make dev-nativeなど複雑なターゲットを削除
   - シンプルなDocker Composeコマンドのみを使用するように変更
   - make -n devでドライラン実行して構文エラーがないことを確認
   - _Requirements: 4.8_
+  - ✅ **完了**: scripts/dev/main.sh呼び出し削除完了、dev-docker/dev-native等削除完了、make -n dev正常動作確認
 
 - [ ] 5. 不要なスクリプトの整理を実施
 - [ ] 5.1 scripts/dev/ディレクトリの削除または無視を実施
