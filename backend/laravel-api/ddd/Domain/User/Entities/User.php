@@ -16,7 +16,7 @@ final class User
     use RecordsDomainEvents;
 
     private function __construct(
-        private UserId $id,
+        private ?UserId $id,
         private Email $email,
         private string $name,
         private Carbon $registeredAt
@@ -24,11 +24,12 @@ final class User
 
     /**
      * Factory method to register a new user.
+     * ID will be set after persistence (bigint auto_increment).
      */
     public static function register(
-        UserId $id,
         Email $email,
-        string $name
+        string $name,
+        ?UserId $id = null
     ): self {
         if (strlen($name) < 2) {
             throw ValidationException::invalidName('Name must be at least 2 characters');
@@ -41,13 +42,28 @@ final class User
             registeredAt: Carbon::now()
         );
 
-        $user->recordThat(new UserRegistered(
-            userId: $id,
-            email: $email,
-            name: $name
-        ));
+        // Domain event will be recorded after ID is set (in repository)
 
         return $user;
+    }
+
+    /**
+     * Set the user ID after persistence (for auto-increment).
+     */
+    public function setId(UserId $id): void
+    {
+        if ($this->id !== null) {
+            throw new \RuntimeException('User ID is already set');
+        }
+
+        $this->id = $id;
+
+        // Record domain event after ID is set
+        $this->recordThat(new UserRegistered(
+            userId: $id,
+            email: $this->email,
+            name: $this->name
+        ));
     }
 
     /**
@@ -66,6 +82,10 @@ final class User
 
     public function id(): UserId
     {
+        if ($this->id === null) {
+            throw new \RuntimeException('User ID is not set yet (entity not persisted)');
+        }
+
         return $this->id;
     }
 

@@ -10,18 +10,12 @@ use Ddd\Domain\User\Repositories\UserRepository;
 use Ddd\Domain\User\ValueObjects\Email;
 use Ddd\Domain\User\ValueObjects\UserId;
 use Ddd\Infrastructure\Persistence\Eloquent\Mappers\UserMapper;
-use Illuminate\Support\Str;
 
 final readonly class EloquentUserRepository implements UserRepository
 {
     public function __construct(
         private UserMapper $mapper
     ) {}
-
-    public function nextId(): UserId
-    {
-        return UserId::fromString((string) Str::uuid());
-    }
 
     public function find(UserId $id): ?User
     {
@@ -44,9 +38,27 @@ final readonly class EloquentUserRepository implements UserRepository
 
     public function save(User $user): void
     {
-        $model = EloquentUser::findOrNew($user->id()->value());
+        // Check if this is a new user (ID not set yet)
+        try {
+            $userId = $user->id();
+            // User has ID - update existing
+            $model = EloquentUser::findOrNew($userId->value());
+        } catch (\RuntimeException $e) {
+            // User doesn't have ID - create new
+            $model = new EloquentUser;
+        }
+
         $this->mapper->toModel($user, $model);
         $model->save();
+
+        // Set auto-generated ID for new users
+        if (! isset($userId)) {
+            // After save(), Eloquent automatically sets the ID
+            if (! $model->id) {
+                throw new \RuntimeException('Failed to generate ID after save');
+            }
+            $user->setId(UserId::fromInt($model->id));
+        }
     }
 
     public function delete(UserId $id): void

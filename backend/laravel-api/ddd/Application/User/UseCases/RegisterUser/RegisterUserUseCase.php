@@ -26,17 +26,13 @@ final readonly class RegisterUserUseCase
         }
 
         $userId = $this->transactionManager->run(function () use ($input) {
-            // Generate new ID
-            $id = $this->userRepository->nextId();
-
-            // Register user
+            // Register user (ID will be auto-generated after save)
             $user = User::register(
-                id: $id,
                 email: $input->email,
                 name: $input->name
             );
 
-            // Save user
+            // Save user (auto-generates ID and sets it on the entity)
             $this->userRepository->save($user);
 
             // Dispatch domain events after commit
@@ -44,7 +40,7 @@ final readonly class RegisterUserUseCase
                 $this->eventBus->dispatch($event, afterCommit: true);
             }
 
-            return $id;
+            return $user->id();
         });
 
         return new RegisterUserOutput($userId);

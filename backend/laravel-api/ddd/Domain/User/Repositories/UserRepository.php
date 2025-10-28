@@ -11,11 +11,6 @@ use Ddd\Domain\User\ValueObjects\UserId;
 interface UserRepository
 {
     /**
-     * Generate a new unique UserId.
-     */
-    public function nextId(): UserId;
-
-    /**
      * Find a user by ID.
      */
     public function find(UserId $id): ?User;
