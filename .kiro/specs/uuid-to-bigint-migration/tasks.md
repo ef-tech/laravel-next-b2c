@@ -67,13 +67,13 @@
   - Unit Tests の整数型 ID 前提アサーションへの変更
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 4.2 Architecture Tests の依存関係確認
+- [x] 4.2 Architecture Tests の依存関係確認
   - DDD 層の依存関係に影響がないことを確認
   - Domain 層が Infrastructure 層に依存していないことを検証
   - User モデルが DDD 層のインターフェースに準拠していることを確認
   - _Requirements: 4.6_
 
-- [ ] 4.3 テストスイートの実行と検証
+- [x] 4.3 テストスイートの実行と検証
   - `./vendor/bin/pest` でユニットテスト実行
   - 全テストケースが成功することを確認
   - テストカバレッジ測定（`./vendor/bin/pest --coverage`）で 85% 以上を維持
