@@ -41,6 +41,10 @@ lerna-debug.log*
 # === Monorepo Root ===
 /node_modules
 
+# === Scripts Dev Dependencies ===
+/scripts/dev/node_modules
+/scripts/dev/package-lock.json
+
 # === Laravel API (backend/laravel-api/) ===
 /backend/laravel-api/.phpunit.result.cache
 /backend/laravel-api/.phpunit.cache

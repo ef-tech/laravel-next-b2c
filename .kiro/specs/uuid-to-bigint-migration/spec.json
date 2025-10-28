@@ -1,0 +1,95 @@
+{
+  "feature_name": "uuid-to-bigint-migration",
+  "created_at": "2025-10-28T04:15:00+09:00",
+  "updated_at": "2025-10-28T09:30:00+09:00",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 100,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/100",
+    "title": "主キーの uuid を bigint に戻す",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, PostgreSQL 17, Eloquent ORM",
+      "frontend": "N/A (バックエンドのみの変更)",
+      "infrastructure": "Docker Compose, Laravel Sail",
+      "tools": "Pest 4, Laravel Pint, Larastan/PHPStan Level 8, Factory/Seeder"
+    },
+    "requirements_hints": [
+      "Laravel標準構成への準拠 (id()メソッド使用)",
+      "パフォーマンス最適化 (bigintインデックスサイズ削減、検索・結合操作高速化)",
+      "開発効率向上 (Factory/Seederでの自動ID生成シンプル化)",
+      "PostgreSQL最適化 (bigint SERIAL型推奨パターン採用)",
+      "既存マイグレーションファイルの直接編集 (開発初期段階対応)",
+      "UUIDからbigintへの完全移行 (users, personal_access_tokens, sessions)",
+      "テストカバレッジ85%以上維持",
+      "CI/CDパイプライン成功保証"
+    ],
+    "project_structure": [
+      "backend/laravel-api/database/migrations/0001_01_01_000000_create_users_table.php",
+      "backend/laravel-api/database/migrations/2025_09_29_083259_create_personal_access_tokens_table.php",
+      "backend/laravel-api/app/Models/User.php",
+      "backend/laravel-api/database/factories/UserFactory.php",
+      "backend/laravel-api/database/seeders/**",
+      "backend/laravel-api/tests/**/*.php"
+    ],
+    "services": {},
+    "todo_items": [
+      "0001_01_01_000000_create_users_table.php 編集",
+      "$table->uuid('id')->primary() → $table->id()",
+      "$table->foreignUuid('user_id') → $table->foreignId('user_id')",
+      "2025_09_29_083259_create_personal_access_tokens_table.php 編集",
+      "$table->uuidMorphs('tokenable') → $table->morphs('tokenable')",
+      "コメント更新（uuidMorphs → morphs の変更理由記載）",
+      "app/Models/User.php 編集",
+      "public $incrementing = false; 削除",
+      "protected $keyType = 'string'; 削除",
+      "関連コメント削除",
+      "database/factories/UserFactory.php 確認・修正",
+      "UUID生成ロジック削除（もしあれば）",
+      "database/seeders/** 全Seeder確認",
+      "UUID指定削除",
+      "UUID前提のテストケース検索",
+      "テストケース修正",
+      "expect($user->id)->toBeString() → toBeInt()",
+      "UUID生成コード削除",
+      "Feature Tests 修正",
+      "Unit Tests 修正",
+      "Architecture Tests 確認（DDD層に影響なし）",
+      "既存データベース削除 (migrate:fresh)",
+      "マイグレーション実行確認",
+      "Seeder実行確認",
+      "データ確認 (SELECT id FROM users LIMIT 5)",
+      "ユニットテスト実行 (./vendor/bin/pest)",
+      "全テスト実行（SQLite）(make test-all)",
+      "PostgreSQLテスト実行 (make test-pgsql)",
+      "E2Eテスト実行 (make test-e2e-only)",
+      "CI/CDパイプライン実行確認",
+      "Laravel Pint実行 (composer pint)",
+      "Larastan実行 (composer stan)",
+      "品質統合チェック (composer quality)",
+      "README.mdでUUID参照があれば修正",
+      "Architecture Decision Record (ADR) 作成（オプション）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
