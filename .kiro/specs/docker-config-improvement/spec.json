@@ -1,0 +1,79 @@
+{
+  "feature_name": "docker-config-improvement",
+  "created_at": "2025-10-28T00:00:00Z",
+  "updated_at": "2025-10-28T05:21:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 99,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/99",
+    "title": "🐛 ローカル開発環境のDocker設定改善（ホットリロード・volumeマウント対応）",
+    "labels": ["bug", "documentation", "enhancement"],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel API (PHP 8.4, Docker)",
+      "frontend": "Next.js (admin-app, user-app) - ネイティブ起動推奨",
+      "infrastructure": "Docker Compose, PostgreSQL, Redis, Mailpit, MinIO",
+      "tools": "Makefile, Docker volumes, Turbopack"
+    },
+    "requirements_hints": [
+      "Laravel API に volumeマウント追加（ホットリロード有効化）",
+      "Next.js サービスを Docker から削除（ネイティブ起動に変更）",
+      "README.md に3ターミナル起動手順追加",
+      "Makefile のシンプル化（docker compose のみ実行）",
+      "scripts/dev/ の削除または無視（複雑すぎる、不要）",
+      "E2E テスト設定調整（depends_on 修正）"
+    ],
+    "project_structure": [
+      "docker-compose.yml",
+      "README.md",
+      "Makefile",
+      "scripts/dev/",
+      "backend/laravel-api/",
+      "frontend/admin-app/",
+      "frontend/user-app/",
+      "e2e/"
+    ],
+    "services": {
+      "laravel-api": {"port": "13000", "volume": "./backend/laravel-api:/var/www/html:cached"},
+      "admin-app": {"port": "13002", "mode": "native"},
+      "user-app": {"port": "13001", "mode": "native"},
+      "pgsql": {"port": "13432"},
+      "redis": {"port": "13379"},
+      "mailpit": {"smtp_port": "11025", "ui_port": "13025"},
+      "minio": {"api_port": "13900", "console_port": "13010"}
+    },
+    "todo_items": [
+      "Laravel API に volumeマウント追加 (./backend/laravel-api:/var/www/html:cached)",
+      "vendor 除外設定追加 (/var/www/html/vendor)",
+      "APP_ENV=local 設定追加",
+      "admin-app サービス削除（docker-compose.yml）",
+      "user-app サービス削除（docker-compose.yml）",
+      "README.md に開発環境起動セクション追加（3ターミナル手順）",
+      "Makefile のシンプル化（make dev: docker compose up -d のみ）",
+      "scripts/dev/ の削除または無視を決定",
+      "E2E テストの depends_on 調整",
+      "ホットリロード動作確認（Laravel API: 1秒以内）",
+      "ホットリロード動作確認（Next.js: 1秒以内）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
