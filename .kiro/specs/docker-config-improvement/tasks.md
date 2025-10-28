@@ -68,7 +68,7 @@
   - _Requirements: 3.5, 3.6, 3.7_
   - ✅ **完了**: ホットリロード確認方法（Laravel API/Next.js）、トラブルシューティング（ポート競合/ホットリロード不具合）、停止方法記載完了
 
-- [ ] 4. Makefileのシンプル化を実施
+- [x] 4. Makefileのシンプル化を実施
 - [x] 4.1 Makefileに基本的なDockerコマンドラッパーを実装
   - make devターゲットを実装（docker compose --profile api --profile infra up -d実行、次ステップガイダンス表示）
   - make stopターゲットを実装（docker compose stop実行）
