@@ -81,13 +81,13 @@
 
 ## 5. データベース再構築と完全検証
 
-- [ ] 5.1 データベース完全再構築と Seeder 実行
+- [x] 5.1 データベース完全再構築と Seeder 実行
   - `php artisan migrate:fresh --seed` で全マイグレーションと Seeder を実行
   - PostgreSQL データベースでテーブル構造を確認（`Schema::getColumnType('users', 'id')` が `"bigint"` を返すことを検証）
   - 最初のユーザーレコードを取得（`User::first()->id` が整数値を返すことを確認）
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 5.2 Laravel Sanctum トークン発行検証
+- [x] 5.2 Laravel Sanctum トークン発行検証
   - Laravel Sanctum トークンを発行して bigint 型 `tokenable_id` で正しく関連付けられることを確認
   - `/api/login` エンドポイントでトークン取得後、`personal_access_tokens` テーブルの `tokenable_id` が整数型であることを検証
   - _Requirements: 5.5_
