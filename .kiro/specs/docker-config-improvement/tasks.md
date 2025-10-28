@@ -95,8 +95,8 @@
   - _Requirements: 5.1, 5.2_
   - ✅ **完了**: scripts/dev/ディレクトリ完全削除完了（git rm -r）、README.mdに削除理由追加完了（複雑なTypeScript/Bash混在構成を削除し、シンプルな3ターミナル起動方式に統一）
 
-- [ ] 6. E2Eテスト環境設定の調整を実施
-- [ ] 6.1 docker-compose.ymlのe2e-testsサービスを調整
+- [x] 6. E2Eテスト環境設定の調整を実施
+- [x] 6.1 docker-compose.ymlのe2e-testsサービスを調整
   - e2e-testsサービスのdepends_onからadmin-app、user-appサービスを削除
   - e2e-testsサービスのdepends_onにlaravel-apiサービス（condition: service_healthy）のみを含める
   - e2e-testsサービスの環境変数E2E_ADMIN_URLを`http://localhost:13002`に設定
@@ -104,6 +104,7 @@
   - e2e-testsサービスの環境変数E2E_API_URLを`http://localhost:13000`に設定
   - docker compose config実行で構文エラーがないことを確認
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+  - ✅ **完了**: e2e-testsサービス調整完了（depends_on: laravel-apiのみ、環境変数: localhost統一、docker compose config成功）
 
 - [ ] 7. 統合動作確認を実施
 - [ ] 7.1 全サービスの起動確認を実施

@@ -69,7 +69,7 @@ services:
       # Next.jsアプリはネイティブ起動のため、localhostでアクセス
       E2E_ADMIN_URL: 'http://localhost:13002'
       E2E_USER_URL: 'http://localhost:13001'
-      E2E_API_URL: 'http://laravel-api:13000'
+      E2E_API_URL: 'http://localhost:13000'
       E2E_ADMIN_EMAIL: '${E2E_ADMIN_EMAIL:-admin@example.com}'
       E2E_ADMIN_PASSWORD: '${E2E_ADMIN_PASSWORD:-password}'
       E2E_USER_EMAIL: '${E2E_USER_EMAIL:-user@example.com}'
