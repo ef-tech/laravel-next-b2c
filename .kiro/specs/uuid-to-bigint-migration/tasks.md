@@ -45,13 +45,13 @@
   - `definition()` メソッドが `id` フィールドを含まないことを確認（Eloquent 自動生成に委ねる）
   - _Requirements: 3.1, 3.2_
 
-- [ ] 3.2 Seeder ファイルの UUID 指定削除
+- [x] 3.2 Seeder ファイルの UUID 指定削除
   - `database/seeders/` 配下の全 Seeder ファイルを確認
   - UUID 明示的指定コード（`'id' => Str::uuid()`）が存在する場合は削除
   - Eloquent 自動インクリメント機能に ID 生成を委ねる
   - _Requirements: 3.3_
 
-- [ ] 3.3 Factory/Seeder の動作検証
+- [x] 3.3 Factory/Seeder の動作検証
   - `User::factory()->create()` 実行時に整数型 ID が自動割り当てされることを確認
   - `php artisan db:seed` 実行時にエラーなく全 Seeder が実行されることを確認
   - データベースで `SELECT id FROM users LIMIT 5;` を実行し、整数値の ID 列（1, 2, 3, ...）を確認
