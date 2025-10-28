@@ -529,41 +529,29 @@ make setup-from STEP=verify_setup           # 検証のみ再実行
 # - verify_setup: セットアップ検証
 ```
 
-### 統合開発サーバー起動コマンド（日常開発）
+### 統合開発サーバー起動コマンド（日常開発、3ターミナル方式）
 ```bash
-# 基本起動コマンド（推奨）
-make dev              # ハイブリッドモード（インフラDocker、アプリネイティブ）
-make dev-docker       # Dockerモード（全サービスDocker）
-make dev-native       # ネイティブモード（全サービスネイティブ）
+# Terminal 1: Dockerサービス起動（Laravel API + インフラ）
+make dev              # Dockerサービス起動（PostgreSQL、Redis、Mailpit、MinIO、Laravel API）
+make stop             # Dockerサービス停止
+make clean            # Dockerコンテナ・ボリューム完全削除
+make logs             # Dockerサービスログ表示
+make ps               # Dockerサービス状態表示
+make help             # 利用可能コマンド一覧表示
 
-# プロファイル別起動
-make dev-api          # APIのみ
-make dev-frontend     # フロントエンドのみ
-make dev-infra        # インフラのみ（PostgreSQL、Redis等）
-make dev-minimal      # 最小構成（API + フロントエンド1つ）
+# Terminal 2: Admin App起動（ネイティブ、推奨）
+cd frontend/admin-app
+npm run dev           # ポート13002で起動
 
-# 停止コマンド
-make dev-stop         # 全サービス停止（Docker/ネイティブ統一インターフェース）
-
-# 詳細オプション（シェルスクリプト直接実行）
-./scripts/dev/main.sh --help                                    # ヘルプ表示
-./scripts/dev/main.sh --mode hybrid --profile full              # ハイブリッドモード全サービス
-./scripts/dev/main.sh --mode docker --profile api-only          # DockerモードAPI専用
-./scripts/dev/main.sh --services laravel-api,admin-app          # 特定サービスのみ
-./scripts/dev/main.sh --setup --mode docker                     # セットアップから実行
-DEBUG=1 ./scripts/dev/main.sh --mode native                     # デバッグモード
+# Terminal 3: User App起動（ネイティブ、推奨）
+cd frontend/user-app
+npm run dev           # ポート13001で起動
 ```
 
-**起動モード説明**:
-- **ハイブリッドモード** (推奨): インフラ（PostgreSQL, Redis等）はDocker、アプリ（Laravel API, Next.js）はネイティブプロセス
-- **Dockerモード**: 全サービスDockerコンテナで起動（環境統一、E2Eテスト向け）
-- **ネイティブモード**: 全サービスネイティブプロセスで起動（最速起動）
-
-**設定駆動アーキテクチャ**:
-- YAML設定ファイル: `scripts/dev/config.yml` - サービス定義、起動コマンド、ポート設定
-- TypeScript実装: `scripts/dev/src/` - dev-server.ts、process-manager.ts、health-check.ts、log-manager.ts
-- Bash統合: `scripts/dev/main.sh` - シェルスクリプトエントリーポイント
-- Makefile統合: `Makefile` - make dev系ターゲット
+**起動方式の特徴**:
+- **Laravel API**: Docker起動（volume mount有効、ホットリロード1秒以内）
+- **Next.jsアプリ**: ネイティブ起動（Turbopack最高速パフォーマンス、ホットリロード1秒以内）
+- **シンプル化**: 複雑なスクリプト削除、標準的なDocker Composeコマンドのみ使用
 
 ### Docker Compose（推奨 - 統合環境）
 ```bash

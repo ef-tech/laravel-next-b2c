@@ -58,6 +58,7 @@ laravel-next-b2c/
 
 - [⚡ パフォーマンス最適化](#-パフォーマンス最適化)
 - [🚀 クイックスタート](#-クイックスタート)
+- [🚀 開発環境起動（日常開発）](#-開発環境起動日常開発)
 - [🔧 環境構築](#-環境構築)
   - [前提条件](#前提条件)
   - [Docker環境でのセットアップ](#docker環境でのセットアップ)
@@ -268,6 +269,171 @@ docker compose exec laravel-api php artisan db:seed
 # ブラウザで以下のURLを開く
 # User App: http://localhost:13001
 # Admin App: http://localhost:13002
+```
+
+### 🚀 開発環境起動（日常開発）
+
+**初回セットアップ後の日常的な開発環境起動手順です。**
+
+#### 前提条件
+
+開発を始める前に、以下のソフトウェアがインストールされていることを確認してください：
+
+| ソフトウェア | 必要バージョン | 確認コマンド |
+|------------|--------------|------------|
+| **Docker Desktop** | 20.10+ | `docker --version` |
+| **Node.js** | 20+ | `node --version` |
+| **PHP** | 8.4+ (オプション) | `php --version` |
+
+**注意**: PHPはLaravel Tinkerなどローカルコマンド実行時に必要です。Docker環境のみの場合は不要です。
+
+#### 起動手順（3ターミナル方式）
+
+##### Terminal 1: Dockerサービス起動
+
+```bash
+# プロジェクトルートへ移動
+cd laravel-next-b2c
+
+# Dockerサービス起動（PostgreSQL、Redis、Mailpit、MinIO、Laravel API）
+make dev
+
+# または docker composeコマンド直接実行
+docker compose up -d
+```
+
+**起動されるサービス**:
+- ✅ Laravel API (ポート: 13000) - **ホットリロード対応**
+- ✅ PostgreSQL (ポート: 13432)
+- ✅ Redis (ポート: 13379)
+- ✅ Mailpit (SMTP: 11025, UI: 13025)
+- ✅ MinIO (API: 13900, Console: 13010)
+
+**開発体験**:
+- 🔥 Laravel APIホットリロード: コード変更が1秒以内に反映
+- ⚡ Next.js Turbopack: 超高速ホットリロード（HMR）
+
+##### Terminal 2: Admin App起動
+
+```bash
+cd frontend/admin-app
+npm run dev
+```
+
+**起動確認**: `✓ Ready in XXXms` が表示されればOK（ポート: 13002）
+
+##### Terminal 3: User App起動
+
+```bash
+cd frontend/user-app
+npm run dev
+```
+
+**起動確認**: `✓ Ready in XXXms` が表示されればOK（ポート: 13001）
+
+#### アクセスURL
+
+セットアップ完了後、以下のURLでアクセス可能：
+
+| サービス | URL | 説明 |
+|---------|-----|------|
+| **Laravel API** | http://localhost:13000 | RESTful API |
+| **Admin App** | http://localhost:13002 | 管理者用ダッシュボード |
+| **User App** | http://localhost:13001 | エンドユーザー向けアプリ |
+| **Mailpit UI** | http://localhost:13025 | メール確認画面 |
+| **MinIO Console** | http://localhost:13010 | オブジェクトストレージ管理 |
+
+#### ホットリロード確認
+
+##### Laravel API
+
+1. `backend/laravel-api/routes/api.php` を編集
+2. 1秒以内に変更が反映されることを確認
+
+```bash
+# 動作確認
+curl http://localhost:13000/api/health
+```
+
+##### Next.js
+
+1. `frontend/admin-app/app/page.tsx` または `frontend/user-app/app/page.tsx` を編集
+2. 1秒以内にブラウザが自動リロードして変更が反映されることを確認
+
+**Turbopack の高速ホットリロード** により、コード変更が即座に反映されます。
+
+#### 停止方法
+
+1. **Terminal 2/3**: `Ctrl+C` でNext.jsアプリを停止
+2. **Terminal 1**: `make stop` または `docker compose down` でDockerサービスを停止
+
+```bash
+# Dockerサービス停止（コンテナ保持）
+make stop
+# または
+docker compose stop
+
+# Dockerサービス完全削除（ボリューム含む）
+docker compose down -v
+```
+
+#### トラブルシューティング
+
+##### ポート競合エラー
+
+**症状**: `Error: listen EADDRINUSE: address already in use`
+
+**解決方法**:
+
+```bash
+# ポート使用状況確認
+lsof -i :13000  # Laravel API
+lsof -i :13001  # User App
+lsof -i :13002  # Admin App
+
+# プロセス終了
+kill -9 [PID]
+
+# または Next.js 開発サーバーを一括停止
+pkill -f "next dev"
+
+# Docker サービス再起動
+docker compose down && docker compose up -d
+```
+
+##### ホットリロード不具合
+
+**症状**: コード変更が反映されない
+
+**解決方法**:
+
+```bash
+# Dockerサービス再起動（キャッシュクリア）
+docker compose down -v
+docker compose up -d
+
+# Next.js アプリキャッシュクリア
+cd frontend/admin-app
+rm -rf .next node_modules/.cache
+npm run dev
+
+# Laravel APIキャッシュクリア
+docker compose exec laravel-api php artisan cache:clear
+docker compose exec laravel-api php artisan config:clear
+```
+
+##### サービス起動確認
+
+```bash
+# Docker サービス状態確認
+docker compose ps
+
+# Laravel API ヘルスチェック
+curl http://localhost:13000/api/health
+
+# ログ確認
+docker compose logs -f laravel-api
+docker compose logs -f pgsql
 ```
 
 ### 🔧 部分的再実行
@@ -523,54 +689,9 @@ php artisan serve --port=13000
 
 ### 開発サーバーの管理
 
-#### 🚀 新: 統合開発サーバー起動（最も簡単）
+> ℹ️ **注記**: 以前使用していた `scripts/dev/` ディレクトリは削除されました。複雑なTypeScript/Bash混在構成で保守が困難だったため、シンプルな3ターミナル起動方式（「🚀 開発環境起動（日常開発）」セクション参照）に統一しました。
 
-**単一コマンドで全サービスを起動:**
-
-```bash
-# デフォルト: ハイブリッドモード（インフラDocker、アプリネイティブ）
-make dev
-
-# Dockerモード: 全サービスDocker
-make dev-docker
-
-# ネイティブモード: 全サービスネイティブ
-make dev-native
-
-# プロファイル別起動
-make dev-api        # APIのみ
-make dev-frontend   # フロントエンドのみ
-make dev-infra      # インフラのみ
-make dev-minimal    # 最小構成（API + フロントエンド1つ）
-
-# 停止
-make dev-stop
-```
-
-**起動モード説明:**
-- **ハイブリッドモード** (推奨): インフラ（PostgreSQL, Redis等）はDocker、アプリ（Laravel API, Next.js）はネイティブプロセス
-- **Dockerモード**: 全サービスDockerコンテナで起動（環境統一、E2Eテスト向け）
-- **ネイティブモード**: 全サービスネイティブプロセスで起動（最速起動）
-
-**詳細オプション:**
-
-```bash
-# ヘルプ表示
-./scripts/dev/main.sh --help
-
-# カスタム起動
-./scripts/dev/main.sh --mode hybrid --profile full       # ハイブリッドモード全サービス
-./scripts/dev/main.sh --mode docker --profile api-only   # DockerモードAPI専用
-./scripts/dev/main.sh --services laravel-api,admin-app   # 特定サービスのみ
-
-# セットアップから実行
-./scripts/dev/main.sh --setup --mode docker
-
-# デバッグモード
-DEBUG=1 ./scripts/dev/main.sh --mode native
-```
-
-#### 従来方式: 全サービス同時起動（Docker Compose）
+#### Docker Composeコマンド直接実行
 
 ```bash
 # リポジトリルートから全サービス起動

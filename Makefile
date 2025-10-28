@@ -1,18 +1,28 @@
-# Laravel + Pest テストワークフロー Makefile
+# Laravel + Next.js モノレポ Makefile
 # 使用方法: make [target]
 
+# =============================================================================
+# 変数定義
+# =============================================================================
 LARAVEL_DIR := backend/laravel-api
 SCRIPTS_DIR := scripts
 
-.PHONY: help test test-sqlite test-pgsql test-parallel test-coverage
-.PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql
-.PHONY: test-all test-all-pgsql test-backend-only test-frontend-only test-e2e-only
-.PHONY: test-with-coverage test-pr test-smoke test-diagnose
-.PHONY: docker-up docker-down docker-logs
+# =============================================================================
+# .PHONY宣言
+# =============================================================================
+.PHONY: help
 .PHONY: setup setup-ci setup-from
-.PHONY: dev dev-docker dev-native dev-api dev-frontend dev-infra dev-minimal dev-stop dev-env
+.PHONY: dev stop clean logs ps dev-env
+.PHONY: test test-pgsql test-parallel test-coverage test-watch
+.PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql test-db-check
+.PHONY: test-all test-all-pgsql test-backend-only test-frontend-only test-e2e-only
+.PHONY: test-with-coverage test-pr test-smoke test-diagnose ci-test full-test
+.PHONY: docker-up docker-down docker-logs docker-reset
+.PHONY: lint lint-fix health
 
+# =============================================================================
 # デフォルトターゲット
+# =============================================================================
 help: ## ヘルプを表示
 	@echo "Laravel + Next.js モノレポ Makefile"
 	@echo ""
@@ -36,75 +46,72 @@ setup-from: ## 部分的再実行（例: make setup-from STEP=install_dependenci
 # テスト実行コマンド
 # =============================================================================
 
-test: ## デフォルトテスト実行（SQLite）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest
-
-quick-test: ## SQLite高速テスト（開発用）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest
+test: ## デフォルトテスト実行（SQLite高速モード）
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest
 
 test-pgsql: ## PostgreSQL本番同等テスト
 	@echo "🐳 Docker環境を確認中..."
 	@docker compose ps pgsql | grep -q "Up" || (echo "❌ PostgreSQLが起動していません。'make docker-up' を実行してください。" && exit 1)
-	./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest
+	@./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest
 
-test-parallel: ## 並列テスト実行（セットアップ→実行→クリーンアップ）
-	./$(SCRIPTS_DIR)/parallel-test-setup.sh 4
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest --parallel
-	./$(SCRIPTS_DIR)/parallel-test-cleanup.sh 4
+test-parallel: ## 並列テスト実行（PostgreSQL + 4並列）
+	@./$(SCRIPTS_DIR)/parallel-test-setup.sh 4
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest --parallel
+	@./$(SCRIPTS_DIR)/parallel-test-cleanup.sh 4
 
-test-coverage: ## カバレッジ付きテスト実行
-	cd $(LARAVEL_DIR) && XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
+test-coverage: ## カバレッジ付きテスト実行（85%以上必須）
+	@cd $(LARAVEL_DIR) && XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
 
 test-watch: ## テストファイル監視実行（開発用）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest --watch
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest --watch
 
 # =============================================================================
 # テスト環境セットアップ
 # =============================================================================
 
 test-setup: ## PostgreSQL並列テスト環境セットアップ
-	./$(SCRIPTS_DIR)/parallel-test-setup.sh
+	@./$(SCRIPTS_DIR)/parallel-test-setup.sh
 
 test-cleanup: ## PostgreSQL並列テスト環境クリーンアップ
-	./$(SCRIPTS_DIR)/parallel-test-cleanup.sh
+	@./$(SCRIPTS_DIR)/parallel-test-cleanup.sh
 
 test-switch-sqlite: ## テスト環境をSQLiteに切り替え
-	./$(SCRIPTS_DIR)/switch-test-env.sh sqlite
+	@./$(SCRIPTS_DIR)/switch-test-env.sh sqlite
 
 test-switch-pgsql: ## テスト環境をPostgreSQLに切り替え
-	./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
+	@./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
 
 test-db-check: ## テスト用データベース存在確認
-	./$(SCRIPTS_DIR)/check-test-db.sh
+	@./$(SCRIPTS_DIR)/check-test-db.sh
 
 # =============================================================================
 # Docker管理コマンド
 # =============================================================================
 
 docker-up: ## Docker環境起動（PostgreSQL + Redis）
-	docker compose up -d pgsql redis
+	@docker compose up -d pgsql redis
 
 docker-down: ## Docker環境停止
-	docker compose down
+	@docker compose down
 
 docker-logs: ## PostgreSQLログ確認
-	docker compose logs -f pgsql
+	@docker compose logs -f pgsql
 
-docker-reset: ## Docker環境リセット
-	docker compose down -v
-	docker compose up -d pgsql redis
+docker-reset: ## Docker環境リセット（ボリューム削除）
+	@docker compose down -v
+	@docker compose up -d pgsql redis
 
 # =============================================================================
 # 品質管理コマンド
 # =============================================================================
 
 lint: ## コード品質チェック（Pint + Larastan）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pint --test
-	cd $(LARAVEL_DIR) && ./vendor/bin/phpstan analyse
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pint --test
+	@cd $(LARAVEL_DIR) && ./vendor/bin/phpstan analyse
 
 lint-fix: ## コードスタイル自動修正（Pint）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pint
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pint
 
 # =============================================================================
 # テスト実行コマンド（新規統合スクリプト）
@@ -185,33 +192,38 @@ health: ## 環境ヘルスチェック
 	@echo "✅ ヘルスチェック完了"
 
 # =============================================================================
-# 開発サーバー起動コマンド
+# 開発サーバー起動コマンド（シンプル版）
 # =============================================================================
 
-dev: ## 開発サーバー起動（ハイブリッドモード: インフラDocker、アプリネイティブ）
-	@./scripts/dev/main.sh --mode hybrid --profile full
+dev: ## Dockerサービス起動（Laravel API + Infra）
+	@echo "🚀 Dockerサービスを起動中..."
+	@docker compose --profile api --profile infra up -d
+	@echo "✅ Dockerサービス起動完了！"
+	@echo ""
+	@echo "📝 次のステップ:"
+	@echo "  Terminal 2: cd frontend/admin-app && npm run dev"
+	@echo "  Terminal 3: cd frontend/user-app && npm run dev"
+	@echo ""
+	@echo "🌐 アクセスURL:"
+	@echo "  Laravel API: http://localhost:13000"
+	@echo "  Admin App:   http://localhost:13002"
+	@echo "  User App:    http://localhost:13001"
 
-dev-docker: ## 開発サーバー起動（Dockerモード: 全サービスDocker）
-	@./scripts/dev/main.sh --mode docker --profile full
+stop: ## Dockerサービス停止
+	@echo "🛑 Dockerサービスを停止中..."
+	@docker compose stop
+	@echo "✅ Dockerサービス停止完了！"
 
-dev-native: ## 開発サーバー起動（ネイティブモード: 全サービスネイティブ）
-	@./scripts/dev/main.sh --mode native --profile full
+clean: ## Dockerコンテナ・ボリューム完全削除
+	@echo "🧹 Dockerコンテナ・ボリュームを削除中..."
+	@docker compose down -v
+	@echo "✅ クリーンアップ完了！"
 
-dev-api: ## 開発サーバー起動（APIのみ）
-	@./scripts/dev/main.sh --mode hybrid --profile api-only
+logs: ## Dockerサービスログ表示
+	@docker compose logs -f
 
-dev-frontend: ## 開発サーバー起動（フロントエンドのみ）
-	@./scripts/dev/main.sh --mode hybrid --profile frontend-only
-
-dev-infra: ## 開発サーバー起動（インフラのみ）
-	@./scripts/dev/main.sh --mode docker --profile infra-only
-
-dev-minimal: ## 開発サーバー起動（最小構成: API + フロントエンド1つ）
-	@./scripts/dev/main.sh --mode hybrid --profile minimal
-
-dev-stop: ## 開発サーバー停止
-	@./scripts/dev/process-manager.sh stop || true
-	@docker compose down
+ps: ## Dockerサービス状態表示
+	@docker compose ps
 
 # =============================================================================
 # 開発者用クイックコマンド
