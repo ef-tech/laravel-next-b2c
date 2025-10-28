@@ -1,3 +1,12 @@
+# ============================================
+# Laravel + Next.js モノレポ Docker Compose設定
+# ============================================
+# 使用方法:
+#   make dev    - Laravel API + Infra起動
+#   make stop   - すべてのサービス停止
+#   make clean  - コンテナ・ボリューム削除
+# ============================================
+
 services:
   # ============================================
   # Laravel API サービス
@@ -49,14 +58,12 @@ services:
   # ============================================
   # Next.js Apps (admin-app, user-app)
   # ============================================
-  # Next.jsアプリはネイティブ起動を推奨
-  # 開発環境では以下のコマンドでネイティブ起動してください：
+  # Next.jsアプリはネイティブ起動を推奨（Turbopack最高速パフォーマンス）
   #
-  # Terminal 2: cd frontend/admin-app && npm run dev (ポート: 13002)
-  # Terminal 3: cd frontend/user-app && npm run dev (ポート: 13001)
-  #
-  # ネイティブ起動により、Turbopackの最高速パフォーマンスと
-  # 完璧なホットリロードを実現します。
+  # ネイティブ起動方法:
+  #   Terminal 2: cd frontend/admin-app && npm run dev  # ポート: 13002
+  #   Terminal 3: cd frontend/user-app && npm run dev   # ポート: 13001
+  # ============================================
 
   # ============================================
   # E2E Tests (Playwright)

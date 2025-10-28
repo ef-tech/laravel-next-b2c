@@ -1,18 +1,28 @@
-# Laravel + Pest テストワークフロー Makefile
+# Laravel + Next.js モノレポ Makefile
 # 使用方法: make [target]
 
+# =============================================================================
+# 変数定義
+# =============================================================================
 LARAVEL_DIR := backend/laravel-api
 SCRIPTS_DIR := scripts
 
-.PHONY: help test test-sqlite test-pgsql test-parallel test-coverage
-.PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql
-.PHONY: test-all test-all-pgsql test-backend-only test-frontend-only test-e2e-only
-.PHONY: test-with-coverage test-pr test-smoke test-diagnose
-.PHONY: docker-up docker-down docker-logs
+# =============================================================================
+# .PHONY宣言
+# =============================================================================
+.PHONY: help
 .PHONY: setup setup-ci setup-from
 .PHONY: dev stop clean logs ps dev-env
+.PHONY: test test-pgsql test-parallel test-coverage test-watch
+.PHONY: test-setup test-cleanup test-switch-sqlite test-switch-pgsql test-db-check
+.PHONY: test-all test-all-pgsql test-backend-only test-frontend-only test-e2e-only
+.PHONY: test-with-coverage test-pr test-smoke test-diagnose ci-test full-test
+.PHONY: docker-up docker-down docker-logs docker-reset
+.PHONY: lint lint-fix health
 
+# =============================================================================
 # デフォルトターゲット
+# =============================================================================
 help: ## ヘルプを表示
 	@echo "Laravel + Next.js モノレポ Makefile"
 	@echo ""
@@ -36,75 +46,72 @@ setup-from: ## 部分的再実行（例: make setup-from STEP=install_dependenci
 # テスト実行コマンド
 # =============================================================================
 
-test: ## デフォルトテスト実行（SQLite）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest
-
-quick-test: ## SQLite高速テスト（開発用）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest
+test: ## デフォルトテスト実行（SQLite高速モード）
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest
 
 test-pgsql: ## PostgreSQL本番同等テスト
 	@echo "🐳 Docker環境を確認中..."
 	@docker compose ps pgsql | grep -q "Up" || (echo "❌ PostgreSQLが起動していません。'make docker-up' を実行してください。" && exit 1)
-	./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest
+	@./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest
 
-test-parallel: ## 並列テスト実行（セットアップ→実行→クリーンアップ）
-	./$(SCRIPTS_DIR)/parallel-test-setup.sh 4
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest --parallel
-	./$(SCRIPTS_DIR)/parallel-test-cleanup.sh 4
+test-parallel: ## 並列テスト実行（PostgreSQL + 4並列）
+	@./$(SCRIPTS_DIR)/parallel-test-setup.sh 4
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest --parallel
+	@./$(SCRIPTS_DIR)/parallel-test-cleanup.sh 4
 
-test-coverage: ## カバレッジ付きテスト実行
-	cd $(LARAVEL_DIR) && XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
+test-coverage: ## カバレッジ付きテスト実行（85%以上必須）
+	@cd $(LARAVEL_DIR) && XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --min=85
 
 test-watch: ## テストファイル監視実行（開発用）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pest --watch
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pest --watch
 
 # =============================================================================
 # テスト環境セットアップ
 # =============================================================================
 
 test-setup: ## PostgreSQL並列テスト環境セットアップ
-	./$(SCRIPTS_DIR)/parallel-test-setup.sh
+	@./$(SCRIPTS_DIR)/parallel-test-setup.sh
 
 test-cleanup: ## PostgreSQL並列テスト環境クリーンアップ
-	./$(SCRIPTS_DIR)/parallel-test-cleanup.sh
+	@./$(SCRIPTS_DIR)/parallel-test-cleanup.sh
 
 test-switch-sqlite: ## テスト環境をSQLiteに切り替え
-	./$(SCRIPTS_DIR)/switch-test-env.sh sqlite
+	@./$(SCRIPTS_DIR)/switch-test-env.sh sqlite
 
 test-switch-pgsql: ## テスト環境をPostgreSQLに切り替え
-	./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
+	@./$(SCRIPTS_DIR)/switch-test-env.sh pgsql
 
 test-db-check: ## テスト用データベース存在確認
-	./$(SCRIPTS_DIR)/check-test-db.sh
+	@./$(SCRIPTS_DIR)/check-test-db.sh
 
 # =============================================================================
 # Docker管理コマンド
 # =============================================================================
 
 docker-up: ## Docker環境起動（PostgreSQL + Redis）
-	docker compose up -d pgsql redis
+	@docker compose up -d pgsql redis
 
 docker-down: ## Docker環境停止
-	docker compose down
+	@docker compose down
 
 docker-logs: ## PostgreSQLログ確認
-	docker compose logs -f pgsql
+	@docker compose logs -f pgsql
 
-docker-reset: ## Docker環境リセット
-	docker compose down -v
-	docker compose up -d pgsql redis
+docker-reset: ## Docker環境リセット（ボリューム削除）
+	@docker compose down -v
+	@docker compose up -d pgsql redis
 
 # =============================================================================
 # 品質管理コマンド
 # =============================================================================
 
 lint: ## コード品質チェック（Pint + Larastan）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pint --test
-	cd $(LARAVEL_DIR) && ./vendor/bin/phpstan analyse
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pint --test
+	@cd $(LARAVEL_DIR) && ./vendor/bin/phpstan analyse
 
 lint-fix: ## コードスタイル自動修正（Pint）
-	cd $(LARAVEL_DIR) && ./vendor/bin/pint
+	@cd $(LARAVEL_DIR) && ./vendor/bin/pint
 
 # =============================================================================
 # テスト実行コマンド（新規統合スクリプト）
