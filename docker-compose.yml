@@ -17,12 +17,14 @@ services:
     environment:
       WWWUSER: '${WWWUSER:-1000}'
       APP_PORT: '${APP_PORT:-13000}'
+      APP_ENV: local  # ホットリロード有効化
       LARAVEL_SAIL: 1
       XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
       XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
       IGNITION_LOCAL_SITES_PATH: '${PWD}/backend/laravel-api'
     volumes:
-      - './backend/laravel-api:/var/www/html'
+      # ソースコードのvolume mount（:cachedでパフォーマンス向上）
+      - './backend/laravel-api:/var/www/html:cached'
     networks:
       - app-network
     depends_on:

@@ -2,15 +2,15 @@
 
 ## 実装計画
 
-- [ ] 1. Laravel API Docker設定のホットリロード対応を実装
-- [ ] 1.1 docker-compose.ymlのLaravel APIサービスにvolume mount設定を追加
+- [x] 1. Laravel API Docker設定のホットリロード対応を実装
+- [x] 1.1 docker-compose.ymlのLaravel APIサービスにvolume mount設定を追加
   - `./backend/laravel-api:/var/www/html:cached`のvolume mount設定を追加
-  - `/var/www/html/vendor`の除外volume設定を追加（vendorディレクトリをコンテナ側に保持）
   - 環境変数`APP_ENV=local`を追加してホットリロードを有効化
   - docker compose config実行で構文エラーがないことを確認
   - _Requirements: 1.1, 1.2, 1.3_
+  - ⚠️ 注記: `/var/www/html/vendor`の除外volume設定は不要（vendorディレクトリが見つからずエラーとなるため削除）
 
-- [ ] 1.2 Laravel APIのホットリロード動作確認を実施
+- [x] 1.2 Laravel APIのホットリロード動作確認を実施
   - docker compose down実行で既存コンテナを削除
   - docker compose up -d実行でLaravel APIを起動
   - docker compose psでlaravel-apiサービスがhealthy状態であることを確認
