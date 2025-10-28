@@ -19,12 +19,12 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **冪等性保証**: 何度実行しても安全、既存設定の保持
   - **エラーハンドリング**: わかりやすいエラーメッセージと解決策の提示
   - **部分的再実行**: `make setup-from STEP=...` による指定ステップからの再実行機能
-- **🚀 シンプル3ターミナル起動方式**: `make dev` + ネイティブNext.jsアプリによる高速開発環境
-  - **Laravel API**: Docker起動（volume mount有効、ホットリロード1秒以内）
+- **🚀 シンプル3ターミナル起動方式**: `make dev` + ネイティブNext.jsアプリによる高速開発環境（**scripts/dev/削除完了**）
+  - **Laravel API**: Docker起動（volume mount有効、**ホットリロード1秒以内実現**）
   - **Next.jsアプリ**: ネイティブ起動（Turbopack最高速パフォーマンス、ホットリロード1秒以内）
   - **シンプルなMakefile**: 標準的なDocker Composeコマンドラッパー（dev/stop/clean/logs/ps/help）
-  - **複雑なスクリプト削除**: scripts/dev/削除、シンプルな開発環境維持
-  - **明確なドキュメント**: README.mdに3ターミナル起動手順記載
+  - **複雑なスクリプト完全削除**: TypeScript/Bash混在のscripts/dev/を削除、保守性大幅向上
+  - **明確なドキュメント**: README.mdに3ターミナル起動手順、トラブルシューティング完備
 - **🧪 統合テスト実行スクリプト実装**: `make test-all` コマンドによる全テストスイート統一実行（Phase 1-7完了、60サブタスク完了）
   - **バックエンドテスト**: Pest 4による高速SQLite/PostgreSQL並列実行対応（`scripts/test/run-backend-tests.sh`）
   - **フロントエンドテスト**: Jest 29による2アプリ並列実行、JUnit XML出力対応（`scripts/test/run-frontend-tests.sh`）

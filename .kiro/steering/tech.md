@@ -530,6 +530,9 @@ make setup-from STEP=verify_setup           # 検証のみ再実行
 ```
 
 ### 統合開発サーバー起動コマンド（日常開発、3ターミナル方式）
+
+**🎯 推奨起動方式（シンプル・高速）**:
+
 ```bash
 # Terminal 1: Dockerサービス起動（Laravel API + インフラ）
 make dev              # Dockerサービス起動（PostgreSQL、Redis、Mailpit、MinIO、Laravel API）
@@ -549,9 +552,16 @@ npm run dev           # ポート13001で起動
 ```
 
 **起動方式の特徴**:
-- **Laravel API**: Docker起動（volume mount有効、ホットリロード1秒以内）
+- **Laravel API**: Docker起動（volume mount有効、**ホットリロード1秒以内実現**）
+  - `compose.yaml` の `volumes` 設定により、ローカル変更が即座に反映
+  - 再ビルド不要、`routes/api.php` 等の変更がリアルタイムで適用
 - **Next.jsアプリ**: ネイティブ起動（Turbopack最高速パフォーマンス、ホットリロード1秒以内）
-- **シンプル化**: 複雑なスクリプト削除、標準的なDocker Composeコマンドのみ使用
+  - Docker起動よりも高速なHMR（Hot Module Replacement）
+  - メモリ効率が良く、開発体験が最適化
+- **シンプル化**: 複雑なTypeScript/Bash混在スクリプト（`scripts/dev/`）を完全削除
+  - 標準的なDocker Composeコマンドのみ使用
+  - 保守性・可読性の大幅向上
+  - トラブルシューティングが容易
 
 ### Docker Compose（推奨 - 統合環境）
 ```bash

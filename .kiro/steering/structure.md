@@ -74,7 +74,14 @@ laravel-next-b2c/
 │   │   └── diagnose-test-env.sh          # テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
 │   ├── analyze-csp-violations.sh         # 🔐 CSP違反ログ分析スクリプト
 │   ├── validate-security-headers.sh      # 🔐 セキュリティヘッダー検証スクリプト（Laravel/Next.js対応）
-│   └── validate-cors-config.sh           # 🌐 CORS設定整合性確認スクリプト
+│   ├── validate-cors-config.sh           # 🌐 CORS設定整合性確認スクリプト
+│   └── setup/                            # ⚡ セットアップスクリプト（make setup実装）
+│       └── setup-project.sh              # プロジェクト一括セットアップスクリプト（15分以内環境構築）
+│   # ⚠️ 注記: scripts/dev/ ディレクトリは削除されました
+│   # - 理由: TypeScript/Bash混在の複雑な構成で保守が困難
+│   # - 代替: シンプルな3ターミナル起動方式（README.md「🚀 開発環境起動（日常開発）」参照）
+│   # - Terminal 1: make dev（Docker起動）
+│   # - Terminal 2/3: npm run dev（Next.jsネイティブ起動）
 ├── CLAUDE.md            # プロジェクト開発ガイドライン
 ├── README.md            # プロジェクト概要
 ├── SECURITY_HEADERS_IMPLEMENTATION_GUIDE.md  # 🔐 セキュリティヘッダー実装ガイド（Laravel/Next.js実装手順、環境変数設定、CSPカスタマイズ）
@@ -590,6 +597,18 @@ import { clsx } from 'clsx'
   - `frontend/{admin-app,user-app}/next.config.ts` - outputFileTracingRoot設定（モノレポ対応）
 
 ## 開発フロー指針
+
+### ⚡ 日常開発フロー（3ターミナル起動方式）
+1. **Terminal 1**: `make dev` でDockerサービス起動（Laravel API + インフラ）
+2. **Terminal 2**: `cd frontend/admin-app && npm run dev` でAdmin App起動
+3. **Terminal 3**: `cd frontend/user-app && npm run dev` でUser App起動
+4. **ホットリロード確認**: 各ファイル変更後1秒以内に反映を確認
+   - Laravel API: `routes/api.php` 等の変更を確認
+   - Next.js: `.tsx` ファイル変更をブラウザで確認
+
+**注記**: 以前の `scripts/dev/` による統合起動方式は削除されました。シンプルな3ターミナル方式を推奨します。
+
+### 🏗️ アーキテクチャ開発フロー
 1. **🏗️ DDD/クリーンアーキテクチャ開発フロー**:
    - **Domain First**: ビジネスロジックをDomain層で先行実装（Entity、ValueObject、Repository Interface）
    - **UseCase実装**: Application層でユースケース実装（DTO、UseCase）
