@@ -43,6 +43,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `dev-server-startup-script` - 開発サーバー起動スクリプト作成（単一コマンド起動、Docker/ネイティブ/ハイブリッドモード、設定駆動アーキテクチャ）
 - `test-execution-script` - テスト実行スクリプト作成（全テストスイート統合実行、JUnit/カバレッジレポート統合、CI/CD連携、エラーハンドリング）
 - `docker-config-improvement` - Docker設定改善（Laravel APIホットリロード対応、Next.jsネイティブ起動、開発環境シンプル化）
+- `uuid-to-bigint` - UUID主キーからbigint主キーへの変更（Laravel標準構成準拠、パフォーマンス最適化）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

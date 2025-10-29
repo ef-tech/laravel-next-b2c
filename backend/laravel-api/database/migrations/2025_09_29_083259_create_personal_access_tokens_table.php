@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->uuidMorphs('tokenable'); // Changed from morphs() to uuidMorphs() for UUID primary keys
+            // Changed from uuidMorphs to morphs for bigint primary keys (Laravel standard)
+            $table->morphs('tokenable');
             $table->text('name');
             $table->string('token', 64)->unique();
             $table->text('abilities')->nullable();

@@ -1,0 +1,80 @@
+{
+  "feature_name": "uuid-to-bigint",
+  "created_at": "2025-10-29T00:00:00Z",
+  "updated_at": "2025-10-29T02:50:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 100,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/100",
+    "title": "主キーの uuid を bigint に戻す",
+    "labels": ["refactoring", "backend"]
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Eloquent ORM",
+      "database": "PostgreSQL 17, bigint SERIAL",
+      "framework": "Laravel Sanctum (認証システム)",
+      "testing": "Pest 4, PHPUnit"
+    },
+    "requirements_hints": [
+      "usersテーブルの主キーをUUID型からbigint型に変更",
+      "Laravel標準構成（$table->id()メソッド）への準拠",
+      "パフォーマンス最適化（bigintはUUIDより高速）",
+      "Sanctum認証システムとの整合性確保",
+      "既存マイグレーションファイルの直接編集（開発初期段階）"
+    ],
+    "project_structure": [
+      "database/migrations/0001_01_01_000000_create_users_table.php",
+      "database/migrations/2025_09_29_083259_create_personal_access_tokens_table.php",
+      "app/Models/User.php",
+      "database/factories/UserFactory.php",
+      "database/seeders/**",
+      "tests/**/*.php"
+    ],
+    "services": {},
+    "todo_items": [
+      "マイグレーションファイル修正（users, personal_access_tokens, sessions）",
+      "Eloquentモデル設定修正（User.php）",
+      "Factory/Seeder修正（UUID生成ロジック削除）",
+      "テストファイル修正（UUID前提コード削除）",
+      "データベース再構築（migrate:fresh）",
+      "全テスト実行（Pest, SQLite, PostgreSQL, E2E）",
+      "コード品質チェック（Pint, Larastan）",
+      "API動作確認（Sanctum認証）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true,
+  "implementation_status": {
+    "started_at": "2025-10-29T01:30:00Z",
+    "completed_at": "2025-10-29T03:30:00Z",
+    "result": "success",
+    "test_results": {
+      "total": 456,
+      "passed": 456,
+      "failed": 0,
+      "success_rate": "100%"
+    },
+    "quality_checks": {
+      "pint": "passed",
+      "larastan": "passed"
+    },
+    "pr_number": 106,
+    "pr_url": "https://github.com/ef-tech/laravel-next-b2c/pull/106"
+  }
+}
