@@ -18,7 +18,7 @@ describe('V1 User API - POST /api/v1/users', function () {
 
         $response->assertStatus(201)
             ->assertHeader('X-API-Version', 'v1')
-            ->assertJsonStructure(['id']);
+            ->assertJsonStructure(['token', 'user' => ['id', 'name', 'email', 'created_at', 'updated_at']]);
 
         assertDatabaseHas('users', [
             'email' => 'test@example.com',

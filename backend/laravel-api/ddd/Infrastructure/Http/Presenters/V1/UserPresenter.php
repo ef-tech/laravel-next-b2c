@@ -17,7 +17,7 @@ final class UserPresenter
      * Userレスポンスを生成
      *
      * @param  User  $user  ユーザーモデル
-     * @return array{id: int, name: string, email: string}
+     * @return array{id: int, name: string, email: string, created_at: string, updated_at: string}
      */
     public static function present(User $user): array
     {
@@ -25,6 +25,8 @@ final class UserPresenter
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'created_at' => $user->created_at?->toIso8601String() ?? now()->toIso8601String(),
+            'updated_at' => $user->updated_at?->toIso8601String() ?? now()->toIso8601String(),
         ];
     }
 }
