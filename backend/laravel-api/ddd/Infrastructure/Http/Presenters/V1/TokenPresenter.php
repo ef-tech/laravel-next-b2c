@@ -26,7 +26,7 @@ final class TokenPresenter
         return [
             'token' => $newToken->plainTextToken,
             'name' => $newToken->accessToken->name,
-            'created_at' => $newToken->accessToken->created_at->toIso8601String(),
+            'created_at' => $newToken->accessToken->created_at?->toIso8601String() ?? now()->toIso8601String(),
         ];
     }
 
@@ -41,7 +41,7 @@ final class TokenPresenter
         return [
             'id' => $token->id,
             'name' => $token->name,
-            'created_at' => $token->created_at->toIso8601String(),
+            'created_at' => $token->created_at?->toIso8601String() ?? now()->toIso8601String(),
             'last_used_at' => $token->last_used_at?->toIso8601String(),
         ];
     }
