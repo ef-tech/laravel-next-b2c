@@ -107,6 +107,7 @@ test.describe('API V1 - Authentication Flow', () => {
     const logoutResponse = await request.post(`${API_V1_URL}/logout`, {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
 
