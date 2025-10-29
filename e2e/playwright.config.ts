@@ -52,6 +52,14 @@ export default defineConfig({
       },
     },
     {
+      name: 'shared-api-tests',
+      testDir: './projects/shared/tests',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.E2E_API_URL ?? 'http://localhost:13000',
+      },
+    },
+    {
       name: 'admin-chromium',
       testDir: './projects/admin/tests',
       use: {
