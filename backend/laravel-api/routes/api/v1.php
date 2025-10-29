@@ -23,12 +23,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/health', [HealthController::class, 'show'])
     ->name('v1.health');
 
-Route::post('/csp-report', [CspReportController::class, 'report'])
+Route::post('/csp/report', [CspReportController::class, 'report'])
     ->middleware('throttle:100,1')
-    ->name('v1.csp-report');
+    ->name('v1.csp.report');
 
-Route::post('/register', [UserController::class, 'register'])
-    ->name('v1.register');
+Route::post('/users', [UserController::class, 'register'])
+    ->name('v1.users.register');
 
 // Login with rate limiting (5 attempts per minute)
 Route::middleware('throttle:5,1')->group(function () {

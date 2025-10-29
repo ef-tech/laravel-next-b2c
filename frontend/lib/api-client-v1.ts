@@ -80,7 +80,7 @@ async function fetchV1<T>(
 /**
  * GET /api/v1/health
  */
-export async function getHealth(): Promise<V1HealthResponse> {
+export async function getHealth(): Promise<V1ApiResponse<V1HealthResponse>> {
   return fetchV1<V1HealthResponse>('/health');
 }
 
@@ -89,12 +89,12 @@ export async function getHealth(): Promise<V1HealthResponse> {
 // ========================================
 
 /**
- * POST /api/v1/register
+ * POST /api/v1/users
  */
 export async function register(
   request: V1RegisterRequest
-): Promise<V1RegisterResponse> {
-  return fetchV1<V1RegisterResponse>('/register', {
+): Promise<V1ApiResponse<V1RegisterResponse>> {
+  return fetchV1<V1RegisterResponse>('/users', {
     method: 'POST',
     body: request,
   });
@@ -105,7 +105,7 @@ export async function register(
  */
 export async function login(
   request: V1LoginRequest
-): Promise<V1LoginResponse> {
+): Promise<V1ApiResponse<V1LoginResponse>> {
   return fetchV1<V1LoginResponse>('/login', {
     method: 'POST',
     body: request,
@@ -115,7 +115,7 @@ export async function login(
 /**
  * POST /api/v1/logout
  */
-export async function logout(token: string): Promise<V1LogoutResponse> {
+export async function logout(token: string): Promise<V1ApiResponse<V1LogoutResponse>> {
   return fetchV1<V1LogoutResponse>('/logout', {
     method: 'POST',
     token,
@@ -125,7 +125,7 @@ export async function logout(token: string): Promise<V1LogoutResponse> {
 /**
  * GET /api/v1/user
  */
-export async function getUser(token: string): Promise<V1UserResponse> {
+export async function getUser(token: string): Promise<V1ApiResponse<V1UserResponse>> {
   return fetchV1<V1UserResponse>('/user', {
     token,
   });
@@ -141,7 +141,7 @@ export async function getUser(token: string): Promise<V1UserResponse> {
 export async function createToken(
   token: string,
   request?: V1TokenStoreRequest
-): Promise<V1TokenStoreResponse> {
+): Promise<V1ApiResponse<V1TokenStoreResponse>> {
   return fetchV1<V1TokenStoreResponse>('/tokens', {
     method: 'POST',
     token,
@@ -152,7 +152,7 @@ export async function createToken(
 /**
  * GET /api/v1/tokens
  */
-export async function getTokens(token: string): Promise<V1TokensResponse> {
+export async function getTokens(token: string): Promise<V1ApiResponse<V1TokensResponse>> {
   return fetchV1<V1TokensResponse>('/tokens', {
     token,
   });
@@ -164,7 +164,7 @@ export async function getTokens(token: string): Promise<V1TokensResponse> {
 export async function deleteToken(
   token: string,
   id: number
-): Promise<V1TokenDestroyResponse> {
+): Promise<V1ApiResponse<V1TokenDestroyResponse>> {
   return fetchV1<V1TokenDestroyResponse>(`/tokens/${id}`, {
     method: 'DELETE',
     token,
@@ -176,7 +176,7 @@ export async function deleteToken(
  */
 export async function deleteAllTokens(
   token: string
-): Promise<V1TokenDestroyAllResponse> {
+): Promise<V1ApiResponse<V1TokenDestroyAllResponse>> {
   return fetchV1<V1TokenDestroyAllResponse>('/tokens', {
     method: 'DELETE',
     token,
@@ -188,12 +188,12 @@ export async function deleteAllTokens(
 // ========================================
 
 /**
- * POST /api/v1/csp-report
+ * POST /api/v1/csp/report
  */
 export async function reportCspViolation(
   request: V1CspReportRequest
 ): Promise<void> {
-  await fetchV1<void>('/csp-report', {
+  await fetchV1<void>('/csp/report', {
     method: 'POST',
     body: request,
   });
