@@ -38,7 +38,8 @@ final readonly class EloquentUserRepository implements UserRepository
 
     public function save(User $user): void
     {
-        // Check if this is a new user (ID not set yet)
+        // Check if this is a new user (ID not set yet) or existing user
+        $isNewUser = false;
         try {
             $userId = $user->id();
             // User has ID - update existing
@@ -46,13 +47,14 @@ final readonly class EloquentUserRepository implements UserRepository
         } catch (\RuntimeException $e) {
             // User doesn't have ID - create new
             $model = new EloquentUser;
+            $isNewUser = true;
         }
 
         $this->mapper->toModel($user, $model);
         $model->save();
 
         // Set auto-generated ID for new users
-        if (! isset($userId)) {
+        if ($isNewUser) {
             // After save(), Eloquent automatically sets the ID
             if (! $model->id) {
                 throw new \RuntimeException('Failed to generate ID after save');
