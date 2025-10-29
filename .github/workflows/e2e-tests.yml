@@ -123,7 +123,11 @@ jobs:
 
       - name: Configure PostgreSQL for E2E tests
         run: |
-          # Override SQLite with PostgreSQL for E2E tests
+          # Remove existing DB configuration from .env.ci
+          sed -i '/^DB_CONNECTION=/d' .env
+          sed -i '/^DB_DATABASE=/d' .env
+
+          # Add PostgreSQL configuration for E2E tests
           echo "" >> .env
           echo "# E2E Tests PostgreSQL Configuration" >> .env
           echo "DB_CONNECTION=pgsql" >> .env
