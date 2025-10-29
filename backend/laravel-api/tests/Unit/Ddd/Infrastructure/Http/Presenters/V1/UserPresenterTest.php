@@ -39,7 +39,7 @@ describe('UserPresenter', function () {
 
         $result = UserPresenter::present($user);
 
-        expect($result)->toHaveKeys(['id', 'name', 'email'])
-            ->and(count($result))->toBe(3);
+        expect($result)->toHaveKeys(['id', 'name', 'email', 'created_at', 'updated_at'])
+            ->and(count($result))->toBe(5);
     });
 });
