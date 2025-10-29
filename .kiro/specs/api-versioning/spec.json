@@ -1,0 +1,100 @@
+{
+  "feature_name": "api-versioning",
+  "created_at": "2025-10-29T07:20:00Z",
+  "updated_at": "2025-10-29T07:45:32Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 107,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/107",
+    "title": "API のバージョニング",
+    "labels": ["enhancement", "priority: high", "backend"],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, Sanctum, Pest 4",
+      "frontend": "Next.js 15.5, TypeScript",
+      "infrastructure": "Docker, GitHub Actions",
+      "tools": "Playwright, OpenAPI, Swagger UI"
+    },
+    "requirements_hints": [
+      "URLベースバージョニング (/api/v1) 実装とヘッダーベース補助 (X-API-Version)",
+      "V1コントローラー実装: 既存コントローラーの V1 ディレクトリへの移行",
+      "DDD 4層構造との統合: Domain/Application層非依存、HTTP/Infrastructure層での変換",
+      "既存ミドルウェアスタック統合: DynamicRateLimit、SetRequestId、Sanctum認証との連携",
+      "完全なテスト戦略: Pest 4 + Architecture Tests + E2E統合（V1のみ）",
+      "V2実装ロードマップドキュメント作成: 将来の V2 実装に向けた方針・戦略をドキュメント化",
+      "後方互換性の維持: 既存クライアント（Next.js admin-app, user-app）への影響最小化",
+      "API仕様の進化: レスポンス形式の標準化、エラーハンドリングの改善、セキュリティ強化"
+    ],
+    "project_structure": [
+      "routes/api/v1.php",
+      "app/Http/Controllers/Api/V1/",
+      "app/Http/Middleware/ApiVersion.php",
+      "ddd/Infrastructure/Http/Presenters/V1/",
+      "ddd/Infrastructure/Http/Requests/V1/",
+      "frontend/types/api/v1.ts",
+      "backend/laravel-api/docs/api-versioning-guide.md",
+      "backend/laravel-api/docs/api-versioning-v2-roadmap.md",
+      "docs/openapi-v1.yaml",
+      "tests/Feature/Api/V1/",
+      "tests/Feature/Middleware/ApiVersionTest.php",
+      "tests/Arch/ApiVersionArchitectureTest.php",
+      "e2e/projects/shared/tests/api-versioning.spec.ts"
+    ],
+    "services": {},
+    "todo_items": [
+      "ApiVersionミドルウェア実装完了（V1対応）",
+      "ルーティング分離完了（routes/api/v1.php）",
+      "V1コントローラー実装完了（既存コントローラー移行）",
+      "Presenter/Request分離完了（Infrastructure層）",
+      "DynamicRateLimit統合完了（V1対応）",
+      "設定ファイル整備完了",
+      "型定義分離完了（frontend/types/api/v1.ts）",
+      "環境変数管理完了（デフォルト: v1）",
+      "既存コンポーネント動作確認完了",
+      "Middleware/ApiVersionTest.php 全合格（V1テスト）",
+      "Api/V1/*Test.php 全合格（回帰テスト）",
+      "カバレッジ85%以上維持",
+      "ApiVersionArchitectureTest.php 全合格",
+      "既存Architecture Tests全合格",
+      "依存方向違反ゼロ確認",
+      "api-versioning.spec.ts 全合格（V1のみ）",
+      "既存E2Eテスト全合格",
+      "CI/CD環境でのE2Eテスト成功確認",
+      ".github/workflows/test.yml paths設定拡張完了",
+      "openapi-v1.yaml 生成成功",
+      "backend/laravel-api/docs/api-versioning-guide.md 作成完了",
+      "設計思想記載（V1実装パターン）",
+      "実装パターン記載（ミドルウェア、ルーティング、コントローラー）",
+      "テスト戦略記載",
+      "トラブルシューティング記載",
+      "backend/laravel-api/docs/api-versioning-v2-roadmap.md 作成完了",
+      "V2実装方針記載",
+      "段階的移行戦略記載",
+      "V2技術要件記載",
+      "V2テスト戦略記載",
+      "Deprecation/Sunset運用方針記載",
+      "docs/openapi-v1.yaml 生成・検証完了",
+      "Swagger UIでの動作確認完了（V1）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
