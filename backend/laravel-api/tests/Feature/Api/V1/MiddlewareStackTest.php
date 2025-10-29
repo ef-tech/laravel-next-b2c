@@ -133,11 +133,9 @@ describe('Authentication Middleware Application', function () {
         $response = $this->get('/api/v1/health');
         $response->assertStatus(200);
 
-        $response = $this->postJson('/api/v1/register', [
+        $response = $this->postJson('/api/v1/users', [
             'name' => 'Test User',
             'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
         ]);
         $response->assertStatus(201);
 
@@ -184,20 +182,20 @@ describe('Endpoint-Specific Rate Limit Application', function () {
         $response->assertStatus(429);
     });
 
-    it('should apply throttle:100,1 to v1.csp-report route', function () {
+    it('should apply throttle:100,1 to v1.csp.report route', function () {
         // CSPレポートエンドポイントは100req/min制限が設定されている
         // Note: DynamicRateLimitミドルウェアも適用されるため、
         // より厳しい制限が先に発動する可能性がある
 
         // ルート定義にthrottle:100,1が設定されていることを検証
-        $route = app('router')->getRoutes()->getByName('v1.csp-report');
+        $route = app('router')->getRoutes()->getByName('v1.csp.report');
         expect($route)->not->toBeNull();
 
         $middlewares = $route->gatherMiddleware();
         expect($middlewares)->toContain('throttle:100,1');
 
         // 正常にリクエストが処理されることを確認
-        $response = $this->postJson('/api/v1/csp-report', [
+        $response = $this->postJson('/api/v1/csp/report', [
             'csp-report' => [
                 'document-uri' => 'https://example.com/',
                 'violated-directive' => 'script-src',

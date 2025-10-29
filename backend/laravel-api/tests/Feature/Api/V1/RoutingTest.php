@@ -35,13 +35,13 @@ describe('V1 Public Routes', function () {
         $response->assertJson(['status' => 'ok']);
     });
 
-    it('should register v1.csp-report route for POST /api/v1/csp-report', function () {
+    it('should register v1.csp.report route for POST /api/v1/csp/report', function () {
         // ルート名でアクセス可能か検証
-        $route = route('v1.csp-report');
-        expect($route)->toBe(url('/api/v1/csp-report'));
+        $route = route('v1.csp.report');
+        expect($route)->toBe(url('/api/v1/csp/report'));
 
         // エンドポイントが正常に動作するか検証（application/json形式でもOK）
-        $response = $this->postJson('/api/v1/csp-report', [
+        $response = $this->postJson('/api/v1/csp/report', [
             'csp-report' => [
                 'document-uri' => 'https://example.com/',
                 'violated-directive' => 'script-src',
@@ -52,17 +52,15 @@ describe('V1 Public Routes', function () {
 });
 
 describe('V1 Authentication Routes', function () {
-    it('should register v1.register route for POST /api/v1/register', function () {
+    it('should register v1.users.register route for POST /api/v1/users', function () {
         // ルート名でアクセス可能か検証
-        $route = route('v1.register');
-        expect($route)->toBe(url('/api/v1/register'));
+        $route = route('v1.users.register');
+        expect($route)->toBe(url('/api/v1/users'));
 
         // エンドポイントが正常に動作するか検証
-        $response = $this->postJson('/api/v1/register', [
+        $response = $this->postJson('/api/v1/users', [
             'name' => 'Test User',
             'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
         ]);
         $response->assertStatus(201);
     });
