@@ -11,6 +11,9 @@ on:
       - develop
     paths:
       - 'backend/laravel-api/**'
+      - 'frontend/types/api/v1.ts'
+      - 'frontend/lib/api-client-v1.ts'
+      - 'e2e/projects/shared/tests/api-versioning.spec.ts'
       - '.github/workflows/test.yml'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -19,6 +22,9 @@ on:
       - develop
     paths:
       - 'backend/laravel-api/**'
+      - 'frontend/types/api/v1.ts'
+      - 'frontend/lib/api-client-v1.ts'
+      - 'e2e/projects/shared/tests/api-versioning.spec.ts'
       - '.github/workflows/test.yml'
 
 jobs:

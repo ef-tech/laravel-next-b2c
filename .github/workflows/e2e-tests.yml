@@ -38,6 +38,10 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'backend/laravel-api/app/Http/Controllers/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Middleware/ApiVersion.php'
+      - 'backend/laravel-api/routes/api/v1.php'
       - 'backend/laravel-api/app/**'
       - 'backend/laravel-api/routes/**'
       - 'backend/laravel-api/config/**'
@@ -48,6 +52,10 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'backend/laravel-api/app/Http/Controllers/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Middleware/ApiVersion.php'
+      - 'backend/laravel-api/routes/api/v1.php'
       - 'backend/laravel-api/app/**'
       - 'backend/laravel-api/routes/**'
       - 'backend/laravel-api/config/**'
