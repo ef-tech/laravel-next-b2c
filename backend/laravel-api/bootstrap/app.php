@@ -3,12 +3,19 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function ($router) {
+            // V1 API Routes with /api/v1 prefix
+            Route::prefix('api/v1')
+                ->middleware('api')
+                ->group(base_path('routes/api/v1.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // API専用化: セッション関連ミドルウェアを除外
@@ -26,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //          → SetRequestId → CorrelationId → ForceJsonResponse
         //          → SecurityHeaders (最後に実行)
 
+        $middleware->append(\App\Http\Middleware\ApiVersion::class);
         $middleware->append(\App\Http\Middleware\SetRequestId::class);
         $middleware->append(\App\Http\Middleware\CorrelationId::class);
         $middleware->append(\App\Http\Middleware\ForceJsonResponse::class);
