@@ -229,6 +229,7 @@ LOG_SENSITIVE_FIELDS=email,ip_address,user_agent  # ハッシュ化対象フィ�
   - **接続最適化**: タイムアウト設定（connect_timeout/statement_timeout）、PDOオプション最適化
   - **環境別設定**: Docker/Native/Production環境に応じた接続パラメータ最適化
   - **信頼性向上**: ServiceProvider方式によるタイムアウト設定、エラーハンドリング強化
+  - **🔧 主キー設計**: bigint自動採番主キー（Laravel標準構成準拠、UUID比較でパフォーマンス最適化）
 - **Redis**: alpine (キャッシュ管理 - セッションストレージ不使用)
 - **MinIO**: オブジェクトストレージ (S3互換)
 
