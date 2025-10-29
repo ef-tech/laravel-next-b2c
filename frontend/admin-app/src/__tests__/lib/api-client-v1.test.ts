@@ -67,7 +67,7 @@ describe("API V1 Client", () => {
       const result = await register(mockRequest);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/v1/register"),
+        expect.stringContaining("/api/v1/users"),
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify(mockRequest),
@@ -290,7 +290,7 @@ describe("API V1 Client", () => {
       await reportCspViolation(mockRequest);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/v1/csp-report"),
+        expect.stringContaining("/api/v1/csp/report"),
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify(mockRequest),
