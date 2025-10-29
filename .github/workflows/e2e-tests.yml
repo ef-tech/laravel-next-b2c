@@ -185,6 +185,15 @@ jobs:
           cp frontend/admin-app/.env.example frontend/admin-app/.env.local
           cp frontend/user-app/.env.example frontend/user-app/.env.local
 
+      - name: Clear Laravel cache before starting server
+        run: |
+          # Clear configuration cache one more time before starting the server
+          # to ensure .env changes are fully loaded
+          php artisan config:clear
+        working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
+
       - name: Start services
         run: |
           # Start Laravel API (ポート13000)
