@@ -121,6 +121,19 @@ jobs:
         run: cp .env.ci .env
         working-directory: backend/laravel-api
 
+      - name: Configure PostgreSQL for E2E tests
+        run: |
+          # Override SQLite with PostgreSQL for E2E tests
+          echo "" >> .env
+          echo "# E2E Tests PostgreSQL Configuration" >> .env
+          echo "DB_CONNECTION=pgsql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=13432" >> .env
+          echo "DB_DATABASE=testing" >> .env
+          echo "DB_USERNAME=sail" >> .env
+          echo "DB_PASSWORD=password" >> .env
+        working-directory: backend/laravel-api
+
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         working-directory: backend/laravel-api
@@ -157,7 +170,7 @@ jobs:
         run: |
           # Start Laravel API (ポート13000)
           cd backend/laravel-api
-          ENV_VALIDATION_SKIP=true DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password SECURITY_ENABLE_CSP=true CORS_SUPPORTS_CREDENTIALS=true php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
+          ENV_VALIDATION_SKIP=true php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - 開発モード)
