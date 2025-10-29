@@ -6,11 +6,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\RegisterUserRequest;
-use App\Models\User;
 use Ddd\Application\User\UseCases\RegisterUser\RegisterUserInput;
 use Ddd\Application\User\UseCases\RegisterUser\RegisterUserUseCase;
 use Ddd\Domain\User\ValueObjects\Email;
 use Ddd\Infrastructure\Http\Presenters\V1\AuthPresenter;
+use Ddd\Infrastructure\Services\TokenGenerationService;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -21,7 +21,8 @@ use Illuminate\Http\JsonResponse;
 final class UserController extends Controller
 {
     public function __construct(
-        private readonly RegisterUserUseCase $registerUserUseCase
+        private readonly RegisterUserUseCase $registerUserUseCase,
+        private readonly TokenGenerationService $tokenGenerationService
     ) {}
 
     /**
@@ -38,20 +39,13 @@ final class UserController extends Controller
 
         $output = $this->registerUserUseCase->execute($input);
 
-        // 作成したユーザーを取得してトークンを発行
-        $user = User::find($output->userId->value());
-
-        if (! $user) {
-            return response()->json([
-                'message' => 'User registration failed',
-            ], 500);
-        }
-
         // APIトークンを生成
-        $token = $user->createToken('API Token')->plainTextToken;
+        // Note: Infrastructure層のTokenGenerationServiceを使用することで、
+        // Controller層がModel層を直接参照することを回避します
+        $result = $this->tokenGenerationService->generateToken($output->userId);
 
         return response()->json(
-            AuthPresenter::presentLogin($user, $token),
+            AuthPresenter::presentLogin($result['user'], $result['token']),
             201
         );
     }
