@@ -132,6 +132,10 @@ jobs:
           echo "DB_DATABASE=testing" >> .env
           echo "DB_USERNAME=sail" >> .env
           echo "DB_PASSWORD=password" >> .env
+
+          # Verify .env configuration
+          echo "=== .env DB Configuration ==="
+          grep "^DB_" .env || echo "No DB_ variables found"
         working-directory: backend/laravel-api
 
       - name: Install Composer dependencies
@@ -141,6 +145,17 @@ jobs:
       - name: Validate environment variables
         run: php artisan env:validate
         working-directory: backend/laravel-api
+
+      - name: Clear Laravel configuration cache
+        run: |
+          # Clear any cached configuration to ensure .env changes are applied
+          php artisan config:clear
+          # Verify DB connection after config clear
+          echo "=== Testing DB Connection ==="
+          php artisan tinker --execute="try { DB::connection()->getPdo(); echo 'DB Connection: OK ('. env('DB_CONNECTION') .')'; } catch (\Exception \$e) { echo 'DB Connection Failed: '. \$e->getMessage(); }"
+        working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
 
       - name: Setup Laravel
         run: |
