@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\LoginRequest;
+use App\Http\Requests\Api\V1\LoginRequest;
 use App\Models\User;
+use Ddd\Infrastructure\Http\Presenters\V1\AuthPresenter;
+use Ddd\Infrastructure\Http\Presenters\V1\UserPresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -27,23 +29,18 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password ?? '')) {
-            return response()->json([
-                'message' => 'Invalid credentials',
-            ], 401);
+            return response()->json(
+                AuthPresenter::presentLoginError(),
+                401
+            );
         }
 
         // APIトークンを生成
         $token = $user->createToken('API Token')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-            'token_type' => 'Bearer',
-        ]);
+        return response()->json(
+            AuthPresenter::presentLogin($user, $token)
+        );
     }
 
     /**
@@ -55,9 +52,9 @@ class AuthController extends Controller
         $user = Auth::user();
         $user->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+        return response()->json(
+            AuthPresenter::presentLogout()
+        );
     }
 
     /**
@@ -68,10 +65,8 @@ class AuthController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-        ]);
+        return response()->json(
+            UserPresenter::present($user)
+        );
     }
 }

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Ddd\Infrastructure\Http\Presenters\V1\TokenPresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,14 +33,10 @@ class TokenController extends Controller
         $tokenName = $request->input('name', 'API Token');
         $newToken = $user->createToken($tokenName);
 
-        /** @var \Carbon\Carbon $createdAt */
-        $createdAt = $newToken->accessToken->created_at;
-
-        return response()->json([
-            'token' => $newToken->plainTextToken,
-            'name' => $newToken->accessToken->name,
-            'created_at' => $createdAt->toISOString(),
-        ], 201);
+        return response()->json(
+            TokenPresenter::presentNewToken($newToken),
+            201
+        );
     }
 
     /**
@@ -50,21 +47,11 @@ class TokenController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $tokens = $user->tokens()->get()->map(function ($token) {
-            /** @var \Carbon\Carbon $createdAt */
-            $createdAt = $token->created_at;
+        $tokens = $user->tokens()->get();
 
-            return [
-                'id' => $token->id,
-                'name' => $token->name,
-                'created_at' => $createdAt->toISOString(),
-                'last_used_at' => $token->last_used_at?->toISOString(),
-            ];
-        });
-
-        return response()->json([
-            'tokens' => $tokens,
-        ]);
+        return response()->json(
+            TokenPresenter::presentTokenList($tokens)
+        );
     }
 
     /**
