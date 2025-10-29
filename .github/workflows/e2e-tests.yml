@@ -118,26 +118,9 @@ jobs:
             e2e/package-lock.json
 
       - name: Copy .env for CI
-        run: cp .env.ci .env
-        working-directory: backend/laravel-api
-
-      - name: Configure PostgreSQL for E2E tests
         run: |
-          # Remove existing DB configuration from .env.ci
-          sed -i '/^DB_CONNECTION=/d' .env
-          sed -i '/^DB_DATABASE=/d' .env
-
-          # Add PostgreSQL configuration for E2E tests
-          echo "" >> .env
-          echo "# E2E Tests PostgreSQL Configuration" >> .env
-          echo "DB_CONNECTION=pgsql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=13432" >> .env
-          echo "DB_DATABASE=testing" >> .env
-          echo "DB_USERNAME=sail" >> .env
-          echo "DB_PASSWORD=password" >> .env
-
-          # Verify .env configuration
+          cp .env.ci .env
+          # Verify DB configuration
           echo "=== .env DB Configuration ==="
           grep "^DB_" .env || echo "No DB_ variables found"
         working-directory: backend/laravel-api
