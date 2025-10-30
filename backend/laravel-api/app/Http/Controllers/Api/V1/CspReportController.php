@@ -44,8 +44,10 @@ class CspReportController extends Controller
         }
 
         // CSPレポートデータを取得（FormRequestによりバリデーション済み）
+        // Note: application/csp-report Content-Typeの場合、Laravelが自動的にJSONデコードしないため、
+        // 明示的に$request->json()を使用してJSONボディから取得する
         /** @var array<string, mixed> $cspReport */
-        $cspReport = $request->json('csp-report', []);
+        $cspReport = $request->json('csp-report') ?? $request->input('csp-report');
 
         // セキュリティログチャンネルに記録
         Log::channel('security')->warning('CSP Violation Detected', [

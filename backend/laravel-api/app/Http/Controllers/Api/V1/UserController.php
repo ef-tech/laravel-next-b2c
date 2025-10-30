@@ -6,14 +6,13 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\RegisterUserRequest;
-use App\Models\User as EloquentUser;
 use Ddd\Application\User\UseCases\RegisterUser\RegisterUserInput;
 use Ddd\Application\User\UseCases\RegisterUser\RegisterUserUseCase;
 use Ddd\Domain\User\ValueObjects\Email;
 use Ddd\Infrastructure\Http\Presenters\V1\AuthPresenter;
+use Ddd\Infrastructure\Services\PasswordService;
 use Ddd\Infrastructure\Services\TokenGenerationService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
 
 /**
  * V1 ユーザーコントローラー
@@ -24,6 +23,7 @@ final class UserController extends Controller
 {
     public function __construct(
         private readonly RegisterUserUseCase $registerUserUseCase,
+        private readonly PasswordService $passwordService,
         private readonly TokenGenerationService $tokenGenerationService
     ) {}
 
@@ -41,18 +41,12 @@ final class UserController extends Controller
 
         $output = $this->registerUserUseCase->execute($input);
 
-        // パスワードをEloquentモデルに直接保存
+        // パスワードを設定
         // Note: パスワードはまだDomainモデルに含まれていないため、
-        // ここでEloquentモデルに直接ハッシュ化して保存します
-        $user = EloquentUser::find($output->userId->value());
-        if ($user) {
-            $user->password = Hash::make($request->input('password'));
-            $user->save();
-        }
+        // Infrastructure層のPasswordServiceを使用してEloquentモデルに保存します
+        $this->passwordService->setPassword($output->userId, $request->input('password'));
 
         // APIトークンを生成
-        // Note: Infrastructure層のTokenGenerationServiceを使用することで、
-        // Controller層がModel層を直接参照することを回避します
         $result = $this->tokenGenerationService->generateToken($output->userId);
 
         return response()->json(

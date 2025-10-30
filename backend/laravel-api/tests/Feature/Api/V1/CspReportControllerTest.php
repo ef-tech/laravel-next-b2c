@@ -57,13 +57,13 @@ describe('V1 CSP Report API - POST /api/v1/csp/report', function () {
             ->assertJson(['error' => 'Unsupported Media Type']);
     });
 
-    test('CSPレポートが空の場合は400エラーを返すこと', function () {
+    test('CSPレポートが空の場合は422エラーを返すこと（FormRequestバリデーション）', function () {
         $response = postJson('/api/v1/csp/report', [], [
             'Content-Type' => 'application/csp-report',
         ]);
 
-        $response->assertStatus(400)
-            ->assertJson(['error' => 'Empty CSP report']);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['csp-report']);
     });
 
     test('CSPレポートがオプションフィールドを含まない場合でもログ記録できること', function () {
