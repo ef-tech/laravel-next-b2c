@@ -48,16 +48,13 @@ test.describe('API V1 - Health Check', () => {
 
 test.describe('API V1 - Authentication Flow', () => {
   test('POST /api/v1/users should create new user', async ({ request }) => {
-    const testUser = {
-      name: 'E2E Test User',
-      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
-      password: 'TestPassword123!',
-    };
+    const testUser = createTestUser();
 
     const response = await request.post(`${API_V1_URL}/users`, {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
@@ -71,27 +68,24 @@ test.describe('API V1 - Authentication Flow', () => {
   });
 
   test('POST /api/v1/login should return token and user', async ({ request }) => {
-    const testUser = {
-      name: 'E2E Test User',
-      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
-      password: 'TestPassword123!',
-    };
+    const testUser = createTestUser();
 
     // 先にユーザーを作成
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
     const { user: registeredUser } = await registerResponse.json();
 
-    // ログイン（デフォルトパスワード 'password' を使用）
+    // ログイン
     const response = await request.post(`${API_V1_URL}/login`, {
       data: {
         email: testUser.email,
-        password: 'password',
+        password: testUser.password,
       },
     });
 
@@ -117,13 +111,14 @@ test.describe('API V1 - Authentication Flow', () => {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
     const loginResponse = await request.post(`${API_V1_URL}/login`, {
       data: {
         email: testUser.email,
-        password: 'password',
+        password: testUser.password,
       },
     });
 
@@ -167,6 +162,7 @@ test.describe('API V1 - User Information', () => {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
@@ -210,6 +206,7 @@ test.describe('API V1 - Token Management', () => {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
@@ -246,6 +243,7 @@ test.describe('API V1 - Token Management', () => {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
@@ -279,6 +277,7 @@ test.describe('API V1 - Token Management', () => {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
@@ -330,6 +329,7 @@ test.describe('API V1 - Token Management', () => {
       data: {
         name: testUser.name,
         email: testUser.email,
+        password: testUser.password,
       },
     });
 
@@ -405,6 +405,7 @@ test.describe('API V1 - Error Handling', () => {
       data: {
         name: 'Test User',
         email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+        password: 'TestPassword123!',
       },
     });
 

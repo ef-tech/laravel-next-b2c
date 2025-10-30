@@ -14,6 +14,7 @@ describe('V1 User API - POST /api/v1/users', function () {
         $response = postJson('/api/v1/users', [
             'email' => 'test@example.com',
             'name' => 'Test User',
+            'password' => 'SecurePassword123',
         ]);
 
         $response->assertStatus(201)
@@ -30,23 +31,24 @@ describe('V1 User API - POST /api/v1/users', function () {
         postJson('/api/v1/users', [
             'email' => 'duplicate@example.com',
             'name' => 'First User',
+            'password' => 'Password123',
         ]);
 
         $response = postJson('/api/v1/users', [
             'email' => 'duplicate@example.com',
             'name' => 'Second User',
+            'password' => 'Password123',
         ]);
 
         $response->assertStatus(422)
-            ->assertJson([
-                'error' => 'email_already_exists',
-            ]);
+            ->assertJsonValidationErrors(['email']);
     });
 
     test('無効なメールアドレスで422を返す', function (): void {
         $response = postJson('/api/v1/users', [
             'email' => 'invalid-email',
             'name' => 'Test User',
+            'password' => 'Password123',
         ]);
 
         $response->assertStatus(422)
@@ -57,16 +59,28 @@ describe('V1 User API - POST /api/v1/users', function () {
         $response = postJson('/api/v1/users', [
             'email' => 'test@example.com',
             'name' => 'A',
+            'password' => 'Password123',
         ]);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name']);
     });
 
+    test('passwordが短すぎる場合422を返す', function (): void {
+        $response = postJson('/api/v1/users', [
+            'email' => 'test@example.com',
+            'name' => 'Test User',
+            'password' => '1234567', // 7文字
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+    });
+
     test('必須フィールドが不足している場合422を返す', function (): void {
         $response = postJson('/api/v1/users', []);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email', 'name']);
+            ->assertJsonValidationErrors(['email', 'name', 'password']);
     });
 });

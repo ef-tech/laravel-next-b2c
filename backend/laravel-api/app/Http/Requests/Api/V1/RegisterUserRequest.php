@@ -29,8 +29,9 @@ final class RegisterUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'name' => ['required', 'string', 'min:2', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'max:255'],
         ];
     }
 
@@ -45,10 +46,15 @@ final class RegisterUserRequest extends FormRequest
             'email.required' => 'The email field is required.',
             'email.email' => 'The email must be a valid email address.',
             'email.max' => 'The email must not exceed :max characters.',
+            'email.unique' => 'The email has already been taken.',
             'name.required' => 'The name field is required.',
             'name.string' => 'The name must be a string.',
             'name.min' => 'The name must be at least :min characters.',
             'name.max' => 'The name must not exceed :max characters.',
+            'password.required' => 'The password field is required.',
+            'password.string' => 'The password must be a string.',
+            'password.min' => 'The password must be at least :min characters.',
+            'password.max' => 'The password must not exceed :max characters.',
         ];
     }
 }
