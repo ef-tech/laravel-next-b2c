@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // API専用化: 認証失敗時のリダイレクトを無効化（常にJSON応答）
+        $middleware->redirectGuestsTo(fn () => throw new \Illuminate\Auth\AuthenticationException);
+
         // API専用化: セッション関連ミドルウェアを除外
         $middleware->remove([
             \Illuminate\Session\Middleware\StartSession::class,
