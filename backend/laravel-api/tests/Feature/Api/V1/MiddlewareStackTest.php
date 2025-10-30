@@ -136,6 +136,7 @@ describe('Authentication Middleware Application', function () {
         $response = $this->postJson('/api/v1/users', [
             'name' => 'Test User',
             'email' => 'newuser@example.com',
+            'password' => 'Password123',
         ]);
         $response->assertStatus(201);
 
