@@ -190,6 +190,8 @@ jobs:
           DB_PASSWORD=password \
           SECURITY_ENABLE_CSP=true \
           SECURITY_CSP_MODE=report-only \
+          CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002 \
+          CORS_SUPPORTS_CREDENTIALS=true \
           php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
           echo "Laravel API PID: $!"
 
