@@ -33,13 +33,13 @@ test.describe('API V1 - Health Check', () => {
 });
 
 test.describe('API V1 - Authentication Flow', () => {
-  const testUser = {
-    name: 'E2E Test User',
-    email: `e2e-test-${Date.now()}@example.com`,
-    password: 'TestPassword123!',
-  };
-
   test('POST /api/v1/users should create new user', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     const response = await request.post(`${API_V1_URL}/users`, {
       data: {
         name: testUser.name,
@@ -57,6 +57,12 @@ test.describe('API V1 - Authentication Flow', () => {
   });
 
   test('POST /api/v1/login should return token and user', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     // 先にユーザーを作成
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
@@ -86,6 +92,12 @@ test.describe('API V1 - Authentication Flow', () => {
   });
 
   test('POST /api/v1/logout should invalidate token', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     // ユーザー作成とログイン
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
