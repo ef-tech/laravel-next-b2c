@@ -141,13 +141,13 @@ test.describe('API V1 - Authentication Flow', () => {
 });
 
 test.describe('API V1 - User Information', () => {
-  const testUser = {
-    name: 'E2E Test User',
-    email: `e2e-test-${Date.now()}@example.com`,
-    password: 'TestPassword123!',
-  };
-
   test('GET /api/v1/user should return authenticated user', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     // ユーザー作成とログイン
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
@@ -184,13 +184,13 @@ test.describe('API V1 - User Information', () => {
 });
 
 test.describe('API V1 - Token Management', () => {
-  const testUser = {
-    name: 'E2E Test User',
-    email: `e2e-test-${Date.now()}@example.com`,
-    password: 'TestPassword123!',
-  };
-
   test('POST /api/v1/tokens should create new token', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     // ユーザー作成とログイン
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
@@ -221,6 +221,12 @@ test.describe('API V1 - Token Management', () => {
   });
 
   test('GET /api/v1/tokens should return token list', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     // ユーザー作成とログイン
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
@@ -248,6 +254,12 @@ test.describe('API V1 - Token Management', () => {
   });
 
   test('DELETE /api/v1/tokens/{id} should delete specific token', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     // ユーザー作成とログイン
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
@@ -293,6 +305,12 @@ test.describe('API V1 - Token Management', () => {
   });
 
   test('DELETE /api/v1/tokens should delete all other tokens', async ({ request }) => {
+    const testUser = {
+      name: 'E2E Test User',
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+      password: 'TestPassword123!',
+    };
+
     // ユーザー作成とログイン
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
@@ -372,7 +390,7 @@ test.describe('API V1 - Error Handling', () => {
     const registerResponse = await request.post(`${API_V1_URL}/users`, {
       data: {
         name: 'Test User',
-        email: `e2e-test-${Date.now()}@example.com`,
+        email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
       },
     });
 
