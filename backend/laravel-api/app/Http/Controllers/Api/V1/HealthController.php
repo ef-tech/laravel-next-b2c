@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use Ddd\Infrastructure\Http\Presenters\V1\HealthPresenter;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -19,9 +20,8 @@ class HealthController extends Controller
      */
     public function show(): JsonResponse
     {
-        return response()->json([
-            'status' => 'ok',
-            'timestamp' => now()->toIso8601String(),
-        ])->header('Cache-Control', 'no-store');
+        return response()->json(
+            HealthPresenter::present(now())
+        )->header('Cache-Control', 'no-store');
     }
 }
