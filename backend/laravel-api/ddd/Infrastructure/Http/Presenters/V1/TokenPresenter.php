@@ -58,4 +58,40 @@ final class TokenPresenter
             'tokens' => $tokens->map(fn (PersonalAccessToken $token) => self::presentToken($token))->toArray(),
         ];
     }
+
+    /**
+     * トークン削除成功レスポンスを生成
+     *
+     * @return array{message: string}
+     */
+    public static function presentTokenDeleted(): array
+    {
+        return [
+            'message' => 'Token deleted successfully',
+        ];
+    }
+
+    /**
+     * 全トークン削除成功レスポンスを生成
+     *
+     * @return array{message: string}
+     */
+    public static function presentAllTokensDeleted(): array
+    {
+        return [
+            'message' => 'All tokens deleted successfully',
+        ];
+    }
+
+    /**
+     * トークン未発見エラーレスポンスを生成
+     *
+     * @return array{message: string}
+     */
+    public static function presentTokenNotFound(): array
+    {
+        return [
+            'message' => 'Token not found',
+        ];
+    }
 }

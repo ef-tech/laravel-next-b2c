@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\CreateTokenRequest;
 use App\Models\User;
 use Ddd\Infrastructure\Http\Presenters\V1\TokenPresenter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -21,12 +21,8 @@ class TokenController extends Controller
     /**
      * 新しいトークンを作成
      */
-    public function store(Request $request): JsonResponse
+    public function store(CreateTokenRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'sometimes|string|max:255',
-        ]);
-
         /** @var User $user */
         $user = Auth::user();
 
@@ -65,16 +61,17 @@ class TokenController extends Controller
         $token = $user->tokens()->find($id);
 
         if (! $token) {
-            return response()->json([
-                'message' => 'Token not found',
-            ], 404);
+            return response()->json(
+                TokenPresenter::presentTokenNotFound(),
+                404
+            );
         }
 
         $token->delete();
 
-        return response()->json([
-            'message' => 'Token deleted successfully',
-        ]);
+        return response()->json(
+            TokenPresenter::presentTokenDeleted()
+        );
     }
 
     /**
@@ -88,8 +85,8 @@ class TokenController extends Controller
         // 現在のトークン以外を削除
         $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
 
-        return response()->json([
-            'message' => 'All tokens deleted successfully',
-        ]);
+        return response()->json(
+            TokenPresenter::presentAllTokensDeleted()
+        );
     }
 }

@@ -77,4 +77,25 @@ describe('TokenPresenter', function () {
             ->and($result['tokens'][0])->toHaveKey('id', 1)
             ->and($result['tokens'][1])->toHaveKey('id', 2);
     });
+
+    test('トークン削除成功レスポンスを生成する', function (): void {
+        $result = TokenPresenter::presentTokenDeleted();
+
+        expect($result)->toBeArray()
+            ->and($result)->toHaveKey('message', 'Token deleted successfully');
+    });
+
+    test('全トークン削除成功レスポンスを生成する', function (): void {
+        $result = TokenPresenter::presentAllTokensDeleted();
+
+        expect($result)->toBeArray()
+            ->and($result)->toHaveKey('message', 'All tokens deleted successfully');
+    });
+
+    test('トークン未発見エラーレスポンスを生成する', function (): void {
+        $result = TokenPresenter::presentTokenNotFound();
+
+        expect($result)->toBeArray()
+            ->and($result)->toHaveKey('message', 'Token not found');
+    });
 });
