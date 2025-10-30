@@ -18,7 +18,7 @@ const ADMIN_APP_URL = process.env.E2E_ADMIN_URL ?? 'http://localhost:13002';
 test.describe('Laravel API Security Headers', () => {
   test('should return X-Frame-Options header', async ({ request }) => {
     // Act: Make request to Laravel API health endpoint
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`);
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`);
 
     // Assert: X-Frame-Options header is present
     const xFrameOptions = response.headers()['x-frame-options'];
@@ -28,7 +28,7 @@ test.describe('Laravel API Security Headers', () => {
 
   test('should return X-Content-Type-Options header', async ({ request }) => {
     // Act: Make request to Laravel API
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`);
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`);
 
     // Assert: X-Content-Type-Options header is present
     const xContentTypeOptions = response.headers()['x-content-type-options'];
@@ -38,7 +38,7 @@ test.describe('Laravel API Security Headers', () => {
 
   test('should return Referrer-Policy header', async ({ request }) => {
     // Act: Make request to Laravel API
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`);
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`);
 
     // Assert: Referrer-Policy header is present
     const referrerPolicy = response.headers()['referrer-policy'];
@@ -50,7 +50,7 @@ test.describe('Laravel API Security Headers', () => {
     request,
   }) => {
     // Act: Make request to Laravel API
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`);
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`);
 
     // Assert: CSP header is present (either enforce or report-only mode)
     const csp = response.headers()['content-security-policy'];
@@ -69,7 +69,7 @@ test.describe('Laravel API Security Headers', () => {
     // In production HTTPS environment, HSTS should be present
 
     // Act: Make request to Laravel API
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`);
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`);
 
     // Assert: HSTS header should not be present in HTTP environment
     const hsts = response.headers()['strict-transport-security'];
@@ -78,7 +78,7 @@ test.describe('Laravel API Security Headers', () => {
 
   test('should return all basic security headers', async ({ request }) => {
     // Act: Make request to Laravel API
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`);
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`);
 
     // Assert: All basic security headers are present
     const headers = response.headers();
@@ -267,7 +267,7 @@ test.describe('CORS Integration', () => {
     const userAppOrigin = new URL(USER_APP_URL).origin;
 
     // Act: Make request with User App origin
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`, {
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`, {
       headers: {
         Origin: userAppOrigin,
       },
@@ -288,7 +288,7 @@ test.describe('CORS Integration', () => {
     const unauthorizedOrigin = 'https://malicious-site.com';
 
     // Act: Make request with unauthorized origin
-    const response = await request.get(`${LARAVEL_API_URL}/api/health`, {
+    const response = await request.get(`${LARAVEL_API_URL}/api/v1/health`, {
       headers: {
         Origin: unauthorizedOrigin,
       },
