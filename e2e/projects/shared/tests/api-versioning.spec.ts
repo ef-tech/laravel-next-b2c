@@ -36,7 +36,7 @@ test.describe('API V1 - Authentication Flow', () => {
   test('POST /api/v1/users should create new user', async ({ request }) => {
     const testUser = {
       name: 'E2E Test User',
-      email: `e2e-test-${Date.now()}@example.com`,
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
       password: 'TestPassword123!',
     };
 
@@ -59,7 +59,7 @@ test.describe('API V1 - Authentication Flow', () => {
   test('POST /api/v1/login should return token and user', async ({ request }) => {
     const testUser = {
       name: 'E2E Test User',
-      email: `e2e-test-${Date.now()}@example.com`,
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
       password: 'TestPassword123!',
     };
 
@@ -94,7 +94,7 @@ test.describe('API V1 - Authentication Flow', () => {
   test('POST /api/v1/logout should invalidate token', async ({ request }) => {
     const testUser = {
       name: 'E2E Test User',
-      email: `e2e-test-${Date.now()}@example.com`,
+      email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
       password: 'TestPassword123!',
     };
 
