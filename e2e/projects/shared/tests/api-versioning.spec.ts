@@ -14,6 +14,20 @@ import { test, expect } from '@playwright/test';
 const API_BASE_URL = process.env.E2E_API_URL || 'http://localhost:13000';
 const API_V1_URL = `${API_BASE_URL}/api/v1`;
 
+/**
+ * 一意なテストユーザーを生成
+ *
+ * 並列実行時のメールアドレス重複を防ぐため、
+ * Date.now() + Math.random() の組み合わせを使用
+ */
+function createTestUser() {
+  return {
+    name: 'E2E Test User',
+    email: `e2e-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+    password: 'TestPassword123!',
+  };
+}
+
 test.describe('API V1 - Health Check', () => {
   test('GET /api/v1/health should return ok status', async ({ request }) => {
     const response = await request.get(`${API_V1_URL}/health`);
