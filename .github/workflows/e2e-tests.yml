@@ -38,6 +38,10 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'backend/laravel-api/app/Http/Controllers/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Middleware/ApiVersion.php'
+      - 'backend/laravel-api/routes/api/v1.php'
       - 'backend/laravel-api/app/**'
       - 'backend/laravel-api/routes/**'
       - 'backend/laravel-api/config/**'
@@ -48,6 +52,10 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'backend/laravel-api/app/Http/Controllers/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Api/V1/**'
+      - 'backend/laravel-api/app/Http/Middleware/ApiVersion.php'
+      - 'backend/laravel-api/routes/api/v1.php'
       - 'backend/laravel-api/app/**'
       - 'backend/laravel-api/routes/**'
       - 'backend/laravel-api/config/**'
@@ -110,7 +118,11 @@ jobs:
             e2e/package-lock.json
 
       - name: Copy .env for CI
-        run: cp .env.ci .env
+        run: |
+          cp .env.ci .env
+          # Verify DB configuration
+          echo "=== .env DB Configuration ==="
+          grep "^DB_" .env || echo "No DB_ variables found"
         working-directory: backend/laravel-api
 
       - name: Install Composer dependencies
@@ -120,6 +132,17 @@ jobs:
       - name: Validate environment variables
         run: php artisan env:validate
         working-directory: backend/laravel-api
+
+      - name: Clear Laravel configuration cache
+        run: |
+          # Clear any cached configuration to ensure .env changes are applied
+          php artisan config:clear
+          # Verify DB connection after config clear
+          echo "=== Testing DB Connection ==="
+          php artisan tinker --execute="try { DB::connection()->getPdo(); echo 'DB Connection: OK ('. env('DB_CONNECTION') .')'; } catch (\Exception \$e) { echo 'DB Connection Failed: '. \$e->getMessage(); }"
+        working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
 
       - name: Setup Laravel
         run: |
@@ -145,11 +168,31 @@ jobs:
           cp frontend/admin-app/.env.example frontend/admin-app/.env.local
           cp frontend/user-app/.env.example frontend/user-app/.env.local
 
+      - name: Clear Laravel cache before starting server
+        run: |
+          # Clear configuration cache one more time before starting the server
+          # to ensure .env changes are fully loaded
+          php artisan config:clear
+        working-directory: backend/laravel-api
+        env:
+          ENV_VALIDATION_SKIP: true
+
       - name: Start services
         run: |
           # Start Laravel API (ポート13000)
           cd backend/laravel-api
-          ENV_VALIDATION_SKIP=true DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=13432 DB_DATABASE=testing DB_USERNAME=sail DB_PASSWORD=password SECURITY_ENABLE_CSP=true CORS_SUPPORTS_CREDENTIALS=true php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
+          ENV_VALIDATION_SKIP=true \
+          DB_CONNECTION=pgsql \
+          DB_HOST=127.0.0.1 \
+          DB_PORT=13432 \
+          DB_DATABASE=testing \
+          DB_USERNAME=sail \
+          DB_PASSWORD=password \
+          SECURITY_ENABLE_CSP=true \
+          SECURITY_CSP_MODE=report-only \
+          CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002 \
+          CORS_SUPPORTS_CREDENTIALS=true \
+          php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - 開発モード)
@@ -188,7 +231,7 @@ jobs:
           npx wait-on \
             http://localhost:13001 \
             http://localhost:13002 \
-            http://localhost:13000/api/health \
+            http://localhost:13000/api/v1/health \
             --timeout 300000 \
             --interval 2000 \
             --verbose

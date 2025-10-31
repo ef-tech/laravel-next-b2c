@@ -83,7 +83,7 @@ final class ForceJsonResponse
         // CSPレポートエンドポイントの場合は application/csp-report または application/json を許可
         // W3C CSP Level 3 仕様では application/csp-report が標準だが、
         // 互換性のため application/json も受け付ける
-        if ($request->is('api/csp/report')) {
+        if ($request->is('api/csp/report') || $request->is('api/v*/csp/report')) {
             return str_contains($contentType, 'application/csp-report') ||
                    str_contains($contentType, 'application/json');
         }

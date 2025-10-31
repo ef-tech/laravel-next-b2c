@@ -3,14 +3,24 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function ($router) {
+            // V1 API Routes with /api/v1 prefix
+            Route::prefix('api/v1')
+                ->middleware('api')
+                ->group(base_path('routes/api/v1.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // API専用化: 認証失敗時のリダイレクトを無効化（常にJSON応答）
+        $middleware->redirectGuestsTo(fn () => throw new \Illuminate\Auth\AuthenticationException);
+
         // API専用化: セッション関連ミドルウェアを除外
         $middleware->remove([
             \Illuminate\Session\Middleware\StartSession::class,
@@ -26,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //          → SetRequestId → CorrelationId → ForceJsonResponse
         //          → SecurityHeaders (最後に実行)
 
+        $middleware->append(\App\Http\Middleware\ApiVersion::class);
         $middleware->append(\App\Http\Middleware\SetRequestId::class);
         $middleware->append(\App\Http\Middleware\CorrelationId::class);
         $middleware->append(\App\Http\Middleware\ForceJsonResponse::class);
@@ -97,8 +108,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Handle Authentication Exceptions (401 Unauthorized)
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        });
+
+        // Handle Validation Exceptions (422 Unprocessable Entity)
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+            ], 422);
+        });
+
         // Handle DDD Domain Exceptions
-        $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e) {
             return response()->json([
                 'error' => $e->getErrorCode(),
                 'message' => $e->getMessage(),

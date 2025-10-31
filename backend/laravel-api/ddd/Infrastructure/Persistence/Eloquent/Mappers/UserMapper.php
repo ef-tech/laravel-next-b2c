@@ -52,5 +52,8 @@ final class UserMapper
         $model->email = $entity->email()->value();
         $model->name = $entity->name();
         $model->created_at = $entity->registeredAt();
+
+        // Note: パスワードはDomainモデルに含まれていないため、
+        // Controller層で直接Eloquentモデルに保存されます
     }
 }

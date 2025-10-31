@@ -38,7 +38,9 @@ final class SanctumTokenVerification
             // 認証失敗: 詳細なエラーログを記録
             $this->logVerificationFailure($request, 'No authenticated user');
 
-            return new Response('Unauthorized', 401);
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
         }
 
         // 認証成功: 詳細ログを記録

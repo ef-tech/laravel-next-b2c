@@ -24,6 +24,7 @@ arch('Application layer must not depend on Infrastructure')
 
 // Note: App\Http\Controllers\Api is excluded from this rule
 // as it contains legacy REST API controllers that directly use models
+// V1 controllers are also excluded as they maintain backward compatibility
 arch('Controllers should use UseCases instead of Models')
     ->expect('App\Http\Controllers')
     ->not->toUse('App\Models')
@@ -31,6 +32,8 @@ arch('Controllers should use UseCases instead of Models')
         'App\Http\Controllers\Api\AuthController',
         'App\Http\Controllers\Api\TokenController',
         'App\Http\Controllers\Api\UserController',
+        'App\Http\Controllers\Api\V1\AuthController',
+        'App\Http\Controllers\Api\V1\TokenController',
     ]);
 
 arch('Repository implementations should be in Infrastructure layer')
