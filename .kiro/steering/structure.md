@@ -127,10 +127,17 @@ laravel-api/
 │   │       └── PruneExpiredTokens.php  # 🔐 期限切れトークン削除コマンド（tokens:prune）
 │   ├── Http/            # 🏗️ HTTP層（DDD統合）
 │   │   ├── Controllers/ # Controllerからユースケース呼び出し
-│   │   │   ├── Api/     # 📊 API基本機能コントローラー
-│   │   │   │   ├── HealthController.php  # ヘルスチェック（GET /api/health）
-│   │   │   │   └── CspReportController.php  # 🔐 CSP違反レポート収集（POST /api/csp-report、application/json互換性対応）
-│   │   │   ├── Auth/    # 🔐 認証コントローラー
+│   │   │   ├── Api/     # 📊 API基本機能コントローラー（レガシー、非推奨）
+│   │   │   │   ├── HealthController.php  # ヘルスチェック（GET /api/health、非推奨 → V1使用推奨）
+│   │   │   │   └── CspReportController.php  # 🔐 CSP違反レポート収集（POST /api/csp-report、非推奨 → V1使用推奨）
+│   │   │   ├── Api/V1/  # 🔢 V1 APIコントローラー（推奨）
+│   │   │   │   ├── Auth/    # 🔐 V1認証コントローラー
+│   │   │   │   │   ├── LoginController.php     # ログイン処理（POST /api/v1/login, POST /api/v1/logout）
+│   │   │   │   │   ├── MeController.php        # 認証ユーザー情報（GET /api/v1/me）
+│   │   │   │   │   └── TokenController.php     # トークン管理（GET /api/v1/tokens, POST /api/v1/tokens/{id}/revoke）
+│   │   │   │   ├── HealthController.php  # V1ヘルスチェック（GET /api/v1/health）
+│   │   │   │   └── CspReportController.php  # 🔐 V1 CSP違反レポート収集（POST /api/v1/csp-report）
+│   │   │   ├── Auth/    # 🔐 認証コントローラー（レガシー、段階的に非推奨）
 │   │   │   │   ├── LoginController.php     # ログイン処理（POST /api/login, POST /api/logout）
 │   │   │   │   ├── MeController.php        # 認証ユーザー情報（GET /api/me）
 │   │   │   │   └── TokenController.php     # トークン管理（GET /api/tokens, POST /api/tokens/{id}/revoke）
@@ -156,10 +163,21 @@ laravel-api/
 │   │   ├── Requests/    # リクエストバリデーション
 │   │   │   └── Auth/    # 🔐 認証リクエスト
 │   │   │       └── LoginRequest.php  # ログインバリデーション（email, password必須）
-│   │   └── Resources/   # APIリソース
-│   │       └── UserResource.php  # ユーザーAPIレスポンス
+│   │   ├── Resources/   # APIリソース（Presenter統一）
+│   │   │   └── UserResource.php  # ユーザーAPIレスポンス
+│   │   └── Presenters/  # 🎨 Presenter層（API/V1統合）
+│   │       └── Api/V1/  # V1専用Presenter
+│   │           ├── Auth/
+│   │           │   ├── LoginPresenter.php    # ログインレスポンス統一
+│   │           │   └── TokenPresenter.php    # トークン管理レスポンス統一
+│   │           └── HealthPresenter.php       # ヘルスチェックレスポンス統一
+│   ├── Exceptions/      # 例外ハンドラー
+│   │   └── Handler.php  # 🔒 Exception Handler強化版
+│   │       # - AuthenticationException: API専用JSONレスポンス、loginルートリダイレクト無効化
+│   │       # - ValidationException: 422 Unprocessable Entity + JSON + errors配列
+│   │       # - 統一エラーレスポンス: { "message": "...", "errors": {...} }
 │   ├── Models/          # Eloquentモデル（Infrastructure層で使用）
-│   │   └── User.php     # 🔐 Userモデル（HasApiTokens trait使用）
+│   │   └── User.php     # 🔐 Userモデル（HasApiTokens trait使用、password必須化対応）
 │   └── Providers/       # サービスプロバイダー（DI設定含む）
 ├── bootstrap/           # アプリケーション初期化
 ├── config/              # 設定ファイル
@@ -199,17 +217,25 @@ laravel-api/
 │   └── views/           # Bladeテンプレート
 ├── routes/              # ルート定義
 │   ├── api.php          # API専用ルート
-│   │                    # 📊 ヘルスチェックエンドポイント:
+│   │                    # 🔢 V1 APIエンドポイント（推奨）:
+│   │                    #   📊 ヘルスチェック:
+│   │                    #     - GET /api/v1/health (V1\HealthController@show, ルート名: v1.health)
+│   │                    #   🔐 認証エンドポイント:
+│   │                    #     - POST /api/v1/login (V1\Auth\LoginController@login)
+│   │                    #     - POST /api/v1/logout (V1\Auth\LoginController@logout, auth:sanctum)
+│   │                    #     - GET /api/v1/me (V1\Auth\MeController@show, auth:sanctum)
+│   │                    #   🔐 トークン管理エンドポイント:
+│   │                    #     - GET /api/v1/tokens (V1\Auth\TokenController@index, auth:sanctum)
+│   │                    #     - POST /api/v1/tokens/{id}/revoke (V1\Auth\TokenController@revoke, auth:sanctum)
+│   │                    #     - POST /api/v1/tokens/refresh (V1\Auth\TokenController@refresh, auth:sanctum)
+│   │                    #   🔐 セキュリティエンドポイント:
+│   │                    #     - POST /api/v1/csp-report (V1\CspReportController@store, CSP違反レポート収集)
+│   │                    #
+│   │                    # 📊 レガシーエンドポイント（非推奨、段階的に廃止予定）:
 │   │                    #   - GET /api/health (HealthController@show, ルート名: health)
-│   │                    # 🔐 認証エンドポイント:
-│   │                    #   - POST /api/login (LoginController@login)
-│   │                    #   - POST /api/logout (LoginController@logout, auth:sanctum)
-│   │                    #   - GET /api/me (MeController@show, auth:sanctum)
-│   │                    #   - GET /api/tokens (TokenController@index, auth:sanctum)
-│   │                    #   - POST /api/tokens/{id}/revoke (TokenController@revoke, auth:sanctum)
-│   │                    #   - POST /api/tokens/refresh (TokenController@refresh, auth:sanctum)
-│   │                    # 🔐 セキュリティエンドポイント:
-│   │                    #   - POST /api/csp-report (CspReportController@store, CSP違反レポート収集、application/json互換性対応)
+│   │                    #   - POST /api/login, /api/logout, GET /api/me
+│   │                    #   - GET /api/tokens, POST /api/tokens/{id}/revoke
+│   │                    #   - POST /api/csp-report
 │   ├── web.php          # Web画面ルート
 │   └── console.php      # コンソールルート
 │                        # 🔐 Scheduled Tasks:
@@ -217,10 +243,17 @@ laravel-api/
 ├── storage/             # ストレージ (ログ、キャッシュ、アップロード)
 ├── tests/               # 🏗️ テストスイート (Pest 4 + Architecture Tests: 96.1%カバレッジ)
 │   ├── Feature/         # 機能テスト（HTTP層統合テスト）
-│   │   ├── Api/         # 📊 API基本機能テスト
-│   │   │   └── HealthCheckTest.php  # ヘルスチェックエンドポイントテスト（JSON形式、Content-Type、ルート名検証）
-│   │   ├── Auth/        # 🔐 認証機能テスト
-│   │   │   ├── LoginTest.php          # ログイン・ログアウトテスト（12テスト）
+│   │   ├── Api/         # 📊 API基本機能テスト（レガシー）
+│   │   │   └── HealthCheckTest.php  # ヘルスチェックエンドポイントテスト（非推奨）
+│   │   ├── Api/V1/      # 🔢 V1 API機能テスト（推奨）
+│   │   │   ├── Auth/    # 🔐 V1認証機能テスト
+│   │   │   │   ├── LoginTest.php          # V1ログイン・ログアウトテスト（password必須化対応）
+│   │   │   │   ├── TokenManagementTest.php # V1トークン管理テスト
+│   │   │   │   └── MeTest.php              # V1認証ユーザー情報テスト
+│   │   │   ├── HealthCheckTest.php  # V1ヘルスチェックエンドポイントテスト（JSON形式、Content-Type、ルート名検証）
+│   │   │   └── CspReportTest.php    # V1 CSP違反レポートテスト（application/json互換性検証）
+│   │   ├── Auth/        # 🔐 認証機能テスト（レガシー、段階的にV1移行）
+│   │   │   ├── LoginTest.php          # ログイン・ログアウトテスト（12テスト、password必須化対応）
 │   │   │   └── TokenManagementTest.php # トークン管理テスト（一覧取得、無効化、更新）
 │   │   ├── Security/    # 🔐 セキュリティ機能テスト
 │   │   │   ├── SecurityHeadersTest.php  # セキュリティヘッダーテスト（X-Frame-Options、X-Content-Type-Options等）

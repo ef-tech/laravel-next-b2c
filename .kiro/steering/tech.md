@@ -96,11 +96,17 @@
 - **POST `/api/tokens/refresh`**: トークン更新（新規トークン発行）
 
 **📊 ヘルスチェックエンドポイント** (`routes/api.php`):
-- **GET `/api/health`**: APIサーバー稼働状態確認（ルート名: `health`）
+- **GET `/api/v1/health`**: APIサーバー稼働状態確認（ルート名: `v1.health`、APIバージョニング対応）
   - **レスポンス**: `{ "status": "ok", "timestamp": "2025-10-12T..." }` (JSON形式)
   - **用途**: Dockerヘルスチェック統合、ロードバランサー監視、サービス死活監視
   - **動的ポート対応**: `APP_PORT`環境変数による柔軟なポート設定
   - **認証不要**: パブリックエンドポイント（middleware: なし）
+- **🔢 APIバージョニング実装**:
+  - **V1エンドポイント**: `/api/v1/*`（URLベースバージョニング）
+  - **認証API**: `/api/v1/login`, `/api/v1/logout`, `/api/v1/me`
+  - **トークン管理API**: `/api/v1/tokens`, `/api/v1/tokens/{id}/revoke`, `/api/v1/tokens/refresh`
+  - **CSPレポート**: `/api/v1/csp-report`
+  - **段階的移行**: 既存 `/api/*` エンドポイントと共存、非推奨化フロー管理
 
 **トークン管理機能**:
 - **Personal Access Tokens**: UUIDベーストークン（`personal_access_tokens`テーブル）
@@ -121,6 +127,12 @@
 // app/Console/Kernel.php
 $schedule->command('tokens:prune')->daily();
 ```
+
+**🔒 Exception Handler強化**:
+- **AuthenticationException**: API専用JSONレスポンス、認証失敗時のloginルートリダイレクト無効化
+- **ValidationException**: FormRequestバリデーションエラーのJSON形式返却
+- **統一エラーレスポンス**: `{ "message": "...", "errors": {...} }` 形式
+- **HTTP Status Code**: 401 Unauthorized（認証失敗）、422 Unprocessable Entity（バリデーションエラー）
 
 **環境変数**:
 ```env
@@ -758,6 +770,20 @@ make test-diagnose           # テスト環境診断（ポート・環境変数�
 ```
 
 ## 環境変数設定
+
+### 🔒 セキュリティ強化設定
+```env
+# ユーザー登録セキュリティ
+# - ユーザー登録時のpassword必須化（デフォルトパスワード削除済み）
+# - RegisterRequest バリデーション: password required|min:8
+# - UserFactory: パスワード生成強制（デフォルト値なし）
+
+# Exception Handler設定
+# - API専用JSONレスポンス（Web向けリダイレクト無効化）
+# - AuthenticationException: 401 Unauthorized + JSON
+# - ValidationException: 422 Unprocessable Entity + JSON + errors配列
+```
+
 ### ポート設定 (カスタマイズ済み)
 
 #### バックエンドポート (backend/laravel-api/.env)
