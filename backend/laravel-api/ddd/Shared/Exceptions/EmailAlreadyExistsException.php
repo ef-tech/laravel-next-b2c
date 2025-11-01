@@ -20,4 +20,9 @@ final class EmailAlreadyExistsException extends DomainException
     {
         return 'email_already_exists';
     }
+
+    protected function getTitle(): string
+    {
+        return 'Email Already Exists';
+    }
 }

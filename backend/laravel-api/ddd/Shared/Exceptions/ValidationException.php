@@ -30,4 +30,9 @@ final class ValidationException extends DomainException
     {
         return 'validation_error';
     }
+
+    protected function getTitle(): string
+    {
+        return 'Validation Error';
+    }
 }

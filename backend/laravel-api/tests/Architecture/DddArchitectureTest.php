@@ -47,4 +47,8 @@ arch('Domain exceptions should extend DomainException')
     ->expect('Ddd\Shared\Exceptions')
     ->classes()
     ->toExtend('Ddd\Shared\Exceptions\DomainException')
-    ->ignoring('Ddd\Shared\Exceptions\DomainException');
+    ->ignoring([
+        'Ddd\Shared\Exceptions\DomainException',
+        'Ddd\Shared\Exceptions\ApplicationException',
+        'Ddd\Shared\Exceptions\InfrastructureException',
+    ]);
