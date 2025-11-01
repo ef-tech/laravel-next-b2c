@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/error-codes.schema.json",
+  "title": "Error Codes Definition Schema",
+  "description": "RFC 7807準拠のエラーコード体系定義スキーマ",
+  "type": "object",
+  "patternProperties": {
+    "^[A-Z]+-[A-Z0-9]+-[0-9]{3}$": {
+      "type": "object",
+      "required": [
+        "code",
+        "http_status",
+        "type",
+        "default_message",
+        "translation_key",
+        "category"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z]+-[A-Z0-9]+-[0-9]{3}$",
+          "description": "エラーコード（DOMAIN-SUBDOMAIN-CODE形式）"
+        },
+        "http_status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599,
+          "description": "HTTPステータスコード"
+        },
+        "type": {
+          "type": "string",
+          "format": "uri",
+          "description": "RFC 7807 type URI"
+        },
+        "default_message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "デフォルトエラーメッセージ（英語）"
+        },
+        "translation_key": {
+          "type": "string",
+          "pattern": "^errors\\.[a-z_]+\\.[a-z_]+$",
+          "description": "翻訳キー（errors.category.subcategory形式）"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["AUTH", "VAL", "BIZ", "INFRA"],
+          "description": "エラーカテゴリー"
+        },
+        "description": {
+          "type": "string",
+          "description": "エラーの詳細説明（オプション）"
+        },
+        "resolution": {
+          "type": "string",
+          "description": "解決方法のヒント（オプション）"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

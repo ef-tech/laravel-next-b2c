@@ -18,7 +18,10 @@
     "format:check": "prettier --check 'frontend/**/*.{ts,tsx,js,jsx,json,css,md}'",
     "type-check": "npm run type-check --workspaces",
     "env:check": "tsx scripts/env-sync.ts --check",
-    "env:sync": "tsx scripts/env-sync.ts --write"
+    "env:sync": "tsx scripts/env-sync.ts --write",
+    "validate:error-codes": "node scripts/validate-error-codes.js",
+    "generate:error-types": "node scripts/generate-error-types.js",
+    "verify:error-types": "bash scripts/verify-error-types.sh"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
