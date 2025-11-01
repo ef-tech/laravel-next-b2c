@@ -27,21 +27,21 @@
 ## Phase 2: バックエンド実装（DDD Exception階層・Middleware・Handler）
 
 - [ ] 2. DDD Exception階層を拡張する
-- [ ] 2.1 既存DomainExceptionを拡張する
+- [x] 2.1 既存DomainExceptionを拡張する
   - toProblemDetails()メソッドを実装する
   - RFC 7807形式の配列を生成する機能を追加する
   - getErrorType()ヘルパーメソッドを実装する
   - エラーコードとHTTPステータスコードのマッピングを検証する
   - _Requirements: 1.1, 1.6, 2.1, 2.4_
 
-- [ ] 2.2 ApplicationException基底クラスを実装する
+- [x] 2.2 ApplicationException基底クラスを実装する
   - Application層のユースケースエラー用基底クラスを作成する
   - getStatusCode()、getErrorCode()、toProblemDetails()メソッドを実装する
   - 具体的なサブクラス例（ResourceNotFoundException、UnauthorizedAccessException）を作成する
   - HTTPステータスコード403/404のマッピングを検証する
   - _Requirements: 2.2, 2.4_
 
-- [ ] 2.3 InfrastructureException基底クラスを実装する
+- [x] 2.3 InfrastructureException基底クラスを実装する
   - Infrastructure層の外部システムエラー用基底クラスを作成する
   - getStatusCode()、getErrorCode()、toProblemDetails()メソッドを実装する
   - 具体的なサブクラス例（DatabaseConnectionException、ExternalApiTimeoutException）を作成する

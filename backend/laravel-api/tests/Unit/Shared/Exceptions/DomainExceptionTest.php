@@ -1,0 +1,128 @@
+<?php
+
+declare(strict_types=1);
+
+use Ddd\Shared\Exceptions\DomainException;
+
+/**
+ * DomainException拡張テスト
+ *
+ * Requirements:
+ * - 1.1: RFC 7807準拠のAPIエラーレスポンス生成
+ * - 1.6: DomainExceptionがtoProblemDetails()メソッドでカスタムエラーコード・ステータスコードを含むRFC 7807レスポンスを生成すること
+ * - 2.1: Domain層でビジネスルール違反が発生する時、DomainExceptionのサブクラスが例外を投げること
+ * - 2.4: DomainException生成時、getErrorCode()メソッドで独自エラーコードを返却すること
+ */
+
+// テスト用具象クラス（ビジネスルール違反例）
+final class UserEmailAlreadyExistsException extends DomainException
+{
+    public function getStatusCode(): int
+    {
+        return 409; // Conflict
+    }
+
+    public function getErrorCode(): string
+    {
+        return 'DOMAIN-USER-4001';
+    }
+
+    protected function getTitle(): string
+    {
+        return 'User Email Already Exists';
+    }
+}
+
+final class InvalidUserAgeException extends DomainException
+{
+    public function getStatusCode(): int
+    {
+        return 400; // Bad Request
+    }
+
+    public function getErrorCode(): string
+    {
+        return 'DOMAIN-USER-4002';
+    }
+
+    protected function getTitle(): string
+    {
+        return 'Invalid User Age';
+    }
+}
+
+test('toProblemDetails() メソッドが RFC 7807形式の配列を生成する', function () {
+    $exception = new UserEmailAlreadyExistsException('The email address is already registered.');
+
+    // Request ID mockをセット（SetRequestId middlewareが実行済みと仮定）
+    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    request()->server->set('REQUEST_URI', '/api/v1/users');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // RFC 7807必須フィールド
+    expect($problemDetails)->toHaveKey('type')
+        ->and($problemDetails['type'])->toBeString()
+        ->and($problemDetails)->toHaveKey('title')
+        ->and($problemDetails['title'])->toBe('User Email Already Exists')
+        ->and($problemDetails)->toHaveKey('status')
+        ->and($problemDetails['status'])->toBe(409)
+        ->and($problemDetails)->toHaveKey('detail')
+        ->and($problemDetails['detail'])->toBe('The email address is already registered.');
+
+    // 拡張フィールド
+    expect($problemDetails)->toHaveKey('error_code')
+        ->and($problemDetails['error_code'])->toBe('DOMAIN-USER-4001')
+        ->and($problemDetails)->toHaveKey('trace_id')
+        ->and($problemDetails['trace_id'])->toBe('550e8400-e29b-41d4-a716-446655440000')
+        ->and($problemDetails)->toHaveKey('instance')
+        ->and($problemDetails['instance'])->toBe('/api/v1/users')
+        ->and($problemDetails)->toHaveKey('timestamp')
+        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/'); // ISO 8601形式
+});
+
+test('getErrorType() がエラータイプURIを生成する', function () {
+    $exception = new UserEmailAlreadyExistsException('The email address is already registered.');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    expect($problemDetails['type'])
+        ->toContain(config('app.url'))
+        ->toContain('/errors/')
+        ->toContain('domain-user-4001'); // 小文字に変換されること
+});
+
+test('getStatusCode() がHTTPステータスコードを返却する（400番台）', function () {
+    $exceptionConflict = new UserEmailAlreadyExistsException('Email already exists');
+    expect($exceptionConflict->getStatusCode())->toBe(409);
+
+    $exceptionBadRequest = new InvalidUserAgeException('Age must be 18 or older');
+    expect($exceptionBadRequest->getStatusCode())->toBe(400);
+});
+
+test('getErrorCode() がDOMAIN-SUBDOMAIN-CODE形式のエラーコードを返却する', function () {
+    $exception = new UserEmailAlreadyExistsException('Email already exists');
+
+    expect($exception->getErrorCode())
+        ->toBe('DOMAIN-USER-4001')
+        ->toMatch('/^[A-Z]+-[A-Z]+-[0-9]{4}$/'); // DOMAIN-SUBDOMAIN-CODE形式検証
+});
+
+test('getTitle() が抽象メソッドとして定義され、具象クラスで実装される', function () {
+    $exception = new UserEmailAlreadyExistsException('Email already exists');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    expect($problemDetails['title'])->toBe('User Email Already Exists');
+});
+
+test('toProblemDetails() がtimestampをISO 8601形式で返却する', function () {
+    $exception = new InvalidUserAgeException('Age must be 18 or older');
+    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    expect($problemDetails['timestamp'])
+        ->toBeString()
+        ->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/'); // ISO 8601形式（タイムゾーン付き）
+});
