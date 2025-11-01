@@ -227,7 +227,7 @@
 3. WHEN GitHub Actionsワークフローを更新する THEN エラーハンドリングテストスイートを統合すること
    - 実行タイミング: Pull Request作成時、mainブランチpush時
 
-4. WHEN CI/CDパイプラインを実行する THEN カバレッジレポートをCodecovに統合し、カバレッジ閾値を検証すること
+4. WHEN CI/CDパイプラインを実行する THEN カバレッジ閾値を検証すること
    - 閾値: バックエンドUnit 90%、Feature 85%、フロントエンドUnit 80%
 
 5. WHEN テストスイートを実行する THEN 全テスト完了時間が10分以内であること

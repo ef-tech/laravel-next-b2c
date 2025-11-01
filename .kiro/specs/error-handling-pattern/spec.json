@@ -18,7 +18,7 @@
       "backend": "Laravel 12, PHP 8.4, Pest (Unit/Feature Tests), DDD/Clean Architecture",
       "frontend": "Next.js 15, React 19, TypeScript, Jest (Unit Tests), Playwright (E2E Tests)",
       "infrastructure": "Docker Compose, PostgreSQL 17, Redis",
-      "tools": "GitHub Actions, Codecov, Laravel Pint, Larastan, ESLint"
+      "tools": "GitHub Actions, Laravel Pint, Larastan, ESLint"
     },
     "requirements_hints": [
       "RFC 7807 (Problem Details for HTTP APIs) 準拠の統一的なエラーハンドリングパターン実装",
@@ -88,8 +88,7 @@
       "統合テストスクリプト作成（test-error-handling.sh）",
       "エラーコード一覧作成（docs/error-codes.md）",
       "トラブルシューティングガイド作成（docs/error-handling-troubleshooting.md）",
-      "CI/CD統合（GitHub Actionsワークフロー更新）",
-      "カバレッジレポート統合（Codecov）"
+      "CI/CD統合（GitHub Actionsワークフロー更新）"
     ]
   },
   "approvals": {
