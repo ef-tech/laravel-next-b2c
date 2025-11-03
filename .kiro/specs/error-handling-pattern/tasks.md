@@ -57,7 +57,7 @@
   - 既存ミドルウェアスタックに統合する
   - _Requirements: 5.1, 5.3_
 
-- [ ] 4. Exception Handlerを拡張する
+- [x] 4. Exception Handlerを拡張する
 - [x] 4.1 RFC 7807形式レスポンス生成機能を実装する
   - render()メソッドでRFC 7807形式のJSONレスポンスを生成する
   - Content-Typeヘッダーにapplication/problem+jsonを設定する
@@ -79,7 +79,7 @@
   - フィールド名とエラーメッセージの配列を生成する
   - _Requirements: 1.3_
 
-- [ ] 4.4 構造化ログ機能を実装する
+- [x] 4.4 構造化ログ機能を実装する
   - Log::withContext()を使用してtrace_id、error_code、user_id、request_pathをログに追加する
   - 個人情報ハッシュ化機能を実装する（LOG_HASH_SENSITIVE_DATA環境変数制御）
   - ログレベル別の分離機能を検証する

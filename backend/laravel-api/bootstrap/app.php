@@ -110,9 +110,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle DDD Domain Exceptions (RFC 7807 Problem Details)
         $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e, \Illuminate\Http\Request $request) {
-            // RFC 7807形式の配列を取得
-            $problemDetails = $e->toProblemDetails();
-
             // Request IDを取得（SetRequestId Middlewareが設定している）
             $requestId = $request->header('X-Request-ID');
 
@@ -120,6 +117,24 @@ return Application::configure(basePath: dirname(__DIR__))
             if (! $requestId) {
                 $requestId = (string) \Illuminate\Support\Str::uuid();
             }
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => $e->getErrorCode(),
+                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::error('DomainException occurred', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'status_code' => $e->getStatusCode(),
+            ]);
+
+            // RFC 7807形式の配列を取得
+            $problemDetails = $e->toProblemDetails();
 
             // RFC 7807形式のレスポンスを生成
             return response()->json($problemDetails, $e->getStatusCode())
@@ -131,6 +146,21 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, \Illuminate\Http\Request $request) {
             // Request IDを取得または生成
             $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'validation_error',
+                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::error('ValidationException occurred', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+            ]);
 
             return response()->json([
                 'type' => config('app.url').'/errors/validation_error',
@@ -152,6 +182,20 @@ return Application::configure(basePath: dirname(__DIR__))
             // Request IDを取得または生成
             $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
 
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'unauthenticated',
+                'user_id' => null, // 認証失敗のため null
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::warning('AuthenticationException occurred', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'type' => config('app.url').'/errors/unauthenticated',
                 'title' => 'Unauthenticated',
@@ -170,6 +214,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, \Illuminate\Http\Request $request) {
             // Request IDを取得または生成
             $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'too_many_requests',
+                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::warning('ThrottleRequestsException occurred', [
+                'exception' => get_class($e),
+                'retry_after' => $e->getHeaders()['Retry-After'] ?? 60,
+            ]);
 
             return response()->json([
                 'type' => config('app.url').'/errors/too_many_requests',
@@ -191,6 +249,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
             // Request IDを取得または生成
             $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'internal_server_error',
+                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::error('Throwable occurred', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
 
             // 本番環境判定
             $isProduction = config('app.env') === 'production';

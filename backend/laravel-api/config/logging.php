@@ -22,6 +22,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Hash Sensitive Data
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, sensitive data (user_id, email, IP address) will be
+    | hashed using SHA-256 before being logged. This helps protect privacy
+    | while maintaining the ability to correlate logs.
+    |
+    */
+
+    'hash_sensitive_data' => env('LOG_HASH_SENSITIVE_DATA', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Deprecations Log Channel
     |--------------------------------------------------------------------------
     |
