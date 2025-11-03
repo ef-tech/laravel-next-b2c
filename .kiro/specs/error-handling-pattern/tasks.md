@@ -172,22 +172,22 @@
 
 ## Phase 4: テスト実装（Unit・Feature・E2E）
 
-- [ ] 8. バックエンドUnit Testsを実装する
-- [ ] 8.1 DomainException Unit Testsを実装する
+- [x] 8. バックエンドUnit Testsを実装する
+- [x] 8.1 DomainException Unit Testsを実装する
   - toProblemDetails()メソッドのRFC 7807形式変換テストを実装する
   - getErrorCode()メソッドのエラーコード形式テストを実装する
   - getStatusCode()メソッドのHTTPステータスコードテストを実装する
   - 90%以上のカバレッジを達成する
   - _Requirements: 9.1_
 
-- [ ] 8.2 ApplicationException & InfrastructureException Unit Testsを実装する
+- [x] 8.2 ApplicationException & InfrastructureException Unit Testsを実装する
   - toProblemDetails()メソッドのRFC 7807形式変換テストを実装する
   - getErrorCode()、getStatusCode()メソッドのテストを実装する
   - 各レイヤーの具象クラス例のテストを実装する
   - 90%以上のカバレッジを達成する
   - _Requirements: 9.1_
 
-- [ ] 8.3 SetLocaleFromAcceptLanguage Middleware Unit Testsを実装する
+- [x] 8.3 SetLocaleFromAcceptLanguage Middleware Unit Testsを実装する
   - Accept-Language: jaヘッダーのロケール設定テストを実装する
   - Accept-Language: enヘッダーのロケール設定テストを実装する
   - デフォルトロケール（ja）のフォールバックテストを実装する
