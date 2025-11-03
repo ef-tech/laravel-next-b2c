@@ -88,14 +88,14 @@
 ## Phase 3: フロントエンド実装（エラークラス・APIクライアント・Error Boundaries）
 
 - [ ] 5. エラークラスを実装する
-- [ ] 5.1 RFC 7807 Problem Details型定義を作成する
+- [x] 5.1 RFC 7807 Problem Details型定義を作成する
   - RFC7807Problem型インターフェースを定義する
   - 必須フィールド（type, title, status, detail）を含める
   - 拡張フィールド（error_code, trace_id, instance, timestamp）を含める
   - バリデーションエラー用errorsフィールドを含める
   - _Requirements: 8.1_
 
-- [ ] 5.2 ApiErrorクラスを実装する
+- [x] 5.2 ApiErrorクラスを実装する
   - RFC 7807レスポンスからApiErrorインスタンスを生成する機能を実装する
   - 型安全なプロパティ（status, errorCode, title, detail, requestId等）を定義する
   - ヘルパーメソッド（isValidationError(), isAuthenticationError(), isNotFoundError()）を実装する
@@ -103,7 +103,7 @@
   - AppError基底インターフェースを実装する
   - _Requirements: 6.2, 6.5, 6.6, 8.1, 8.2, 8.5_
 
-- [ ] 5.3 NetworkErrorクラスを実装する
+- [x] 5.3 NetworkErrorクラスを実装する
   - Fetch APIエラーからNetworkErrorを生成するファクトリーメソッドを実装する
   - isRetryableプロパティを設定する機能を追加する
   - isTimeout()、isConnectionError()判定メソッドを実装する
