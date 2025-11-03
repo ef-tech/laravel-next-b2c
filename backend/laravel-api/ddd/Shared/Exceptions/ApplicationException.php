@@ -16,7 +16,7 @@ use Exception;
  * - 2.2: Application層でユースケース実行エラーが発生する時、ApplicationExceptionのサブクラスが例外を投げること
  * - 2.4: ApplicationException生成時、getErrorCode()メソッドで独自エラーコードを返却すること
  */
-class ApplicationException extends Exception
+abstract class ApplicationException extends Exception
 {
     /**
      * @var int HTTPステータスコード（デフォルト: 400 Bad Request）
@@ -49,6 +49,13 @@ class ApplicationException extends Exception
     }
 
     /**
+     * Get a human-readable error title.
+     *
+     * @return string エラータイトル（サブクラスで実装）
+     */
+    abstract protected function getTitle(): string;
+
+    /**
      * Convert the exception to RFC 7807 Problem Details format.
      *
      * @return array<string, mixed> RFC 7807形式の配列
@@ -57,13 +64,13 @@ class ApplicationException extends Exception
     {
         return [
             'type' => config('app.url').'/errors/'.strtolower($this->getErrorCode()),
-            'title' => class_basename($this),
+            'title' => $this->getTitle(),
             'status' => $this->getStatusCode(),
             'detail' => $this->getMessage(),
             'error_code' => $this->getErrorCode(),
             'trace_id' => request()->header('X-Request-ID'),
             'instance' => request()->getRequestUri(),
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->format('Y-m-d\TH:i:s\Z'),
         ];
     }
 }

@@ -18,6 +18,11 @@ final class ResourceNotFoundException extends ApplicationException
     protected int $statusCode = 404;
 
     protected string $errorCode = 'APP-RESOURCE-4001';
+
+    protected function getTitle(): string
+    {
+        return 'Resource Not Found';
+    }
 }
 
 final class UnauthorizedAccessException extends ApplicationException
@@ -25,6 +30,11 @@ final class UnauthorizedAccessException extends ApplicationException
     protected int $statusCode = 403;
 
     protected string $errorCode = 'APP-AUTH-4002';
+
+    protected function getTitle(): string
+    {
+        return 'Unauthorized Access';
+    }
 }
 
 test('ApplicationException は基底クラスとして機能する', function () {
@@ -63,7 +73,7 @@ test('toProblemDetails() がRFC 7807形式の配列を生成する', function ()
     expect($problemDetails)->toHaveKey('type')
         ->and($problemDetails['type'])->toBeString()
         ->and($problemDetails)->toHaveKey('title')
-        ->and($problemDetails['title'])->toBe('ResourceNotFoundException') // class_basename()
+        ->and($problemDetails['title'])->toBe('Resource Not Found') // getTitle()
         ->and($problemDetails)->toHaveKey('status')
         ->and($problemDetails['status'])->toBe(404)
         ->and($problemDetails)->toHaveKey('detail')
@@ -77,7 +87,7 @@ test('toProblemDetails() がRFC 7807形式の配列を生成する', function ()
         ->and($problemDetails)->toHaveKey('instance')
         ->and($problemDetails['instance'])->toBe('/api/v1/users/123')
         ->and($problemDetails)->toHaveKey('timestamp')
-        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/'); // ISO 8601形式
+        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式
 });
 
 test('toProblemDetails() のtypeフィールドがエラーコードを含むURIである', function () {
@@ -93,7 +103,13 @@ test('toProblemDetails() のtypeフィールドがエラーコードを含むURI
 });
 
 test('ApplicationException は具象クラスとしてインスタンス化できる（デフォルト値）', function () {
-    $exception = new class('Application error occurred') extends ApplicationException {};
+    $exception = new class('Application error occurred') extends ApplicationException
+    {
+        protected function getTitle(): string
+        {
+            return 'Application Error';
+        }
+    };
 
     expect($exception->getStatusCode())->toBe(400) // デフォルト
         ->and($exception->getErrorCode())->toBe('APP-0001'); // デフォルト

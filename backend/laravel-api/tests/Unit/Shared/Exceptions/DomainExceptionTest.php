@@ -78,7 +78,7 @@ test('toProblemDetails() メソッドが RFC 7807形式の配列を生成する'
         ->and($problemDetails)->toHaveKey('instance')
         ->and($problemDetails['instance'])->toBe('/api/v1/users')
         ->and($problemDetails)->toHaveKey('timestamp')
-        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/'); // ISO 8601形式
+        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式
 });
 
 test('getErrorType() がエラータイプURIを生成する', function () {
@@ -116,7 +116,7 @@ test('getTitle() が抽象メソッドとして定義され、具象クラスで
     expect($problemDetails['title'])->toBe('User Email Already Exists');
 });
 
-test('toProblemDetails() がtimestampをISO 8601形式で返却する', function () {
+test('toProblemDetails() がtimestampをISO 8601 Zulu形式で返却する', function () {
     $exception = new InvalidUserAgeException('Age must be 18 or older');
     request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
 
@@ -124,5 +124,5 @@ test('toProblemDetails() がtimestampをISO 8601形式で返却する', function
 
     expect($problemDetails['timestamp'])
         ->toBeString()
-        ->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/'); // ISO 8601形式（タイムゾーン付き）
+        ->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式（Z終端）
 });

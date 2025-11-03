@@ -142,6 +142,64 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->header('X-Request-ID', $requestId);
         });
 
+        // Handle DDD Application Exceptions (RFC 7807 Problem Details)
+        $exceptions->render(function (\Ddd\Shared\Exceptions\ApplicationException $e, \Illuminate\Http\Request $request) {
+            // Request IDを取得または生成
+            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => $e->getErrorCode(),
+                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::error('ApplicationException occurred', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'status_code' => $e->getStatusCode(),
+            ]);
+
+            // RFC 7807形式の配列を取得
+            $problemDetails = $e->toProblemDetails();
+
+            // RFC 7807形式のレスポンスを生成
+            return response()->json($problemDetails, $e->getStatusCode())
+                ->header('Content-Type', 'application/problem+json')
+                ->header('X-Request-ID', $requestId);
+        });
+
+        // Handle DDD Infrastructure Exceptions (RFC 7807 Problem Details)
+        $exceptions->render(function (\Ddd\Shared\Exceptions\InfrastructureException $e, \Illuminate\Http\Request $request) {
+            // Request IDを取得または生成
+            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => $e->getErrorCode(),
+                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::error('InfrastructureException occurred', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'status_code' => $e->getStatusCode(),
+            ]);
+
+            // RFC 7807形式の配列を取得
+            $problemDetails = $e->toProblemDetails();
+
+            // RFC 7807形式のレスポンスを生成
+            return response()->json($problemDetails, $e->getStatusCode())
+                ->header('Content-Type', 'application/problem+json')
+                ->header('X-Request-ID', $requestId);
+        });
+
         // Handle Validation Exceptions (422 Unprocessable Entity)
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, \Illuminate\Http\Request $request) {
             // Request IDを取得または生成

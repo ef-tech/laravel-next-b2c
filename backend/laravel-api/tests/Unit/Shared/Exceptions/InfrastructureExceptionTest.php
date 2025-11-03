@@ -18,6 +18,11 @@ final class DatabaseConnectionException extends InfrastructureException
     protected int $statusCode = 503;
 
     protected string $errorCode = 'INFRA-DB-5001';
+
+    protected function getTitle(): string
+    {
+        return 'Database Connection Error';
+    }
 }
 
 final class ExternalApiTimeoutException extends InfrastructureException
@@ -25,6 +30,11 @@ final class ExternalApiTimeoutException extends InfrastructureException
     protected int $statusCode = 504;
 
     protected string $errorCode = 'INFRA-API-5002';
+
+    protected function getTitle(): string
+    {
+        return 'External API Timeout';
+    }
 }
 
 final class ServiceUnavailableException extends InfrastructureException
@@ -32,6 +42,11 @@ final class ServiceUnavailableException extends InfrastructureException
     protected int $statusCode = 502;
 
     protected string $errorCode = 'INFRA-SERVICE-5003';
+
+    protected function getTitle(): string
+    {
+        return 'Service Unavailable';
+    }
 }
 
 test('InfrastructureException は基底クラスとして機能する', function () {
@@ -73,7 +88,7 @@ test('toProblemDetails() がRFC 7807形式の配列を生成する', function ()
     expect($problemDetails)->toHaveKey('type')
         ->and($problemDetails['type'])->toBeString()
         ->and($problemDetails)->toHaveKey('title')
-        ->and($problemDetails['title'])->toBe('ExternalApiTimeoutException') // class_basename()
+        ->and($problemDetails['title'])->toBe('External API Timeout') // getTitle()
         ->and($problemDetails)->toHaveKey('status')
         ->and($problemDetails['status'])->toBe(504)
         ->and($problemDetails)->toHaveKey('detail')
@@ -87,7 +102,7 @@ test('toProblemDetails() がRFC 7807形式の配列を生成する', function ()
         ->and($problemDetails)->toHaveKey('instance')
         ->and($problemDetails['instance'])->toBe('/api/v1/orders')
         ->and($problemDetails)->toHaveKey('timestamp')
-        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/'); // ISO 8601形式
+        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式
 });
 
 test('toProblemDetails() のtypeフィールドがエラーコードを含むURIである', function () {
@@ -103,7 +118,13 @@ test('toProblemDetails() のtypeフィールドがエラーコードを含むURI
 });
 
 test('InfrastructureException は具象クラスとしてインスタンス化できる（デフォルト値）', function () {
-    $exception = new class('Infrastructure error occurred') extends InfrastructureException {};
+    $exception = new class('Infrastructure error occurred') extends InfrastructureException
+    {
+        protected function getTitle(): string
+        {
+            return 'Infrastructure Error';
+        }
+    };
 
     expect($exception->getStatusCode())->toBe(503) // デフォルト
         ->and($exception->getErrorCode())->toBe('INFRA-0001'); // デフォルト
