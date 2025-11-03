@@ -111,8 +111,8 @@
   - AppError基底インターフェースを実装する
   - _Requirements: 6.3, 8.3, 8.5_
 
-- [ ] 6. 統一APIクライアントを実装する
-- [ ] 6.1 fetch wrapper基本機能を実装する
+- [x] 6. 統一APIクライアントを実装する
+- [x] 6.1 fetch wrapper基本機能を実装する
   - request()メソッドで統一されたAPIリクエスト機能を実装する
   - X-Request-IDヘッダー自動生成機能を追加する（crypto.randomUUID()使用）
   - Accept-Languageヘッダー自動付与機能を追加する（ブラウザ言語設定取得）
@@ -120,19 +120,19 @@
   - AbortControllerによる30秒タイムアウト管理を実装する
   - _Requirements: 6.1, 6.4_
 
-- [ ] 6.2 RFC 7807レスポンス解析機能を実装する
+- [x] 6.2 RFC 7807レスポンス解析機能を実装する
   - 4xx/5xxレスポンスをRFC 7807形式として解析する機能を追加する
   - ApiErrorインスタンスを生成してthrowする
   - バリデーションエラー（errorsフィールド）を適切に解析する
   - _Requirements: 6.2_
 
-- [ ] 6.3 ネットワークエラーハンドリング機能を実装する
+- [x] 6.3 ネットワークエラーハンドリング機能を実装する
   - TypeError: Failed to fetchをキャッチしてNetworkErrorをthrowする
   - AbortError（タイムアウト）をキャッチしてNetworkErrorをthrowする
   - その他のFetch APIエラーを適切にハンドリングする
   - _Requirements: 6.3_
 
-- [ ] 6.4 RESTful APIメソッドを実装する
+- [x] 6.4 RESTful APIメソッドを実装する
   - get()メソッドを実装する
   - post()メソッドを実装する
   - put()メソッドを実装する
