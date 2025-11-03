@@ -233,8 +233,8 @@
   - Request ID常時返却テストを実装する
   - _Requirements: 9.2_
 
-- [ ] 10. フロントエンドUnit Testsを実装する
-- [ ] 10.1 ApiClient Unit Testsを実装する
+- [x] 10. フロントエンドUnit Testsを実装する
+- [x] 10.1 ApiClient Unit Testsを実装する
   - RFC 7807レスポンス解析テストを実装する
   - X-Request-ID自動生成テストを実装する
   - Accept-Languageヘッダー自動付与テストを実装する
@@ -242,8 +242,9 @@
   - ApiError/NetworkError生成テストを実装する
   - 80%以上のカバレッジを達成する
   - _Requirements: 9.3_
+  - _Note: 既存実装で全要件を満たしている。17 tests passed。_
 
-- [ ] 10.2 ApiError Unit Testsを実装する
+- [x] 10.2 ApiError Unit Testsを実装する
   - RFC 7807レスポンスからインスタンス生成テストを実装する
   - isValidationError()判定テストを実装する
   - isAuthenticationError()判定テストを実装する
@@ -251,8 +252,9 @@
   - getDisplayMessage()メッセージ生成テストを実装する
   - 80%以上のカバレッジを達成する
   - _Requirements: 9.3_
+  - _Note: 既存実装で全要件を満たしている。13 tests passed。_
 
-- [ ] 10.3 NetworkError Unit Testsを実装する
+- [x] 10.3 NetworkError Unit Testsを実装する
   - fromFetchError()ファクトリーメソッドテストを実装する
   - isTimeout()判定テストを実装する
   - isConnectionError()判定テストを実装する
@@ -260,6 +262,7 @@
   - isRetryableプロパティテストを実装する
   - 80%以上のカバレッジを達成する
   - _Requirements: 9.3_
+  - _Note: 既存実装で全要件を満たしている。15 tests passed。_
 
 - [ ] 11. E2E Testsを実装する
 - [ ] 11.1 APIエラー表示E2Eテストを実装する
