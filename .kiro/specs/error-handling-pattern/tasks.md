@@ -139,8 +139,8 @@
   - delete()メソッドを実装する
   - _Requirements: 6.1_
 
-- [ ] 7. Error Boundariesを実装する
-- [ ] 7.1 セグメント用Error Boundaryを実装する（user-app）
+- [x] 7. Error Boundariesを実装する
+- [x] 7.1 セグメント用Error Boundaryを実装する（user-app）
   - error.tsxファイルを作成する
   - ApiErrorを検出してRFC 7807情報を画面表示する機能を実装する
   - NetworkErrorを検出してネットワークエラーメッセージと再試行ボタンを表示する機能を実装する
@@ -149,7 +149,7 @@
   - 本番環境では内部エラー詳細をマスクする
   - _Requirements: 7.1, 7.2, 7.3, 7.5, 7.6, 7.7_
 
-- [ ] 7.2 セグメント用Error Boundaryを実装する（admin-app）
+- [x] 7.2 セグメント用Error Boundaryを実装する（admin-app）
   - error.tsxファイルを作成する
   - ApiErrorを検出してRFC 7807情報を画面表示する機能を実装する
   - NetworkErrorを検出してネットワークエラーメッセージと再試行ボタンを表示する機能を実装する
@@ -158,13 +158,13 @@
   - 本番環境では内部エラー詳細をマスクする
   - _Requirements: 7.1, 7.2, 7.3, 7.5, 7.6, 7.7_
 
-- [ ] 7.3 ルートレイアウト用Global Error Boundaryを実装する（user-app）
+- [x] 7.3 ルートレイアウト用Global Error Boundaryを実装する（user-app）
   - global-error.tsxファイルを作成する
   - ルートセグメントエラー用のフォールバックUIを実装する
   - Request IDを表示してサポート問い合わせを促す
   - _Requirements: 7.4, 7.6_
 
-- [ ] 7.4 ルートレイアウト用Global Error Boundaryを実装する（admin-app）
+- [x] 7.4 ルートレイアウト用Global Error Boundaryを実装する（admin-app）
   - global-error.tsxファイルを作成する
   - ルートセグメントエラー用のフォールバックUIを実装する
   - Request IDを表示してサポート問い合わせを促す
