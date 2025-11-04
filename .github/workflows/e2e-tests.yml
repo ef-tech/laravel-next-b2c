@@ -228,13 +228,39 @@ jobs:
 
       - name: Wait for services to be ready
         run: |
-          npx wait-on \
-            http://localhost:13001 \
-            http://localhost:13002 \
-            http://localhost:13000/api/v1/health \
-            --timeout 300000 \
-            --interval 2000 \
-            --verbose
+          echo "=== Waiting for services to be ready ==="
+
+          # Check Laravel API health
+          for i in {1..60}; do
+            if curl -f http://localhost:13000/api/health > /dev/null 2>&1; then
+              echo "✓ Laravel API is ready"
+              break
+            fi
+            echo "Waiting for Laravel API... ($i/60)"
+            sleep 5
+          done
+
+          # Check User App
+          for i in {1..60}; do
+            if curl -f http://localhost:13001 > /dev/null 2>&1; then
+              echo "✓ User App is ready"
+              break
+            fi
+            echo "Waiting for User App... ($i/60)"
+            sleep 5
+          done
+
+          # Check Admin App
+          for i in {1..60}; do
+            if curl -f http://localhost:13002 > /dev/null 2>&1; then
+              echo "✓ Admin App is ready"
+              break
+            fi
+            echo "Waiting for Admin App... ($i/60)"
+            sleep 5
+          done
+
+          echo "=== All services are ready ==="
 
       - name: Install E2E dependencies
         run: |

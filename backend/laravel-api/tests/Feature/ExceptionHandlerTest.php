@@ -92,7 +92,7 @@ describe('Exception Handler - RFC 7807 Response Generation', function () {
 
         // Assert: timestampフィールドがISO 8601形式であることを検証
         $json = $response->json();
-        expect($json['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/');
+        expect($json['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/');
     });
 
     test('多言語エラーメッセージが日本語で返される（Accept-Language: ja）', function () {

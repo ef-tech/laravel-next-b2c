@@ -196,17 +196,14 @@ describe("ApiClient", () => {
         json: async () => problem,
       });
 
-      try {
-        await client.request("/users", { method: "POST" });
-        fail("Should throw ApiError");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ApiError);
-        if (error instanceof ApiError) {
-          expect(error.validationErrors).toEqual(problem.errors);
-          expect(error.validationErrors?.email).toHaveLength(2);
-          expect(error.validationErrors?.name).toHaveLength(1);
-        }
-      }
+      const errorPromise = client.request("/users", { method: "POST" });
+      await expect(errorPromise).rejects.toThrow(ApiError);
+
+      const error = await errorPromise.catch((e) => e);
+      expect(error).toBeInstanceOf(ApiError);
+      expect(error.validationErrors).toEqual(problem.errors);
+      expect(error.validationErrors?.email).toHaveLength(2);
+      expect(error.validationErrors?.name).toHaveLength(1);
     });
   });
 
