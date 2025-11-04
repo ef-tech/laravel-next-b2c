@@ -13,7 +13,7 @@
  */
 
 import { useState } from "react";
-import { ApiClient } from "@/lib/api-client";
+import { ApiClient } from "../../../../../../lib/api-client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:13000";
 
