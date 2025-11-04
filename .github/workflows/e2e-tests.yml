@@ -192,7 +192,7 @@ jobs:
       - name: Start services
         run: |
           # Start Laravel API (ポート13000)
-          cd "$GITHUB_WORKSPACE/backend/laravel-api" && \
+          (cd "$GITHUB_WORKSPACE/backend/laravel-api" && \
           ENV_VALIDATION_SKIP=true \
           DB_CONNECTION=pgsql \
           DB_HOST=127.0.0.1 \
@@ -204,17 +204,17 @@ jobs:
           SECURITY_CSP_MODE=report-only \
           CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002 \
           CORS_SUPPORTS_CREDENTIALS=true \
-          php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1 &
+          php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1) &
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - 本番モード)
-          cd "$GITHUB_WORKSPACE/frontend/admin-app" && \
-          npx next start --port 13002 > /tmp/admin-app.log 2>&1 &
+          (cd "$GITHUB_WORKSPACE/frontend/admin-app" && \
+          npx next start --port 13002 > /tmp/admin-app.log 2>&1) &
           echo "Admin App PID: $!"
 
           # Start User App (ポート13001 - 本番モード)
-          cd "$GITHUB_WORKSPACE/frontend/user-app" && \
-          npx next start --port 13001 > /tmp/user-app.log 2>&1 &
+          (cd "$GITHUB_WORKSPACE/frontend/user-app" && \
+          npx next start --port 13001 > /tmp/user-app.log 2>&1) &
           echo "User App PID: $!"
 
           # プロセス起動待機
@@ -222,6 +222,10 @@ jobs:
 
       - name: Debug - Check running processes
         run: |
+          echo "=== Check build directories ==="
+          ls -la "$GITHUB_WORKSPACE/frontend/admin-app/.next" || echo "Admin App .next not found"
+          ls -la "$GITHUB_WORKSPACE/frontend/user-app/.next" || echo "User App .next not found"
+
           echo "=== Running processes on ports 13000-13002 ==="
           lsof -i :13000 || echo "Port 13000 not listening"
           lsof -i :13001 || echo "Port 13001 not listening"
@@ -231,10 +235,10 @@ jobs:
           cat /tmp/laravel.log || echo "No Laravel log"
 
           echo "=== Admin App log ==="
-          head -50 /tmp/admin-app.log || echo "No Admin App log"
+          cat /tmp/admin-app.log || echo "No Admin App log"
 
           echo "=== User App log ==="
-          head -50 /tmp/user-app.log || echo "No User App log"
+          cat /tmp/user-app.log || echo "No User App log"
 
       - name: Wait for services to be ready
         run: |
