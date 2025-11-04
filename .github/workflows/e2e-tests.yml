@@ -191,8 +191,13 @@ jobs:
 
       - name: Start services
         run: |
+          echo "=== Current directory before starting services ==="
+          pwd
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+
           # Start Laravel API (ポート13000)
           (cd "$GITHUB_WORKSPACE/backend/laravel-api" && \
+          pwd > /tmp/laravel-pwd.log && \
           ENV_VALIDATION_SKIP=true \
           DB_CONNECTION=pgsql \
           DB_HOST=127.0.0.1 \
@@ -209,11 +214,15 @@ jobs:
 
           # Start Admin App (ポート13002 - 本番モード)
           (cd "$GITHUB_WORKSPACE/frontend/admin-app" && \
+          pwd > /tmp/admin-pwd.log && \
+          ls -la .next > /tmp/admin-next-check.log 2>&1 && \
           npx next start --port 13002 > /tmp/admin-app.log 2>&1) &
           echo "Admin App PID: $!"
 
           # Start User App (ポート13001 - 本番モード)
           (cd "$GITHUB_WORKSPACE/frontend/user-app" && \
+          pwd > /tmp/user-pwd.log && \
+          ls -la .next > /tmp/user-next-check.log 2>&1 && \
           npx next start --port 13001 > /tmp/user-app.log 2>&1) &
           echo "User App PID: $!"
 
@@ -222,7 +231,21 @@ jobs:
 
       - name: Debug - Check running processes
         run: |
-          echo "=== Check build directories ==="
+          echo "=== Working directories during service startup ==="
+          echo "Laravel API directory:"
+          cat /tmp/laravel-pwd.log || echo "No laravel-pwd.log"
+          echo "Admin App directory:"
+          cat /tmp/admin-pwd.log || echo "No admin-pwd.log"
+          echo "User App directory:"
+          cat /tmp/user-pwd.log || echo "No user-pwd.log"
+
+          echo "=== Check .next directories in service directories ==="
+          echo "Admin App .next check:"
+          cat /tmp/admin-next-check.log || echo "No admin-next-check.log"
+          echo "User App .next check:"
+          cat /tmp/user-next-check.log || echo "No user-next-check.log"
+
+          echo "=== Check build directories from GITHUB_WORKSPACE ==="
           ls -la "$GITHUB_WORKSPACE/frontend/admin-app/.next" || echo "Admin App .next not found"
           ls -la "$GITHUB_WORKSPACE/frontend/user-app/.next" || echo "User App .next not found"
 
