@@ -153,19 +153,6 @@ enum ErrorCode: string
      */
     public static function fromString(string $code): ?self
     {
-        return match ($code) {
-            'AUTH-LOGIN-001' => self::AUTH_LOGIN_001,
-            'AUTH-TOKEN-001' => self::AUTH_TOKEN_001,
-            'AUTH-TOKEN-002' => self::AUTH_TOKEN_002,
-            'AUTH-PERMISSION-001' => self::AUTH_PERMISSION_001,
-            'VAL-INPUT-001' => self::VAL_INPUT_001,
-            'VAL-EMAIL-001' => self::VAL_EMAIL_001,
-            'BIZ-RESOURCE-001' => self::BIZ_RESOURCE_001,
-            'BIZ-CONFLICT-001' => self::BIZ_CONFLICT_001,
-            'INFRA-DB-001' => self::INFRA_DB_001,
-            'INFRA-API-001' => self::INFRA_API_001,
-            'INFRA-TIMEOUT-001' => self::INFRA_TIMEOUT_001,
-            default => null,
-        };
+        return self::tryFrom($code);
     }
 }

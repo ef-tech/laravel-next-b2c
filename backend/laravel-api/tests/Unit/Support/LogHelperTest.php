@@ -23,9 +23,9 @@ final class LogHelperTest extends TestCase
         config(['logging.hash_sensitive_data' => false]);
 
         // Act & Assert
-        $this->assertSame(123, LogHelper::hashUserId(123));
-        $this->assertSame('test@example.com', LogHelper::hashEmail('test@example.com'));
-        $this->assertSame('192.168.1.1', LogHelper::hashIpAddress('192.168.1.1'));
+        $this->assertSame(123, LogHelper::hashSensitiveData(123));
+        $this->assertSame('test@example.com', LogHelper::hashSensitiveData('test@example.com'));
+        $this->assertSame('192.168.1.1', LogHelper::hashSensitiveData('192.168.1.1'));
     }
 
     /**
@@ -37,9 +37,9 @@ final class LogHelperTest extends TestCase
         config(['logging.hash_sensitive_data' => true]);
 
         // Act
-        $hashedUserId = LogHelper::hashUserId(123);
-        $hashedEmail = LogHelper::hashEmail('test@example.com');
-        $hashedIp = LogHelper::hashIpAddress('192.168.1.1');
+        $hashedUserId = LogHelper::hashSensitiveData(123);
+        $hashedEmail = LogHelper::hashSensitiveData('test@example.com');
+        $hashedIp = LogHelper::hashSensitiveData('192.168.1.1');
 
         // Assert
         $this->assertIsString($hashedUserId);
@@ -64,8 +64,8 @@ final class LogHelperTest extends TestCase
         config(['logging.hash_sensitive_data' => true]);
 
         // Act
-        $hash1 = LogHelper::hashUserId(123);
-        $hash2 = LogHelper::hashUserId(123);
+        $hash1 = LogHelper::hashSensitiveData(123);
+        $hash2 = LogHelper::hashSensitiveData(123);
 
         // Assert
         $this->assertSame($hash1, $hash2);
@@ -80,8 +80,8 @@ final class LogHelperTest extends TestCase
         config(['logging.hash_sensitive_data' => true]);
 
         // Act
-        $hash1 = LogHelper::hashUserId(123);
-        $hash2 = LogHelper::hashUserId(456);
+        $hash1 = LogHelper::hashSensitiveData(123);
+        $hash2 = LogHelper::hashSensitiveData(456);
 
         // Assert
         $this->assertNotSame($hash1, $hash2);
@@ -96,9 +96,7 @@ final class LogHelperTest extends TestCase
         config(['logging.hash_sensitive_data' => true]);
 
         // Act & Assert
-        $this->assertNull(LogHelper::hashUserId(null));
-        $this->assertNull(LogHelper::hashEmail(null));
-        $this->assertNull(LogHelper::hashIpAddress(null));
+        $this->assertNull(LogHelper::hashSensitiveData(null));
     }
 
     /**
@@ -154,7 +152,7 @@ final class LogHelperTest extends TestCase
         config(['logging.hash_sensitive_data' => true]);
 
         // Act
-        $hashedValue = LogHelper::hashUserId(123);
+        $hashedValue = LogHelper::hashSensitiveData(123);
 
         // Assert: 期待されるSHA-256ハッシュ値
         $expectedHash = hash('sha256', '123');

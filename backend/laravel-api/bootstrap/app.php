@@ -110,94 +110,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle DDD Domain Exceptions (RFC 7807 Problem Details)
         $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e, \Illuminate\Http\Request $request) {
-            // Request IDを取得（SetRequestId Middlewareが設定している）
-            $requestId = $request->header('X-Request-ID');
-
-            // Request IDが設定されていない場合は自動生成
-            if (! $requestId) {
-                $requestId = (string) \Illuminate\Support\Str::uuid();
-            }
-
-            // 構造化ログコンテキストを設定
-            \Illuminate\Support\Facades\Log::withContext([
-                'trace_id' => $requestId,
-                'error_code' => $e->getErrorCode(),
-                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
-                'request_path' => $request->getRequestUri(),
-            ]);
-
-            // エラーログを記録
-            \Illuminate\Support\Facades\Log::error('DomainException occurred', [
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'status_code' => $e->getStatusCode(),
-            ]);
-
-            // RFC 7807形式の配列を取得
-            $problemDetails = $e->toProblemDetails();
-
-            // RFC 7807形式のレスポンスを生成
-            return response()->json($problemDetails, $e->getStatusCode())
-                ->header('Content-Type', 'application/problem+json')
-                ->header('X-Request-ID', $requestId);
+            return \App\Support\ExceptionHandler::handleProblemDetailsException($e, $request, 'DomainException');
         });
 
         // Handle DDD Application Exceptions (RFC 7807 Problem Details)
         $exceptions->render(function (\Ddd\Shared\Exceptions\ApplicationException $e, \Illuminate\Http\Request $request) {
-            // Request IDを取得または生成
-            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
-
-            // 構造化ログコンテキストを設定
-            \Illuminate\Support\Facades\Log::withContext([
-                'trace_id' => $requestId,
-                'error_code' => $e->getErrorCode(),
-                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
-                'request_path' => $request->getRequestUri(),
-            ]);
-
-            // エラーログを記録
-            \Illuminate\Support\Facades\Log::error('ApplicationException occurred', [
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'status_code' => $e->getStatusCode(),
-            ]);
-
-            // RFC 7807形式の配列を取得
-            $problemDetails = $e->toProblemDetails();
-
-            // RFC 7807形式のレスポンスを生成
-            return response()->json($problemDetails, $e->getStatusCode())
-                ->header('Content-Type', 'application/problem+json')
-                ->header('X-Request-ID', $requestId);
+            return \App\Support\ExceptionHandler::handleProblemDetailsException($e, $request, 'ApplicationException');
         });
 
         // Handle DDD Infrastructure Exceptions (RFC 7807 Problem Details)
         $exceptions->render(function (\Ddd\Shared\Exceptions\InfrastructureException $e, \Illuminate\Http\Request $request) {
-            // Request IDを取得または生成
-            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
-
-            // 構造化ログコンテキストを設定
-            \Illuminate\Support\Facades\Log::withContext([
-                'trace_id' => $requestId,
-                'error_code' => $e->getErrorCode(),
-                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
-                'request_path' => $request->getRequestUri(),
-            ]);
-
-            // エラーログを記録
-            \Illuminate\Support\Facades\Log::error('InfrastructureException occurred', [
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'status_code' => $e->getStatusCode(),
-            ]);
-
-            // RFC 7807形式の配列を取得
-            $problemDetails = $e->toProblemDetails();
-
-            // RFC 7807形式のレスポンスを生成
-            return response()->json($problemDetails, $e->getStatusCode())
-                ->header('Content-Type', 'application/problem+json')
-                ->header('X-Request-ID', $requestId);
+            return \App\Support\ExceptionHandler::handleProblemDetailsException($e, $request, 'InfrastructureException');
         });
 
         // Handle Validation Exceptions (422 Unprocessable Entity)
@@ -209,7 +132,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Support\Facades\Log::withContext([
                 'trace_id' => $requestId,
                 'error_code' => 'validation_error',
-                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'user_id' => \App\Support\LogHelper::hashSensitiveData($request->user()?->getAuthIdentifier()),
                 'request_path' => $request->getRequestUri(),
             ]);
 
@@ -277,7 +200,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Support\Facades\Log::withContext([
                 'trace_id' => $requestId,
                 'error_code' => 'too_many_requests',
-                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'user_id' => \App\Support\LogHelper::hashSensitiveData($request->user()?->getAuthIdentifier()),
                 'request_path' => $request->getRequestUri(),
             ]);
 
@@ -312,7 +235,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Support\Facades\Log::withContext([
                 'trace_id' => $requestId,
                 'error_code' => 'internal_server_error',
-                'user_id' => \App\Support\LogHelper::hashUserId($request->user()?->getAuthIdentifier()),
+                'user_id' => \App\Support\LogHelper::hashSensitiveData($request->user()?->getAuthIdentifier()),
                 'request_path' => $request->getRequestUri(),
             ]);
 

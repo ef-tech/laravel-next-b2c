@@ -46,44 +46,16 @@ final class LogHelper
         }
 
         // オブジェクトの場合は文字列に変換してからハッシュ化
+        // __toString()メソッドを持つオブジェクトのみ対応
         if (is_object($value)) {
+            if (! method_exists($value, '__toString')) {
+                return hash('sha256', get_class($value));
+            }
+
             $value = (string) $value;
         }
 
         // スカラー値をSHA-256でハッシュ化
         return hash('sha256', (string) $value);
-    }
-
-    /**
-     * ユーザーIDをハッシュ化する
-     *
-     * @param  int|string|null  $userId  ユーザーID
-     * @return int|string|null ハッシュ化後のユーザーID
-     */
-    public static function hashUserId(int|string|null $userId): int|string|null
-    {
-        return self::hashSensitiveData($userId);
-    }
-
-    /**
-     * メールアドレスをハッシュ化する
-     *
-     * @param  string|null  $email  メールアドレス
-     * @return string|null ハッシュ化後のメールアドレス
-     */
-    public static function hashEmail(?string $email): ?string
-    {
-        return self::hashSensitiveData($email);
-    }
-
-    /**
-     * IPアドレスをハッシュ化する
-     *
-     * @param  string|null  $ip  IPアドレス
-     * @return string|null ハッシュ化後のIPアドレス
-     */
-    public static function hashIpAddress(?string $ip): ?string
-    {
-        return self::hashSensitiveData($ip);
     }
 }
