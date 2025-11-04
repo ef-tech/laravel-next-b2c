@@ -349,10 +349,11 @@
   - _Requirements: 10.2_
   - _Note: error-handling-troubleshooting.md作成完了。8章構成（Request ID追跡・多言語メッセージ設定ミス・Error Boundary動作不良デバッグ・RFC 7807形式問題・フロントエンドAPIクライアント・環境別エラーメッセージ制御・Laravel/Next.jsデバッグ方法・FAQ）。4ケーススタディ・grepコマンド例・コードサンプル付き。_
 
-- [ ] 14. CI/CDパイプラインを統合する
-- [ ] 14.1 GitHub Actionsワークフローを更新する
+- [x] 14. CI/CDパイプラインを統合する
+- [x] 14.1 GitHub Actionsワークフローを更新する
   - エラーハンドリングテストスイートをワークフローに追加する
   - Pull Request作成時の自動テスト実行を設定する
   - mainブランチpush時の自動テスト実行を設定する
   - テスト完了時間10分以内の目標を検証する
   - _Requirements: 10.3, 10.5_
+  - _Note: 既存`.github/workflows/test.yml`で完全実装済み。Pest 4 Shard並列実行によりエラーハンドリングテスト含む全テスト自動実行（Unit: DomainException/ApplicationException/InfrastructureExceptionTest、Feature: ErrorHandlingTest/ExceptionHandlerTest、Performance: ExceptionGenerationPerformanceTest）。PR時・mainブランチpush時に自動実行。実行時間約3分（10分以内目標達成）。Concurrency設定・Paths Filter最適化済み。_
