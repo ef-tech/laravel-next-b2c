@@ -22,80 +22,68 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:13000"
 
 export default function TestErrorPage() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  // エラーをスローしてError Boundaryをトリガー
-  if (error) {
-    throw error;
-  }
 
   const triggerError = async (errorType: string) => {
     setLoading(true);
-    setError(null);
 
-    try {
-      const client = new ApiClient(API_BASE_URL);
+    const client = new ApiClient(API_BASE_URL);
 
-      switch (errorType) {
-        case "400-domain":
-          // Domain Exception (400 Bad Request)
-          await client.request("/test/domain-exception", { method: "GET" });
-          break;
+    switch (errorType) {
+      case "400-domain":
+        // Domain Exception (400 Bad Request)
+        await client.request("/test/domain-exception", { method: "GET" });
+        break;
 
-        case "404-application":
-          // Application Exception (404 Not Found)
-          await client.request("/test/application-exception", { method: "GET" });
-          break;
+      case "404-application":
+        // Application Exception (404 Not Found)
+        await client.request("/test/application-exception", { method: "GET" });
+        break;
 
-        case "503-infrastructure":
-          // Infrastructure Exception (503 Service Unavailable)
-          await client.request("/test/infrastructure-exception", { method: "GET" });
-          break;
+      case "503-infrastructure":
+        // Infrastructure Exception (503 Service Unavailable)
+        await client.request("/test/infrastructure-exception", { method: "GET" });
+        break;
 
-        case "422-validation":
-          // Validation Error (422 Unprocessable Entity)
-          await client.request("/test/validation", {
-            method: "POST",
-            body: JSON.stringify({
-              email: "invalid-email",
-              name: "ab", // min:3 validation error
-              // age is missing
-            }),
-          });
-          break;
+      case "422-validation":
+        // Validation Error (422 Unprocessable Entity)
+        await client.request("/test/validation", {
+          method: "POST",
+          body: JSON.stringify({
+            email: "invalid-email",
+            name: "ab", // min:3 validation error
+            // age is missing
+          }),
+        });
+        break;
 
-        case "401-auth":
-          // Authentication Error (401 Unauthorized)
-          await client.request("/test/auth-error", { method: "GET" });
-          break;
+      case "401-auth":
+        // Authentication Error (401 Unauthorized)
+        await client.request("/test/auth-error", { method: "GET" });
+        break;
 
-        case "500-generic":
-          // Generic 500 Error
-          await client.request("/test/generic-exception", { method: "GET" });
-          break;
+      case "500-generic":
+        // Generic 500 Error
+        await client.request("/test/generic-exception", { method: "GET" });
+        break;
 
-        case "network-timeout":
-          // Network Timeout (AbortError)
-          // Note: Simplified for type safety - implement AbortController for actual timeout
-          await client.request("/test/timeout-endpoint", {
-            method: "GET",
-          });
-          break;
+      case "network-timeout":
+        // Network Timeout (AbortError)
+        // Note: Simplified for type safety - implement AbortController for actual timeout
+        await client.request("/test/timeout-endpoint", {
+          method: "GET",
+        });
+        break;
 
-        case "network-connection":
-          // Network Connection Error (fetch to invalid URL)
-          await fetch("http://invalid-domain-for-test.example.com/api");
-          break;
+      case "network-connection":
+        // Network Connection Error (fetch to invalid URL)
+        await fetch("http://invalid-domain-for-test.example.com/api");
+        break;
 
-        default:
-          throw new Error("Unknown error type");
-      }
-    } catch (err) {
-      // エラーをキャプチャしてError Boundaryにスロー
-      setError(err as Error);
-    } finally {
-      setLoading(false);
+      default:
+        throw new Error("Unknown error type");
     }
+    // エラーが発生しなかった場合はloadingを解除
+    setLoading(false);
   };
 
   return (
