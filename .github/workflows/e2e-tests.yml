@@ -178,6 +178,10 @@ jobs:
           ENV_VALIDATION_SKIP: true
 
       - name: Build frontend applications
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:13000
+          NEXT_PUBLIC_API_V1_BASE_URL: http://localhost:13000/api/v1
+          NODE_ENV: production
         run: |
           # Build Admin App
           cd frontend/admin-app && npm run build
