@@ -27,7 +27,7 @@ test.describe('Error Handling E2E Tests', () => {
       page,
     }) => {
       // Arrange: テスト用エラーページに遷移（admin-app）
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Wait for page to be fully rendered
@@ -63,7 +63,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('Error Boundary UIが正しく表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 404 Application Exceptionをトリガー
@@ -88,7 +88,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('Request IDがサポート用参照IDとして表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 503 Infrastructure Exceptionをトリガー
@@ -117,7 +117,7 @@ test.describe('Error Handling E2E Tests', () => {
   test.describe('Validation Error Display', () => {
     test('フィールド別エラーメッセージが画面に表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 422 Validation Errorをトリガー
@@ -147,7 +147,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('errorsフィールドが正しく解析され表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 422 Validation Errorをトリガー
@@ -180,7 +180,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('401エラー発生時にログインページにリダイレクトされる', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 401 Authentication Errorをトリガー
@@ -192,7 +192,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('認証エラーメッセージが表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 401 Authentication Errorをトリガー
@@ -207,7 +207,7 @@ test.describe('Error Handling E2E Tests', () => {
   test.describe('Network Error Display', () => {
     test('ネットワークエラーメッセージが表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: Network Connection Errorをトリガー
@@ -226,7 +226,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('再試行ボタンが表示され動作する', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: Network Timeoutをトリガー
@@ -249,7 +249,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('NetworkErrorが検出されUIに表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: Network Connection Errorをトリガー
@@ -276,7 +276,7 @@ test.describe('Error Handling E2E Tests', () => {
       // ここでは500エラーが正しく表示されることを確認する
 
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 500 Generic Exceptionをトリガー
@@ -292,7 +292,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('汎用エラーメッセージが表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 500 Generic Exceptionをトリガー
@@ -309,7 +309,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('Request ID表示が維持される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 500 Generic Exceptionをトリガー
@@ -339,7 +339,7 @@ test.describe('Error Handling E2E Tests', () => {
   test.describe('Retry Button Functionality', () => {
     test('Error Boundaryの再試行ボタンがクリックできる', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 400 Domain Exceptionをトリガー
@@ -358,7 +358,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('reset()関数が呼び出される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 404 Application Exceptionをトリガー
@@ -382,7 +382,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('reset()によるリカバリーが実行される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: Network Timeoutをトリガー
@@ -411,7 +411,7 @@ test.describe('Error Handling E2E Tests', () => {
   test.describe('Request ID Display', () => {
     test('Error Boundary UIにRequest ID（trace_id）が表示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 400 Domain Exceptionをトリガー
@@ -436,7 +436,7 @@ test.describe('Error Handling E2E Tests', () => {
 
     test('サポート問い合わせ用参照IDが提示される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
-      const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
+      const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Act: 404 Application Exceptionをトリガー
