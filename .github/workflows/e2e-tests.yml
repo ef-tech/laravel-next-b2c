@@ -180,17 +180,15 @@ jobs:
       - name: Build frontend applications
         run: |
           # Build Admin App
-          cd frontend/admin-app
-          npm run build
+          cd frontend/admin-app && npm run build
 
           # Build User App
-          cd ../user-app
-          npm run build
+          cd frontend/user-app && npm run build
 
       - name: Start services
         run: |
           # Start Laravel API (ポート13000)
-          cd backend/laravel-api
+          cd backend/laravel-api && \
           ENV_VALIDATION_SKIP=true \
           DB_CONNECTION=pgsql \
           DB_HOST=127.0.0.1 \
@@ -206,12 +204,12 @@ jobs:
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - 本番モード)
-          cd ../../frontend/admin-app
+          cd frontend/admin-app && \
           npx next start --port 13002 > /tmp/admin-app.log 2>&1 &
           echo "Admin App PID: $!"
 
           # Start User App (ポート13001 - 本番モード)
-          cd ../user-app
+          cd frontend/user-app && \
           npx next start --port 13001 > /tmp/user-app.log 2>&1 &
           echo "User App PID: $!"
 
