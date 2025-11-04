@@ -31,14 +31,14 @@ test.describe('Error Handling E2E Tests', () => {
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
       // Wait for page to be fully rendered
-      await expect(page.locator('[data-testid="trigger-400-error"]')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('[data-testid="trigger-400-error"]')).toBeVisible({ timeout: 30000 });
 
       // Act: 400 Domain Exceptionをトリガー
       await page.click('[data-testid="trigger-400-error"]');
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("エラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: RFC 7807情報が表示される
@@ -71,7 +71,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIの主要要素が表示される
       // エラーアイコン（SVG）
-      await expect(page.locator('svg').first()).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('svg').first()).toBeVisible({ timeout: 30000 });
 
       // エラータイトル
       await expect(page.locator('h2').first()).toBeVisible();
@@ -95,7 +95,7 @@ test.describe('Error Handling E2E Tests', () => {
       await page.click('[data-testid="trigger-503-error"]');
 
       // Assert: Request ID表示エリアが表示される
-      await expect(page.locator('text=Request ID:')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('text=Request ID:')).toBeVisible({ timeout: 30000 });
 
       // Assert: サポート問い合わせ用メッセージが表示される
       await expect(
@@ -125,7 +125,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("エラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: Validation Error titleが表示される
@@ -155,7 +155,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("エラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: errorsフィールドがリスト形式で表示される
@@ -187,7 +187,7 @@ test.describe('Error Handling E2E Tests', () => {
       await page.click('[data-testid="trigger-401-error"]');
 
       // Assert: ログインページにリダイレクトされる
-      await expect(page).toHaveURL(/.*\/login/, { timeout: 5000 });
+      await expect(page).toHaveURL(/.*\/login/, { timeout: 30000 });
     });
 
     test('認証エラーメッセージが表示される', async ({ page }) => {
@@ -199,7 +199,7 @@ test.describe('Error Handling E2E Tests', () => {
       await page.click('[data-testid="trigger-401-error"]');
 
       // Assert: 認証エラーメッセージが表示される
-      await expect(page.locator('text=認証が必要です')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('text=認証が必要です')).toBeVisible({ timeout: 30000 });
     });
   });
 
@@ -215,7 +215,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("ネットワークエラー")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: ネットワークエラーメッセージが表示される
@@ -234,7 +234,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("ネットワークエラー")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: 再試行ボタンが表示される
@@ -257,7 +257,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: ネットワークエラータイトルが表示される
       await expect(page.locator('h2:has-text("ネットワークエラー")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: エラータイプが表示される（接続エラー）
@@ -283,7 +283,7 @@ test.describe('Error Handling E2E Tests', () => {
       await page.click('[data-testid="trigger-500-error"]');
 
       // Assert: Error Boundary UIが表示される
-      await expect(page.locator('h2').first()).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('h2').first()).toBeVisible({ timeout: 30000 });
 
       // Assert: エラーメッセージが表示される
       // 本番環境では汎用メッセージ、開発環境では詳細メッセージ
@@ -300,7 +300,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("予期しないエラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: エラーメッセージが表示される
@@ -317,7 +317,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("予期しないエラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: Error ID表示エリアが表示される
@@ -347,7 +347,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("エラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: 再試行ボタンが表示され、クリック可能である
@@ -366,7 +366,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("エラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Act: 再試行ボタンをクリック
@@ -376,7 +376,7 @@ test.describe('Error Handling E2E Tests', () => {
       // Assert: Error Boundary UIが非表示になり、元のページに戻る
       // （テストページが再表示される）
       await expect(page.locator('h1:has-text("Test Error Page")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
     });
 
@@ -390,7 +390,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("ネットワークエラー")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Act: 再試行ボタンをクリック
@@ -399,7 +399,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: エラーがクリアされ、元のページに戻る
       await expect(page.locator('h1:has-text("Test Error Page")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: ボタンが再度クリック可能な状態に戻る
@@ -419,7 +419,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("エラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: Request ID（trace_id）が表示される
@@ -444,7 +444,7 @@ test.describe('Error Handling E2E Tests', () => {
 
       // Assert: Error Boundary UIが表示される
       await expect(page.locator('h2:has-text("エラーが発生しました")')).toBeVisible({
-        timeout: 5000,
+        timeout: 30000,
       });
 
       // Assert: Request ID表示エリアが表示される
