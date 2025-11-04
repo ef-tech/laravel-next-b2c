@@ -15,6 +15,9 @@
 import { useState } from "react";
 import { ApiClient } from "@/lib/api-client";
 
+// Force dynamic rendering to ensure environment variables are read at runtime
+export const dynamic = "force-dynamic";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:13000";
 
 export default function TestErrorPage() {
