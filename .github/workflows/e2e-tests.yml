@@ -184,10 +184,10 @@ jobs:
           NODE_ENV: production
         run: |
           # Build Admin App (use npx next build directly to skip prebuild hook)
-          cd frontend/admin-app && npx next build
+          cd frontend/admin-app && npx next build && cd ../..
 
           # Build User App (use npx next build directly to skip prebuild hook)
-          cd frontend/user-app && npx next build
+          cd frontend/user-app && npx next build && cd ../..
 
       - name: Start services
         run: |
