@@ -212,18 +212,18 @@ jobs:
           php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1) &
           echo "Laravel API PID: $!"
 
-          # Start Admin App (ポート13002 - 本番モード)
+          # Start Admin App (ポート13002 - standalone mode)
           (cd "$GITHUB_WORKSPACE/frontend/admin-app" && \
           pwd > /tmp/admin-pwd.log && \
           ls -la .next > /tmp/admin-next-check.log 2>&1 && \
-          npx next start --port 13002 > /tmp/admin-app.log 2>&1) &
+          PORT=13002 node .next/standalone/frontend/admin-app/server.js > /tmp/admin-app.log 2>&1) &
           echo "Admin App PID: $!"
 
-          # Start User App (ポート13001 - 本番モード)
+          # Start User App (ポート13001 - standalone mode)
           (cd "$GITHUB_WORKSPACE/frontend/user-app" && \
           pwd > /tmp/user-pwd.log && \
           ls -la .next > /tmp/user-next-check.log 2>&1 && \
-          npx next start --port 13001 > /tmp/user-app.log 2>&1) &
+          PORT=13001 node .next/standalone/frontend/user-app/server.js > /tmp/user-app.log 2>&1) &
           echo "User App PID: $!"
 
           # プロセス起動待機
