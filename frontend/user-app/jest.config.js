@@ -22,6 +22,10 @@ const customJestConfig = {
     "!src/**/index.{ts,tsx}",
     "!src/app/layout.tsx",
     "!src/app/page.tsx",
+    "!src/app/error.tsx",
+    "!src/app/global-error.tsx",
+    "!src/app/test-error/**",
+    "!src/types/error-codes.ts",
   ],
 };
 
