@@ -192,7 +192,7 @@ jobs:
       - name: Start services
         run: |
           # Start Laravel API (ポート13000)
-          cd backend/laravel-api && \
+          cd "$GITHUB_WORKSPACE/backend/laravel-api" && \
           ENV_VALIDATION_SKIP=true \
           DB_CONNECTION=pgsql \
           DB_HOST=127.0.0.1 \
@@ -208,12 +208,12 @@ jobs:
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - 本番モード)
-          cd frontend/admin-app && \
+          cd "$GITHUB_WORKSPACE/frontend/admin-app" && \
           npx next start --port 13002 > /tmp/admin-app.log 2>&1 &
           echo "Admin App PID: $!"
 
           # Start User App (ポート13001 - 本番モード)
-          cd frontend/user-app && \
+          cd "$GITHUB_WORKSPACE/frontend/user-app" && \
           npx next start --port 13001 > /tmp/user-app.log 2>&1 &
           echo "User App PID: $!"
 

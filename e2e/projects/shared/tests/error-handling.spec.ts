@@ -30,6 +30,9 @@ test.describe('Error Handling E2E Tests', () => {
       const adminAppUrl = process.env.E2E_ADMIN_APP_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
+      // Wait for page to be fully rendered
+      await expect(page.locator('[data-testid="trigger-400-error"]')).toBeVisible({ timeout: 30000 });
+
       // Act: 400 Domain Exceptionをトリガー
       await page.click('[data-testid="trigger-400-error"]');
 
