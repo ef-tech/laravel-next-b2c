@@ -26,7 +26,7 @@
 
 ## Phase 2: バックエンド実装（DDD Exception階層・Middleware・Handler）
 
-- [ ] 2. DDD Exception階層を拡張する
+- [x] 2. DDD Exception階層を拡張する
 - [x] 2.1 既存DomainExceptionを拡張する
   - toProblemDetails()メソッドを実装する
   - RFC 7807形式の配列を生成する機能を追加する
@@ -48,7 +48,7 @@
   - HTTPステータスコード502/503/504のマッピングを検証する
   - _Requirements: 2.3, 2.4_
 
-- [ ] 3. ミドルウェアスタックを拡張する
+- [x] 3. ミドルウェアスタックを拡張する
 - [x] 3.1 Accept-Languageヘッダー解析ミドルウェアを実装する
   - Accept-Languageヘッダーを解析する機能を実装する
   - Laravelアプリケーションロケールを設定する機能を追加する
@@ -87,7 +87,7 @@
 
 ## Phase 3: フロントエンド実装（エラークラス・APIクライアント・Error Boundaries）
 
-- [ ] 5. エラークラスを実装する
+- [x] 5. エラークラスを実装する
 - [x] 5.1 RFC 7807 Problem Details型定義を作成する
   - RFC7807Problem型インターフェースを定義する
   - 必須フィールド（type, title, status, detail）を含める
