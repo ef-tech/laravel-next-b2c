@@ -14,13 +14,13 @@ use Illuminate\Support\Facades\Route;
 | Playwright E2E tests. They intentionally trigger specific error
 | conditions so the frontend can verify its error handling UI.
 |
-| Base URL (no "/api" prefix) so that frontend can call
-|   `${NEXT_PUBLIC_API_URL}/test/...`
+| Mounted at: /api/test (via bootstrap/app.php Route::prefix('api/test'))
+| Example endpoint: /api/test/domain-exception
 |
 */
 
 // Domain Exception (400)
-Route::get('/test/domain-exception', function () {
+Route::get('/domain-exception', function () {
     throw new class('Test domain exception message') extends DomainException
     {
         public function getStatusCode(): int
@@ -41,7 +41,7 @@ Route::get('/test/domain-exception', function () {
 })->middleware('api');
 
 // Application Exception (404)
-Route::get('/test/application-exception', function () {
+Route::get('/application-exception', function () {
     throw new class('Test application exception message') extends ApplicationException
     {
         protected int $statusCode = 404;
@@ -56,7 +56,7 @@ Route::get('/test/application-exception', function () {
 })->middleware('api');
 
 // Infrastructure Exception (503)
-Route::get('/test/infrastructure-exception', function () {
+Route::get('/infrastructure-exception', function () {
     throw new class('Test infrastructure exception message') extends InfrastructureException
     {
         protected int $statusCode = 503;
@@ -71,7 +71,7 @@ Route::get('/test/infrastructure-exception', function () {
 })->middleware('api');
 
 // Validation Error (422)
-Route::post('/test/validation', function (\Illuminate\Http\Request $request) {
+Route::post('/validation', function (\Illuminate\Http\Request $request) {
     $request->validate([
         'email' => 'required|email',
         'name' => 'required|string|min:3',
@@ -82,17 +82,17 @@ Route::post('/test/validation', function (\Illuminate\Http\Request $request) {
 })->middleware('api');
 
 // Authentication Error (401)
-Route::get('/test/auth-error', function () {
+Route::get('/auth-error', function () {
     throw new \Illuminate\Auth\AuthenticationException('Unauthenticated.');
 })->middleware('api');
 
 // Generic 500 Error
-Route::get('/test/generic-exception', function () {
+Route::get('/generic-exception', function () {
     throw new \RuntimeException('Test generic exception message');
 })->middleware('api');
 
 // Simulate slow endpoint to trigger client timeout (ApiClient uses 30s timeout)
-Route::get('/test/timeout-endpoint', function () {
+Route::get('/timeout-endpoint', function () {
     // Sleep a bit longer than client timeout to ensure AbortError occurs
     sleep(35);
 
