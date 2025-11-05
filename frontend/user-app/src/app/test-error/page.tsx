@@ -99,10 +99,10 @@ export default function TestErrorPage() {
           // Network Timeout (AbortError)
           try {
             const controller = new AbortController();
-            // 100ms timeout - fetching non-existent endpoint ensures timeout occurs
+            // 100ms timeout - backend sleeps for 35s, ensuring AbortError occurs
             const timeoutId = setTimeout(() => controller.abort(), 100);
-            // Use non-existent endpoint to ensure request doesn't complete before timeout
-            await fetch(`${API_BASE_URL}/api/slow-endpoint-that-does-not-exist`, {
+            // Use Laravel slow endpoint that sleeps for 35 seconds
+            await fetch(`${API_BASE_URL}/api/test/timeout-endpoint`, {
               signal: controller.signal,
             });
             clearTimeout(timeoutId);

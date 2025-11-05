@@ -91,10 +91,12 @@ Route::get('/generic-exception', function () {
     throw new \RuntimeException('Test generic exception message');
 });
 
-// Simulate slow endpoint to trigger client timeout (ApiClient uses 30s timeout)
+// Simulate slow endpoint to trigger client timeout
+// Note: E2E tests use 100ms AbortController timeout, so 1 second is sufficient
 Route::get('/timeout-endpoint', function () {
-    // Sleep a bit longer than client timeout to ensure AbortError occurs
-    sleep(35);
+    // Sleep 1 second - long enough for 100ms timeout to trigger AbortError
+    // but short enough to not block php artisan serve for other tests
+    sleep(1);
 
     return response()->json(['status' => 'delayed']);
 });
