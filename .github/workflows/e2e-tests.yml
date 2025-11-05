@@ -257,6 +257,13 @@ jobs:
           echo "User App directory:"
           cat /tmp/user-pwd.log || echo "No user-pwd.log"
 
+          echo "=== Laravel API Environment Check ==="
+          cd "$GITHUB_WORKSPACE/backend/laravel-api"
+          ENV_VALIDATION_SKIP=true php artisan env | grep -E "APP_ENV|E2E_TEST_ROUTES" || echo "Env vars not found"
+
+          echo "=== Laravel API Routes Check ==="
+          ENV_VALIDATION_SKIP=true APP_ENV=testing E2E_TEST_ROUTES=true php artisan route:list --path=api/test || echo "No /api/test routes found"
+
           echo "=== Running processes on ports 13000-13002 ==="
           lsof -i :13000 || echo "Port 13000 not listening"
           lsof -i :13001 || echo "Port 13001 not listening"
