@@ -86,21 +86,21 @@ describe("NetworkError", () => {
       const abortError = new DOMException("The operation was aborted", "AbortError");
       const error = NetworkError.fromFetchError(abortError);
 
-      expect(error.getDisplayMessage().toLowerCase()).toContain("time");
+      expect(error.getDisplayMessage()).toContain("タイムアウト");
     });
 
     it("接続エラーの場合、接続エラーメッセージを返す", () => {
       const fetchError = new TypeError("Failed to fetch");
       const error = NetworkError.fromFetchError(fetchError);
 
-      expect(error.getDisplayMessage().toLowerCase()).toContain("network");
+      expect(error.getDisplayMessage()).toContain("ネットワーク接続");
     });
 
     it("その他のエラーの場合、汎用エラーメッセージを返す", () => {
       const genericError = new Error("Unknown error");
       const error = NetworkError.fromFetchError(genericError);
 
-      expect(error.getDisplayMessage()).toContain("error");
+      expect(error.getDisplayMessage()).toContain("予期しない");
     });
   });
 

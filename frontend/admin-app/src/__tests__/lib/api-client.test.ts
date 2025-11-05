@@ -73,7 +73,7 @@ describe("ApiClient", () => {
       expect(typeof headers.get("Accept-Language")).toBe("string");
     });
 
-    it("Acceptヘッダーがapplication/problem+jsonに設定される", async () => {
+    it("Acceptヘッダーがapplication/jsonに設定される", async () => {
       const client = new ApiClient("https://api.example.com");
 
       mockFetch.mockResolvedValueOnce({
@@ -87,7 +87,7 @@ describe("ApiClient", () => {
       // Headers オブジェクトの検証
       const callArgs = mockFetch.mock.calls[0];
       const headers = callArgs?.[1]?.headers as Headers;
-      expect(headers.get("Accept")).toBe("application/problem+json");
+      expect(headers.get("Accept")).toBe("application/json");
     });
 
     it("30秒タイムアウトが設定される（AbortController使用）", async () => {
