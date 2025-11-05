@@ -165,8 +165,16 @@ jobs:
 
       - name: Setup frontend environment files
         run: |
-          cp frontend/admin-app/.env.example frontend/admin-app/.env.local
-          cp frontend/user-app/.env.example frontend/user-app/.env.local
+          # Create .env.local with correct API URLs for CI
+          echo "NEXT_PUBLIC_API_URL=http://localhost:13000" > frontend/admin-app/.env.local
+          echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:13000" >> frontend/admin-app/.env.local
+          echo "NEXT_PUBLIC_API_V1_BASE_URL=http://localhost:13000/api/v1" >> frontend/admin-app/.env.local
+          echo "NODE_ENV=development" >> frontend/admin-app/.env.local
+
+          echo "NEXT_PUBLIC_API_URL=http://localhost:13000" > frontend/user-app/.env.local
+          echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:13000" >> frontend/user-app/.env.local
+          echo "NEXT_PUBLIC_API_V1_BASE_URL=http://localhost:13000/api/v1" >> frontend/user-app/.env.local
+          echo "NODE_ENV=development" >> frontend/user-app/.env.local
 
       - name: Clear Laravel cache before starting server
         run: |
