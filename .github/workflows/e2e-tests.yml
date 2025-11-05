@@ -177,20 +177,15 @@ jobs:
         env:
           ENV_VALIDATION_SKIP: true
 
-      - name: Build frontend applications
+      # Note: Using development mode (next dev) instead of production build
+      # Development mode is faster and more reliable for E2E testing
+      # Security Headers tests also use development mode successfully
+
+      - name: Start services
         env:
           NEXT_PUBLIC_API_URL: http://localhost:13000
           NEXT_PUBLIC_API_BASE_URL: http://localhost:13000
           NEXT_PUBLIC_API_V1_BASE_URL: http://localhost:13000/api/v1
-          NODE_ENV: production
-        run: |
-          # Build Admin App (use npx next build directly to skip prebuild hook)
-          cd frontend/admin-app && npx next build && cd ../..
-
-          # Build User App (use npx next build directly to skip prebuild hook)
-          cd frontend/user-app && npx next build && cd ../..
-
-      - name: Start services
         run: |
           echo "=== Current directory before starting services ==="
           pwd
@@ -213,24 +208,22 @@ jobs:
           php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1) &
           echo "Laravel API PID: $!"
 
-          # Start Admin App (ポート13002 - production mode with `next start`)
+          # Start Admin App (ポート13002 - development mode)
           cd "$GITHUB_WORKSPACE/frontend/admin-app"
           pwd > /tmp/admin-pwd.log
-          ls -la .next > /tmp/admin-next-check.log 2>&1
-          nohup env PORT=13002 npx next start > /tmp/admin-app.log 2>&1 &
+          nohup npx next dev --turbopack --port 13002 > /tmp/admin-app.log 2>&1 &
           ADMIN_PID=$!
           echo "Admin App PID: $ADMIN_PID"
 
-          # Start User App (ポート13001 - production mode with `next start`)
+          # Start User App (ポート13001 - development mode)
           cd "$GITHUB_WORKSPACE/frontend/user-app"
           pwd > /tmp/user-pwd.log
-          ls -la .next > /tmp/user-next-check.log 2>&1
-          nohup env PORT=13001 npx next start > /tmp/user-app.log 2>&1 &
+          nohup npx next dev --turbopack --port 13001 > /tmp/user-app.log 2>&1 &
           USER_PID=$!
           echo "User App PID: $USER_PID"
 
-          # プロセス起動待機（next start は起動確認が容易）
-          sleep 20
+          # プロセス起動待機（開発モードは起動が速い）
+          sleep 15
 
       - name: Debug - Check running processes
         run: |
@@ -241,16 +234,6 @@ jobs:
           cat /tmp/admin-pwd.log || echo "No admin-pwd.log"
           echo "User App directory:"
           cat /tmp/user-pwd.log || echo "No user-pwd.log"
-
-          echo "=== Check .next directories in service directories ==="
-          echo "Admin App .next check:"
-          cat /tmp/admin-next-check.log || echo "No admin-next-check.log"
-          echo "User App .next check:"
-          cat /tmp/user-next-check.log || echo "No user-next-check.log"
-
-          echo "=== Check build directories from GITHUB_WORKSPACE ==="
-          ls -la "$GITHUB_WORKSPACE/frontend/admin-app/.next" || echo "Admin App .next not found"
-          ls -la "$GITHUB_WORKSPACE/frontend/user-app/.next" || echo "User App .next not found"
 
           echo "=== Running processes on ports 13000-13002 ==="
           lsof -i :13000 || echo "Port 13000 not listening"
