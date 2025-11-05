@@ -59,6 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
             // Laravel標準
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             // カスタムミドルウェア
+            \App\Http\Middleware\SetLocaleFromAcceptLanguage::class, // Accept-Language header → App::setLocale()
             \App\Http\Middleware\RequestLogging::class,
             \App\Http\Middleware\PerformanceMonitoring::class,
             \App\Http\Middleware\DynamicRateLimit::class.':api',
