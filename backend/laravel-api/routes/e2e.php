@@ -38,7 +38,7 @@ Route::get('/domain-exception', function () {
             return 'Domain Exception Test';
         }
     };
-})->middleware('api');
+});
 
 // Application Exception (404)
 Route::get('/application-exception', function () {
@@ -53,7 +53,7 @@ Route::get('/application-exception', function () {
             return 'Application Exception Test';
         }
     };
-})->middleware('api');
+});
 
 // Infrastructure Exception (503)
 Route::get('/infrastructure-exception', function () {
@@ -68,7 +68,7 @@ Route::get('/infrastructure-exception', function () {
             return 'Infrastructure Exception Test';
         }
     };
-})->middleware('api');
+});
 
 // Validation Error (422)
 Route::post('/validation', function (\Illuminate\Http\Request $request) {
@@ -79,17 +79,17 @@ Route::post('/validation', function (\Illuminate\Http\Request $request) {
     ]);
 
     return response()->json(['success' => true]);
-})->middleware('api');
+});
 
 // Authentication Error (401)
 Route::get('/auth-error', function () {
     throw new \Illuminate\Auth\AuthenticationException('Unauthenticated.');
-})->middleware('api');
+});
 
 // Generic 500 Error
 Route::get('/generic-exception', function () {
     throw new \RuntimeException('Test generic exception message');
-})->middleware('api');
+});
 
 // Simulate slow endpoint to trigger client timeout (ApiClient uses 30s timeout)
 Route::get('/timeout-endpoint', function () {
@@ -97,4 +97,4 @@ Route::get('/timeout-endpoint', function () {
     sleep(35);
 
     return response()->json(['status' => 'delayed']);
-})->middleware('api');
+});
