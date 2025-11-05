@@ -214,21 +214,23 @@ jobs:
           echo "Laravel API PID: $!"
 
           # Start Admin App (ポート13002 - production mode with `next start`)
-          (cd "$GITHUB_WORKSPACE/frontend/admin-app" && \
-          pwd > /tmp/admin-pwd.log && \
-          ls -la .next > /tmp/admin-next-check.log 2>&1 && \
-          PORT=13002 npx next start > /tmp/admin-app.log 2>&1) &
-          echo "Admin App PID: $!"
+          cd "$GITHUB_WORKSPACE/frontend/admin-app"
+          pwd > /tmp/admin-pwd.log
+          ls -la .next > /tmp/admin-next-check.log 2>&1
+          nohup env PORT=13002 npx next start > /tmp/admin-app.log 2>&1 &
+          ADMIN_PID=$!
+          echo "Admin App PID: $ADMIN_PID"
 
           # Start User App (ポート13001 - production mode with `next start`)
-          (cd "$GITHUB_WORKSPACE/frontend/user-app" && \
-          pwd > /tmp/user-pwd.log && \
-          ls -la .next > /tmp/user-next-check.log 2>&1 && \
-          PORT=13001 npx next start > /tmp/user-app.log 2>&1) &
-          echo "User App PID: $!"
+          cd "$GITHUB_WORKSPACE/frontend/user-app"
+          pwd > /tmp/user-pwd.log
+          ls -la .next > /tmp/user-next-check.log 2>&1
+          nohup env PORT=13001 npx next start > /tmp/user-app.log 2>&1 &
+          USER_PID=$!
+          echo "User App PID: $USER_PID"
 
           # プロセス起動待機（next start は起動確認が容易）
-          sleep 15
+          sleep 20
 
       - name: Debug - Check running processes
         run: |
