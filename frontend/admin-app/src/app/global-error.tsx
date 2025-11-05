@@ -33,8 +33,47 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   // 本番環境判定
   const isProduction = process.env.NODE_ENV === "production";
 
-  // ApiError の場合
+  // IMPORTANT: Reconstruct ApiError from error.cause if properties are missing
+  // This handles Next.js error serialization where custom properties are lost
+  let apiError: ApiError | null = null;
+
   if (error instanceof ApiError) {
+    // ApiError instance detected
+    if (error.title && error.status) {
+      // Properties intact - use as-is
+      apiError = error;
+    } else if (error.cause && typeof error.cause === "object") {
+      // ApiError instance but properties lost - reconstruct from cause
+      try {
+        apiError = new ApiError(error.cause);
+      } catch (e) {
+        console.error("Failed to reconstruct ApiError from cause:", e);
+        apiError = error; // Fallback to original even with undefined properties
+      }
+    } else {
+      // ApiError instance but no cause - use as-is (may have undefined properties)
+      apiError = error;
+    }
+  } else if (error.name === "ApiError" || error.constructor?.name === "ApiError") {
+    // Not instanceof but has ApiError name - try to reconstruct from cause
+    if (error.cause && typeof error.cause === "object") {
+      try {
+        apiError = new ApiError(error.cause);
+      } catch (e) {
+        console.error("Failed to reconstruct ApiError from name check:", e);
+      }
+    }
+  } else if (error.cause && typeof error.cause === "object" && "status" in error.cause) {
+    // Generic error with RFC 7807 data in cause
+    try {
+      apiError = new ApiError(error.cause);
+    } catch (e) {
+      console.error("Failed to reconstruct ApiError from generic cause:", e);
+    }
+  }
+
+  // ApiError の場合
+  if (apiError) {
     return (
       <html lang="ja">
         <body>
@@ -59,21 +98,21 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   </div>
                   <div className="ml-4">
                     <h2 className="text-lg font-semibold text-gray-900">
-                      {error.title || "エラーが発生しました"}
+                      {apiError.title || "エラーが発生しました"}
                     </h2>
-                    <p className="text-sm text-gray-500">ステータスコード: {error.status}</p>
+                    <p className="text-sm text-gray-500">ステータスコード: {apiError.status}</p>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <p className="mb-2 text-gray-700">{error.getDisplayMessage()}</p>
+                  <p className="mb-2 text-gray-700">{apiError.getDisplayMessage()}</p>
 
                   {/* バリデーションエラーの詳細表示 */}
-                  {error.validationErrors && (
+                  {apiError.validationErrors && (
                     <div className="mt-4 rounded-md bg-red-50 p-4">
                       <h3 className="mb-2 text-sm font-medium text-red-800">入力エラー:</h3>
                       <ul className="list-inside list-disc space-y-1">
-                        {Object.entries(error.validationErrors).map(([field, messages]) => (
+                        {Object.entries(apiError.validationErrors).map(([field, messages]) => (
                           <li key={field} className="text-sm text-red-700">
                             <span className="font-medium">{field}:</span> {messages.join(", ")}
                           </li>
@@ -86,7 +125,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   <div className="mt-4 rounded-md bg-gray-100 p-3">
                     <p className="text-xs text-gray-600">
                       <span className="font-medium">Request ID:</span>{" "}
-                      <code className="rounded bg-gray-200 px-2 py-1">{error.requestId}</code>
+                      <code className="rounded bg-gray-200 px-2 py-1">{apiError.requestId}</code>
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
                       お問い合わせの際は、このIDをお伝えください
@@ -94,18 +133,18 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   </div>
 
                   {/* 開発環境のみ：詳細情報表示 */}
-                  {!isProduction && error.debug && (
+                  {!isProduction && apiError.debug && (
                     <details className="mt-4 rounded-md bg-yellow-50 p-3">
                       <summary className="cursor-pointer text-sm font-medium text-yellow-800">
                         開発者向け情報（本番環境では非表示）
                       </summary>
                       <div className="mt-2 text-xs text-yellow-700">
                         <p>
-                          <span className="font-medium">Exception:</span> {error.debug.exception}
+                          <span className="font-medium">Exception:</span> {apiError.debug.exception}
                         </p>
                         <p>
-                          <span className="font-medium">File:</span> {error.debug.file}:
-                          {error.debug.line}
+                          <span className="font-medium">File:</span> {apiError.debug.file}:
+                          {apiError.debug.line}
                         </p>
                       </div>
                     </details>
