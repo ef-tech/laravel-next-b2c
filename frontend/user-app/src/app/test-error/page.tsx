@@ -110,6 +110,13 @@ export default function TestErrorPage() {
           Boundaryがトリガーされます。
         </p>
 
+        {/* Debug: Show API URL */}
+        <div className="mb-4 rounded-md bg-yellow-50 p-4">
+          <p className="text-sm text-yellow-800">
+            <strong>Debug - API URL:</strong> {API_BASE_URL}
+          </p>
+        </div>
+
         {loading && (
           <div className="mb-4 rounded-md bg-blue-50 p-4">
             <p className="text-blue-800">リクエスト中...</p>
