@@ -166,15 +166,25 @@ jobs:
       - name: Setup frontend environment files
         run: |
           # Create .env.local with correct API URLs for CI
+          # Note: Create in both app directories AND monorepo root for Turbopack workspace resolution
+
+          # Admin App .env.local
           echo "NEXT_PUBLIC_API_URL=http://localhost:13000" > frontend/admin-app/.env.local
           echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:13000" >> frontend/admin-app/.env.local
           echo "NEXT_PUBLIC_API_V1_BASE_URL=http://localhost:13000/api/v1" >> frontend/admin-app/.env.local
           echo "NODE_ENV=development" >> frontend/admin-app/.env.local
 
+          # User App .env.local
           echo "NEXT_PUBLIC_API_URL=http://localhost:13000" > frontend/user-app/.env.local
           echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:13000" >> frontend/user-app/.env.local
           echo "NEXT_PUBLIC_API_V1_BASE_URL=http://localhost:13000/api/v1" >> frontend/user-app/.env.local
           echo "NODE_ENV=development" >> frontend/user-app/.env.local
+
+          # Monorepo root .env.local (for Turbopack workspace root resolution)
+          echo "NEXT_PUBLIC_API_URL=http://localhost:13000" > .env.local
+          echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:13000" >> .env.local
+          echo "NEXT_PUBLIC_API_V1_BASE_URL=http://localhost:13000/api/v1" >> .env.local
+          echo "NODE_ENV=development" >> .env.local
 
       - name: Clear Laravel cache before starting server
         run: |
