@@ -209,6 +209,8 @@ jobs:
           (cd "$GITHUB_WORKSPACE/backend/laravel-api" && \
           pwd > /tmp/laravel-pwd.log && \
           ENV_VALIDATION_SKIP=true \
+          APP_ENV=testing \
+          E2E_TEST_ROUTES=true \
           DB_CONNECTION=pgsql \
           DB_HOST=127.0.0.1 \
           DB_PORT=13432 \
