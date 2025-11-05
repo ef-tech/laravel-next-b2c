@@ -33,6 +33,9 @@ test.describe('Error Handling E2E Tests', () => {
       // Wait for page to be fully rendered
       await expect(page.locator('[data-testid="trigger-400-error"]')).toBeVisible({ timeout: 30000 });
 
+      // Debug: Screenshot to verify API URL display
+      await page.screenshot({ path: 'test-results/debug-api-url.png', fullPage: true });
+
       // Act: 400 Domain Exceptionをトリガー
       await page.click('[data-testid="trigger-400-error"]');
 
