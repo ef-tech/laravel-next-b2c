@@ -87,6 +87,11 @@ export class ApiError extends Error implements AppError {
     this.validationErrors = problem.errors;
     this.debug = problem.debug;
 
+    // IMPORTANT: Store problem data in cause for Next.js Error Boundary serialization
+    // Next.js serializes Error.cause, allowing us to preserve custom properties
+    // across client-server boundaries
+    this.cause = problem;
+
     // Error.captureStackTraceが利用可能な場合はスタックトレースを設定
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, ApiError);

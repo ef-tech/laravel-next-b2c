@@ -95,13 +95,13 @@ export class NetworkError extends Error implements AppError {
    */
   getDisplayMessage(): string {
     if (this.isTimeout()) {
-      return "The request timed out. Please try again.";
+      return "リクエストがタイムアウトしました。しばらくしてから再度お試しください。";
     }
 
     if (this.isConnectionError()) {
-      return "Network connection error. Please check your internet connection and try again.";
+      return "ネットワーク接続に問題が発生しました。インターネット接続を確認して再度お試しください。";
     }
 
-    return "An unexpected error occurred. Please try again later.";
+    return "予期しないエラーが発生しました。しばらくしてから再度お試しください。";
   }
 }

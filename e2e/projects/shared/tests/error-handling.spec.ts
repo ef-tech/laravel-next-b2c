@@ -177,14 +177,14 @@ test.describe('Error Handling E2E Tests', () => {
   });
 
   // Task 11.3: 認証エラー（401）リダイレクトE2Eテスト
-  test.describe.skip('Authentication Error Redirect (Not Implemented)', () => {
-    // 注: ログインページがまだ実装されていないため、このテストはスキップします
-    // TODO: ログインページ実装後に有効化する
-
+  test.describe('Authentication Error Redirect', () => {
     test('401エラー発生時にログインページにリダイレクトされる', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
       const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
+
+      // Wait for page to be fully rendered
+      await expect(page.locator('[data-testid="trigger-401-error"]')).toBeVisible({ timeout: 30000 });
 
       // Act: 401 Authentication Errorをトリガー
       await page.click('[data-testid="trigger-401-error"]');
@@ -193,16 +193,27 @@ test.describe('Error Handling E2E Tests', () => {
       await expect(page).toHaveURL(/.*\/login/, { timeout: 30000 });
     });
 
-    test('認証エラーメッセージが表示される', async ({ page }) => {
+    test('リダイレクト時に元のURLがreturn_urlとして保存される', async ({ page }) => {
       // Arrange: テスト用エラーページに遷移
       const adminAppUrl = process.env.E2E_ADMIN_URL || 'http://localhost:13002';
       await page.goto(`${adminAppUrl}/test-error`, { waitUntil: 'networkidle', timeout: 90000 });
 
+      // Wait for page to be fully rendered
+      await expect(page.locator('[data-testid="trigger-401-error"]')).toBeVisible({ timeout: 30000 });
+
       // Act: 401 Authentication Errorをトリガー
       await page.click('[data-testid="trigger-401-error"]');
 
-      // Assert: 認証エラーメッセージが表示される
-      await expect(page.locator('text=認証が必要です')).toBeVisible({ timeout: 30000 });
+      // Assert: ログインページにリダイレクトされる
+      await expect(page).toHaveURL(/.*\/login/, { timeout: 30000 });
+
+      // Assert: return_urlクエリパラメータが設定されている
+      const url = new URL(page.url());
+      expect(url.searchParams.has('return_url')).toBeTruthy();
+
+      // Assert: return_urlに元のページパスが含まれている
+      const returnUrl = url.searchParams.get('return_url');
+      expect(returnUrl).toContain('/test-error');
     });
   });
 

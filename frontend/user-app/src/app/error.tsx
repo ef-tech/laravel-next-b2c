@@ -12,8 +12,8 @@
  */
 
 import { useEffect } from "react";
-import { ApiError } from "../../../lib/api-error";
-import { NetworkError } from "../../../lib/network-error";
+import { ApiError } from "@/lib/api-error";
+import { NetworkError } from "@/lib/network-error";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -24,13 +24,84 @@ export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // エラーをコンソールにログ出力（開発環境用）
     console.error("Error Boundary caught an error:", error);
+    console.error("Error name:", error.name);
+    console.error("Error instanceof ApiError:", error instanceof ApiError);
+    console.error("Error instanceof NetworkError:", error instanceof NetworkError);
+    console.error("Error constructor name:", error.constructor.name);
+
+    // ApiErrorのプロパティをログ出力
+    if (error instanceof ApiError) {
+      console.error("ApiError properties:", {
+        title: error.title,
+        status: error.status,
+        detail: error.detail,
+        requestId: error.requestId,
+        errorCode: error.errorCode,
+      });
+      console.error("ApiError toJSON():", error.toJSON());
+    }
+
+    // 401エラーの場合、ログインページにリダイレクト
+    // ApiErrorまたはerror.causeから401を検出
+    const is401Error =
+      (error instanceof ApiError && error.status === 401) ||
+      (error.cause &&
+        typeof error.cause === "object" &&
+        "status" in error.cause &&
+        error.cause.status === 401);
+
+    if (is401Error) {
+      console.log("401 Unauthorized detected - redirecting to login page");
+      // ログインページにリダイレクト（現在のURLをreturn_urlとして保存）
+      const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/login?return_url=${currentUrl}`;
+    }
   }, [error]);
 
   // 本番環境判定
   const isProduction = process.env.NODE_ENV === "production";
 
-  // ApiError の場合
+  // IMPORTANT: Reconstruct ApiError from error.cause if properties are missing
+  // This handles Next.js error serialization where custom properties are lost
+  let apiError: ApiError | null = null;
+
   if (error instanceof ApiError) {
+    // ApiError instance detected
+    if (error.title && error.status) {
+      // Properties intact - use as-is
+      apiError = error;
+    } else if (error.cause && typeof error.cause === "object") {
+      // ApiError instance but properties lost - reconstruct from cause
+      try {
+        apiError = new ApiError(error.cause as any);
+      } catch (e) {
+        console.error("Failed to reconstruct ApiError from cause:", e);
+        apiError = error; // Fallback to original even with undefined properties
+      }
+    } else {
+      // ApiError instance but no cause - use as-is (may have undefined properties)
+      apiError = error;
+    }
+  } else if (error.name === "ApiError" || error.constructor?.name === "ApiError") {
+    // Not instanceof but has ApiError name - try to reconstruct from cause
+    if (error.cause && typeof error.cause === "object") {
+      try {
+        apiError = new ApiError(error.cause as any);
+      } catch (e) {
+        console.error("Failed to reconstruct ApiError from name check:", e);
+      }
+    }
+  } else if (error.cause && typeof error.cause === "object" && "status" in error.cause) {
+    // Generic error with RFC 7807 data in cause
+    try {
+      apiError = new ApiError(error.cause as any);
+    } catch (e) {
+      console.error("Failed to reconstruct ApiError from generic cause:", e);
+    }
+  }
+
+  // ApiError の場合
+  if (apiError) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
@@ -52,22 +123,22 @@ export default function Error({ error, reset }: ErrorProps) {
                 </svg>
               </div>
               <div className="ml-4">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {error.title || "エラーが発生しました"}
-                </h2>
-                <p className="text-sm text-gray-500">ステータスコード: {error.status}</p>
+                <h2 className="text-lg font-semibold text-gray-900">エラーが発生しました</h2>
+                <p className="text-sm text-gray-500">ステータスコード: {apiError.status}</p>
               </div>
             </div>
 
             <div className="mb-4">
-              <p className="mb-2 text-gray-700">{error.getDisplayMessage()}</p>
+              {/* RFC 7807 Error Title */}
+              {apiError.title && <p className="mb-2 font-medium text-gray-900">{apiError.title}</p>}
+              <p className="mb-2 text-gray-700">{apiError.getDisplayMessage()}</p>
 
               {/* バリデーションエラーの詳細表示 */}
-              {error.validationErrors && (
+              {apiError.validationErrors && (
                 <div className="mt-4 rounded-md bg-red-50 p-4">
                   <h3 className="mb-2 text-sm font-medium text-red-800">入力エラー:</h3>
                   <ul className="list-inside list-disc space-y-1">
-                    {Object.entries(error.validationErrors).map(([field, messages]) => (
+                    {Object.entries(apiError.validationErrors).map(([field, messages]) => (
                       <li key={field} className="text-sm text-red-700">
                         <span className="font-medium">{field}:</span> {messages.join(", ")}
                       </li>
@@ -80,7 +151,7 @@ export default function Error({ error, reset }: ErrorProps) {
               <div className="mt-4 rounded-md bg-gray-100 p-3">
                 <p className="text-xs text-gray-600">
                   <span className="font-medium">Request ID:</span>{" "}
-                  <code className="rounded bg-gray-200 px-2 py-1">{error.requestId}</code>
+                  <code className="rounded bg-gray-200 px-2 py-1">{apiError.requestId}</code>
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   お問い合わせの際は、このIDをお伝えください
@@ -88,18 +159,18 @@ export default function Error({ error, reset }: ErrorProps) {
               </div>
 
               {/* 開発環境のみ：詳細情報表示 */}
-              {!isProduction && error.debug && (
+              {!isProduction && apiError.debug && (
                 <details className="mt-4 rounded-md bg-yellow-50 p-3">
                   <summary className="cursor-pointer text-sm font-medium text-yellow-800">
                     開発者向け情報（本番環境では非表示）
                   </summary>
                   <div className="mt-2 text-xs text-yellow-700">
                     <p>
-                      <span className="font-medium">Exception:</span> {error.debug.exception}
+                      <span className="font-medium">Exception:</span> {apiError.debug.exception}
                     </p>
                     <p>
-                      <span className="font-medium">File:</span> {error.debug.file}:
-                      {error.debug.line}
+                      <span className="font-medium">File:</span> {apiError.debug.file}:
+                      {apiError.debug.line}
                     </p>
                   </div>
                 </details>
@@ -184,6 +255,10 @@ export default function Error({ error, reset }: ErrorProps) {
   }
 
   // その他のエラー（汎用Error）
+  // digestがない場合、一意なIDを生成する
+  const errorId =
+    error.digest || `error-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
@@ -220,18 +295,16 @@ export default function Error({ error, reset }: ErrorProps) {
                 : error.message}
             </p>
 
-            {/* digest（Next.js Error ID）がある場合は表示 */}
-            {error.digest && (
-              <div className="mt-4 rounded-md bg-gray-100 p-3">
-                <p className="text-xs text-gray-600">
-                  <span className="font-medium">Error ID:</span>{" "}
-                  <code className="rounded bg-gray-200 px-2 py-1">{error.digest}</code>
-                </p>
-                <p className="mt-1 text-xs text-gray-500">
-                  お問い合わせの際は、このIDをお伝えください
-                </p>
-              </div>
-            )}
+            {/* Error ID表示（digest または生成したID） */}
+            <div className="mt-4 rounded-md bg-gray-100 p-3">
+              <p className="text-xs text-gray-600">
+                <span className="font-medium">Error ID:</span>{" "}
+                <code className="rounded bg-gray-200 px-2 py-1">{errorId}</code>
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                お問い合わせの際は、このIDをお伝えください
+              </p>
+            </div>
 
             {/* 開発環境のみ：スタックトレース表示 */}
             {!isProduction && error.stack && (

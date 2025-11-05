@@ -9,9 +9,9 @@
  * - 30秒タイムアウト管理
  */
 
-import { ApiError } from "./api-error";
-import { NetworkError } from "./network-error";
-import type { RFC7807Problem } from "../types/errors";
+import { ApiError } from "@/lib/api-error";
+import { NetworkError } from "@/lib/network-error";
+import type { RFC7807Problem } from "@/types/errors";
 
 /**
  * APIクライアントクラス
@@ -159,9 +159,11 @@ export class ApiClient {
       headers.set("Accept-Language", this.getBrowserLanguage());
     }
 
-    // Accept: application/problem+jsonヘッダーを設定
+    // Accept: application/jsonヘッダーを設定
+    // Laravel accepts both application/json and application/problem+json
+    // but requires at least application/json in the Accept header
     if (!headers.has("Accept")) {
-      headers.set("Accept", "application/problem+json");
+      headers.set("Accept", "application/json");
     }
 
     return headers;

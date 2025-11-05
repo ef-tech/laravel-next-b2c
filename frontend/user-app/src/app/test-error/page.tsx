@@ -12,27 +12,49 @@
  * 注意: このページは開発環境専用です
  */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ApiClient } from "@/lib/api-client";
+import { ApiError } from "@/lib/api-error";
+import { NetworkError } from "@/lib/network-error";
 
 // Force dynamic rendering to ensure environment variables are read at runtime
 export const dynamic = "force-dynamic";
 
 export default function TestErrorPage() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const errorRef = useRef<Error | null>(null);
 
   // Read API URL at runtime in component (not at module level)
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:13000";
 
   // エラーをスローしてError Boundaryをトリガー
-  if (error) {
-    throw error;
+  // Error.cause パターンにより、Next.jsが自動的に cause を保持します
+  if (hasError && errorRef.current) {
+    const err = errorRef.current;
+    console.error("=== test-error page: About to throw error ===");
+    console.error("Error type:", err.constructor.name);
+    console.error("Error instanceof ApiError:", err instanceof ApiError);
+
+    // ApiErrorの場合、プロパティ確認のためログ出力
+    if (err instanceof ApiError) {
+      console.error("ApiError properties:", {
+        title: err.title,
+        status: err.status,
+        requestId: err.requestId,
+        cause: err.cause,
+      });
+    }
+
+    // Error.cause パターンを使用しているため、単純に throw するだけで OK
+    // Error Boundary が error.cause から ApiError を再構築します
+    throw err;
   }
 
   const triggerError = async (errorType: string) => {
     setLoading(true);
-    setError(null);
+    setHasError(false);
+    errorRef.current = null;
 
     try {
       const client = new ApiClient(API_BASE_URL);
@@ -40,52 +62,64 @@ export default function TestErrorPage() {
       switch (errorType) {
         case "400-domain":
           // Domain Exception (400 Bad Request)
-          await client.request("/api/test/domain-exception", { method: "GET" });
+          await client.get("/api/test/domain-exception");
           break;
 
         case "404-application":
           // Application Exception (404 Not Found)
-          await client.request("/api/test/application-exception", { method: "GET" });
+          await client.get("/api/test/application-exception");
           break;
 
         case "503-infrastructure":
           // Infrastructure Exception (503 Service Unavailable)
-          await client.request("/api/test/infrastructure-exception", { method: "GET" });
+          await client.get("/api/test/infrastructure-exception");
           break;
 
         case "422-validation":
           // Validation Error (422 Unprocessable Entity)
-          await client.request("/api/test/validation", {
-            method: "POST",
-            body: JSON.stringify({
-              email: "invalid-email",
-              name: "ab", // min:3 validation error
-              // age is missing
-            }),
+          await client.post("/api/test/validation", {
+            email: "invalid-email",
+            name: "ab", // min:3 validation error
+            // age is missing
           });
           break;
 
         case "401-auth":
           // Authentication Error (401 Unauthorized)
-          await client.request("/api/test/auth-error", { method: "GET" });
+          await client.get("/api/test/auth-error");
           break;
 
         case "500-generic":
-          // Generic 500 Error
-          await client.request("/api/test/generic-exception", { method: "GET" });
+          // Generic 500 Error - throw plain Error (not ApiError)
+          // This simulates an unexpected error that is not structured as RFC 7807
+          throw new Error("Unexpected generic error occurred");
           break;
 
         case "network-timeout":
           // Network Timeout (AbortError)
-          // Note: Simplified for type safety - implement AbortController for actual timeout
-          await client.request("/api/test/timeout-endpoint", {
-            method: "GET",
-          });
+          try {
+            const controller = new AbortController();
+            // 100ms timeout - fetching non-existent endpoint ensures timeout occurs
+            const timeoutId = setTimeout(() => controller.abort(), 100);
+            // Use non-existent endpoint to ensure request doesn't complete before timeout
+            await fetch(`${API_BASE_URL}/api/slow-endpoint-that-does-not-exist`, {
+              signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
+          } catch (fetchErr) {
+            // Convert AbortError to NetworkError for proper Error Boundary handling
+            throw NetworkError.fromFetchError(fetchErr as Error);
+          }
           break;
 
         case "network-connection":
           // Network Connection Error (fetch to invalid URL)
-          await fetch("http://invalid-domain-for-test.example.com/api");
+          try {
+            await fetch("http://invalid-domain-for-test.example.com/api");
+          } catch (fetchErr) {
+            // Convert TypeError to NetworkError for proper Error Boundary handling
+            throw NetworkError.fromFetchError(fetchErr as Error);
+          }
           break;
 
         default:
@@ -94,10 +128,11 @@ export default function TestErrorPage() {
       // エラーが発生しなかった場合はloadingを解除
       setLoading(false);
     } catch (err) {
-      // エラーをキャプチャしてstateに保存
+      // エラーをキャプチャしてuseRefに保存（シリアライズを防ぐ）
       // 次のレンダリングで throw される
       setLoading(false);
-      setError(err as Error);
+      errorRef.current = err as Error;
+      setHasError(true);
     }
   };
 
