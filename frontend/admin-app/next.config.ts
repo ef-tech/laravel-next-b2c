@@ -65,10 +65,11 @@ try {
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: "standalone",
+  // Standalone mode disabled for E2E testing (use `next start` instead of `node server.js`)
+  // output: "standalone",
   // Monorepo環境でのNext.jsビルド警告を解消するために設定
   // "Warning: Next.js inferred your workspace root, but it may not be correct..."を回避
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  // outputFileTracingRoot: path.join(__dirname, "../../"),
 
   // セキュリティヘッダー設定（Admin App 用 - User App より厳格）
   async headers() {
