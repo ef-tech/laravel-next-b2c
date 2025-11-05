@@ -18,8 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // Load E2E test support routes only in non-production
             if (app()->environment(['local', 'testing']) || (bool) env('E2E_TEST_ROUTES', false)) {
-                // No prefix: mounted at "/test/*" with API middleware
-                Route::middleware('api')->group(base_path('routes/e2e.php'));
+                // Prefix /api/test: mounted at "/api/test/*" with API middleware
+                Route::prefix('api/test')
+                    ->middleware('api')
+                    ->group(base_path('routes/e2e.php'));
             }
         },
     )

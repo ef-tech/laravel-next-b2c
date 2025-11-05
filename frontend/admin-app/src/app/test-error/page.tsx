@@ -40,22 +40,22 @@ export default function TestErrorPage() {
       switch (errorType) {
         case "400-domain":
           // Domain Exception (400 Bad Request)
-          await client.request("/test/domain-exception", { method: "GET" });
+          await client.request("/api/test/domain-exception", { method: "GET" });
           break;
 
         case "404-application":
           // Application Exception (404 Not Found)
-          await client.request("/test/application-exception", { method: "GET" });
+          await client.request("/api/test/application-exception", { method: "GET" });
           break;
 
         case "503-infrastructure":
           // Infrastructure Exception (503 Service Unavailable)
-          await client.request("/test/infrastructure-exception", { method: "GET" });
+          await client.request("/api/test/infrastructure-exception", { method: "GET" });
           break;
 
         case "422-validation":
           // Validation Error (422 Unprocessable Entity)
-          await client.request("/test/validation", {
+          await client.request("/api/test/validation", {
             method: "POST",
             body: JSON.stringify({
               email: "invalid-email",
@@ -67,18 +67,18 @@ export default function TestErrorPage() {
 
         case "401-auth":
           // Authentication Error (401 Unauthorized)
-          await client.request("/test/auth-error", { method: "GET" });
+          await client.request("/api/test/auth-error", { method: "GET" });
           break;
 
         case "500-generic":
           // Generic 500 Error
-          await client.request("/test/generic-exception", { method: "GET" });
+          await client.request("/api/test/generic-exception", { method: "GET" });
           break;
 
         case "network-timeout":
           // Network Timeout (AbortError)
           // Note: Simplified for type safety - implement AbortController for actual timeout
-          await client.request("/test/timeout-endpoint", {
+          await client.request("/api/test/timeout-endpoint", {
             method: "GET",
           });
           break;
