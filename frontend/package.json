@@ -1,18 +1,16 @@
 {
   "name": "@laravel-next-b2c/frontend-shared",
   "version": "1.0.0",
-  "type": "commonjs",
-  "main": "./security-config.js",
+  "type": "module",
+  "main": "./security-config.cjs",
   "exports": {
     "./security-config": {
-      "import": "./security-config.js",
-      "require": "./security-config.js",
-      "default": "./security-config.js"
+      "require": "./security-config.cjs",
+      "default": "./security-config.cjs"
     },
-    "./security-config.js": {
-      "import": "./security-config.js",
-      "require": "./security-config.js",
-      "default": "./security-config.js"
+    "./security-config.cjs": {
+      "require": "./security-config.cjs",
+      "default": "./security-config.cjs"
     }
   }
 }
