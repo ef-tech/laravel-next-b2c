@@ -51,7 +51,7 @@ export default function Error({ error, reset }: ErrorProps) {
         error.cause.status === 401);
 
     if (is401Error) {
-      console.log("401 Unauthorized detected - redirecting to login page");
+      console.error("401 Unauthorized detected - redirecting to login page");
       // ログインページにリダイレクト（現在のURLをreturn_urlとして保存）
       const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
       window.location.href = `/login?return_url=${currentUrl}`;
@@ -73,7 +73,7 @@ export default function Error({ error, reset }: ErrorProps) {
     } else if (error.cause && typeof error.cause === "object") {
       // ApiError instance but properties lost - reconstruct from cause
       try {
-        apiError = new ApiError(error.cause as any);
+        apiError = new ApiError(error.cause);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from cause:", e);
         apiError = error; // Fallback to original even with undefined properties
@@ -86,7 +86,7 @@ export default function Error({ error, reset }: ErrorProps) {
     // Not instanceof but has ApiError name - try to reconstruct from cause
     if (error.cause && typeof error.cause === "object") {
       try {
-        apiError = new ApiError(error.cause as any);
+        apiError = new ApiError(error.cause);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from name check:", e);
       }
@@ -94,7 +94,7 @@ export default function Error({ error, reset }: ErrorProps) {
   } else if (error.cause && typeof error.cause === "object" && "status" in error.cause) {
     // Generic error with RFC 7807 data in cause
     try {
-      apiError = new ApiError(error.cause as any);
+      apiError = new ApiError(error.cause);
     } catch (e) {
       console.error("Failed to reconstruct ApiError from generic cause:", e);
     }
