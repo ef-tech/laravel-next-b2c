@@ -18,11 +18,12 @@ import { ApiClient } from "@/lib/api-client";
 // Force dynamic rendering to ensure environment variables are read at runtime
 export const dynamic = "force-dynamic";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:13000";
-
 export default function TestErrorPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // Read API URL at runtime in component (not at module level)
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:13000";
 
   // エラーをスローしてError Boundaryをトリガー
   if (error) {
