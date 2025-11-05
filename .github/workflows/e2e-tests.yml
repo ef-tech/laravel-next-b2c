@@ -182,10 +182,6 @@ jobs:
       # Security Headers tests also use development mode successfully
 
       - name: Start services
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:13000
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:13000
-          NEXT_PUBLIC_API_V1_BASE_URL: http://localhost:13000/api/v1
         run: |
           echo "=== Current directory before starting services ==="
           pwd
@@ -208,16 +204,22 @@ jobs:
           php artisan serve --host=0.0.0.0 --port=13000 > /tmp/laravel.log 2>&1) &
           echo "Laravel API PID: $!"
 
-          # Start Admin App (ポート13002 - development mode)
+          # Start Admin App (ポート13002 - development mode with env vars)
           cd "$GITHUB_WORKSPACE/frontend/admin-app"
           pwd > /tmp/admin-pwd.log
+          NEXT_PUBLIC_API_URL=http://localhost:13000 \
+          NEXT_PUBLIC_API_BASE_URL=http://localhost:13000 \
+          NEXT_PUBLIC_API_V1_BASE_URL=http://localhost:13000/api/v1 \
           nohup npx next dev --turbopack --port 13002 > /tmp/admin-app.log 2>&1 &
           ADMIN_PID=$!
           echo "Admin App PID: $ADMIN_PID"
 
-          # Start User App (ポート13001 - development mode)
+          # Start User App (ポート13001 - development mode with env vars)
           cd "$GITHUB_WORKSPACE/frontend/user-app"
           pwd > /tmp/user-pwd.log
+          NEXT_PUBLIC_API_URL=http://localhost:13000 \
+          NEXT_PUBLIC_API_BASE_URL=http://localhost:13000 \
+          NEXT_PUBLIC_API_V1_BASE_URL=http://localhost:13000/api/v1 \
           nohup npx next dev --turbopack --port 13001 > /tmp/user-app.log 2>&1 &
           USER_PID=$!
           echo "User App PID: $USER_PID"
