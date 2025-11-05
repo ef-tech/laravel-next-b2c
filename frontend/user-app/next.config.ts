@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import path from "path";
+// import path from "path"; // Unused when output: "standalone" is disabled
 
 // Type definitions for security config
 interface CSPConfig {
