@@ -230,12 +230,7 @@ ${codes.map(code => {
      */
     public static function fromString(string $code): ?self
     {
-        return match ($code) {
-${codes.map(code => {
-  return `            '${code}' => self::${code.replace(/-/g, '_')},`;
-}).join('\n')}
-            default => null,
-        };
+        return self::tryFrom($code);
     }
 }
 `;
