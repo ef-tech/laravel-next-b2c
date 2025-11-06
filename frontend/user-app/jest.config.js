@@ -15,6 +15,9 @@ const customJestConfig = {
     // Security config module resolution for Jest
     "^\\.\\./security-config$": "<rootDir>/../security-config.ts",
   },
+  transformIgnorePatterns: [
+    "node_modules/(?!(msw|@mswjs|until-async|next-intl|use-intl|.*\\.mjs$))",
+  ],
   collectCoverageFrom: [
     "src/**/*.{ts,tsx,js,jsx}",
     "!src/**/*.d.ts",
@@ -22,7 +25,6 @@ const customJestConfig = {
     "!src/**/index.{ts,tsx}",
     "!src/app/layout.tsx",
     "!src/app/page.tsx",
-    "!src/app/error.tsx",
     "!src/app/global-error.tsx",
     "!src/app/test-error/**",
     "!src/types/error-codes.ts",

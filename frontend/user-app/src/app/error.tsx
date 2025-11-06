@@ -241,7 +241,7 @@ export default function Error({ error, reset }: ErrorProps) {
             </div>
 
             <div className="mb-4">
-              <p className="mb-2 text-gray-700">{error.getDisplayMessage()}</p>
+              <p className="mb-2 text-gray-700">{error.getDisplayMessage(t)}</p>
 
               {error.isRetryable && (
                 <div className="mt-4 rounded-md bg-blue-50 p-3">
