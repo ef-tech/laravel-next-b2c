@@ -16,6 +16,7 @@ export default createMiddleware({
   locales: i18nConfig.locales,
   defaultLocale: i18nConfig.defaultLocale,
   localeDetection: true, // Enable Accept-Language detection
+  localePrefix: "always", // Always add locale prefix to URLs (enables cookie setting)
 });
 
 export const config = {
