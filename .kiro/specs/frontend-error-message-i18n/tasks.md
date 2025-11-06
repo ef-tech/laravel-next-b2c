@@ -88,15 +88,15 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 2: NetworkError多言語化
 
-- [ ] 4. NetworkErrorクラスの多言語化対応
-- [ ] 4.1 getDisplayMessage()メソッドのシグネチャを拡張する
+- [x] 4. NetworkErrorクラスの多言語化対応
+- [x] 4.1 getDisplayMessage()メソッドのシグネチャを拡張する
   - オプショナル引数t（翻訳関数）を追加
   - 引数なしでも動作する後方互換性を維持
   - 引数あり時に翻訳キーから翻訳メッセージを取得
   - 引数なし時に既存のハードコード日本語メッセージを返却
   - _要件: REQ-2.1、REQ-2.2、REQ-10.1、REQ-10.2_
 
-- [ ] 4.2 エラー種別ごとの翻訳キーマッピングを実装する
+- [x] 4.2 エラー種別ごとの翻訳キーマッピングを実装する
   - タイムアウトエラーの翻訳キー（network.timeout）
   - 接続エラーの翻訳キー（network.connection）
   - 不明なエラーの翻訳キー（network.unknown）
