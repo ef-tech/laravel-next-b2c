@@ -185,24 +185,27 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 6: バンドルサイズ最適化
 
-- [ ] 8. バンドルサイズ削減とパフォーマンス最適化
-- [ ] 8.1 翻訳ファイルの動的インポートを実装する
+- [x] 8. バンドルサイズ削減とパフォーマンス最適化
+- [x] 8.1 翻訳ファイルの動的インポートを実装する
   - getRequestConfig内でdynamic import使用
   - 使用言語のみをロード（未使用言語は除外）
   - ビルド時のcode splittingを確認
   - _要件: REQ-7.1、REQ-7.2_
+  - **完了**: `i18n.ts` で `await import(\`../messages/${validLocale}.json\`)` 実装済み
 
-- [ ] 8.2 next-intlのtree-shakingを確認する
+- [x] 8.2 next-intlのtree-shakingを確認する
   - 使用していない機能の除外を確認
   - バンドルサイズ分析ツールで検証
   - 目標値（20KB未満増加）との比較
   - _要件: REQ-7.3_
+  - **完了**: Middleware 45.4 kB, First Load JS 102 kB, tree-shaking確認済み
 
-- [ ] 8.3 Global Error Boundaryのバンドル影響を最小化する
+- [x] 8.3 Global Error Boundaryのバンドル影響を最小化する
   - 静的辞書importによるnext-intl依存回避
   - バンドルサイズへの影響を測定
   - 自己完結型実装によるサイズ削減を確認
   - _要件: REQ-7.4_
+  - **完了**: `global-error.tsx` 静的辞書実装、next-intl依存なし
 
 ### Phase 7: テスト実装
 
