@@ -2,6 +2,7 @@ module.exports = {
   projects: [
     '<rootDir>/frontend/admin-app',
     '<rootDir>/frontend/user-app',
+    '<rootDir>/frontend/lib',
     '<rootDir>/scripts',
   ],
   // Root-level reporters configuration for all projects

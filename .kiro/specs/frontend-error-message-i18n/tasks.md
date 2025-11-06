@@ -209,21 +209,21 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 7: テスト実装
 
-- [ ] 9. NetworkError Unit Testsの実装
-- [ ] 9.1 後方互換性テストを実装する
+- [x] 9. NetworkError Unit Testsの実装
+- [x] 9.1 後方互換性テストを実装する
   - 引数なしでgetDisplayMessage()を呼び出し
   - 日本語ハードコードメッセージが返却されることを確認
   - タイムアウト、接続エラー、不明なエラーの全パターンをテスト
   - _要件: REQ-8.1、REQ-10.4_
 
-- [ ] 9.2 i18n有効化時のテストを実装する
+- [x] 9.2 i18n有効化時のテストを実装する
   - モック翻訳関数を作成
   - getDisplayMessage(mockT)で翻訳メッセージが返却されることを確認
   - タイムアウト、接続エラー、不明なエラーの全パターンをテスト
   - 翻訳キーの正確性を検証
   - _要件: REQ-8.1_
 
-- [ ] 9.3 NetworkError Unit Tests 100%カバレッジを達成する
+- [x] 9.3 NetworkError Unit Tests 100%カバレッジを達成する
   - 全ブランチ（if文、switch文）をカバー
   - エッジケース（null、undefined、空文字列）をテスト
   - カバレッジレポートを生成して100%確認
