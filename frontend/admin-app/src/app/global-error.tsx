@@ -10,14 +10,116 @@
  * - Request ID（trace_id）をユーザーに提示
  * - reset()による再試行機能
  * - 本番環境では内部エラー詳細をマスク
+ * - i18n対応（静的辞書による多言語化）
  *
  * Note: global-error.tsx must include <html> and <body> tags
  * because it replaces the root layout when activated.
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ApiError } from "../../../lib/api-error";
 import { NetworkError } from "../../../lib/network-error";
+
+/**
+ * 静的メッセージ辞書（ja、en）
+ * global-error.tsxではnext-intlが使用できないため、独自の辞書を定義
+ */
+const messages = {
+  ja: {
+    network: {
+      timeout: "リクエストがタイムアウトしました。しばらくしてから再度お試しください。",
+      connection:
+        "ネットワーク接続に問題が発生しました。インターネット接続を確認して再度お試しください。",
+      unknown: "予期しないエラーが発生しました。しばらくしてから再度お試しください。",
+    },
+    boundary: {
+      title: "エラーが発生しました",
+      retry: "再試行",
+      home: "ホームに戻る",
+      status: "ステータスコード",
+      requestId: "Request ID",
+      networkError: "ネットワークエラー",
+      timeout: "タイムアウト",
+      connectionError: "接続エラー",
+      retryableMessage: "このエラーは再試行可能です。しばらくしてから再度お試しください。",
+    },
+    validation: {
+      title: "入力エラー",
+    },
+    global: {
+      title: "予期しないエラーが発生しました",
+      retry: "再試行",
+      errorId: "Error ID",
+      contactMessage: "お問い合わせの際は、このIDをお伝えください",
+    },
+  },
+  en: {
+    network: {
+      timeout: "The request timed out. Please try again later.",
+      connection:
+        "A network connection problem occurred. Please check your internet connection and try again.",
+      unknown: "An unexpected error occurred. Please try again later.",
+    },
+    boundary: {
+      title: "An error occurred",
+      retry: "Retry",
+      home: "Go to Home",
+      status: "Status Code",
+      requestId: "Request ID",
+      networkError: "Network Error",
+      timeout: "Timeout",
+      connectionError: "Connection Error",
+      retryableMessage: "This error is retryable. Please try again later.",
+    },
+    validation: {
+      title: "Validation Errors",
+    },
+    global: {
+      title: "An unexpected error occurred",
+      retry: "Retry",
+      errorId: "Error ID",
+      contactMessage: "Please provide this ID when contacting support",
+    },
+  },
+} as const;
+
+type Locale = keyof typeof messages;
+
+/**
+ * ブラウザロケールを検出
+ * 1. document.documentElement.lang をチェック
+ * 2. navigator.languages をチェック
+ * 3. デフォルトは 'ja'
+ */
+const detectLocale = (): Locale => {
+  if (typeof window === "undefined") {
+    return "ja";
+  }
+
+  // 1. document.documentElement.lang をチェック
+  const htmlLang = document.documentElement.lang;
+  if (htmlLang && htmlLang.startsWith("en")) {
+    return "en";
+  }
+  if (htmlLang && htmlLang.startsWith("ja")) {
+    return "ja";
+  }
+
+  // 2. navigator.languages をチェック
+  if (navigator.languages) {
+    for (const lang of navigator.languages) {
+      if (lang.startsWith("en")) {
+        return "en";
+      }
+      if (lang.startsWith("ja")) {
+        return "ja";
+      }
+    }
+  }
+
+  // 3. デフォルトは 'ja'
+  return "ja";
+};
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -25,13 +127,22 @@ interface GlobalErrorProps {
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
+  // ロケール状態管理
+  const [locale, setLocale] = useState<Locale>("ja");
+
   useEffect(() => {
     // エラーをコンソールにログ出力（開発環境用）
     console.error("Global Error Boundary caught an error:", error);
+
+    // ロケールを検出して設定
+    setLocale(detectLocale());
   }, [error]);
 
   // 本番環境判定
   const isProduction = process.env.NODE_ENV === "production";
+
+  // 翻訳関数（メッセージ辞書から取得）
+  const t = messages[locale];
 
   // IMPORTANT: Reconstruct ApiError from error.cause if properties are missing
   // This handles Next.js error serialization where custom properties are lost
@@ -75,7 +186,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   // ApiError の場合
   if (apiError) {
     return (
-      <html lang="ja">
+      <html lang={locale}>
         <body>
           <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-8">
@@ -98,9 +209,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   </div>
                   <div className="ml-4">
                     <h2 className="text-lg font-semibold text-gray-900">
-                      {apiError.title || "エラーが発生しました"}
+                      {apiError.title || t.boundary.title}
                     </h2>
-                    <p className="text-sm text-gray-500">ステータスコード: {apiError.status}</p>
+                    <p className="text-sm text-gray-500">
+                      {t.boundary.status}: {apiError.status}
+                    </p>
                   </div>
                 </div>
 
@@ -110,7 +223,9 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   {/* バリデーションエラーの詳細表示 */}
                   {apiError.validationErrors && (
                     <div className="mt-4 rounded-md bg-red-50 p-4">
-                      <h3 className="mb-2 text-sm font-medium text-red-800">入力エラー:</h3>
+                      <h3 className="mb-2 text-sm font-medium text-red-800">
+                        {t.validation.title}:
+                      </h3>
                       <ul className="list-inside list-disc space-y-1">
                         {Object.entries(apiError.validationErrors).map(([field, messages]) => (
                           <li key={field} className="text-sm text-red-700">
@@ -124,12 +239,10 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   {/* Request ID（trace_id）表示 */}
                   <div className="mt-4 rounded-md bg-gray-100 p-3">
                     <p className="text-xs text-gray-600">
-                      <span className="font-medium">Request ID:</span>{" "}
+                      <span className="font-medium">{t.boundary.requestId}:</span>{" "}
                       <code className="rounded bg-gray-200 px-2 py-1">{apiError.requestId}</code>
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      お問い合わせの際は、このIDをお伝えください
-                    </p>
+                    <p className="mt-1 text-xs text-gray-500">{t.global.contactMessage}</p>
                   </div>
 
                   {/* 開発環境のみ：詳細情報表示 */}
@@ -155,7 +268,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   onClick={reset}
                   className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 >
-                  再試行
+                  {t.boundary.retry}
                 </button>
               </div>
             </div>
@@ -168,7 +281,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   // NetworkError の場合
   if (error instanceof NetworkError) {
     return (
-      <html lang="ja">
+      <html lang={locale}>
         <body>
           <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-8">
@@ -190,13 +303,15 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <h2 className="text-lg font-semibold text-gray-900">ネットワークエラー</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      {t.boundary.networkError}
+                    </h2>
                     <p className="text-sm text-gray-500">
                       {error.isTimeout()
-                        ? "タイムアウト"
+                        ? t.boundary.timeout
                         : error.isConnectionError()
-                          ? "接続エラー"
-                          : "ネットワークエラー"}
+                          ? t.boundary.connectionError
+                          : t.boundary.networkError}
                     </p>
                   </div>
                 </div>
@@ -218,7 +333,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                             clipRule="evenodd"
                           />
                         </svg>
-                        このエラーは再試行可能です。しばらくしてから再度お試しください。
+                        {t.boundary.retryableMessage}
                       </p>
                     </div>
                   )}
@@ -228,7 +343,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   onClick={reset}
                   className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 >
-                  再試行
+                  {t.boundary.retry}
                 </button>
               </div>
             </div>
@@ -240,7 +355,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
   // その他のエラー（汎用Error）
   return (
-    <html lang="ja">
+    <html lang={locale}>
       <body>
         <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
           <div className="w-full max-w-md space-y-8">
@@ -262,9 +377,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    予期しないエラーが発生しました
-                  </h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t.global.title}</h2>
                   <p className="text-sm text-gray-500">{error.name}</p>
                 </div>
               </div>
@@ -272,21 +385,17 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               <div className="mb-4">
                 {/* 本番環境ではエラーメッセージをマスク */}
                 <p className="mb-2 text-gray-700">
-                  {isProduction
-                    ? "申し訳ございませんが、エラーが発生しました。しばらくしてから再度お試しください。"
-                    : error.message}
+                  {isProduction ? t.network.unknown : error.message}
                 </p>
 
                 {/* digest（Next.js Error ID）がある場合は表示 */}
                 {error.digest && (
                   <div className="mt-4 rounded-md bg-gray-100 p-3">
                     <p className="text-xs text-gray-600">
-                      <span className="font-medium">Error ID:</span>{" "}
+                      <span className="font-medium">{t.global.errorId}:</span>{" "}
                       <code className="rounded bg-gray-200 px-2 py-1">{error.digest}</code>
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      お問い合わせの際は、このIDをお伝えください
-                    </p>
+                    <p className="mt-1 text-xs text-gray-500">{t.global.contactMessage}</p>
                   </div>
                 )}
 
@@ -307,7 +416,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 onClick={reset}
                 className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
               >
-                再試行
+                {t.global.retry}
               </button>
             </div>
           </div>
