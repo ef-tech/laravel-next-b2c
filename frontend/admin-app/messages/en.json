@@ -1,0 +1,25 @@
+{
+  "errors": {
+    "network": {
+      "timeout": "The request timed out. Please try again later.",
+      "connection": "A network connection problem occurred. Please check your internet connection and try again.",
+      "unknown": "An unexpected error occurred. Please try again later."
+    },
+    "boundary": {
+      "title": "An error occurred",
+      "retry": "Retry",
+      "home": "Go to Home",
+      "status": "Status Code",
+      "requestId": "Request ID"
+    },
+    "validation": {
+      "title": "Validation Errors"
+    },
+    "global": {
+      "title": "An unexpected error occurred",
+      "retry": "Retry",
+      "errorId": "Error ID",
+      "contactMessage": "Please provide this ID when contacting support"
+    }
+  }
+}

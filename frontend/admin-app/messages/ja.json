@@ -1,0 +1,25 @@
+{
+  "errors": {
+    "network": {
+      "timeout": "リクエストがタイムアウトしました。しばらくしてから再度お試しください。",
+      "connection": "ネットワーク接続に問題が発生しました。インターネット接続を確認して再度お試しください。",
+      "unknown": "予期しないエラーが発生しました。しばらくしてから再度お試しください。"
+    },
+    "boundary": {
+      "title": "エラーが発生しました",
+      "retry": "再試行",
+      "home": "ホームに戻る",
+      "status": "ステータスコード",
+      "requestId": "Request ID"
+    },
+    "validation": {
+      "title": "入力エラー"
+    },
+    "global": {
+      "title": "予期しないエラーが発生しました",
+      "retry": "再試行",
+      "errorId": "Error ID",
+      "contactMessage": "お問い合わせの際は、このIDをお伝えください"
+    }
+  }
+}

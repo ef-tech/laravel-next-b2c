@@ -33,22 +33,22 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - TypeScript型定義（Locale型）を作成
   - _要件: REQ-1.3、REQ-1.6_
 
-- [ ] 2. 翻訳リソースファイルの作成と管理
-- [ ] 2.1 User App用翻訳ファイルを作成する
+- [x] 2. 翻訳リソースファイルの作成と管理
+- [x] 2.1 User App用翻訳ファイルを作成する
   - messagesディレクトリを作成
   - ja.jsonファイルを作成（日本語翻訳リソース）
   - en.jsonファイルを作成（英語翻訳リソース）
   - エラーメッセージ階層構造を定義（errors.network, errors.boundary, errors.validation, errors.global）
   - _要件: REQ-1.2、REQ-6.1、REQ-6.2_
 
-- [ ] 2.2 Admin App用翻訳ファイルを作成する
+- [x] 2.2 Admin App用翻訳ファイルを作成する
   - messagesディレクトリを作成
   - ja.jsonファイルを作成（日本語翻訳リソース）
   - en.jsonファイルを作成（英語翻訳リソース）
   - エラーメッセージ階層構造を定義（User Appと同一構造）
   - _要件: REQ-1.2、REQ-6.1、REQ-6.2_
 
-- [ ] 2.3 翻訳キーのTypeScript型定義を作成する
+- [x] 2.3 翻訳キーのTypeScript型定義を作成する
   - MessagesインターフェースをTypeScriptで定義
   - next-intlのIntlMessages型拡張
   - 型安全な翻訳キー参照を実現
