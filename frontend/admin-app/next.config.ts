@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 // import path from "path"; // Unused when output: "standalone" is disabled
+
+const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
 // Type definitions for security config
 interface CSPConfig {
@@ -125,4 +128,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
