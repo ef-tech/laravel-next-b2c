@@ -13,8 +13,10 @@
  */
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ApiError } from "@/lib/api-error";
+import type { RFC7807Problem } from "@/types/errors";
 import { NetworkError } from "@/lib/network-error";
 
 interface ErrorProps {
@@ -77,7 +79,7 @@ export default function Error({ error, reset }: ErrorProps) {
     } else if (error.cause && typeof error.cause === "object") {
       // ApiError instance but properties lost - reconstruct from cause
       try {
-        apiError = new ApiError(error.cause);
+        apiError = new ApiError(error.cause as RFC7807Problem);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from cause:", e);
         apiError = error; // Fallback to original even with undefined properties
@@ -90,7 +92,7 @@ export default function Error({ error, reset }: ErrorProps) {
     // Not instanceof but has ApiError name - try to reconstruct from cause
     if (error.cause && typeof error.cause === "object") {
       try {
-        apiError = new ApiError(error.cause);
+        apiError = new ApiError(error.cause as RFC7807Problem);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from name check:", e);
       }
@@ -98,7 +100,7 @@ export default function Error({ error, reset }: ErrorProps) {
   } else if (error.cause && typeof error.cause === "object" && "status" in error.cause) {
     // Generic error with RFC 7807 data in cause
     try {
-      apiError = new ApiError(error.cause);
+      apiError = new ApiError(error.cause as RFC7807Problem);
     } catch (e) {
       console.error("Failed to reconstruct ApiError from generic cause:", e);
     }
@@ -189,12 +191,12 @@ export default function Error({ error, reset }: ErrorProps) {
               >
                 {t("boundary.retry")}
               </button>
-              <a
+              <Link
                 href="/"
                 className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
               >
                 {t("boundary.home")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -239,7 +241,7 @@ export default function Error({ error, reset }: ErrorProps) {
             </div>
 
             <div className="mb-4">
-              <p className="mb-2 text-gray-700">{error.getDisplayMessage(t)}</p>
+              <p className="mb-2 text-gray-700">{error.getDisplayMessage()}</p>
 
               {error.isRetryable && (
                 <div className="mt-4 rounded-md bg-blue-50 p-3">
@@ -264,12 +266,12 @@ export default function Error({ error, reset }: ErrorProps) {
               >
                 {t("boundary.retry")}
               </button>
-              <a
+              <Link
                 href="/"
                 className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
               >
                 {t("boundary.home")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -341,12 +343,12 @@ export default function Error({ error, reset }: ErrorProps) {
             >
               {t("global.retry")}
             </button>
-            <a
+            <Link
               href="/"
               className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
             >
               {t("boundary.home")}
-            </a>
+            </Link>
           </div>
         </div>
       </div>

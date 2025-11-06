@@ -18,6 +18,7 @@
 
 import { useEffect, useState } from "react";
 import { ApiError } from "../../../lib/api-error";
+import type { RFC7807Problem } from "../../../types/errors";
 import { NetworkError } from "../../../lib/network-error";
 
 /**
@@ -156,7 +157,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     } else if (error.cause && typeof error.cause === "object") {
       // ApiError instance but properties lost - reconstruct from cause
       try {
-        apiError = new ApiError(error.cause);
+        apiError = new ApiError(error.cause as RFC7807Problem);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from cause:", e);
         apiError = error; // Fallback to original even with undefined properties
@@ -169,7 +170,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     // Not instanceof but has ApiError name - try to reconstruct from cause
     if (error.cause && typeof error.cause === "object") {
       try {
-        apiError = new ApiError(error.cause);
+        apiError = new ApiError(error.cause as RFC7807Problem);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from name check:", e);
       }
@@ -177,7 +178,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   } else if (error.cause && typeof error.cause === "object" && "status" in error.cause) {
     // Generic error with RFC 7807 data in cause
     try {
-      apiError = new ApiError(error.cause);
+      apiError = new ApiError(error.cause as RFC7807Problem);
     } catch (e) {
       console.error("Failed to reconstruct ApiError from generic cause:", e);
     }

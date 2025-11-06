@@ -6,6 +6,9 @@
 
 import type { AppError, RFC7807Problem } from '../types/errors';
 
+// Re-export RFC7807Problem for convenience
+export type { RFC7807Problem };
+
 /**
  * APIエラークラス
  *
