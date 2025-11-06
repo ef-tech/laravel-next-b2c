@@ -91,17 +91,32 @@ export class NetworkError extends Error implements AppError {
   /**
    * ユーザー向け表示メッセージを取得する
    *
+   * @param t - Optional translation function from useTranslations()
    * @returns ユーザー向け表示メッセージ
    */
-  getDisplayMessage(): string {
+  getDisplayMessage(t?: any): string {
+    // Backward compatibility: return hardcoded Japanese messages when t is not provided
+    if (!t) {
+      if (this.isTimeout()) {
+        return "リクエストがタイムアウトしました。しばらくしてから再度お試しください。";
+      }
+
+      if (this.isConnectionError()) {
+        return "ネットワーク接続に問題が発生しました。インターネット接続を確認して再度お試しください。";
+      }
+
+      return "予期しないエラーが発生しました。しばらくしてから再度お試しください。";
+    }
+
+    // i18n-enabled path: use translation keys
     if (this.isTimeout()) {
-      return "リクエストがタイムアウトしました。しばらくしてから再度お試しください。";
+      return t("network.timeout");
     }
 
     if (this.isConnectionError()) {
-      return "ネットワーク接続に問題が発生しました。インターネット接続を確認して再度お試しください。";
+      return t("network.connection");
     }
 
-    return "予期しないエラーが発生しました。しばらくしてから再度お試しください。";
+    return t("network.unknown");
   }
 }

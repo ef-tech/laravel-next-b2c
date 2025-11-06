@@ -1,9 +1,8 @@
 /**
- * Error Boundary Component Tests (User App)
+ * Error Boundary Component Tests (Admin App)
  *
  * Task 10: Error Boundary Component Testsの実装
- * - Task 10.1: User App Error Boundary日本語ロケールテスト実装
- * - Task 10.2: User App Error Boundary英語ロケールテスト実装
+ * - Task 10.3: Admin App Error Boundaryテスト実装（日本語・英語両ロケール）
  *
  * Requirements:
  * - REQ-8.3: Error Boundary i18n tests with NextIntlClientProvider
@@ -87,7 +86,7 @@ const messagesEn = {
   },
 };
 
-describe("Error Boundary (User App)", () => {
+describe("Error Boundary (Admin App)", () => {
   const mockReset = jest.fn();
 
   beforeEach(() => {
