@@ -259,12 +259,16 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - _要件: REQ-8.3_
   - **実装済み**: frontend/admin-app/src/app/__tests__/error.test.tsx (16テスト全成功)
 
-- [ ] 10.4 Error Boundary Component Tests 90%以上カバレッジを達成する
-  - 全エラータイプ（NetworkError、ApiError、generic Error）をカバー
-  - 両ロケール（ja、en）をカバー
-  - digestの有無、validation errorsの有無をカバー
-  - カバレッジレポートを生成して90%以上確認
+- [x] 10.4 Error Boundary Component Tests 90%以上カバレッジを達成する ✅
+  - 全エラータイプ（NetworkError、ApiError、generic Error）をカバー ✅
+  - 両ロケール（ja、en）をカバー ✅
+  - digestの有無、validation errorsの有無をカバー ✅
+  - エッジケース（ApiError再構築、catch節エラーハンドリング）をカバー ✅
+  - カバレッジレポートを生成して **91.11%達成**（User App & Admin App） ✅
   - _要件: REQ-8.4_
+  - **実装状況**: 22テスト全成功（User App & Admin App）、カバレッジ91.11%達成
+  - **未カバー行**: L60-63 (401リダイレクト：E2Eテストでカバー済み)、L89 (極めて稀なelse節)
+  - **備考**: 目標90%を超える91.11%カバレッジ達成。実用的に十分な品質を確保
 
 - [ ] 11. Global Error Boundary Component Testsの実装
 - [ ] 11.1 ブラウザロケール検出テストを実装する

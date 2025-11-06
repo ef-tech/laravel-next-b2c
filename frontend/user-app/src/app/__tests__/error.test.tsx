@@ -94,9 +94,16 @@ describe("Error Boundary (User App)", () => {
     mockReset.mockClear();
     // Suppress console.error for cleaner test output
     jest.spyOn(console, "error").mockImplementation(() => {});
-    // Mock window.location.href to prevent actual redirects in tests
+    // Mock window.location to prevent actual redirects in tests
     delete (window as any).location;
-    (window as any).location = { href: "", pathname: "/", search: "" };
+    window.location = {
+      href: "http://localhost/",
+      pathname: "/",
+      search: "",
+      assign: jest.fn(),
+      replace: jest.fn(),
+      reload: jest.fn(),
+    } as any;
   });
 
   afterEach(() => {
@@ -521,6 +528,214 @@ describe("Error Boundary (User App)", () => {
 
         process.env.NODE_ENV = originalEnv;
       });
+    });
+  });
+
+  /**
+   * Task 10.4: Error Boundary Component Tests 90%以上カバレッジ達成
+   * - 未カバーの行（L60-63, L79-89, L93-97, L102-105）をテスト
+   */
+  describe("Edge Cases (カバレッジ向上)", () => {
+    const renderWithJa = (ui: React.ReactElement) =>
+      render(
+        <NextIntlClientProvider locale="ja" messages={messagesJa}>
+          {ui}
+        </NextIntlClientProvider>,
+      );
+
+    it("ApiErrorプロパティ喪失ケース（error.causeから再構築）", () => {
+      // ApiErrorインスタンスだがプロパティが失われているケース（Next.jsシリアライズ問題）
+      const apiError = new ApiError({
+        status: 500,
+        title: "Internal Server Error",
+        detail: "サーバーエラー",
+        type: "about:blank",
+        instance: "/api/v1/users",
+        trace_id: "req-reconstruct",
+      });
+
+      // プロパティを上書きしてcauseだけ残す（Next.jsシリアライズをシミュレート）
+      // readonly プロパティをundefinedに変更
+      Object.defineProperty(apiError, "title", {
+        value: undefined,
+        writable: false,
+        configurable: true,
+      });
+      Object.defineProperty(apiError, "status", {
+        value: undefined,
+        writable: false,
+        configurable: true,
+      });
+
+      renderWithJa(<ErrorBoundary error={apiError} reset={mockReset} />);
+
+      // causeから再構築されたApiErrorが表示されることを確認
+      expect(screen.getByText("エラーが発生しました")).toBeInTheDocument();
+      expect(screen.getByText("ステータスコード: 500")).toBeInTheDocument();
+      expect(screen.getByText("req-reconstruct")).toBeInTheDocument();
+    });
+
+    it("ApiError名前チェック経由の再構築（instanceof失敗ケース）", () => {
+      // instanceofが失敗するがnameがApiErrorのケース
+      const error = new Error("ApiError-like error");
+      error.name = "ApiError";
+      (error as any).cause = {
+        status: 503,
+        title: "Service Unavailable",
+        detail: "サービスが利用できません",
+        type: "about:blank",
+        instance: "/api/v1/health",
+        trace_id: "req-503",
+      };
+
+      renderWithJa(<ErrorBoundary error={error} reset={mockReset} />);
+
+      // causeから再構築されたApiErrorが表示されることを確認
+      expect(screen.getByText("ステータスコード: 503")).toBeInTheDocument();
+      expect(screen.getByText("Service Unavailable")).toBeInTheDocument();
+      expect(screen.getByText("req-503")).toBeInTheDocument();
+    });
+
+    it("Generic error causeからApiError再構築", () => {
+      // Generic errorだがcauseにRFC 7807準拠データがあるケース
+      const error = new Error("Generic error");
+      (error as any).cause = {
+        status: 504,
+        title: "Gateway Timeout",
+        detail: "ゲートウェイタイムアウト",
+        type: "about:blank",
+        instance: "/api/v1/external",
+        trace_id: "req-504",
+      };
+
+      renderWithJa(<ErrorBoundary error={error} reset={mockReset} />);
+
+      // causeから再構築されたApiErrorが表示されることを確認
+      expect(screen.getByText("ステータスコード: 504")).toBeInTheDocument();
+      expect(screen.getByText("Gateway Timeout")).toBeInTheDocument();
+      expect(screen.getByText("req-504")).toBeInTheDocument();
+    });
+
+    it("ApiError再構築失敗時のフォールバック（causeが不正）", () => {
+      // console.errorをスパイ
+      const consoleErrorSpy = jest.spyOn(console, "error");
+
+      // ApiErrorインスタンスだがプロパティ喪失 & causeがゲッターで例外を投げる
+      const apiError = new ApiError({
+        status: 500,
+        title: "Internal Server Error",
+        detail: "サーバーエラー",
+        type: "about:blank",
+        instance: "/api/v1/users",
+        trace_id: "req-fallback",
+      });
+
+      // プロパティを上書きしてundefinedに
+      Object.defineProperty(apiError, "title", {
+        value: undefined,
+        writable: false,
+        configurable: true,
+      });
+      Object.defineProperty(apiError, "status", {
+        value: undefined,
+        writable: false,
+        configurable: true,
+      });
+
+      // causeに、detailプロパティへのアクセス時に例外を投げるオブジェクトを設定
+      const poisonedCause = {
+        get detail() {
+          throw new Error("Poisoned detail getter");
+        },
+        status: 500,
+        title: "Title",
+        type: "about:blank",
+        instance: "/test",
+        trace_id: "test-id",
+      };
+      Object.defineProperty(apiError, "cause", {
+        value: poisonedCause,
+        writable: false,
+        configurable: true,
+      });
+
+      // 再構築失敗時はcatch節で元のerrorを使う（L84-85）
+      renderWithJa(<ErrorBoundary error={apiError} reset={mockReset} />);
+
+      // フォールバック: L85で apiError = error とするので、ApiErrorインスタンスとして表示される
+      // ただしstatusとtitleがundefinedなので "ステータスコード: undefined" と表示される
+      expect(screen.getByText("エラーが発生しました")).toBeInTheDocument();
+      expect(screen.getByText(/ステータスコード:/)).toBeInTheDocument();
+
+      // catch節でconsole.errorが呼ばれたことを確認（L84）
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Failed to reconstruct ApiError from cause:",
+        expect.any(Error),
+      );
+    });
+
+    it("ApiError名前チェック経由の再構築失敗（L97）", () => {
+      // console.errorをスパイ
+      const consoleErrorSpy = jest.spyOn(console, "error");
+
+      // error.name = "ApiError"だがinstanceofは失敗、causeのdetailゲッターが例外を投げる
+      const error = new Error("ApiError-like error");
+      error.name = "ApiError"; // L91の条件を満たすためにerror.nameを設定
+
+      const poisonedCause = {
+        get detail() {
+          throw new Error("Poisoned detail in name check");
+        },
+        status: 503,
+        title: "Service Unavailable",
+        type: "about:blank",
+        instance: "/test",
+        trace_id: "test-97",
+      };
+      (error as any).cause = poisonedCause;
+
+      renderWithJa(<ErrorBoundary error={error} reset={mockReset} />);
+
+      // L97のcatch節で再構築失敗、apiErrorはnullのままなのでGeneric errorとして表示
+      expect(screen.getByText("予期しないエラーが発生しました")).toBeInTheDocument();
+
+      // catch節でconsole.errorが呼ばれたことを確認（L97）
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Failed to reconstruct ApiError from name check:",
+        expect.any(Error),
+      );
+    });
+
+    it("Generic error causeから再構築失敗（L105）", () => {
+      // console.errorをスパイ
+      const consoleErrorSpy = jest.spyOn(console, "error");
+
+      // Generic errorでcauseのdetailゲッターが例外を投げる
+      const error = new Error("Generic error");
+      error.name = "TypeError"; // ApiErrorではないことを明示
+
+      const poisonedCause = {
+        get detail() {
+          throw new Error("Poisoned detail in generic cause");
+        },
+        status: 504,
+        title: "Gateway Timeout",
+        type: "about:blank",
+        instance: "/test",
+        trace_id: "test-105",
+      };
+      (error as any).cause = poisonedCause;
+
+      renderWithJa(<ErrorBoundary error={error} reset={mockReset} />);
+
+      // L105のcatch節で再構築失敗、apiErrorはnullのままなのでGeneric errorとして表示
+      expect(screen.getByText("予期しないエラーが発生しました")).toBeInTheDocument();
+
+      // catch節でconsole.errorが呼ばれたことを確認（L105）
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Failed to reconstruct ApiError from generic cause:",
+        expect.any(Error),
+      );
     });
   });
 });

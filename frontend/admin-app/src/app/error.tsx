@@ -9,11 +9,14 @@
  * - Request ID（trace_id）をユーザーに提示
  * - reset()による再試行機能
  * - 本番環境では内部エラー詳細をマスク
+ * - i18n対応（next-intl）
  */
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ApiError } from "@/lib/api-error";
+import type { RFC7807Problem } from "@/types/errors";
 import { NetworkError } from "@/lib/network-error";
 
 interface ErrorProps {
@@ -28,7 +31,21 @@ export default function Error({ error, reset }: ErrorProps) {
     // エラーをコンソールにログ出力（開発環境用）
     console.error("Error Boundary caught an error:", error);
     console.error("Error name:", error.name);
-    console.error("Error cause:", error.cause);
+    console.error("Error instanceof ApiError:", error instanceof ApiError);
+    console.error("Error instanceof NetworkError:", error instanceof NetworkError);
+    console.error("Error constructor name:", error.constructor.name);
+
+    // ApiErrorのプロパティをログ出力
+    if (error instanceof ApiError) {
+      console.error("ApiError properties:", {
+        title: error.title,
+        status: error.status,
+        detail: error.detail,
+        requestId: error.requestId,
+        errorCode: error.errorCode,
+      });
+      console.error("ApiError toJSON():", error.toJSON());
+    }
 
     // 401エラーの場合、ログインページにリダイレクト
     // ApiErrorまたはerror.causeから401を検出
@@ -62,7 +79,7 @@ export default function Error({ error, reset }: ErrorProps) {
     } else if (error.cause && typeof error.cause === "object") {
       // ApiError instance but properties lost - reconstruct from cause
       try {
-        apiError = new ApiError(error.cause);
+        apiError = new ApiError(error.cause as RFC7807Problem);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from cause:", e);
         apiError = error; // Fallback to original even with undefined properties
@@ -75,7 +92,7 @@ export default function Error({ error, reset }: ErrorProps) {
     // Not instanceof but has ApiError name - try to reconstruct from cause
     if (error.cause && typeof error.cause === "object") {
       try {
-        apiError = new ApiError(error.cause);
+        apiError = new ApiError(error.cause as RFC7807Problem);
       } catch (e) {
         console.error("Failed to reconstruct ApiError from name check:", e);
       }
@@ -83,7 +100,7 @@ export default function Error({ error, reset }: ErrorProps) {
   } else if (error.cause && typeof error.cause === "object" && "status" in error.cause) {
     // Generic error with RFC 7807 data in cause
     try {
-      apiError = new ApiError(error.cause);
+      apiError = new ApiError(error.cause as RFC7807Problem);
     } catch (e) {
       console.error("Failed to reconstruct ApiError from generic cause:", e);
     }
@@ -174,12 +191,12 @@ export default function Error({ error, reset }: ErrorProps) {
               >
                 {t("boundary.retry")}
               </button>
-              <a
+              <Link
                 href="/"
                 className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
               >
                 {t("boundary.home")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -249,12 +266,12 @@ export default function Error({ error, reset }: ErrorProps) {
               >
                 {t("boundary.retry")}
               </button>
-              <a
+              <Link
                 href="/"
                 className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
               >
                 {t("boundary.home")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -326,12 +343,12 @@ export default function Error({ error, reset }: ErrorProps) {
             >
               {t("global.retry")}
             </button>
-            <a
+            <Link
               href="/"
               className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
             >
               {t("boundary.home")}
-            </a>
+            </Link>
           </div>
         </div>
       </div>
