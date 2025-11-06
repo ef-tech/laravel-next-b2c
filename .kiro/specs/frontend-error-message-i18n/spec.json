@@ -1,0 +1,88 @@
+{
+  "feature_name": "frontend-error-message-i18n",
+  "created_at": "2025-11-06T02:07:50Z",
+  "updated_at": "2025-11-06T02:30:00Z",
+  "language": "ja",
+  "phase": "design-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 113,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/113",
+    "title": "フロントエンドエラーメッセージ多言語化対応（i18n）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, SetLocaleFromAcceptLanguage Middleware",
+      "frontend": "Next.js 15.5, React 19, next-intl",
+      "infrastructure": "Docker Compose, GitHub Actions",
+      "tools": "Jest 29, React Testing Library 16, Playwright 1.47.2, TypeScript"
+    },
+    "requirements_hints": [
+      "NetworkError多言語化: getDisplayMessage()メソッドのシグネチャ拡張",
+      "Error Boundary多言語化: useTranslations() hook統合（user-app、admin-app）",
+      "Global Error Boundary多言語化: 自己完結型Provider実装、ブラウザロケール検出",
+      "i18n基盤実装: next-intl統合、翻訳リソース管理（JSON）、Middleware実装（Accept-Language自動検出）",
+      "Accept-Language連携: ブラウザ言語設定とバックエンド言語検出の整合性保証",
+      "翻訳リソース管理: TypeScript型定義、翻訳キー整合性チェック（CI/CD）",
+      "後方互換性維持: NetworkError引数なしでも動作、英語フォールバック",
+      "バンドルサイズ最適化: バンドルサイズ増加<20KB",
+      "テスト実装: Unit Tests（100%カバレッジ）、Component Tests（90%以上）、E2E Tests（Playwright）",
+      "CI/CD統合: 翻訳ファイル検証スクリプト、GitHub Actionsワークフロー更新"
+    ],
+    "project_structure": [
+      "frontend/user-app/messages/{ja,en}.json",
+      "frontend/admin-app/messages/{ja,en}.json",
+      "frontend/user-app/src/i18n.ts",
+      "frontend/admin-app/src/i18n.ts",
+      "frontend/user-app/src/middleware.ts",
+      "frontend/admin-app/src/middleware.ts",
+      "frontend/lib/network-error.ts",
+      "frontend/user-app/src/app/error.tsx",
+      "frontend/admin-app/src/app/error.tsx",
+      "frontend/user-app/src/app/global-error.tsx",
+      "frontend/admin-app/src/app/global-error.tsx",
+      "scripts/validate-i18n-messages.js",
+      "scripts/validate-i18n-keys.js"
+    ],
+    "services": {},
+    "todo_items": [
+      "Phase 0: 事前準備・調査（2-3時間）",
+      "Phase 1: 基盤実装（4-6時間）",
+      "Phase 2: コンポーネント実装（3-4時間）",
+      "Phase 3: テスト実装（6-8時間）",
+      "Phase 4: CI/CD統合（2-3時間）",
+      "next-intl依存関係インストール（user-app、admin-app）",
+      "翻訳ファイル作成（ja.json、en.json）",
+      "i18n設定ファイル作成（i18n.ts）",
+      "Middleware作成（middleware.ts）",
+      "NetworkError.getDisplayMessage(t)改修",
+      "Error Boundary改修（user-app、admin-app）",
+      "Global Error Boundary改修（user-app、admin-app）",
+      "NetworkError Unit Tests実装（100%カバレッジ）",
+      "Error Boundary Component Tests実装（90%以上カバレッジ）",
+      "E2E Tests実装（Playwright）",
+      "翻訳ファイル検証スクリプト作成（validate-i18n-messages.js、validate-i18n-keys.js）",
+      "GitHub Actions frontend-test.yml更新",
+      "GitHub Actions e2e-tests.yml更新",
+      "Makefileタスク統合（make validate-i18n、make test-i18n）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}

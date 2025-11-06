@@ -121,6 +121,15 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **DDD統合**: V1専用Controllerディレクトリ、Application層ユースケース統合、Infrastructure層Repository実装
   - **完全テスト**: Feature Tests（認証フロー、トークン管理、ヘルスチェック）、Architecture Tests（依存方向検証）
   - **V2ロードマップ**: GraphQL対応、バッチAPI、WebSocket統合、高度な認可システム
+- **🎯 統一エラーハンドリングパターン実装**: RFC 7807準拠、型安全なエラーコード体系、多言語対応、Request ID伝播
+  - **RFC 7807準拠APIエラーレスポンス**: `type`、`title`、`status`、`detail`、`instance`、`request_id`、`errors` の統一フォーマット
+  - **型安全エラーコード体系**: TypeScript Enum/Union型による厳格な型チェック、Laravel Enumとの完全連携
+  - **多言語エラーメッセージ対応（i18n）**: Accept-Language header自動検出、日本語/英語切り替え、SetLocaleFromAcceptLanguageミドルウェア
+  - **Request ID伝播**: Laravel → フロントエンドへのError ID自動伝播、トレーサビリティ確保、ログ追跡の簡易化
+  - **NetworkError日本語化**: フロントエンド通信エラーの自動日本語化、ユーザー体験の向上
+  - **401自動リダイレクト**: 認証エラー時の自動ログインページ遷移、セキュアな認証フロー
+  - **Error Boundaries実装**: React Error Boundariesによるフロントエンドエラー捕捉、Fallback UI表示
+  - **自動コード生成**: `generate-error-types.js` スクリプトによるTypeScript型定義自動生成、Laravel/フロントエンド同期保証
 
 ## アーキテクチャ上の特徴
 - **API専用最適化**: Web機能削除によるステートレス設計とパフォーマンス最大化

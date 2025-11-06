@@ -145,6 +145,11 @@ CORS_ALLOWED_ORIGINS=http://localhost:13001,http://localhost:13002  # 開発環�
 CORS_SUPPORTS_CREDENTIALS=true  # Cookie送信許可（Sanctum認証対応）
 # 本番環境例: CORS_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
 
+# 🌍 多言語対応（i18n）設定
+APP_LOCALE=ja                     # デフォルトロケール（日本語）
+APP_FALLBACK_LOCALE=en            # フォールバックロケール（英語）
+# SetLocaleFromAcceptLanguageミドルウェアによるAccept-Language header自動検出対応
+
 # 🔐 セキュリティヘッダー設定（OWASP準拠）
 SECURITY_ENABLE_CSP=true  # Content Security Policy有効化
 SECURITY_CSP_MODE=report-only  # CSPモード: report-only（監視）または enforce（強制）
@@ -172,6 +177,110 @@ LOG_SENSITIVE_FIELDS=email,ip_address,user_agent  # ハッシュ化対象フィ�
 
 # 環境変数バリデーションスキップ（緊急時のみ、migrate/seed実行時に使用可能）
 # ENV_VALIDATION_SKIP=true
+```
+
+### 🎯 統一エラーハンドリングパターン詳細
+
+**RFC 7807準拠APIエラーレスポンス**:
+```json
+{
+  "type": "https://api.example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 422,
+  "detail": "入力データに問題があります",
+  "instance": "/api/v1/users",
+  "request_id": "550e8400-e29b-41d4-a716-446655440000",
+  "errors": {
+    "email": ["メールアドレスの形式が正しくありません"]
+  }
+}
+```
+
+**エラーコード体系（型安全）**:
+
+Laravel側:
+```php
+// app/Enums/ErrorCode.php
+enum ErrorCode: string
+{
+    case VALIDATION_ERROR = 'VALIDATION_ERROR';
+    case AUTHENTICATION_FAILED = 'AUTHENTICATION_FAILED';
+    case RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND';
+    // ... その他のエラーコード
+
+    public static function tryFrom(string $value): ?self
+    {
+        return self::cases()[$value] ?? null;
+    }
+}
+```
+
+フロントエンド側（自動生成）:
+```typescript
+// frontend/types/errors.ts
+export enum ErrorCode {
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  AUTHENTICATION_FAILED = 'AUTHENTICATION_FAILED',
+  RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  // ... 自動生成される型定義
+}
+
+export type ErrorCodeType = keyof typeof ErrorCode;
+```
+
+**多言語エラーメッセージ（i18n）**:
+- **SetLocaleFromAcceptLanguageミドルウェア**: Accept-Language headerを自動検出し、Laravelロケールを設定
+- **言語ファイル**: `lang/ja/errors.php`、`lang/en/errors.php` によるメッセージ管理
+- **フロントエンド対応**: Accept-Language: ja ヘッダーを自動送信、日本語エラーメッセージ受信
+
+**Request ID伝播フロー**:
+1. **Laravel**: SetRequestIdミドルウェアがUUID生成、`X-Request-ID` ヘッダー付与
+2. **エラー発生**: Exception Handler が `request_id` をエラーレスポンスに含める
+3. **フロントエンド**: エラーオブジェクトに `request_id` を保持、ログに記録
+4. **トレーサビリティ**: Laravel logs (`storage/logs/`) でRequest ID検索可能
+
+**NetworkError日本語化**:
+```typescript
+// frontend/lib/api-client.ts
+const ERROR_MESSAGES: Record<string, string> = {
+  NETWORK_ERROR: 'ネットワークエラーが発生しました',
+  TIMEOUT_ERROR: 'タイムアウトしました',
+  // ...
+};
+```
+
+**401自動リダイレクト**:
+```typescript
+// frontend/lib/api-client.ts
+if (error.response?.status === 401) {
+  router.push('/login');
+  return Promise.reject(error);
+}
+```
+
+**Error Boundaries実装**:
+```typescript
+// app/error.tsx (Admin/User App共通)
+'use client';
+
+export default function Error({ error, reset }: ErrorProps) {
+  return (
+    <div className="error-container">
+      <h2>エラーが発生しました</h2>
+      <p>{error.message}</p>
+      <button onClick={reset}>再試行</button>
+    </div>
+  );
+}
+```
+
+**自動コード生成スクリプト**:
+```bash
+# Laravel Enumから TypeScript型定義を自動生成
+npm run generate:error-types
+
+# 生成先: frontend/types/errors.ts
+# 検証: npm run verify:error-types
 ```
 
 ### 🛡️ 基本ミドルウェアスタック詳細
