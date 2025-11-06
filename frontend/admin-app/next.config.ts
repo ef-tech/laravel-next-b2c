@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import path from "path";
+// import path from "path"; // Unused when output: "standalone" is disabled
 
 // Type definitions for security config
 interface CSPConfig {
@@ -33,15 +33,15 @@ let buildPermissionsPolicyString: (config: Record<string, unknown>) => string;
 try {
   // Try to load actual security config
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const securityConfigModule = require("../security-config.js");
+  const securityConfigModule = require("../security-config.cjs");
   const isDev = process.env.NODE_ENV === "development";
   securityConfig = securityConfigModule.getAdminSecurityConfig(isDev);
   buildCSPString = securityConfigModule.buildCSPString;
   buildPermissionsPolicyString = securityConfigModule.buildPermissionsPolicyString;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 } catch (_error) {
-  // Fallback for environments where security-config.js is not available
-  console.warn("Failed to load security-config.js, using fallback config");
+  // Fallback for environments where security-config.cjs is not available
+  console.warn("Failed to load security-config.cjs, using fallback config");
   securityConfig = {
     xFrameOptions: "DENY" as const,
     xContentTypeOptions: "nosniff" as const,
@@ -65,10 +65,11 @@ try {
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: "standalone",
+  // Standalone mode disabled for E2E testing (use `next start` instead of `node server.js`)
+  // output: "standalone",
   // Monorepo環境でのNext.jsビルド警告を解消するために設定
   // "Warning: Next.js inferred your workspace root, but it may not be correct..."を回避
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  // outputFileTracingRoot: path.join(__dirname, "../../"),
 
   // セキュリティヘッダー設定（Admin App 用 - User App より厳格）
   async headers() {

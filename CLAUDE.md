@@ -45,6 +45,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `docker-config-improvement` - Docker設定改善（Laravel APIホットリロード対応、Next.jsネイティブ起動、開発環境シンプル化）
 - `uuid-to-bigint` - UUID主キーからbigint主キーへの変更（Laravel標準構成準拠、パフォーマンス最適化）
 - `api-versioning` - APIバージョニング（V1実装、URLベース/api/v1、DDD準拠、完全テスト戦略、V2ロードマップ）
+- `error-handling-pattern` - エラーハンドリングパターン作成（RFC 7807準拠、統一APIエラーレスポンス、Request ID伝播、多言語対応、Error Boundaries実装）
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines

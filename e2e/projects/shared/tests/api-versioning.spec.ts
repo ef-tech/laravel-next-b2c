@@ -395,7 +395,12 @@ test.describe('API V1 - Error Handling', () => {
     expect(response.headers()['x-api-version']).toBe('v1');
 
     const body = await response.json();
-    expect(body).toHaveProperty('message');
+    // RFC 7807 Problem Details format
+    expect(body).toHaveProperty('type');
+    expect(body).toHaveProperty('title');
+    expect(body).toHaveProperty('status', 422);
+    expect(body).toHaveProperty('detail');
+    expect(body).toHaveProperty('error_code', 'validation_error');
     expect(body).toHaveProperty('errors');
   });
 

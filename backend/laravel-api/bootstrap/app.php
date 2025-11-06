@@ -15,6 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::prefix('api/v1')
                 ->middleware('api')
                 ->group(base_path('routes/api/v1.php'));
+
+            // Load E2E test support routes only in non-production
+            if (app()->environment(['local', 'testing']) || (bool) env('E2E_TEST_ROUTES', false)) {
+                // Prefix /api/test: mounted at "/api/test/*" with API middleware
+                Route::prefix('api/test')
+                    ->middleware('api')
+                    ->group(base_path('routes/e2e.php'));
+            }
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -51,6 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
             // Laravel標準
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             // カスタムミドルウェア
+            \App\Http\Middleware\SetLocaleFromAcceptLanguage::class, // Accept-Language header → App::setLocale()
             \App\Http\Middleware\RequestLogging::class,
             \App\Http\Middleware\PerformanceMonitoring::class,
             \App\Http\Middleware\DynamicRateLimit::class.':api',
@@ -108,26 +117,177 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Handle Authentication Exceptions (401 Unauthorized)
-        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e) {
-            return response()->json([
-                'message' => 'Unauthenticated.',
-            ], 401);
+        // Handle DDD Domain Exceptions (RFC 7807 Problem Details)
+        $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e, \Illuminate\Http\Request $request) {
+            return \App\Support\ExceptionHandler::handleProblemDetailsException($e, $request, 'DomainException');
+        });
+
+        // Handle DDD Application Exceptions (RFC 7807 Problem Details)
+        $exceptions->render(function (\Ddd\Shared\Exceptions\ApplicationException $e, \Illuminate\Http\Request $request) {
+            return \App\Support\ExceptionHandler::handleProblemDetailsException($e, $request, 'ApplicationException');
+        });
+
+        // Handle DDD Infrastructure Exceptions (RFC 7807 Problem Details)
+        $exceptions->render(function (\Ddd\Shared\Exceptions\InfrastructureException $e, \Illuminate\Http\Request $request) {
+            return \App\Support\ExceptionHandler::handleProblemDetailsException($e, $request, 'InfrastructureException');
         });
 
         // Handle Validation Exceptions (422 Unprocessable Entity)
-        $exceptions->render(function (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, \Illuminate\Http\Request $request) {
+            // Request IDを取得または生成
+            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'validation_error',
+                'user_id' => \App\Support\LogHelper::hashSensitiveData($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::error('ValidationException occurred', [
+                'exception' => get_class($e),
                 'message' => $e->getMessage(),
                 'errors' => $e->errors(),
-            ], 422);
+            ]);
+
+            return response()->json([
+                'type' => config('app.url').'/errors/validation_error',
+                'title' => 'Validation Error',
+                'status' => 422,
+                'detail' => $e->getMessage(),
+                'error_code' => 'validation_error',
+                'trace_id' => $requestId,
+                'instance' => $request->getRequestUri(),
+                'timestamp' => now()->toIso8601String(),
+                'errors' => $e->errors(),
+            ], 422)
+                ->header('Content-Type', 'application/problem+json')
+                ->header('X-Request-ID', $requestId);
         });
 
-        // Handle DDD Domain Exceptions
-        $exceptions->render(function (\Ddd\Shared\Exceptions\DomainException $e) {
-            return response()->json([
-                'error' => $e->getErrorCode(),
+        // Handle Authentication Exceptions (401 Unauthorized)
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            // Request IDを取得または生成
+            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'unauthenticated',
+                'user_id' => null, // 認証失敗のため null
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::warning('AuthenticationException occurred', [
+                'exception' => get_class($e),
                 'message' => $e->getMessage(),
-            ], $e->getStatusCode());
+            ]);
+
+            return response()->json([
+                'type' => config('app.url').'/errors/unauthenticated',
+                'title' => 'Unauthenticated',
+                'status' => 401,
+                'detail' => 'Unauthenticated.',
+                'error_code' => 'unauthenticated',
+                'trace_id' => $requestId,
+                'instance' => $request->getRequestUri(),
+                'timestamp' => now()->toIso8601String(),
+            ], 401)
+                ->header('Content-Type', 'application/problem+json')
+                ->header('X-Request-ID', $requestId);
+        });
+
+        // Handle Rate Limit Exceptions (429 Too Many Requests)
+        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, \Illuminate\Http\Request $request) {
+            // Request IDを取得または生成
+            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'too_many_requests',
+                'user_id' => \App\Support\LogHelper::hashSensitiveData($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::warning('ThrottleRequestsException occurred', [
+                'exception' => get_class($e),
+                'retry_after' => $e->getHeaders()['Retry-After'] ?? 60,
+            ]);
+
+            return response()->json([
+                'type' => config('app.url').'/errors/too_many_requests',
+                'title' => 'Too Many Requests',
+                'status' => 429,
+                'detail' => 'Too many requests. Please try again later.',
+                'error_code' => 'too_many_requests',
+                'trace_id' => $requestId,
+                'instance' => $request->getRequestUri(),
+                'timestamp' => now()->toIso8601String(),
+            ], 429)
+                ->header('Content-Type', 'application/problem+json')
+                ->header('X-Request-ID', $requestId)
+                ->header('Retry-After', $e->getHeaders()['Retry-After'] ?? 60);
+        });
+
+        // Handle All Other Exceptions (500 Internal Server Error)
+        // 環境別エラーマスキング機能
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            // Request IDを取得または生成
+            $requestId = $request->header('X-Request-ID') ?: (string) \Illuminate\Support\Str::uuid();
+
+            // 構造化ログコンテキストを設定
+            \Illuminate\Support\Facades\Log::withContext([
+                'trace_id' => $requestId,
+                'error_code' => 'internal_server_error',
+                'user_id' => \App\Support\LogHelper::hashSensitiveData($request->user()?->getAuthIdentifier()),
+                'request_path' => $request->getRequestUri(),
+            ]);
+
+            // エラーログを記録
+            \Illuminate\Support\Facades\Log::error('Throwable occurred', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            // 本番環境判定
+            $isProduction = config('app.env') === 'production';
+            $isDebug = config('app.debug', false);
+
+            // RFC 7807形式の基本情報
+            $problemDetails = [
+                'type' => config('app.url').'/errors/internal_server_error',
+                'title' => 'Internal Server Error',
+                'status' => 500,
+                'detail' => $isProduction
+                    ? 'An internal server error occurred. Please try again later.'
+                    : $e->getMessage(),
+                'error_code' => 'internal_server_error',
+                'trace_id' => $requestId,
+                'instance' => $request->getRequestUri(),
+                'timestamp' => now()->toIso8601String(),
+            ];
+
+            // 開発環境ではデバッグ情報を追加
+            if (! $isProduction && $isDebug) {
+                $problemDetails['debug'] = [
+                    'exception' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => collect($e->getTrace())->map(function ($trace) {
+                        return \Illuminate\Support\Arr::except($trace, ['args']);
+                    })->all(),
+                ];
+            }
+
+            return response()->json($problemDetails, 500)
+                ->header('Content-Type', 'application/problem+json')
+                ->header('X-Request-ID', $requestId);
         });
     })->create();

@@ -6,7 +6,7 @@
     "predev": "tsx scripts/check-env.ts",
     "dev": "next dev --turbopack --port 13001",
     "prebuild": "tsx scripts/check-env.ts",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start --port 13001",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",

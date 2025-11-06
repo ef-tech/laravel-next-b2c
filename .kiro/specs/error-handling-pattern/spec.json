@@ -1,0 +1,109 @@
+{
+  "feature_name": "error-handling-pattern",
+  "created_at": "2025-11-01T18:30:00Z",
+  "updated_at": "2025-11-04T08:00:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 43,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/43",
+    "title": "エラーハンドリングパターン作成",
+    "labels": ["backend", "frontend"],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Pest (Unit/Feature Tests), DDD/Clean Architecture",
+      "frontend": "Next.js 15, React 19, TypeScript, Jest (Unit Tests), Playwright (E2E Tests)",
+      "infrastructure": "Docker Compose, PostgreSQL 17, Redis",
+      "tools": "GitHub Actions, Laravel Pint, Larastan, ESLint"
+    },
+    "requirements_hints": [
+      "RFC 7807 (Problem Details for HTTP APIs) 準拠の統一的なエラーハンドリングパターン実装",
+      "一貫性のあるAPIエラーレスポンス形式（Content-Type: application/problem+json）",
+      "X-Request-IDとtrace_idによるトレーサビリティ確保",
+      "Accept-Languageヘッダーに基づくエラーメッセージ国際化（日本語・英語）",
+      "Next.js Error Boundaries実装（error.tsx、global-error.tsx）",
+      "統一APIクライアント（fetch wrapper）実装",
+      "エラーコード体系定義（shared/error-codes.json）",
+      "DDD Exception階層拡張（DomainException、ApplicationException、InfrastructureException）",
+      "環境別エラーメッセージ制御（本番: マスク、開発: 詳細表示）"
+    ],
+    "project_structure": [
+      "app/Exceptions/Handler.php",
+      "ddd/Shared/Exceptions/DomainException.php",
+      "ddd/Shared/Exceptions/ApplicationException.php",
+      "ddd/Shared/Exceptions/InfrastructureException.php",
+      "app/Http/Middleware/RequestIdMiddleware.php",
+      "app/Http/Middleware/SetLocaleFromAcceptLanguage.php",
+      "lang/ja/errors.php",
+      "lang/en/errors.php",
+      "shared/error-codes.json",
+      "frontend/admin-app/src/lib/api/client.ts",
+      "frontend/admin-app/src/lib/errors/api-error.ts",
+      "frontend/admin-app/src/lib/errors/network-error.ts",
+      "frontend/admin-app/src/app/error.tsx",
+      "frontend/admin-app/src/app/global-error.tsx",
+      "frontend/user-app/src/lib/api/client.ts",
+      "frontend/user-app/src/lib/errors/api-error.ts",
+      "frontend/user-app/src/lib/errors/network-error.ts",
+      "frontend/user-app/src/app/error.tsx",
+      "frontend/user-app/src/app/global-error.tsx",
+      "e2e/projects/shared/tests/error-handling.spec.ts",
+      "tests/Unit/Shared/Exceptions/",
+      "tests/Feature/Api/ErrorHandlingTest.php",
+      "docs/error-codes.md",
+      "docs/error-handling-troubleshooting.md"
+    ],
+    "services": {},
+    "todo_items": [
+      "Phase 1: 基盤整備（エラーコード体系設計、多言語リソース準備）",
+      "Phase 2: バックエンド実装（DDD Exception階層、RequestId Middleware、Exception Handler拡張）",
+      "Phase 3: フロントエンド実装（エラークラス定義、API Client、Error Boundaries）",
+      "Phase 4: 統合・テスト（Feature Test、E2E Test、統合テストスクリプト）",
+      "Phase 5: ドキュメント・運用（エラーコード一覧、トラブルシューティングガイド、CI/CD統合）",
+      "エラーコード体系設計（shared/error-codes.json）",
+      "TypeScript型定義生成",
+      "多言語リソース準備（ja/errors.php、en/errors.php）",
+      "DomainException拡張（toProblemDetails()メソッド）",
+      "ApplicationException実装",
+      "InfrastructureException実装",
+      "RequestIdMiddleware実装",
+      "SetLocaleFromAcceptLanguage Middleware実装",
+      "Exception Handler拡張（RFC 7807形式）",
+      "ProblemDetailsFactory実装（オプション）",
+      "RFC7807Problem型定義",
+      "ApiErrorクラス実装",
+      "NetworkErrorクラス実装",
+      "ApiClientクラス実装（fetch wrapper）",
+      "error.tsx実装（user-app、admin-app）",
+      "global-error.tsx実装（user-app、admin-app）",
+      "Backend Feature Tests実装（ErrorHandlingTest.php）",
+      "E2E Tests実装（error-handling.spec.ts）",
+      "Request ID伝播テスト",
+      "多言語対応テスト",
+      "Content-Type検証テスト",
+      "統合テストスクリプト作成（test-error-handling.sh）",
+      "エラーコード一覧作成（docs/error-codes.md）",
+      "トラブルシューティングガイド作成（docs/error-handling-troubleshooting.md）",
+      "CI/CD統合（GitHub Actionsワークフロー更新）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}

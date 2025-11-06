@@ -116,8 +116,10 @@ export function getAdminSecurityConfig(isDev: boolean): SecurityConfig {
       scriptSrc: isDev ? ["'self'", "'unsafe-inline'"] : ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'https:'],
-      // Admin App は開発環境でも ws/wss を許可しない
-      connectSrc: ["'self'"],
+      // 開発環境: Laravel APIへのfetchを許可（E2Eテスト用）
+      connectSrc: isDev
+        ? ["'self'", 'http://localhost:13000']
+        : ["'self'"],
       fontSrc: ["'self'", 'data:'],
       objectSrc: ["'none'"],
       frameAncestors: ["'none'"],

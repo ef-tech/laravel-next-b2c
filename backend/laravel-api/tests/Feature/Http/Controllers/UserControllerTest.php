@@ -36,7 +36,7 @@ test('returns 422 when email already exists', function (): void {
 
     $response->assertStatus(422)
         ->assertJson([
-            'error' => 'email_already_exists',
+            'error_code' => 'email_already_exists',
         ]);
 });
 
