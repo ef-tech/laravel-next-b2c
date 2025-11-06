@@ -105,8 +105,8 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 3: Error Boundary多言語化
 
-- [ ] 5. Error Boundaryコンポーネントの多言語化対応
-- [ ] 5.1 User App Error BoundaryをuseTranslationsで多言語化する
+- [x] 5. Error Boundaryコンポーネントの多言語化対応
+- [x] 5.1 User App Error BoundaryをuseTranslationsで多言語化する
   - 'use client'ディレクティブを追加
   - useTranslations('errors')フックを統合
   - エラータイトルメッセージを翻訳キーに置き換え
@@ -117,14 +117,14 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - ホームに戻るボタンテキストを翻訳キーに置き換え
   - _要件: REQ-3.1、REQ-3.2、REQ-3.3_
 
-- [ ] 5.2 Admin App Error BoundaryをuseTranslationsで多言語化する
+- [x] 5.2 Admin App Error BoundaryをuseTranslationsで多言語化する
   - 'use client'ディレクティブを追加
   - useTranslations('errors')フックを統合
   - User Appと同様の翻訳キー置き換えを実施
   - 全ハードコード日本語メッセージを翻訳キーに変更
   - _要件: REQ-3.1、REQ-3.2、REQ-3.3_
 
-- [ ] 5.3 Error BoundaryでNetworkErrorの翻訳メッセージを表示する
+- [x] 5.3 Error BoundaryでNetworkErrorの翻訳メッセージを表示する
   - NetworkError.getDisplayMessage()に翻訳関数を渡す
   - 翻訳キープレフィックス（network.）を適切に処理
   - ApiErrorとNetworkErrorの表示分岐を維持
