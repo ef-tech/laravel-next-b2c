@@ -18,15 +18,15 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 1: i18n基盤実装
 
-- [ ] 1. next-intlライブラリ依存関係のインストールと基本設定
-- [ ] 1.1 next-intlパッケージをUser AppとAdmin Appにインストールする
+- [x] 1. next-intlライブラリ依存関係のインストールと基本設定
+- [x] 1.1 next-intlパッケージをUser AppとAdmin Appにインストールする
   - User Appのpackage.jsonにnext-intl追加
   - Admin Appのpackage.jsonにnext-intl追加
   - npm installを両アプリで実行
   - インストール後のバージョン確認
   - _要件: REQ-1.1_
 
-- [ ] 1.2 共通i18n設定ファイルを作成する
+- [x] 1.2 共通i18n設定ファイルを作成する
   - 共通ライブラリに言語設定を定義
   - サポート言語リスト（ja、en）を設定
   - デフォルト言語（ja）を設定
