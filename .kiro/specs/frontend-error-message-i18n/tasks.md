@@ -55,8 +55,8 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - エラー階層の型定義（network、boundary、validation、global）
   - _要件: REQ-1.5、REQ-6.5_
 
-- [ ] 3. next-intl設定とミドルウェアの実装
-- [ ] 3.1 User Appのi18n設定ファイルを実装する
+- [x] 3. next-intl設定とミドルウェアの実装
+- [x] 3.1 User Appのi18n設定ファイルを実装する
   - i18n.tsファイルを作成
   - getRequestConfig関数を実装
   - ロケール検証ロジックを実装
@@ -64,14 +64,14 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - 無効なロケールのフォールバック処理を実装
   - _要件: REQ-1.3、REQ-5.3_
 
-- [ ] 3.2 User Appのミドルウェアを実装する
+- [x] 3.2 User Appのミドルウェアを実装する
   - middleware.tsファイルを作成
   - next-intlのcreateMiddleware関数を統合
   - ロケール検出を有効化（localeDetection: true）
   - URLパターンマッチング設定（API除外、静的ファイル除外）
   - _要件: REQ-1.4、REQ-5.1_
 
-- [ ] 3.3 Admin Appのi18n設定ファイルを実装する
+- [x] 3.3 Admin Appのi18n設定ファイルを実装する
   - i18n.tsファイルを作成（User Appと同様の構成）
   - getRequestConfig関数を実装
   - ロケール検証ロジックを実装
@@ -79,7 +79,7 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - 無効なロケールのフォールバック処理を実装
   - _要件: REQ-1.3、REQ-5.3_
 
-- [ ] 3.4 Admin Appのミドルウェアを実装する
+- [x] 3.4 Admin Appのミドルウェアを実装する
   - middleware.tsファイルを作成
   - next-intlのcreateMiddleware関数を統合
   - ロケール検出を有効化

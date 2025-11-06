@@ -1,11 +1,11 @@
 /**
  * Type definitions for translation messages
  *
- * This file extends next-intl's IntlMessages interface to provide
- * type-safe translation key references throughout the application.
+ * This file provides type-safe translation key references
+ * throughout the application by augmenting next-intl's type system.
  */
 
-interface Messages {
+type Messages = {
   errors: {
     network: {
       timeout: string;
@@ -29,8 +29,7 @@ interface Messages {
       contactMessage: string;
     };
   };
-}
+};
 
-declare module 'next-intl' {
-  interface IntlMessages extends Messages {}
-}
+// Augment next-intl's type system
+declare interface IntlMessages extends Messages {}

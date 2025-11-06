@@ -5,7 +5,7 @@
  * describes the structure of translation files.
  */
 
-import type { IntlMessages } from "next-intl";
+// IntlMessages is globally declared in frontend/types/messages.d.ts
 import jaMessages from "../../messages/ja.json";
 import enMessages from "../../messages/en.json";
 
