@@ -133,29 +133,29 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 4: Global Error Boundary多言語化
 
-- [ ] 6. Global Error Boundaryの自己完結型i18n実装
-- [ ] 6.1 User App Global Error Boundaryの多言語化を実装する
-  - 'use client'ディレクティブを追加
-  - 静的メッセージ辞書（ja、en）を定義
-  - ブラウザロケール検出ロジックを実装（document.documentElement.lang → navigator.languages）
-  - useEffectフックでロケール状態を設定
-  - デフォルトロケール（ja）へのフォールバック処理
+- [x] 6. Global Error Boundaryの自己完結型i18n実装
+- [x] 6.1 User App Global Error Boundaryの多言語化を実装する
+  - 'use client'ディレクティブを追加（既存）
+  - 静的メッセージ辞書（ja、en）を定義 ✅
+  - ブラウザロケール検出ロジックを実装（document.documentElement.lang → navigator.languages） ✅
+  - useEffectフックでロケール状態を設定 ✅
+  - デフォルトロケール（ja）へのフォールバック処理 ✅
   - _要件: REQ-4.1、REQ-4.2、REQ-4.3_
 
-- [ ] 6.2 User App Global Error Boundaryのメッセージを翻訳する
-  - タイトルメッセージ（"予期しないエラーが発生しました"）を辞書から取得
-  - Error IDラベルを辞書から取得
-  - お問い合わせメッセージを辞書から取得
-  - 再試行ボタンテキストを辞書から取得
-  - html lang属性を動的ロケールに設定
+- [x] 6.2 User App Global Error Boundaryのメッセージを翻訳する
+  - タイトルメッセージ（"予期しないエラーが発生しました"）を辞書から取得 ✅
+  - Error IDラベルを辞書から取得 ✅
+  - お問い合わせメッセージを辞書から取得 ✅
+  - 再試行ボタンテキストを辞書から取得 ✅
+  - html lang属性を動的ロケールに設定 ✅
   - _要件: REQ-4.4、REQ-4.5、REQ-4.6_
 
-- [ ] 6.3 Admin App Global Error Boundaryの多言語化を実装する
-  - User Appと同様の静的辞書を定義
-  - ブラウザロケール検出ロジックを実装
-  - useEffectフックでロケール状態を設定
-  - 全メッセージを辞書から取得
-  - html lang属性を動的ロケールに設定
+- [x] 6.3 Admin App Global Error Boundaryの多言語化を実装する
+  - User Appと同様の静的辞書を定義 ✅
+  - ブラウザロケール検出ロジックを実装 ✅
+  - useEffectフックでロケール状態を設定 ✅
+  - 全メッセージを辞書から取得 ✅
+  - html lang属性を動的ロケールに設定 ✅
   - _要件: REQ-4.1、REQ-4.2、REQ-4.3、REQ-4.4、REQ-4.5、REQ-4.6_
 
 ### Phase 5: ロケール検出とAccept-Language連携
