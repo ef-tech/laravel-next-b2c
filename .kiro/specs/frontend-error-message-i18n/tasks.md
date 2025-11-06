@@ -229,28 +229,31 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - カバレッジレポートを生成して100%確認
   - _要件: REQ-8.2_
 
-- [ ] 10. Error Boundary Component Testsの実装
-- [ ] 10.1 User App Error Boundary日本語ロケールテストを実装する
-  - NextIntlClientProviderでラップ
-  - ja.jsonメッセージを使用
-  - NetworkErrorで日本語メッセージが表示されることを確認
-  - ApiErrorでステータスコードと検証エラーが日本語表示されることを確認
-  - digestがある場合にRequest IDが日本語表示されることを確認
+- [x] 10. Error Boundary Component Testsの実装
+- [x] 10.1 User App Error Boundary日本語ロケールテストを実装する
+  - NextIntlClientProviderでラップ ✅
+  - ja.jsonメッセージを使用 ✅
+  - NetworkErrorで日本語メッセージが表示されることを確認 ✅ (8テスト)
+  - ApiErrorでステータスコードと検証エラーが日本語表示されることを確認 ✅
+  - digestがある場合にRequest IDが日本語表示されることを確認 ✅
   - _要件: REQ-8.3_
+  - **実装済み**: frontend/user-app/src/app/__tests__/error.test.tsx (16テスト全成功)
 
-- [ ] 10.2 User App Error Boundary英語ロケールテストを実装する
-  - NextIntlClientProviderでラップ（en locale）
-  - en.jsonメッセージを使用
-  - NetworkErrorで英語メッセージが表示されることを確認
-  - ApiErrorで英語メッセージが表示されることを確認
-  - 全UI要素（タイトル、ボタン、ラベル）の英語表示を検証
+- [x] 10.2 User App Error Boundary英語ロケールテストを実装する
+  - NextIntlClientProviderでラップ（en locale） ✅
+  - en.jsonメッセージを使用 ✅
+  - NetworkErrorで英語メッセージが表示されることを確認 ✅ (8テスト)
+  - ApiErrorで英語メッセージが表示されることを確認 ✅
+  - 全UI要素（タイトル、ボタン、ラベル）の英語表示を検証 ✅
   - _要件: REQ-8.3_
+  - **実装済み**: 同上（日本語・英語合計16テスト）
 
-- [ ] 10.3 Admin App Error Boundaryテストを実装する
-  - User Appと同様の日本語ロケールテスト
-  - User Appと同様の英語ロケールテスト
-  - Admin App固有の表示要素があれば追加テスト
+- [x] 10.3 Admin App Error Boundaryテストを実装する
+  - User Appと同様の日本語ロケールテスト ✅
+  - User Appと同様の英語ロケールテスト ✅
+  - Admin App固有の表示要素があれば追加テスト ✅
   - _要件: REQ-8.3_
+  - **実装済み**: frontend/admin-app/src/app/__tests__/error.test.tsx (16テスト全成功)
 
 - [ ] 10.4 Error Boundary Component Tests 90%以上カバレッジを達成する
   - 全エラータイプ（NetworkError、ApiError、generic Error）をカバー
