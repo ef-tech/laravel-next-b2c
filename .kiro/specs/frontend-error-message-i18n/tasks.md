@@ -161,27 +161,31 @@ next-intlを使用してフロントエンドアプリケーション（User App
 ### Phase 5: ロケール検出とAccept-Language連携
 
 - [x] 7. ロケール検出優先順位の実装と検証
-- [x] 7.1 URL Prefixロケール検出を実装する
-  - URLパスから言語プレフィックス（/ja、/en）を検出
-  - 検出したロケールをnext-intlに渡す
-  - 無効なプレフィックスの場合はフォールバック
+- [x] 7.1 URL Prefixロケール検出を実装する ✅
+  - URLパスから言語プレフィックス（/ja、/en）を検出 ✅
+  - 検出したロケールをnext-intlに渡す ✅
+  - 無効なプレフィックスの場合はフォールバック ✅
   - _要件: REQ-5.1_
   - **実装済み**: middleware.ts `localePrefix: "always"` + i18n.ts ロケール検証
+  - **E2Eテスト**: 14/14 PASS (URLプレフィックス検出テスト3件成功)
 
-- [x] 7.2 NEXT_LOCALE Cookie永続化を実装する
-  - ロケール変更時にCookieを設定
-  - Cookie読み取りによるロケール復元
-  - Cookie有効期限の設定
+- [x] 7.2 NEXT_LOCALE Cookie永続化を実装する ✅
+  - ロケール変更時にCookieを設定 ✅
+  - Cookie読み取りによるロケール復元 ✅
+  - Cookie有効期限の設定 ✅
   - _要件: REQ-5.2_
   - **実装済み**: next-intl middleware自動Cookie設定、E2Eテスト検証完了（L60-117）
+  - **E2Eテスト**: 14/14 PASS (Cookie永続化テスト3件成功)
 
-- [x] 7.3 Accept-Language Headerロケール検出を実装する
-  - ブラウザのAccept-Language headerを解析
-  - @formatjs/intl-localematcherで最適なロケールを選択
-  - サポート言語リストとマッチング
-  - バックエンドのSetLocaleFromAcceptLanguageとの整合性確認
+- [x] 7.3 Accept-Language Headerロケール検出を実装する ✅
+  - ブラウザのAccept-Language headerを解析 ✅
+  - @formatjs/intl-localematcherで最適なロケールを選択 ✅
+  - サポート言語リストとマッチング ✅
+  - バックエンドのSetLocaleFromAcceptLanguageとの整合性確認 ✅
   - _要件: REQ-5.1、REQ-5.3、REQ-5.4_
   - **実装済み**: middleware.ts `localeDetection: true`、E2Eテスト検証完了（L119-173、優先順位L198-257）
+  - **E2Eテスト**: 14/14 PASS (Accept-Language検出テスト5件 + 優先順位検証テスト3件成功)
+  - **修正履歴**: `.next`ビルドキャッシュクリアでタイムアウト問題解決（13 failed → 14 passed）
 
 ### Phase 6: バンドルサイズ最適化
 
