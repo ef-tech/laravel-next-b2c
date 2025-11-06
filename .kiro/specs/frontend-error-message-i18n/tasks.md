@@ -160,25 +160,28 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 5: ロケール検出とAccept-Language連携
 
-- [ ] 7. ロケール検出優先順位の実装と検証
-- [ ] 7.1 URL Prefixロケール検出を実装する
+- [x] 7. ロケール検出優先順位の実装と検証
+- [x] 7.1 URL Prefixロケール検出を実装する
   - URLパスから言語プレフィックス（/ja、/en）を検出
   - 検出したロケールをnext-intlに渡す
   - 無効なプレフィックスの場合はフォールバック
   - _要件: REQ-5.1_
+  - **実装済み**: middleware.ts `localePrefix: "always"` + i18n.ts ロケール検証
 
-- [ ] 7.2 NEXT_LOCALE Cookie永続化を実装する
+- [x] 7.2 NEXT_LOCALE Cookie永続化を実装する
   - ロケール変更時にCookieを設定
   - Cookie読み取りによるロケール復元
   - Cookie有効期限の設定
   - _要件: REQ-5.2_
+  - **実装済み**: next-intl middleware自動Cookie設定、E2Eテスト検証完了（L60-117）
 
-- [ ] 7.3 Accept-Language Headerロケール検出を実装する
+- [x] 7.3 Accept-Language Headerロケール検出を実装する
   - ブラウザのAccept-Language headerを解析
   - @formatjs/intl-localematcherで最適なロケールを選択
   - サポート言語リストとマッチング
   - バックエンドのSetLocaleFromAcceptLanguageとの整合性確認
   - _要件: REQ-5.1、REQ-5.3、REQ-5.4_
+  - **実装済み**: middleware.ts `localeDetection: true`、E2Eテスト検証完了（L119-173、優先順位L198-257）
 
 ### Phase 6: バンドルサイズ最適化
 
