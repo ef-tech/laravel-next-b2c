@@ -9,9 +9,11 @@
  * - Request ID（trace_id）をユーザーに提示
  * - reset()による再試行機能
  * - 本番環境では内部エラー詳細をマスク
+ * - i18n対応（next-intl）
  */
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ApiError } from "@/lib/api-error";
 import { NetworkError } from "@/lib/network-error";
 
@@ -21,6 +23,8 @@ interface ErrorProps {
 }
 
 export default function Error({ error, reset }: ErrorProps) {
+  const t = useTranslations("errors");
+
   useEffect(() => {
     // エラーをコンソールにログ出力（開発環境用）
     console.error("Error Boundary caught an error:", error);
@@ -123,8 +127,10 @@ export default function Error({ error, reset }: ErrorProps) {
                 </svg>
               </div>
               <div className="ml-4">
-                <h2 className="text-lg font-semibold text-gray-900">エラーが発生しました</h2>
-                <p className="text-sm text-gray-500">ステータスコード: {apiError.status}</p>
+                <h2 className="text-lg font-semibold text-gray-900">{t("boundary.title")}</h2>
+                <p className="text-sm text-gray-500">
+                  {t("boundary.status")}: {apiError.status}
+                </p>
               </div>
             </div>
 
@@ -136,7 +142,9 @@ export default function Error({ error, reset }: ErrorProps) {
               {/* バリデーションエラーの詳細表示 */}
               {apiError.validationErrors && (
                 <div className="mt-4 rounded-md bg-red-50 p-4">
-                  <h3 className="mb-2 text-sm font-medium text-red-800">入力エラー:</h3>
+                  <h3 className="mb-2 text-sm font-medium text-red-800">
+                    {t("validation.title")}:
+                  </h3>
                   <ul className="list-inside list-disc space-y-1">
                     {Object.entries(apiError.validationErrors).map(([field, messages]) => (
                       <li key={field} className="text-sm text-red-700">
@@ -150,11 +158,8 @@ export default function Error({ error, reset }: ErrorProps) {
               {/* Request ID（trace_id）表示 */}
               <div className="mt-4 rounded-md bg-gray-100 p-3">
                 <p className="text-xs text-gray-600">
-                  <span className="font-medium">Request ID:</span>{" "}
+                  <span className="font-medium">{t("boundary.requestId")}:</span>{" "}
                   <code className="rounded bg-gray-200 px-2 py-1">{apiError.requestId}</code>
-                </p>
-                <p className="mt-1 text-xs text-gray-500">
-                  お問い合わせの際は、このIDをお伝えください
                 </p>
               </div>
 
@@ -177,12 +182,20 @@ export default function Error({ error, reset }: ErrorProps) {
               )}
             </div>
 
-            <button
-              onClick={reset}
-              className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-            >
-              再試行
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={reset}
+                className="flex-1 rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+              >
+                {t("boundary.retry")}
+              </button>
+              <a
+                href="/"
+                className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+              >
+                {t("boundary.home")}
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -212,19 +225,21 @@ export default function Error({ error, reset }: ErrorProps) {
                 </svg>
               </div>
               <div className="ml-4">
-                <h2 className="text-lg font-semibold text-gray-900">ネットワークエラー</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {t("boundary.networkError")}
+                </h2>
                 <p className="text-sm text-gray-500">
                   {error.isTimeout()
-                    ? "タイムアウト"
+                    ? t("boundary.timeout")
                     : error.isConnectionError()
-                      ? "接続エラー"
-                      : "ネットワークエラー"}
+                      ? t("boundary.connectionError")
+                      : t("boundary.networkError")}
                 </p>
               </div>
             </div>
 
             <div className="mb-4">
-              <p className="mb-2 text-gray-700">{error.getDisplayMessage()}</p>
+              <p className="mb-2 text-gray-700">{error.getDisplayMessage(t)}</p>
 
               {error.isRetryable && (
                 <div className="mt-4 rounded-md bg-blue-50 p-3">
@@ -236,18 +251,26 @@ export default function Error({ error, reset }: ErrorProps) {
                         clipRule="evenodd"
                       />
                     </svg>
-                    このエラーは再試行可能です。しばらくしてから再度お試しください。
+                    {t("boundary.retryableMessage")}
                   </p>
                 </div>
               )}
             </div>
 
-            <button
-              onClick={reset}
-              className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-            >
-              再試行
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={reset}
+                className="flex-1 rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+              >
+                {t("boundary.retry")}
+              </button>
+              <a
+                href="/"
+                className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+              >
+                {t("boundary.home")}
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -280,9 +303,7 @@ export default function Error({ error, reset }: ErrorProps) {
               </svg>
             </div>
             <div className="ml-4">
-              <h2 className="text-lg font-semibold text-gray-900">
-                予期しないエラーが発生しました
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t("global.title")}</h2>
               <p className="text-sm text-gray-500">{error.name}</p>
             </div>
           </div>
@@ -290,20 +311,16 @@ export default function Error({ error, reset }: ErrorProps) {
           <div className="mb-4">
             {/* 本番環境ではエラーメッセージをマスク */}
             <p className="mb-2 text-gray-700">
-              {isProduction
-                ? "申し訳ございませんが、エラーが発生しました。しばらくしてから再度お試しください。"
-                : error.message}
+              {isProduction ? t("network.unknown") : error.message}
             </p>
 
             {/* Error ID表示（digest または生成したID） */}
             <div className="mt-4 rounded-md bg-gray-100 p-3">
               <p className="text-xs text-gray-600">
-                <span className="font-medium">Error ID:</span>{" "}
+                <span className="font-medium">{t("global.errorId")}:</span>{" "}
                 <code className="rounded bg-gray-200 px-2 py-1">{errorId}</code>
               </p>
-              <p className="mt-1 text-xs text-gray-500">
-                お問い合わせの際は、このIDをお伝えください
-              </p>
+              <p className="mt-1 text-xs text-gray-500">{t("global.contactMessage")}</p>
             </div>
 
             {/* 開発環境のみ：スタックトレース表示 */}
@@ -317,12 +334,20 @@ export default function Error({ error, reset }: ErrorProps) {
             )}
           </div>
 
-          <button
-            onClick={reset}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-          >
-            再試行
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={reset}
+              className="flex-1 rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            >
+              {t("global.retry")}
+            </button>
+            <a
+              href="/"
+              className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center font-medium text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+            >
+              {t("boundary.home")}
+            </a>
+          </div>
         </div>
       </div>
     </div>

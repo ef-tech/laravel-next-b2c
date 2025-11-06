@@ -10,7 +10,11 @@
       "retry": "再試行",
       "home": "ホームに戻る",
       "status": "ステータスコード",
-      "requestId": "Request ID"
+      "requestId": "Request ID",
+      "networkError": "ネットワークエラー",
+      "timeout": "タイムアウト",
+      "connectionError": "接続エラー",
+      "retryableMessage": "このエラーは再試行可能です。しばらくしてから再度お試しください。"
     },
     "validation": {
       "title": "入力エラー"

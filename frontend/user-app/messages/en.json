@@ -10,7 +10,11 @@
       "retry": "Retry",
       "home": "Go to Home",
       "status": "Status Code",
-      "requestId": "Request ID"
+      "requestId": "Request ID",
+      "networkError": "Network Error",
+      "timeout": "Timeout",
+      "connectionError": "Connection Error",
+      "retryableMessage": "This error is retryable. Please try again later."
     },
     "validation": {
       "title": "Validation Errors"

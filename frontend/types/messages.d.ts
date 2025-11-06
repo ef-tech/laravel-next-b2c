@@ -18,6 +18,10 @@ type Messages = {
       home: string;
       status: string;
       requestId: string;
+      networkError: string;
+      timeout: string;
+      connectionError: string;
+      retryableMessage: string;
     };
     validation: {
       title: string;
