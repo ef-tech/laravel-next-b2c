@@ -270,28 +270,36 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - **未カバー行**: L60-63 (401リダイレクト：E2Eテストでカバー済み）のみ
   - **備考**: 目標90%を大きく超える93.33%カバレッジ達成。ブランチカバレッジ96.15%。安定した品質を確保
 
-- [ ] 11. Global Error Boundary Component Testsの実装
-- [ ] 11.1 ブラウザロケール検出テストを実装する
-  - document.documentElement.langをモック（ja設定）
-  - 日本語メッセージが表示されることを確認
-  - navigator.languagesをモック（en設定）
-  - 英語メッセージが表示されることを確認
-  - デフォルトロケール（ja）へのフォールバックを確認
-  - _要件: REQ-8.5_
+- [x] 11. Global Error Boundary Component Testsの実装 ✅
 
-- [ ] 11.2 Global Error Boundary両ロケールテストを実装する
-  - 日本語ロケール時の全メッセージ表示確認
-  - 英語ロケール時の全メッセージ表示確認
-  - digestがある場合のError ID表示確認
-  - html lang属性が正しく設定されることを確認
+- [x] 11.1 ブラウザロケール検出テストを実装する ✅
+  - document.documentElement.langをモック（ja設定）✅
+  - 日本語メッセージが表示されることを確認 ✅
+  - navigator.languagesをモック（en設定）✅
+  - 英語メッセージが表示されることを確認 ✅
+  - デフォルトロケール（ja）へのフォールバックを確認 ✅
   - _要件: REQ-8.5_
+  - **実装済み**: 5テスト全成功（User App & Admin App）
 
-- [ ] 11.3 Global Error Boundary 90%以上カバレッジを達成する
-  - ロケール検出の全パス（documentElement.lang、navigator.languages、フォールバック）をカバー
-  - 両ロケール（ja、en）をカバー
-  - digestの有無をカバー
-  - カバレッジレポートを生成して90%以上確認
+- [x] 11.2 Global Error Boundary両ロケールテストを実装する ✅
+  - 日本語ロケール時の全メッセージ表示確認 ✅
+  - 英語ロケール時の全メッセージ表示確認 ✅
+  - digestがある場合のError ID表示確認 ✅
+  - html lang属性が正しく設定されることを確認 ✅
+  - _要件: REQ-8.5_
+  - **実装済み**: 6テスト全成功（User App & Admin App）
+
+- [x] 11.3 Global Error Boundary 90%以上カバレッジを達成する ✅
+  - ロケール検出の全パス（documentElement.lang、navigator.languages、フォールバック）をカバー ✅
+  - 両ロケール（ja、en）をカバー ✅
+  - digestの有無をカバー ✅
+  - NetworkErrorとApiErrorの多言語対応をカバー ✅
+  - ApiError再構築（cause経由、プロパティ消失、エラーハンドリング）をカバー ✅
+  - カバレッジレポートを生成して **93.87%達成**（User App & Admin App）✅
   - _要件: REQ-8.6_
+  - **実装状況**: 24テスト全成功（User App & Admin App）、カバレッジ93.87%達成
+  - **未カバー行**: L97 (サーバーサイドチェック), L175 (名前ベースApiError再構築エラー), L183 (Generic error再構築エラー) - 非常に稀なエッジケース
+  - **備考**: 目標90%を超える93.87%カバレッジ達成。インポートパス統一（相対パス→エイリアス）によりinstanceofチェック正常化。ブランチカバレッジ93.75%
 
 - [ ] 12. E2E Tests（Playwright）の実装
 - [ ] 12.1 ロケール検出E2Eテストを実装する

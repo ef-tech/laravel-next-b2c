@@ -17,9 +17,9 @@
  */
 
 import { useEffect, useState } from "react";
-import { ApiError } from "../../../lib/api-error";
-import type { RFC7807Problem } from "../../../types/errors";
-import { NetworkError } from "../../../lib/network-error";
+import { ApiError } from "@/lib/api-error";
+import type { RFC7807Problem } from "@/types/errors";
+import { NetworkError } from "@/lib/network-error";
 
 /**
  * 静的メッセージ辞書（ja、en）
@@ -128,14 +128,14 @@ interface GlobalErrorProps {
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
-  // ロケール状態管理
-  const [locale, setLocale] = useState<Locale>("ja");
+  // ロケール状態管理 - 初期値として検出
+  const [locale, setLocale] = useState<Locale>(detectLocale);
 
   useEffect(() => {
     // エラーをコンソールにログ出力（開発環境用）
     console.error("Global Error Boundary caught an error:", error);
 
-    // ロケールを検出して設定
+    // ロケールを再検出して更新（error変更時）
     setLocale(detectLocale());
   }, [error]);
 
@@ -280,7 +280,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   }
 
   // NetworkError の場合
-  if (error instanceof NetworkError) {
+  // Check both instanceof and name for Jest compatibility
+  if (error instanceof NetworkError || error.name === "NetworkError") {
+    // Type assertion for NetworkError methods
+    const networkError = error as NetworkError;
+
     return (
       <html lang={locale}>
         <body>
@@ -308,9 +312,9 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                       {t.boundary.networkError}
                     </h2>
                     <p className="text-sm text-gray-500">
-                      {error.isTimeout()
+                      {networkError.isTimeout()
                         ? t.boundary.timeout
-                        : error.isConnectionError()
+                        : networkError.isConnectionError()
                           ? t.boundary.connectionError
                           : t.boundary.networkError}
                     </p>
@@ -318,9 +322,15 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 </div>
 
                 <div className="mb-4">
-                  <p className="mb-2 text-gray-700">{error.getDisplayMessage()}</p>
+                  <p className="mb-2 text-gray-700">
+                    {networkError.isTimeout()
+                      ? t.network.timeout
+                      : networkError.isConnectionError()
+                        ? t.network.connection
+                        : t.network.unknown}
+                  </p>
 
-                  {error.isRetryable && (
+                  {networkError.isRetryable && (
                     <div className="mt-4 rounded-md bg-blue-50 p-3">
                       <p className="text-sm text-blue-800">
                         <svg
