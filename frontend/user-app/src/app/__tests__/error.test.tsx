@@ -12,7 +12,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import ErrorBoundary from "../error";
+import ErrorBoundary from "../[locale]/error";
 import { NetworkError } from "@/lib/network-error";
 import { ApiError } from "@/lib/api-error";
 
