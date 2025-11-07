@@ -301,8 +301,8 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - **未カバー行**: L97 (サーバーサイドチェック), L175 (名前ベースApiError再構築エラー), L183 (Generic error再構築エラー) - 非常に稀なエッジケース
   - **備考**: 目標90%を超える93.87%カバレッジ達成。インポートパス統一（相対パス→エイリアス）によりinstanceofチェック正常化。ブランチカバレッジ93.75%
 
-- [ ] 12. E2E Tests（Playwright）の実装
-- [ ] 12.1 ロケール検出E2Eテストを実装する
+- [x] 12. E2E Tests（Playwright）の実装
+- [x] 12.1 ロケール検出E2Eテストを実装する
   - Accept-Languageヘッダーをjaに設定してページアクセス
   - html lang属性がjaであることを確認
   - エラートリガー後に日本語エラーメッセージ表示を確認
@@ -310,34 +310,41 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - html lang属性がenであることを確認
   - エラートリガー後に英語エラーメッセージ表示を確認
   - _要件: REQ-8.7_
+  - **実装状況**: `error-message-i18n.spec.ts`にUser App/Admin App用テスト実装完了
+  - **備考**: Error Boundary多言語化はTask 10で完全実装済み。E2Eテストファイル作成（16テスト）
 
-- [ ] 12.2 NEXT_LOCALE Cookie永続化E2Eテストを実装する
+- [x] 12.2 NEXT_LOCALE Cookie永続化E2Eテストを実装する
   - 日本語でページアクセス
   - NEXT_LOCALE cookieがjaに設定されることを確認
   - Accept-Languageヘッダーをクリア
   - ページリロード後もhtml lang属性がjaであることを確認（Cookie優先）
   - _要件: REQ-8.7_
+  - **実装状況**: Cookie優先度テスト実装完了（2テスト）
 
-- [ ] 12.3 NetworkErrorタイムアウトE2Eテストを実装する
+- [x] 12.3 NetworkErrorタイムアウトE2Eテストを実装する
   - 日本語ロケールでAPIタイムアウトをシミュレート
   - "リクエストがタイムアウトしました"メッセージが表示されることを確認
   - 英語ロケールでAPIタイムアウトをシミュレート
   - "The request timed out"メッセージが表示されることを確認
   - _要件: REQ-8.7_
+  - **実装状況**: NetworkError多言語化テスト実装完了（User App 2テスト、Admin App 2テスト）
 
-- [ ] 12.4 ApiError検証エラーE2Eテストを実装する
+- [x] 12.4 ApiError検証エラーE2Eテストを実装する
   - 日本語ロケールで400 Bad Requestをモック
   - "入力エラー:"タイトルと検証エラーメッセージ（日本語）が表示されることを確認
   - 英語ロケールで400 Bad Requestをモック
   - "Validation Errors:"タイトルと検証エラーメッセージ（英語）が表示されることを確認
   - _要件: REQ-8.7_
+  - **実装状況**: ApiError多言語化テスト実装完了（User App 2テスト、Admin App 2テスト）
 
-- [ ] 12.5 Global Error Boundaryブラウザロケール検出E2Eテストを実装する
+- [x] 12.5 Global Error Boundaryブラウザロケール検出E2Eテストを実装する
   - ブラウザ言語設定をenにエミュレート
   - グローバルエラーをトリガー
   - "An unexpected error occurred"メッセージが表示されることを確認
   - "Retry"ボタンが表示されることを確認
   - _要件: REQ-8.7_
+  - **実装状況**: Global Error Boundary多言語化テスト実装完了（User App 2テスト、Admin App 2テスト）
+  - **備考**: global-error.tsxのブラウザロケール検出機能（detectLocale関数）テスト実装
 
 ### Phase 8: CI/CD統合
 
