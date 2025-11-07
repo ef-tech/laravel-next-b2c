@@ -88,16 +88,31 @@ type Locale = keyof typeof messages;
 
 /**
  * ブラウザロケールを検出
- * 1. document.documentElement.lang をチェック
- * 2. navigator.languages をチェック
- * 3. デフォルトは 'ja'
+ * 1. NEXT_LOCALE Cookie をチェック（next-intl middleware が設定）
+ * 2. document.documentElement.lang をチェック
+ * 3. navigator.languages をチェック
+ * 4. デフォルトは 'ja'
  */
 const detectLocale = (): Locale => {
   if (typeof window === "undefined") {
     return "ja";
   }
 
-  // 1. document.documentElement.lang をチェック
+  // 1. NEXT_LOCALE Cookie をチェック
+  const cookies = document.cookie.split(";");
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split("=");
+    if (name === "NEXT_LOCALE") {
+      if (value === "en") {
+        return "en";
+      }
+      if (value === "ja") {
+        return "ja";
+      }
+    }
+  }
+
+  // 2. document.documentElement.lang をチェック
   const htmlLang = document.documentElement.lang;
   if (htmlLang && htmlLang.startsWith("en")) {
     return "en";
@@ -106,7 +121,7 @@ const detectLocale = (): Locale => {
     return "ja";
   }
 
-  // 2. navigator.languages をチェック
+  // 3. navigator.languages をチェック
   if (navigator.languages) {
     for (const lang of navigator.languages) {
       if (lang.startsWith("en")) {
@@ -118,7 +133,7 @@ const detectLocale = (): Locale => {
     }
   }
 
-  // 3. デフォルトは 'ja'
+  // 4. デフォルトは 'ja'
   return "ja";
 };
 
