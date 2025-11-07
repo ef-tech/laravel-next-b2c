@@ -348,28 +348,34 @@ next-intlを使用してフロントエンドアプリケーション（User App
 
 ### Phase 8: CI/CD統合
 
-- [ ] 13. 翻訳ファイル検証スクリプトの作成
-- [ ] 13.1 validate-i18n-messages.jsスクリプトを作成する
+- [x] 13. 翻訳ファイル検証スクリプトの作成
+- [x] 13.1 validate-i18n-messages.jsスクリプトを作成する
   - ja.jsonとen.jsonの構造を検証
   - 必須キー（errors.network, errors.boundary等）の存在確認
   - ネストレベルの検証
   - 翻訳値が文字列であることを確認
   - スクリプト実行時のエラーハンドリング
   - _要件: REQ-9.1、REQ-9.2_
+  - **実装状況**: validate-i18n-messages.js実装完了（9 Unit Tests全てPASS）
+  - **備考**: 翻訳ファイル構造検証・必須キー検証・ネストレベル検証・値型検証実装
 
-- [ ] 13.2 validate-i18n-keys.jsスクリプトを作成する
+- [x] 13.2 validate-i18n-keys.jsスクリプトを作成する
   - ja.jsonとen.jsonのキー整合性確認
   - 片方にしか存在しないキーの検出
   - キー数の一致確認
   - 不足キーのレポート出力
   - _要件: REQ-9.3_
+  - **実装状況**: validate-i18n-keys.js実装完了（10 Unit Tests全てPASS）
+  - **備考**: キー整合性検証・キー数検証・不足キーレポート機能実装
 
-- [ ] 13.3 翻訳ファイル検証スクリプトのUnit Testを作成する
+- [x] 13.3 翻訳ファイル検証スクリプトのUnit Testを作成する
   - 有効な翻訳ファイルでエラーなしを確認
   - 必須キー不足時にエラーをスロー
   - ネストレベル不正時にエラーをスロー
   - キー不整合時にエラーをスロー
   - _要件: REQ-9.7_
+  - **実装状況**: 全Unit Test実装完了（validate-i18n-messages: 9テスト、validate-i18n-keys: 10テスト）
+  - **備考**: TDD RED-GREEN-REFACTORサイクルで実装、npm run validate:i18n統合スクリプト追加
 
 - [ ] 14. GitHub Actionsワークフロー更新
 - [ ] 14.1 frontend-test.ymlに翻訳ファイル検証を追加する

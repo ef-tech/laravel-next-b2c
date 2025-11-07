@@ -1,7 +1,7 @@
 module.exports = {
   displayName: 'scripts',
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/__tests__/**/*.test.ts'],
+  testMatch: ['<rootDir>/__tests__/**/*.test.{ts,js}'],
   transform: {
     '^.+\\.ts$': [
       'ts-jest',
@@ -15,5 +15,5 @@ module.exports = {
     ],
   },
   moduleFileExtensions: ['ts', 'js'],
-  collectCoverageFrom: ['<rootDir>/*.ts', '!<rootDir>/__tests__/**'],
+  collectCoverageFrom: ['<rootDir>/*.{ts,js}', '!<rootDir>/__tests__/**'],
 };
