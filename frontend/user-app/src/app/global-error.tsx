@@ -99,16 +99,11 @@ const detectLocale = (): Locale => {
   }
 
   // 1. NEXT_LOCALE Cookie をチェック
-  const cookies = document.cookie.split(";");
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split("=");
-    if (name === "NEXT_LOCALE") {
-      if (value === "en") {
-        return "en";
-      }
-      if (value === "ja") {
-        return "ja";
-      }
+  const cookieMatch = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/);
+  if (cookieMatch) {
+    const value = cookieMatch[1];
+    if (value === "en" || value === "ja") {
+      return value;
     }
   }
 
