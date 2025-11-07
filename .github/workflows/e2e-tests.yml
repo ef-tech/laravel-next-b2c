@@ -38,6 +38,7 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'frontend/**/messages/**'
       - 'backend/laravel-api/app/Http/Controllers/Api/V1/**'
       - 'backend/laravel-api/app/Http/Api/V1/**'
       - 'backend/laravel-api/app/Http/Middleware/ApiVersion.php'
@@ -52,6 +53,7 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'frontend/**/messages/**'
       - 'backend/laravel-api/app/Http/Controllers/Api/V1/**'
       - 'backend/laravel-api/app/Http/Api/V1/**'
       - 'backend/laravel-api/app/Http/Middleware/ApiVersion.php'

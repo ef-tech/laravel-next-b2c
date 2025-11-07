@@ -21,7 +21,10 @@
     "env:sync": "tsx scripts/env-sync.ts --write",
     "validate:error-codes": "node scripts/validate-error-codes.js",
     "generate:error-types": "node scripts/generate-error-types.js",
-    "verify:error-types": "bash scripts/verify-error-types.sh"
+    "verify:error-types": "bash scripts/verify-error-types.sh",
+    "validate:i18n-messages": "node scripts/validate-i18n-messages.js",
+    "validate:i18n-keys": "node scripts/validate-i18n-keys.js",
+    "validate:i18n": "npm run validate:i18n-messages && npm run validate:i18n-keys"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

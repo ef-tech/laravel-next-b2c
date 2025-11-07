@@ -75,6 +75,14 @@ laravel-next-b2c/
 │   ├── analyze-csp-violations.sh         # 🔐 CSP違反ログ分析スクリプト
 │   ├── validate-security-headers.sh      # 🔐 セキュリティヘッダー検証スクリプト（Laravel/Next.js対応）
 │   ├── validate-cors-config.sh           # 🌐 CORS設定整合性確認スクリプト
+│   ├── generate-error-types.js           # 🎯 エラー型定義自動生成スクリプト（Laravel Enum → TypeScript型定義）
+│   │   # - Laravel app/Enums/ErrorCode.phpを解析
+│   │   # - frontend/types/errors.ts を自動生成
+│   │   # - ErrorCode Enum/Union型定義
+│   │   # - RFC 7807準拠エラーレスポンス型
+│   │   # - tryFrom()メソッド対応
+│   ├── verify-error-types.sh             # 🎯 エラー型定義検証スクリプト（Laravel/TypeScript型整合性チェック）
+│   ├── validate-error-codes.js           # 🎯 エラーコード検証スクリプト（重複チェック、命名規約検証）
 │   └── setup/                            # ⚡ セットアップスクリプト（make setup実装）
 │       └── setup-project.sh              # プロジェクト一括セットアップスクリプト（15分以内環境構築）
 │   # ⚠️ 注記: scripts/dev/ ディレクトリは削除されました
@@ -125,6 +133,11 @@ laravel-api/
 │   ├── Console/         # Artisanコマンド
 │   │   └── Commands/    # カスタムコマンド
 │   │       └── PruneExpiredTokens.php  # 🔐 期限切れトークン削除コマンド（tokens:prune）
+│   ├── Enums/           # Enumクラス（PHP 8.1+）
+│   │   └── ErrorCode.php  # 🎯 エラーコード定義（型安全、TypeScript自動生成対象）
+│   │       # - Enum定義: VALIDATION_ERROR, AUTHENTICATION_FAILED等
+│   │       # - tryFrom()メソッド: 型安全な変換処理
+│   │       # - Laravel/フロントエンド同期保証
 │   ├── Http/            # 🏗️ HTTP層（DDD統合）
 │   │   ├── Controllers/ # Controllerからユースケース呼び出し
 │   │   │   ├── Api/     # 📊 API基本機能コントローラー（レガシー、非推奨）
@@ -145,6 +158,7 @@ laravel-api/
 │   │   │   ├── Authenticate.php  # 🔐 Sanctum認証ミドルウェア（auth:sanctum）
 │   │   │   ├── SecurityHeaders.php  # 🔐 セキュリティヘッダーミドルウェア（X-Frame-Options、X-Content-Type-Options等）
 │   │   │   ├── ContentSecurityPolicy.php  # 🔐 CSPヘッダー設定ミドルウェア（動的CSP構築、Report-Only/Enforceモード切替）
+│   │   │   ├── SetLocaleFromAcceptLanguage.php  # 🌍 多言語対応ミドルウェア（Accept-Language header自動検出、i18n対応）
 │   │   │   ├── SetRequestId.php          # 🛡️ リクエストID付与（Laravel標準Str::uuid()、構造化ログ対応）
 │   │   │   ├── LogPerformance.php        # 🛡️ パフォーマンス監視（レスポンスタイム記録）
 │   │   │   ├── LogSecurity.php           # 🛡️ セキュリティログ分離（個人情報ハッシュ化対応、LOG_HASH_SENSITIVE_DATA環境変数制御）
@@ -191,6 +205,15 @@ laravel-api/
 │       # - レート制限環境変数: RATELIMIT_CACHE_STORE、RATELIMIT_*_MAX_ATTEMPTS
 │       # - Idempotency環境変数: IDEMPOTENCY_CACHE_STORE、IDEMPOTENCY_TTL
 │       # - ログ個人情報配慮: LOG_HASH_SENSITIVE_DATA、LOG_SENSITIVE_FIELDS
+├── lang/                # 🌍 多言語ファイル（i18n対応）
+│   ├── ja/              # 日本語リソース
+│   │   ├── validation.php  # バリデーションメッセージ（日本語）
+│   │   ├── errors.php      # 🎯 エラーメッセージ（日本語、RFC 7807準拠）
+│   │   └── auth.php        # 認証メッセージ（日本語）
+│   └── en/              # 英語リソース
+│       ├── validation.php  # バリデーションメッセージ（英語）
+│       ├── errors.php      # 🎯 エラーメッセージ（英語、RFC 7807準拠）
+│       └── auth.php        # 認証メッセージ（英語）
 ├── database/            # データベース関連
 │   ├── factories/       # モデルファクトリー
 │   ├── migrations/      # マイグレーション
@@ -299,14 +322,25 @@ laravel-api/
 │   │   ├── globals.css  # グローバルスタイル
 │   │   ├── layout.tsx   # ルートレイアウト
 │   │   ├── page.tsx     # ホームページ
+│   │   ├── error.tsx    # 🎯 Error Boundaries実装（React 19、フロントエンドエラー捕捉、Fallback UI表示）
+│   │   ├── global-error.tsx  # 🎯 グローバルError Boundaries（アプリ全体のエラー捕捉）
 │   │   └── actions.ts   # Server Actions
 │   ├── components/      # 再利用可能コンポーネント
 │   │   └── **/*.test.tsx # コンポーネントテスト
 │   ├── lib/             # ユーティリティ・ヘルパー
+│   │   ├── api-client.ts  # 🎯 API通信ユーティリティ（Sanctum認証統合、401自動リダイレクト、NetworkError日本語化）
+│   │   ├── error-handler.ts  # 🎯 エラーハンドリングロジック（RFC 7807準拠エラー解析、Request ID抽出）
 │   │   └── **/*.test.ts  # ライブラリテスト
 │   ├── hooks/           # カスタムReactフック
 │   │   └── **/*.test.ts  # フックテスト
 │   ├── types/           # TypeScript型定義
+│   │   ├── api/         # API関連型定義
+│   │   │   └── v1.ts    # 🔢 V1 API型定義（Presenter型、リクエスト型、レスポンス型）
+│   │   └── errors.ts    # 🎯 エラー型定義（自動生成、ErrorCode Enum、RFC 7807準拠型）
+│   │       # - Laravel Enumから自動生成（generate-error-types.js）
+│   │       # - ErrorCode Enum/Union型定義
+│   │       # - RFC 7807準拠エラーレスポンス型
+│   │       # - 型安全なエラーコード体系
 │   └── utils/           # 汎用ユーティリティ
 ├── public/              # 静的ファイル
 ├── coverage/            # テストカバレッジレポート
@@ -332,6 +366,10 @@ frontend/
 │                        #   - Testing Library推奨ルールセット（flat/react）
 │                        #   - Jest-DOM推奨ルールセット（flat/recommended）
 │                        # - Prettier競合ルール無効化
+├── types/               # 🎯 フロントエンド共通型定義
+│   ├── errors.ts        # エラー型定義（共通、自動生成対象、ErrorCode Enum）
+│   └── api/             # API型定義
+│       └── v1.ts        # 🔢 V1 API型定義（Presenter型、リクエスト型、レスポンス型）
 ├── admin-app/           # 管理者向けアプリケーション
 ├── user-app/            # エンドユーザー向けアプリケーション
 ├── TESTING_GUIDE.md     # フロントエンドテストガイド

@@ -67,6 +67,48 @@ jest.mock('next/font/local', () => ({
 // Next.js Navigation Mock
 jest.mock('next/navigation', () => require('next-router-mock'));
 
+// next-intl Mock
+// Mock next-intl for Error Boundary tests
+jest.mock('next-intl', () => {
+  const React = require('react');
+
+  const flattenMessages = (obj: any, prefix = ''): Record<string, string> => {
+    return Object.keys(obj).reduce(
+      (acc, key) => {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
+        if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+          Object.assign(acc, flattenMessages(obj[key], fullKey));
+        } else {
+          acc[fullKey] = obj[key];
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+  };
+
+  // Create a Context for messages
+  const MessagesContext = React.createContext<Record<string, string>>({});
+
+  return {
+    useTranslations: (namespace: string) => {
+      // Get messages from context during component render
+      const messages = React.useContext(MessagesContext);
+      return (key: string) => {
+        const fullKey = `${namespace}.${key}`;
+        return messages[fullKey] || fullKey;
+      };
+    },
+    NextIntlClientProvider: ({ children, messages }: { children: React.ReactNode; messages: any }) => {
+      // Flatten messages
+      const flatMessages = flattenMessages(messages);
+
+      // Provide messages via Context
+      return React.createElement(MessagesContext.Provider, { value: flatMessages }, children);
+    },
+  };
+});
+
 // Console Error Suppression
 const originalError = console.error;
 beforeAll(() => {

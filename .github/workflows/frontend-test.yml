@@ -24,6 +24,8 @@ on:
       - 'package-lock.json'
       - 'frontend/**/package.json'
       - 'frontend/**/package-lock.json'
+      - 'frontend/**/messages/**'
+      - 'scripts/validate-i18n-*.js'
       - 'backend/laravel-api/app/Http/Controllers/Api/**'
       - 'backend/laravel-api/app/Http/Resources/**'
       - 'backend/laravel-api/routes/api.php'
@@ -47,6 +49,8 @@ on:
       - 'package-lock.json'
       - 'frontend/**/package.json'
       - 'frontend/**/package-lock.json'
+      - 'frontend/**/messages/**'
+      - 'scripts/validate-i18n-*.js'
       - 'backend/laravel-api/app/Http/Controllers/Api/**'
       - 'backend/laravel-api/app/Http/Resources/**'
       - 'backend/laravel-api/routes/api.php'
@@ -87,6 +91,11 @@ jobs:
 
       - name: Validate environment variables
         run: npm run env:check
+        env:
+          CI: true
+
+      - name: Validate i18n translation files
+        run: npm run validate:i18n
         env:
           CI: true
 
