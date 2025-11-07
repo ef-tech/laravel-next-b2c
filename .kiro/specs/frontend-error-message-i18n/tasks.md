@@ -398,20 +398,24 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - pathsトリガーに`frontend/**/messages/**`追加 ✓
   - _要件: REQ-9.5_
 
-- [ ] 15. Makefileタスク統合
-- [ ] 15.1 make validate-i18nタスクを作成する
-  - validate-i18n-messages.jsを実行
-  - validate-i18n-keys.jsを実行
-  - 両スクリプトの結果をレポート
-  - タスク実行ログを出力
+- [x] 15. Makefileタスク統合
+- [x] 15.1 make validate-i18nタスクを作成する
+  - **実装状況**: `make validate-i18n`タスク実装完了、動作確認済み
+  - **備考**: 翻訳ファイル構造検証・キー整合性検証を統合実行、ログ出力対応
+  - validate-i18n-messages.jsを実行 ✓
+  - validate-i18n-keys.jsを実行 ✓
+  - 両スクリプトの結果をレポート ✓
+  - タスク実行ログを出力 ✓
   - _要件: REQ-9.6_
 
-- [ ] 15.2 make test-i18nタスクを作成する
-  - NetworkError Unit Testsを実行
-  - Error Boundary Component Testsを実行
-  - Global Error Boundary Component Testsを実行
-  - i18n E2E Testsを実行
-  - カバレッジレポートを生成
+- [x] 15.2 make test-i18nタスクを作成する
+  - **実装状況**: `make test-i18n`タスク実装完了（Unit + Component + E2E統合実行）
+  - **備考**: NetworkError/Error Boundary/Global Error Boundaryテスト + i18n E2Eテスト + カバレッジレポート生成
+  - NetworkError Unit Testsを実行 ✓
+  - Error Boundary Component Testsを実行 ✓
+  - Global Error Boundary Component Testsを実行 ✓
+  - i18n E2E Testsを実行 ✓
+  - カバレッジレポートを生成 ✓
   - _要件: REQ-9.6_
 
 ---

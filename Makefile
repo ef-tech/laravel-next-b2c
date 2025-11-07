@@ -19,6 +19,7 @@ SCRIPTS_DIR := scripts
 .PHONY: test-with-coverage test-pr test-smoke test-diagnose ci-test full-test
 .PHONY: docker-up docker-down docker-logs docker-reset
 .PHONY: lint lint-fix health
+.PHONY: validate-i18n test-i18n
 
 # =============================================================================
 # デフォルトターゲット
@@ -240,3 +241,38 @@ prod-test: ## 本番同等テスト環境（PostgreSQL設定）
 	$(MAKE) test-switch-pgsql
 	@echo "✅ 本番同等テスト環境の準備が完了しました！"
 	@echo "   テスト実行: make test-pgsql"
+
+# =============================================================================
+# i18n検証・テストコマンド
+# =============================================================================
+
+validate-i18n: ## 翻訳ファイル検証（構造・キー整合性チェック）
+	@echo "🌍 翻訳ファイル検証を開始します..."
+	@echo ""
+	@echo "1️⃣ 翻訳ファイル構造検証（validate-i18n-messages.js）..."
+	@npm run validate:i18n-messages
+	@echo ""
+	@echo "2️⃣ 翻訳ファイルキー整合性検証（validate-i18n-keys.js）..."
+	@npm run validate:i18n-keys
+	@echo ""
+	@echo "✅ 翻訳ファイル検証完了！"
+
+test-i18n: ## i18n関連テスト実行（Unit + Component + E2E）
+	@echo "🧪 i18n関連テスト実行を開始します..."
+	@echo ""
+	@echo "1️⃣ NetworkError Unit Tests..."
+	@npm test -- NetworkError.test --watchAll=false
+	@echo ""
+	@echo "2️⃣ Error Boundary Component Tests..."
+	@npm test -- error.test --watchAll=false
+	@echo ""
+	@echo "3️⃣ Global Error Boundary Component Tests..."
+	@npm test -- global-error.test --watchAll=false
+	@echo ""
+	@echo "4️⃣ i18n E2E Tests..."
+	@cd e2e && npx playwright test i18n-locale-detection.spec.ts error-message-i18n.spec.ts
+	@echo ""
+	@echo "5️⃣ カバレッジレポート生成..."
+	@npm run test:coverage
+	@echo ""
+	@echo "✅ i18n関連テスト実行完了！"
