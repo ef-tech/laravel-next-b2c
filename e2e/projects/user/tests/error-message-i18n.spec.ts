@@ -29,7 +29,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Verify html lang attribute is 'ja'
         const html = page.locator("html");
@@ -61,7 +61,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/en/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Verify html lang attribute is 'en'
         const html = page.locator("html");
@@ -131,7 +131,7 @@ test.describe("Error Message i18n - User App", () => {
       });
 
       // Visit test-error page (without URL prefix)
-      await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+      await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
       // Verify html lang attribute is 'ja' (Cookie priority)
       const html = page.locator("html");
@@ -159,7 +159,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger Network Timeout error
         await page.click('[data-testid="trigger-timeout-error"]');
@@ -187,7 +187,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/en/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger Network Timeout error
         await page.click('[data-testid="trigger-timeout-error"]');
@@ -218,7 +218,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 422 Validation Error
         await page.click('[data-testid="trigger-422-error"]');
@@ -248,7 +248,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/en/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 422 Validation Error
         await page.click('[data-testid="trigger-422-error"]');
@@ -281,7 +281,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/en/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 500 Generic Exception (triggers global-error.tsx)
         await page.click('[data-testid="trigger-500-error"]');
@@ -309,7 +309,7 @@ test.describe("Error Message i18n - User App", () => {
         await context.clearCookies();
 
         // Visit test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 500 Generic Exception (triggers global-error.tsx)
         await page.click('[data-testid="trigger-500-error"]');
@@ -342,7 +342,7 @@ test.describe("Error Message i18n - Admin App", () => {
         await context.clearCookies();
 
         // Visit Admin App test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger Network Timeout error
         await page.click('[data-testid="trigger-timeout-error"]');
@@ -367,7 +367,7 @@ test.describe("Error Message i18n - Admin App", () => {
         await context.clearCookies();
 
         // Visit Admin App test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/en/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger Network Timeout error
         await page.click('[data-testid="trigger-timeout-error"]');
@@ -395,7 +395,7 @@ test.describe("Error Message i18n - Admin App", () => {
         await context.clearCookies();
 
         // Visit Admin App test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 422 Validation Error
         await page.click('[data-testid="trigger-422-error"]');
@@ -420,7 +420,7 @@ test.describe("Error Message i18n - Admin App", () => {
         await context.clearCookies();
 
         // Visit Admin App test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/en/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 422 Validation Error
         await page.click('[data-testid="trigger-422-error"]');
@@ -448,7 +448,7 @@ test.describe("Error Message i18n - Admin App", () => {
         await context.clearCookies();
 
         // Visit Admin App test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/en/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 500 Generic Exception (triggers global-error.tsx)
         await page.click('[data-testid="trigger-500-error"]');
@@ -473,7 +473,7 @@ test.describe("Error Message i18n - Admin App", () => {
         await context.clearCookies();
 
         // Visit Admin App test-error page
-        await page.goto("/test-error", { waitUntil: "networkidle", timeout: 90000 });
+        await page.goto("/ja/test-error", { waitUntil: "networkidle", timeout: 90000 });
 
         // Trigger 500 Generic Exception (triggers global-error.tsx)
         await page.click('[data-testid="trigger-500-error"]');
