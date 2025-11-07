@@ -20,6 +20,7 @@ describe("Global Error Boundary (Admin App)", () => {
   const mockReset = jest.fn();
   let originalLang: string;
   let originalNavigatorLanguages: readonly string[];
+  let originalCookie: string;
 
   beforeEach(() => {
     mockReset.mockClear();
@@ -29,6 +30,7 @@ describe("Global Error Boundary (Admin App)", () => {
     // Save original values
     originalLang = document.documentElement.lang;
     originalNavigatorLanguages = navigator.languages;
+    originalCookie = document.cookie;
   });
 
   afterEach(() => {
@@ -47,9 +49,62 @@ describe("Global Error Boundary (Admin App)", () => {
       configurable: true,
       value: originalNavigatorLanguages,
     });
+
+    // Clear all cookies
+    document.cookie.split(";").forEach((cookie) => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    });
   });
 
   describe("Task 11.1: ブラウザロケール検出テスト", () => {
+    it("NEXT_LOCALE=ja Cookieがある場合、日本語メッセージを表示する", async () => {
+      // Set NEXT_LOCALE Cookie
+      document.cookie = "NEXT_LOCALE=ja";
+
+      const error = new Error("Test error");
+      render(<GlobalError error={error} reset={mockReset} />);
+
+      // 日本語メッセージが表示されることを確認
+      await waitFor(() => {
+        expect(screen.getByText("予期しないエラーが発生しました")).toBeInTheDocument();
+      });
+    });
+
+    it("NEXT_LOCALE=en Cookieがある場合、英語メッセージを表示する", async () => {
+      // Set NEXT_LOCALE Cookie
+      document.cookie = "NEXT_LOCALE=en";
+
+      const error = new Error("Test error");
+      render(<GlobalError error={error} reset={mockReset} />);
+
+      // 英語メッセージが表示されることを確認
+      await waitFor(() => {
+        expect(screen.getByText("An unexpected error occurred")).toBeInTheDocument();
+      });
+    });
+
+    it("Cookie優先: NEXT_LOCALE=en Cookie + lang=ja の場合、英語メッセージを表示する", async () => {
+      // Set NEXT_LOCALE Cookie to 'en'
+      document.cookie = "NEXT_LOCALE=en";
+
+      // Set document.documentElement.lang to 'ja'
+      Object.defineProperty(document.documentElement, "lang", {
+        writable: true,
+        configurable: true,
+        value: "ja",
+      });
+
+      const error = new Error("Test error");
+      render(<GlobalError error={error} reset={mockReset} />);
+
+      // Cookie優先で英語メッセージが表示されることを確認
+      await waitFor(() => {
+        expect(screen.getByText("An unexpected error occurred")).toBeInTheDocument();
+      });
+    });
+
     it("document.documentElement.langが'ja'のとき、日本語メッセージを表示する", async () => {
       // Mock document.documentElement.lang
       Object.defineProperty(document.documentElement, "lang", {
