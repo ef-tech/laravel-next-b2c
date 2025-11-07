@@ -20,7 +20,6 @@ describe("Global Error Boundary (Admin App)", () => {
   const mockReset = jest.fn();
   let originalLang: string;
   let originalNavigatorLanguages: readonly string[];
-  let originalCookie: string;
 
   beforeEach(() => {
     mockReset.mockClear();
@@ -30,7 +29,6 @@ describe("Global Error Boundary (Admin App)", () => {
     // Save original values
     originalLang = document.documentElement.lang;
     originalNavigatorLanguages = navigator.languages;
-    originalCookie = document.cookie;
   });
 
   afterEach(() => {
