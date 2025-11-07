@@ -163,6 +163,7 @@ export default function Error({ error, reset }: ErrorProps) {
                   <span className="font-medium">{t("boundary.requestId")}:</span>{" "}
                   <code className="rounded bg-gray-200 px-2 py-1">{apiError.requestId}</code>
                 </p>
+                <p className="mt-1 text-xs text-gray-500">{t("global.contactMessage")}</p>
               </div>
 
               {/* 開発環境のみ：詳細情報表示 */}
