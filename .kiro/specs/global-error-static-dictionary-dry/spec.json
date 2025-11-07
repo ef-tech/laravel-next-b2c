@@ -1,0 +1,67 @@
+{
+  "feature_name": "global-error-static-dictionary-dry",
+  "created_at": "2025-11-08T00:00:00Z",
+  "updated_at": "2025-11-07T20:08:17Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 119,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/119",
+    "title": "Refactor: Global Error静的辞書の共通化（DRY原則改善）",
+    "labels": [
+      "enhancement",
+      "refactoring",
+      "frontend"
+    ],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": [],
+      "frontend": [
+        "TypeScript",
+        "React",
+        "Next.js"
+      ],
+      "infrastructure": [],
+      "tools": []
+    },
+    "requirements_hints": [
+      "DRY原則の適用により重複コード削減",
+      "保守性向上のための単一箇所管理",
+      "表現の一貫性保証によるドリフト防止",
+      "既存テスト（54テスト）の全てpass",
+      "型安全性の維持"
+    ],
+    "project_structure": [
+      "frontend/user-app/src/app/global-error.tsx",
+      "frontend/admin-app/src/app/global-error.tsx",
+      "frontend/lib/global-error-messages.ts",
+      "frontend/types/messages.d.ts"
+    ],
+    "services": {},
+    "todo_items": [
+      "共通モジュール化の実装",
+      "User App/Admin Appでの動作確認",
+      "既存テストの全てpass（54テスト）",
+      "型安全性の維持"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
