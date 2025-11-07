@@ -377,19 +377,25 @@ next-intlを使用してフロントエンドアプリケーション（User App
   - **実装状況**: 全Unit Test実装完了（validate-i18n-messages: 9テスト、validate-i18n-keys: 10テスト）
   - **備考**: TDD RED-GREEN-REFACTORサイクルで実装、npm run validate:i18n統合スクリプト追加
 
-- [ ] 14. GitHub Actionsワークフロー更新
-- [ ] 14.1 frontend-test.ymlに翻訳ファイル検証を追加する
-  - validate-i18n-messages.jsをテストステップに追加
-  - validate-i18n-keys.jsをテストステップに追加
-  - 検証失敗時にワークフローを失敗させる
-  - User AppとAdmin App両方の翻訳ファイルを検証
+- [x] 14. GitHub Actionsワークフロー更新
+- [x] 14.1 frontend-test.ymlに翻訳ファイル検証を追加する
+  - **実装状況**: frontend-test.ymlに`npm run validate:i18n`ステップ追加完了
+  - **備考**: 環境変数検証後、ESLint実行前に翻訳ファイル検証を実行、検証失敗時にワークフロー失敗
+  - validate-i18n-messages.jsをテストステップに追加 ✓
+  - validate-i18n-keys.jsをテストステップに追加 ✓
+  - 検証失敗時にワークフローを失敗させる ✓
+  - User AppとAdmin App両方の翻訳ファイルを検証 ✓
+  - pathsトリガーに`frontend/**/messages/**`と`scripts/validate-i18n-*.js`追加 ✓
   - _要件: REQ-9.4_
 
-- [ ] 14.2 e2e-tests.ymlにi18n E2Eテストを統合する
-  - ロケール検出E2Eテストを含める
-  - NetworkError多言語化E2Eテストを含める
-  - Error Boundary多言語化E2Eテストを含める
-  - Global Error Boundary多言語化E2Eテストを含める
+- [x] 14.2 e2e-tests.ymlにi18n E2Eテストを統合する
+  - **実装状況**: e2e-tests.ymlのpathsトリガーに翻訳ファイルパス追加完了
+  - **備考**: i18n E2Eテスト(`i18n-locale-detection.spec.ts`, `error-message-i18n.spec.ts`)は既にPlaywright設定に含まれシャード実行対象
+  - ロケール検出E2Eテストを含める ✓ (`i18n-locale-detection.spec.ts`)
+  - NetworkError多言語化E2Eテストを含める ✓ (`error-message-i18n.spec.ts`)
+  - Error Boundary多言語化E2Eテストを含める ✓ (`error-message-i18n.spec.ts`)
+  - Global Error Boundary多言語化E2Eテストを含める ✓ (`error-message-i18n.spec.ts`)
+  - pathsトリガーに`frontend/**/messages/**`追加 ✓
   - _要件: REQ-9.5_
 
 - [ ] 15. Makefileタスク統合
