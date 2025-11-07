@@ -737,5 +737,41 @@ describe("Error Boundary (User App)", () => {
         expect.any(Error),
       );
     });
+
+    it("ApiErrorインスタンスだがプロパティ喪失でcauseもない（L89）", () => {
+      // ApiErrorインスタンスだが、titleとstatusがundefinedで、causeもnull
+      const apiError = new ApiError({
+        status: 500,
+        title: "Internal Server Error",
+        detail: "サーバーエラー",
+        type: "about:blank",
+        instance: "/api/v1/users",
+        trace_id: "req-no-cause",
+      });
+
+      // プロパティを上書きしてundefinedに、causeをnullに設定
+      Object.defineProperty(apiError, "title", {
+        value: undefined,
+        writable: false,
+        configurable: true,
+      });
+      Object.defineProperty(apiError, "status", {
+        value: undefined,
+        writable: false,
+        configurable: true,
+      });
+      Object.defineProperty(apiError, "cause", {
+        value: null, // causeがnull
+        writable: false,
+        configurable: true,
+      });
+
+      // L87-89のelse節に入る: ApiErrorインスタンスだがcauseなし
+      renderWithJa(<ErrorBoundary error={apiError} reset={mockReset} />);
+
+      // L89でapiError = errorとなり、ApiErrorとして表示される（プロパティがundefinedでも）
+      expect(screen.getByText("エラーが発生しました")).toBeInTheDocument();
+      expect(screen.getByText(/ステータスコード:/)).toBeInTheDocument();
+    });
   });
 });
