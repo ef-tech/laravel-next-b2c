@@ -16,11 +16,23 @@ import ErrorBoundary from "../error";
 import { NetworkError } from "@/lib/network-error";
 import { ApiError } from "@/lib/api-error";
 
+// RFC 7807 Problem Details interface for error.cause
+interface RFC7807Cause {
+  status: number;
+  title: string;
+  detail: string;
+  type: string;
+  instance: string;
+  trace_id: string;
+}
+
 // Mock Next.js Link component
 jest.mock("next/link", () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => {
+  const MockLink = ({ children, href }: { children: React.ReactNode; href: string }) => {
     return <a href={href}>{children}</a>;
   };
+  MockLink.displayName = "MockLink";
+  return MockLink;
 });
 
 // 日本語翻訳メッセージ
@@ -95,7 +107,7 @@ describe("Error Boundary (User App)", () => {
     // Suppress console.error for cleaner test output
     jest.spyOn(console, "error").mockImplementation(() => {});
     // Mock window.location to prevent actual redirects in tests
-    delete (window as any).location;
+    delete (window as Partial<Window>).location;
     window.location = {
       href: "http://localhost/",
       pathname: "/",
@@ -103,7 +115,7 @@ describe("Error Boundary (User App)", () => {
       assign: jest.fn(),
       replace: jest.fn(),
       reload: jest.fn(),
-    } as any;
+    } as Location;
   });
 
   afterEach(() => {
@@ -577,9 +589,9 @@ describe("Error Boundary (User App)", () => {
 
     it("ApiError名前チェック経由の再構築（instanceof失敗ケース）", () => {
       // instanceofが失敗するがnameがApiErrorのケース
-      const error = new Error("ApiError-like error");
+      const error = new Error("ApiError-like error") as Error & { cause: RFC7807Cause };
       error.name = "ApiError";
-      (error as any).cause = {
+      error.cause = {
         status: 503,
         title: "Service Unavailable",
         detail: "サービスが利用できません",
@@ -598,8 +610,8 @@ describe("Error Boundary (User App)", () => {
 
     it("Generic error causeからApiError再構築", () => {
       // Generic errorだがcauseにRFC 7807準拠データがあるケース
-      const error = new Error("Generic error");
-      (error as any).cause = {
+      const error = new Error("Generic error") as Error & { cause: RFC7807Cause };
+      error.cause = {
         status: 504,
         title: "Gateway Timeout",
         detail: "ゲートウェイタイムアウト",
@@ -679,7 +691,7 @@ describe("Error Boundary (User App)", () => {
       const consoleErrorSpy = jest.spyOn(console, "error");
 
       // error.name = "ApiError"だがinstanceofは失敗、causeのdetailゲッターが例外を投げる
-      const error = new Error("ApiError-like error");
+      const error = new Error("ApiError-like error") as Error & { cause: unknown };
       error.name = "ApiError"; // L91の条件を満たすためにerror.nameを設定
 
       const poisonedCause = {
@@ -692,7 +704,7 @@ describe("Error Boundary (User App)", () => {
         instance: "/test",
         trace_id: "test-97",
       };
-      (error as any).cause = poisonedCause;
+      error.cause = poisonedCause;
 
       renderWithJa(<ErrorBoundary error={error} reset={mockReset} />);
 
@@ -711,7 +723,7 @@ describe("Error Boundary (User App)", () => {
       const consoleErrorSpy = jest.spyOn(console, "error");
 
       // Generic errorでcauseのdetailゲッターが例外を投げる
-      const error = new Error("Generic error");
+      const error = new Error("Generic error") as Error & { cause: unknown };
       error.name = "TypeError"; // ApiErrorではないことを明示
 
       const poisonedCause = {
@@ -724,7 +736,7 @@ describe("Error Boundary (User App)", () => {
         instance: "/test",
         trace_id: "test-105",
       };
-      (error as any).cause = poisonedCause;
+      error.cause = poisonedCause;
 
       renderWithJa(<ErrorBoundary error={error} reset={mockReset} />);
 

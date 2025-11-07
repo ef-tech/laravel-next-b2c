@@ -18,7 +18,6 @@
 
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api-error";
-import type { RFC7807Problem } from "@/types/errors";
 import { NetworkError } from "@/lib/network-error";
 
 /**

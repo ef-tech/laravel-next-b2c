@@ -1,3 +1,8 @@
+// Mock next-intl plugin to avoid version detection issues in Jest
+jest.mock("next-intl/plugin", () => {
+  return () => (config: unknown) => config;
+});
+
 import nextConfig from "../../next.config";
 
 describe("User App next.config.ts セキュリティヘッダー", () => {

@@ -94,7 +94,7 @@ export class NetworkError extends Error implements AppError {
    * @param t - Optional translation function from useTranslations()
    * @returns ユーザー向け表示メッセージ
    */
-  getDisplayMessage(t?: any): string {
+  getDisplayMessage(t?: (key: string) => string): string {
     // Backward compatibility: return hardcoded Japanese messages when t is not provided
     if (!t) {
       if (this.isTimeout()) {
