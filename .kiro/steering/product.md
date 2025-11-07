@@ -128,7 +128,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **Request ID伝播**: Laravel → フロントエンドへのError ID自動伝播、トレーサビリティ確保、ログ追跡の簡易化
   - **NetworkError日本語化**: フロントエンド通信エラーの自動日本語化、ユーザー体験の向上
   - **401自動リダイレクト**: 認証エラー時の自動ログインページ遷移、セキュアな認証フロー
-  - **Error Boundaries実装**: React Error Boundariesによるフロントエンドエラー捕捉、Fallback UI表示
+  - **Error Boundaries i18n完全実装**: React Error Boundariesによるフロントエンドエラー捕捉、next-intl統合による多言語Fallback UI、NEXT_LOCALE Cookie連携、Accept-Language header自動検出
   - **自動コード生成**: `generate-error-types.js` スクリプトによるTypeScript型定義自動生成、Laravel/フロントエンド同期保証
 
 ## アーキテクチャ上の特徴

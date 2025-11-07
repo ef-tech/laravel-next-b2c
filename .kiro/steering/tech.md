@@ -27,6 +27,7 @@
 - **React**: 19.1.0 (最新のConcurrent Features)
 - **TypeScript**: ^5 (厳密な型チェック)
 - **Tailwind CSS**: ^4.0.0 (最新版CSS framework)
+- **next-intl**: ^3.x (多言語化対応、Error Boundaries i18n統合)
 
 ### ビルド・開発ツール
 - **Turbopack**: Next.js標準バンドラー (`--turbopack`フラグ)
@@ -258,21 +259,31 @@ if (error.response?.status === 401) {
 }
 ```
 
-**Error Boundaries実装**:
+**Error Boundaries i18n実装**:
 ```typescript
-// app/error.tsx (Admin/User App共通)
+// app/[locale]/error.tsx (Admin/User App共通)
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 export default function Error({ error, reset }: ErrorProps) {
+  const t = useTranslations('error');
+
   return (
     <div className="error-container">
-      <h2>エラーが発生しました</h2>
+      <h2>{t('title')}</h2>
       <p>{error.message}</p>
-      <button onClick={reset}>再試行</button>
+      <button onClick={reset}>{t('retry')}</button>
     </div>
   );
 }
 ```
+
+**next-intl統合機能**:
+- **ロケール検出**: NEXT_LOCALE Cookie優先、Accept-Language header自動フォールバック
+- **Error Boundaries多言語化**: グローバル/ページレベルError Boundariesでのロケール対応
+- **メッセージファイル管理**: `messages/ja.json`、`messages/en.json` による一元管理
+- **getMessages明示的locale渡し**: Error Boundaries内でのロケール確実性保証
 
 **自動コード生成スクリプト**:
 ```bash
