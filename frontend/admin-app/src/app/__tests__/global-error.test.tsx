@@ -172,11 +172,11 @@ describe("Global Error Boundary (Admin App)", () => {
 
       await waitFor(() => {
         expect(screen.getByText("予期しないエラーが発生しました")).toBeInTheDocument();
-        expect(screen.getByText("再試行")).toBeInTheDocument();
-        expect(screen.getByText("Error ID:")).toBeInTheDocument();
-        expect(screen.getByText("test-digest-123")).toBeInTheDocument();
-        expect(screen.getByText("お問い合わせの際は、このIDをお伝えください")).toBeInTheDocument();
       });
+      expect(screen.getByText("再試行")).toBeInTheDocument();
+      expect(screen.getByText("Error ID:")).toBeInTheDocument();
+      expect(screen.getByText("test-digest-123")).toBeInTheDocument();
+      expect(screen.getByText("お問い合わせの際は、このIDをお伝えください")).toBeInTheDocument();
     });
 
     it("英語ロケール時、すべての英語メッセージが表示される（汎用エラー）", async () => {
@@ -193,13 +193,13 @@ describe("Global Error Boundary (Admin App)", () => {
 
       await waitFor(() => {
         expect(screen.getByText("An unexpected error occurred")).toBeInTheDocument();
-        expect(screen.getByText("Retry")).toBeInTheDocument();
-        expect(screen.getByText("Error ID:")).toBeInTheDocument();
-        expect(screen.getByText("test-digest-456")).toBeInTheDocument();
-        expect(
-          screen.getByText("Please provide this ID when contacting support"),
-        ).toBeInTheDocument();
       });
+      expect(screen.getByText("Retry")).toBeInTheDocument();
+      expect(screen.getByText("Error ID:")).toBeInTheDocument();
+      expect(screen.getByText("test-digest-456")).toBeInTheDocument();
+      expect(
+        screen.getByText("Please provide this ID when contacting support"),
+      ).toBeInTheDocument();
     });
 
     it("digestがある場合、Error ID表示エリアが表示される", async () => {
@@ -216,8 +216,8 @@ describe("Global Error Boundary (Admin App)", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Error ID:")).toBeInTheDocument();
-        expect(screen.getByText("test-digest-789")).toBeInTheDocument();
       });
+      expect(screen.getByText("test-digest-789")).toBeInTheDocument();
     });
 
     it("digestがない場合、Error ID表示エリアが表示されない", async () => {
@@ -247,10 +247,9 @@ describe("Global Error Boundary (Admin App)", () => {
 
       render(<GlobalError error={error} reset={mockReset} />);
 
-      // GlobalError componentは<html>要素を返すため、bodyの親要素でチェック
+      // GlobalError componentは<html>要素を返すため、documentElementでチェック
       await waitFor(() => {
-        const bodyElement = document.body;
-        const htmlElement = bodyElement.parentElement;
+        const htmlElement = document.documentElement;
         expect(htmlElement).toHaveAttribute("lang", "ja");
       });
     });
@@ -266,10 +265,9 @@ describe("Global Error Boundary (Admin App)", () => {
 
       render(<GlobalError error={error} reset={mockReset} />);
 
-      // GlobalError componentは<html>要素を返すため、bodyの親要素でチェック
+      // GlobalError componentは<html>要素を返すため、documentElementでチェック
       await waitFor(() => {
-        const bodyElement = document.body;
-        const htmlElement = bodyElement.parentElement;
+        const htmlElement = document.documentElement;
         expect(htmlElement).toHaveAttribute("lang", "en");
       });
     });
@@ -292,13 +290,11 @@ describe("Global Error Boundary (Admin App)", () => {
 
       await waitFor(() => {
         expect(screen.getByText("ネットワークエラー")).toBeInTheDocument();
-        expect(screen.getByText("タイムアウト")).toBeInTheDocument();
-        expect(
-          screen.getByText(
-            "リクエストがタイムアウトしました。しばらくしてから再度お試しください。",
-          ),
-        ).toBeInTheDocument();
       });
+      expect(screen.getByText("タイムアウト")).toBeInTheDocument();
+      expect(
+        screen.getByText("リクエストがタイムアウトしました。しばらくしてから再度お試しください。"),
+      ).toBeInTheDocument();
     });
 
     it("NetworkError（接続エラー）が日本語で表示される", async () => {
@@ -364,11 +360,11 @@ describe("Global Error Boundary (Admin App)", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Network Error")).toBeInTheDocument();
-        expect(screen.getByText("Timeout")).toBeInTheDocument();
-        expect(
-          screen.getByText("The request timed out. Please try again later."),
-        ).toBeInTheDocument();
       });
+      expect(screen.getByText("Timeout")).toBeInTheDocument();
+      expect(
+        screen.getByText("The request timed out. Please try again later."),
+      ).toBeInTheDocument();
     });
 
     it("ApiErrorが日本語で表示される", async () => {
