@@ -17,8 +17,8 @@
   - `Locale`型と`GlobalErrorMessages`型の型推論を検証
   - _要件: 2.2, 2.3, 2.5_
 
-- [ ] 2. User App Global Error Boundaryの共通モジュール統合
-- [ ] 2.1 User App `global-error.tsx`へのimport文追加とローカル定義削除
+- [x] 2. User App Global Error Boundaryの共通モジュール統合
+- [x] 2.1 User App `global-error.tsx`へのimport文追加とローカル定義削除
   - `import { globalErrorMessages, type Locale } from '@/../../lib/global-error-messages'`を追加
   - ローカル`messages`定数定義（約85行）を完全削除
   - ローカル`type Locale`定義を削除
@@ -26,7 +26,7 @@
   - `detectLocale()`関数とその他のロジックは変更せず維持
   - _要件: 1.3, 3.1, 3.3, 3.5, 3.6_
 
-- [ ] 2.2 User Appの全27テスト実行と検証
+- [x] 2.2 User Appの全27テスト実行と検証
   - `cd frontend/user-app && npm test src/app/__tests__/global-error.test.tsx`を実行
   - 全27テストがpassすることを確認
   - テスト失敗時は共通モジュールまたはimportロジックを修正
