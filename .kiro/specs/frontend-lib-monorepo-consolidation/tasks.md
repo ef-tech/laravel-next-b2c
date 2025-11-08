@@ -69,22 +69,22 @@
   - テストカバレッジが既存レベル（94.73%以上）を維持していることを確認する
   - _Requirements: 3.2, 3.3, 6.1, 6.2_
 
-- [ ] 4. User Appのimport文を一括更新する
-- [ ] 4.1 User Appの影響範囲を調査する
+- [x] 4. User Appのimport文を一括更新する
+- [x] 4.1 User Appの影響範囲を調査する
   - grepコマンドで`from '@/lib/api-client'`を検索し、該当箇所を特定する
   - grepコマンドで`from '@/lib/api-error'`を検索し、該当箇所を特定する
   - grepコマンドで`from '@/lib/network-error'`を検索し、該当箇所を特定する
   - 検索結果を記録し、置換対象ファイル数を把握する
   - _Requirements: 4.1_
 
-- [ ] 4.2 User Appのimport文を自動置換する
+- [x] 4.2 User Appのimport文を自動置換する
   - sedコマンドで`from '@/lib/api-client'`を`from '@shared/api-client'`に一括置換する
   - sedコマンドで`from '@/lib/api-error'`を`from '@shared/api-error'`に一括置換する
   - sedコマンドで`from '@/lib/network-error'`を`from '@shared/network-error'`に一括置換する
   - バックアップファイル（`.bak`）を削除する
   - _Requirements: 4.2_
 
-- [ ] 4.3 User Appの置換結果を検証する
+- [x] 4.3 User Appの置換結果を検証する
   - TypeScript型チェック（`npm run type-check`）を実行し、型エラーがないことを確認する
   - grepコマンドで`from '@/lib/`を再検索し、アプリ固有ファイル（`api.ts`, `env.ts`）のみが残っていることを確認する
   - すべての`.ts`および`.tsx`ファイルで`@shared/*`インポートに統一されていることを確認する

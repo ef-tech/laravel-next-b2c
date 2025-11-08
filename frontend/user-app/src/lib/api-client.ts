@@ -9,8 +9,8 @@
  * - 30秒タイムアウト管理
  */
 
-import { ApiError } from "@/lib/api-error";
-import { NetworkError } from "@/lib/network-error";
+import { ApiError } from "@shared/api-error";
+import { NetworkError } from "@shared/network-error";
 import type { RFC7807Problem } from "@/types/errors";
 
 /**

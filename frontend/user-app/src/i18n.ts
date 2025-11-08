@@ -6,7 +6,7 @@
  */
 
 import { getRequestConfig } from "next-intl/server";
-import { i18nConfig, type Locale } from "@/../../lib/i18n-config";
+import { i18nConfig, type Locale } from "@shared/i18n-config";
 
 export default getRequestConfig(async ({ locale }) => {
   // Validate locale against supported locales

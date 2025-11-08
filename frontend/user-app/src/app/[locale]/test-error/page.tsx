@@ -13,9 +13,9 @@
  */
 
 import { useState, useRef } from "react";
-import { ApiClient } from "@/lib/api-client";
-import { ApiError } from "@/lib/api-error";
-import { NetworkError } from "@/lib/network-error";
+import { ApiClient } from "@shared/api-client";
+import { ApiError } from "@shared/api-error";
+import { NetworkError } from "@shared/network-error";
 
 // Force dynamic rendering to ensure environment variables are read at runtime
 export const dynamic = "force-dynamic";
