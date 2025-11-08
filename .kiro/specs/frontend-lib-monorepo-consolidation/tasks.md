@@ -131,26 +131,26 @@
   - 約560行のコード削減が達成されたことを確認する
   - _Requirements: 5.3, 5.4_
 
-- [ ] 7. 全テストスイートを実行して品質を保証する
-- [ ] 7.1 User AppとAdmin AppのJestユニットテストを実行する
+- [x] 7. 全テストスイートを実行して品質を保証する
+- [x] 7.1 User AppとAdmin AppのJestユニットテストを実行する
   - User Appで全Jestテスト（`npm run test`）を実行し、すべてのテストがパスすることを確認する
   - Admin Appで全Jestテストを実行し、すべてのテストがパスすることを確認する
   - カバレッジレポート（`npm run test:coverage`）を生成し、94.73%以上を維持していることを確認する
   - _Requirements: 6.1, 6.2_
 
-- [ ] 7.2 TypeScript型チェックとESLint/Prettierを実行する
+- [x] 7.2 TypeScript型チェックとESLint/Prettierを実行する
   - 両アプリケーションでTypeScript型チェック（`npm run type-check`）を実行し、型エラーゼロを確認する
   - ESLintとPrettierチェック（`npm run lint && npm run format:check`）を実行し、エラーゼロを確認する
   - コード品質が維持されていることを確認する
   - _Requirements: 6.3, 6.4_
 
-- [ ] 7.3 User AppとAdmin Appの本番ビルドを実行する
+- [x] 7.3 User AppとAdmin Appの本番ビルドを実行する
   - User Appで本番ビルド（`npm run build`）を実行し、ビルドが成功することを確認する
   - Admin Appで本番ビルドを実行し、ビルドが成功することを確認する
   - ビルドエラーやwebpackエラーが発生しないことを確認する
   - _Requirements: 6.5_
 
-- [ ] 7.4 E2Eテストを実行して統合動作を確認する
+- [x] 7.4 E2Eテストを実行して統合動作を確認する
   - E2Eテストディレクトリに移動する
   - User App E2Eテスト（`npm run test:user`）を実行し、全テストがパスすることを確認する
   - Admin App E2Eテスト（`npm run test:admin`）を実行し、全テストがパスすることを確認する
