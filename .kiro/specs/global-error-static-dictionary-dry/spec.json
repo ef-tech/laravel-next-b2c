@@ -1,9 +1,9 @@
 {
   "feature_name": "global-error-static-dictionary-dry",
   "created_at": "2025-11-08T00:00:00Z",
-  "updated_at": "2025-11-07T20:08:17Z",
+  "updated_at": "2025-11-08T00:00:00Z",
   "language": "ja",
-  "phase": "requirements-generated",
+  "phase": "design-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 119,
@@ -52,11 +52,11 @@
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
-      "approved": false
+      "generated": true,
+      "approved": true
     },
     "tasks": {
       "generated": false,
