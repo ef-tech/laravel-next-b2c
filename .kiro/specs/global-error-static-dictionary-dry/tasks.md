@@ -2,8 +2,8 @@
 
 ## 実装計画
 
-- [ ] 1. 共通モジュールの作成と型定義の整備
-- [ ] 1.1 `frontend/lib/global-error-messages.ts`の作成と静的メッセージ辞書の実装
+- [x] 1. 共通モジュールの作成と型定義の整備
+- [x] 1.1 `frontend/lib/global-error-messages.ts`の作成と静的メッセージ辞書の実装
   - User App `global-error.tsx`から既存の静的メッセージ辞書（messages）をコピー
   - 型定義（`Locale`、`GlobalErrorMessages`）を明示的にexport
   - `as const`型アサーションを維持し、TypeScript型推論を保証
@@ -11,7 +11,7 @@
   - 4カテゴリ（network, boundary, validation, global）× 2言語（ja, en）の完全な実装
   - _要件: 1.1, 1.2, 1.4, 1.5, 2.1, 2.4, 7.1_
 
-- [ ] 1.2 TypeScriptコンパイル確認と型安全性の検証
+- [x] 1.2 TypeScriptコンパイル確認と型安全性の検証
   - モノレポルートで`npm run type-check`を実行
   - 共通モジュールの型定義が正しく認識されることを確認
   - `Locale`型と`GlobalErrorMessages`型の型推論を検証
