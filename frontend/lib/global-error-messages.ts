@@ -166,4 +166,4 @@ export const globalErrorMessages = {
       contactMessage: "Please provide this ID when contacting support",
     },
   },
-} as const;
+} as const satisfies Record<Locale, GlobalErrorMessages>;
