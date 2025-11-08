@@ -90,21 +90,21 @@
   - すべての`.ts`および`.tsx`ファイルで`@shared/*`インポートに統一されていることを確認する
   - _Requirements: 4.3, 4.4, 4.5_
 
-- [ ] 5. Admin Appのimport文を一括更新する
-- [ ] 5.1 Admin Appの影響範囲を調査する
+- [x] 5. Admin Appのimport文を一括更新する
+- [x] 5.1 Admin Appの影響範囲を調査する
   - grepコマンドで`from '@/lib/api-client'`を検索し、該当箇所を特定する
   - grepコマンドで`from '@/lib/api-error'`を検索し、該当箇所を特定する
   - grepコマンドで`from '@/lib/network-error'`を検索し、該当箇所を特定する
   - 検索結果を記録し、置換対象ファイル数を把握する
   - _Requirements: 4.1_
 
-- [ ] 5.2 Admin Appのimport文を自動置換する
+- [x] 5.2 Admin Appのimport文を自動置換する
   - sedコマンドで3つのインポートパターンを`@shared/*`に一括置換する
   - バックアップファイル（`.bak`）を削除する
   - TypeScript型チェックを実行し、型エラーがないことを確認する
   - _Requirements: 4.2, 4.3_
 
-- [ ] 5.3 Admin Appの置換結果を検証する
+- [x] 5.3 Admin Appの置換結果を検証する
   - grepコマンドで置換漏れがないことを確認する
   - アプリ固有ファイル（`api.ts`, `env.ts`）が変更されていないことを確認する
   - すべてのインポートが`@shared/*`に統一されていることを確認する
