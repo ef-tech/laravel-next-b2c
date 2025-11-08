@@ -47,7 +47,12 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `api-versioning` - APIバージョニング（V1実装、URLベース/api/v1、DDD準拠、完全テスト戦略、V2ロードマップ）
 - `error-handling-pattern` - エラーハンドリングパターン作成（RFC 7807準拠、統一APIエラーレスポンス、Request ID伝播、多言語対応、Error Boundaries実装）
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
-- `global-error-static-dictionary-dry` - Global Error静的辞書の共通化（DRY原則適用、重複コード削減、保守性向上）
+
+### Completed Specifications
+- `global-error-static-dictionary-dry` - ✅ Global Error静的辞書の共通化完了（DRY原則適用、~170行コード削減、型安全性維持、全54テストpass）
+  - 実装完了日: 2025-11-09
+  - 成果: User App/Admin Appの重複メッセージ辞書を共通モジュール化、保守性向上
+
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Development Guidelines
