@@ -50,20 +50,20 @@
   - Jestテストを実行して設定が正しく動作することを確認する
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 3. パスエイリアス設定の統合検証を実施する
-- [ ] 3.1 User AppとAdmin Appの型チェックを実行する
+- [x] 3. パスエイリアス設定の統合検証を実施する
+- [x] 3.1 User AppとAdmin Appの型チェックを実行する
   - 両アプリケーションでTypeScript型チェック（`npm run type-check`）を実行する
   - 型エラーがゼロであることを確認する
   - IDEで`@shared/*`インポートの型補完が動作することを確認する
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 3.2 User AppとAdmin Appの開発サーバー起動を確認する
+- [x] 3.2 User AppとAdmin Appの開発サーバー起動を確認する
   - User Appで開発サーバー（`npm run dev`）を起動し、エラーがないことを確認する
   - Admin Appで開発サーバーを起動し、エラーがないことを確認する
   - ブラウザでhttp://localhost:13001とhttp://localhost:13002にアクセスし、ページが表示されることを確認する
   - _Requirements: 2.2, 2.3, 7.1, 7.2_
 
-- [ ] 3.3 User AppとAdmin AppのJestテストを実行する
+- [x] 3.3 User AppとAdmin AppのJestテストを実行する
   - User Appで全Jestテスト（`npm run test`）を実行し、全テストがパスすることを確認する
   - Admin Appで全Jestテストを実行し、全テストがパスすることを確認する
   - テストカバレッジが既存レベル（94.73%以上）を維持していることを確認する
