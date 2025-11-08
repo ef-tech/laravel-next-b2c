@@ -26,6 +26,10 @@
 - **Next.js**: 15.5.4 (React Server Components、App Router対応)
 - **React**: 19.1.0 (最新のConcurrent Features)
 - **TypeScript**: ^5 (厳密な型チェック)
+  - **型安全性強化**:
+    - `satisfies`演算子適用: 型推論最適化とタイプミス防止（`as const satisfies Record<Locale, GlobalErrorMessages>`）
+    - 厳格な型チェック: リテラル型の活用による実行時エラーの削減
+    - JSDocコメント完備: 詳細な型定義ドキュメントによる開発者体験向上
 - **Tailwind CSS**: ^4.0.0 (最新版CSS framework)
 - **next-intl**: ^3.x (多言語化対応、Error Boundaries i18n統合)
 
@@ -50,6 +54,13 @@
 ### デュアルアプリケーション構成
 - **Admin App** (`frontend/admin-app/`): 管理者向けダッシュボード
 - **User App** (`frontend/user-app/`): エンドユーザー向けアプリケーション
+- **共通ライブラリ** (`frontend/lib/`): DRY原則に基づく共通モジュール
+  - **global-error-messages.ts**: Global Error静的辞書（共通モジュール化完了）
+    - User AppとAdmin Appの重複メッセージ辞書を統一（~170行コード削減）
+    - satisfies演算子適用による型安全性強化
+    - 4カテゴリ構造（network, boundary, validation, global）
+    - 日本語/英語対応（ja/en）
+    - 全54テストpass
 
 ### テスト環境
 - **Jest**: ^29.7.0 (テストランナー、モノレポ対応)

@@ -372,8 +372,18 @@ frontend/
 │                        #   - Testing Library推奨ルールセット（flat/react）
 │                        #   - Jest-DOM推奨ルールセット（flat/recommended）
 │                        # - Prettier競合ルール無効化
+├── lib/                 # 🎯 フロントエンド共通ライブラリ（DRY原則適用）
+│   └── global-error-messages.ts  # ✅ Global Error静的辞書（共通モジュール化完了）
+│                        # - User AppとAdmin Appの重複メッセージ辞書を統一
+│                        # - DRY原則適用による保守性向上（~170行コード削減）
+│                        # - satisfies演算子適用による型安全性強化
+│                        # - 詳細JSDocコメント完備
+│                        # - 4カテゴリ構造: network, boundary, validation, global
+│                        # - 日本語/英語対応（ja/en）
+│                        # - TypeScript型推論最適化（as const + satisfies）
 ├── types/               # 🎯 フロントエンド共通型定義
 │   ├── errors.ts        # エラー型定義（共通、自動生成対象、ErrorCode Enum）
+│   ├── messages.d.ts    # メッセージ型定義（GlobalErrorMessages型、全54テストpass）
 │   └── api/             # API型定義
 │       └── v1.ts        # 🔢 V1 API型定義（Presenter型、リクエスト型、レスポンス型）
 ├── admin-app/           # 管理者向けアプリケーション
