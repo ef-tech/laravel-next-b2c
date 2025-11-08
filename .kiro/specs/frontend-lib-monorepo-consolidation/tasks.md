@@ -8,22 +8,22 @@
 
 ## Tasks
 
-- [ ] 1. User App向けTypeScript・ビルド・テスト設定を確立する
-- [ ] 1.1 User AppのTypeScriptパスエイリアス設定を追加する
+- [x] 1. User App向けTypeScript・ビルド・テスト設定を確立する
+- [x] 1.1 User AppのTypeScriptパスエイリアス設定を追加する
   - tsconfig.jsonを開き、既存のpaths設定を確認する
   - compilerOptions.pathsに`@shared/*`エイリアスを追加し、`../lib/*`に解決させる
   - baseUrl設定が`.`であることを確認し、相対パス解決を有効化する
   - TypeScript型チェックを実行して設定エラーがないことを確認する
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 1.2 User AppのNext.js webpack alias設定を追加する
+- [x] 1.2 User AppのNext.js webpack alias設定を追加する
   - next.config.tsを開き、既存のwebpack設定を確認する
   - pathモジュールをインポートし、`__dirname`を使用して相対パス解決を準備する
   - webpack関数内でresolve.alias設定に`@shared`エイリアスを追加する
   - 開発サーバーを起動して設定が正しく読み込まれることを確認する
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 1.3 User AppのJest moduleNameMapper設定を追加する
+- [x] 1.3 User AppのJest moduleNameMapper設定を追加する
   - jest.config.jsを開き、既存のmoduleNameMapper設定を確認する
   - moduleNameMapperに`^@shared/(.*)$`パターンを追加し、`<rootDir>/../lib/$1`にマッピングする
   - 既存の`@/*`マッパーや`security-config`マッパーが保持されていることを確認する
