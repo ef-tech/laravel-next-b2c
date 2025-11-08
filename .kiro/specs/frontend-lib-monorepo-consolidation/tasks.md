@@ -30,21 +30,21 @@
   - Jestテストを実行して設定が正しく動作することを確認する
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 2. Admin App向けTypeScript・ビルド・テスト設定を確立する
-- [ ] 2.1 Admin AppのTypeScriptパスエイリアス設定を追加する
+- [x] 2. Admin App向けTypeScript・ビルド・テスト設定を確立する
+- [x] 2.1 Admin AppのTypeScriptパスエイリアス設定を追加する
   - tsconfig.jsonを開き、User Appと同様のpaths設定を追加する
   - compilerOptions.pathsに`@shared/*`エイリアスを追加し、`../lib/*`に解決させる
   - baseUrl設定が`.`であることを確認する
   - TypeScript型チェックを実行して設定エラーがないことを確認する
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2.2 Admin AppのNext.js webpack alias設定を追加する
+- [x] 2.2 Admin AppのNext.js webpack alias設定を追加する
   - next.config.tsを開き、User Appと同様のwebpack alias設定を追加する
   - pathモジュールをインポートし、resolve.aliasに`@shared`を追加する
   - 開発サーバーを起動して設定が正しく読み込まれることを確認する
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 2.3 Admin AppのJest moduleNameMapper設定を追加する
+- [x] 2.3 Admin AppのJest moduleNameMapper設定を追加する
   - jest.config.jsを開き、User Appと同様のmoduleNameMapper設定を追加する
   - `^@shared/(.*)$`パターンを追加し、既存マッパーを保持する
   - Jestテストを実行して設定が正しく動作することを確認する
