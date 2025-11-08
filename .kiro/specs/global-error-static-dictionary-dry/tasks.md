@@ -32,8 +32,8 @@
   - テスト失敗時は共通モジュールまたはimportロジックを修正
   - _要件: 5.1, 5.3, 5.4, 5.5, 5.6_
 
-- [ ] 3. Admin App Global Error Boundaryの共通モジュール統合
-- [ ] 3.1 Admin App `global-error.tsx`へのimport文追加とローカル定義削除
+- [x] 3. Admin App Global Error Boundaryの共通モジュール統合
+- [x] 3.1 Admin App `global-error.tsx`へのimport文追加とローカル定義削除
   - `import { globalErrorMessages, type Locale } from '@/../../lib/global-error-messages'`を追加
   - ローカル`messages`定数定義（約85行）を完全削除
   - ローカル`type Locale`定義を削除
@@ -41,7 +41,7 @@
   - `detectLocale()`関数とその他のロジックは変更せず維持
   - _要件: 1.3, 3.2, 3.4, 3.5, 3.6_
 
-- [ ] 3.2 Admin Appの全27テスト実行と検証
+- [x] 3.2 Admin Appの全27テスト実行と検証
   - `cd frontend/admin-app && npm test src/app/__tests__/global-error.test.tsx`を実行
   - 全27テストがpassすることを確認
   - テスト失敗時は共通モジュールまたはimportロジックを修正

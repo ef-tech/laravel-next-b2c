@@ -20,71 +20,7 @@ import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api-error";
 import type { RFC7807Problem } from "@/types/errors";
 import { NetworkError } from "@/lib/network-error";
-
-/**
- * 静的メッセージ辞書（ja、en）
- * global-error.tsxではnext-intlが使用できないため、独自の辞書を定義
- */
-const messages = {
-  ja: {
-    network: {
-      timeout: "リクエストがタイムアウトしました。しばらくしてから再度お試しください。",
-      connection:
-        "ネットワーク接続に問題が発生しました。インターネット接続を確認して再度お試しください。",
-      unknown: "予期しないエラーが発生しました。しばらくしてから再度お試しください。",
-    },
-    boundary: {
-      title: "エラーが発生しました",
-      retry: "再試行",
-      home: "ホームに戻る",
-      status: "ステータスコード",
-      requestId: "Request ID",
-      networkError: "ネットワークエラー",
-      timeout: "タイムアウト",
-      connectionError: "接続エラー",
-      retryableMessage: "このエラーは再試行可能です。しばらくしてから再度お試しください。",
-    },
-    validation: {
-      title: "入力エラー",
-    },
-    global: {
-      title: "予期しないエラーが発生しました",
-      retry: "再試行",
-      errorId: "Error ID",
-      contactMessage: "お問い合わせの際は、このIDをお伝えください",
-    },
-  },
-  en: {
-    network: {
-      timeout: "The request timed out. Please try again later.",
-      connection:
-        "A network connection problem occurred. Please check your internet connection and try again.",
-      unknown: "An unexpected error occurred. Please try again later.",
-    },
-    boundary: {
-      title: "An error occurred",
-      retry: "Retry",
-      home: "Go to Home",
-      status: "Status Code",
-      requestId: "Request ID",
-      networkError: "Network Error",
-      timeout: "Timeout",
-      connectionError: "Connection Error",
-      retryableMessage: "This error is retryable. Please try again later.",
-    },
-    validation: {
-      title: "Validation Errors",
-    },
-    global: {
-      title: "An unexpected error occurred",
-      retry: "Retry",
-      errorId: "Error ID",
-      contactMessage: "Please provide this ID when contacting support",
-    },
-  },
-} as const;
-
-type Locale = keyof typeof messages;
+import { globalErrorMessages, type Locale } from "@/../../lib/global-error-messages";
 
 /**
  * ブラウザロケールを検出
@@ -153,7 +89,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const isProduction = process.env.NODE_ENV === "production";
 
   // 翻訳関数（メッセージ辞書から取得）
-  const t = messages[locale];
+  const t = globalErrorMessages[locale];
 
   // IMPORTANT: Reconstruct ApiError from error.cause if properties are missing
   // This handles Next.js error serialization where custom properties are lost
