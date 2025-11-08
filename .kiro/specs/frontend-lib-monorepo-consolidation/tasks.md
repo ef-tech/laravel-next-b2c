@@ -110,22 +110,22 @@
   - すべてのインポートが`@shared/*`に統一されていることを確認する
   - _Requirements: 4.4, 4.5_
 
-- [ ] 6. 重複ファイルを削除してコード重複を解消する
-- [ ] 6.1 User Appの重複ファイルを削除する
+- [x] 6. 重複ファイルを削除してコード重複を解消する
+- [x] 6.1 User Appの重複ファイルを削除する
   - User App `src/lib/api-client.ts`を削除する
   - User App `src/lib/api-error.ts`を削除する
   - User App `src/lib/network-error.ts`を削除する
   - アプリ固有ファイル（`api.ts`, `env.ts`）が保持されていることを確認する
   - _Requirements: 5.1, 5.2_
 
-- [ ] 6.2 Admin Appの重複ファイルを削除する
+- [x] 6.2 Admin Appの重複ファイルを削除する
   - Admin App `src/lib/api-client.ts`を削除する
   - Admin App `src/lib/api-error.ts`を削除する
   - Admin App `src/lib/network-error.ts`を削除する
   - アプリ固有ファイル（`api.ts`, `env.ts`）が保持されていることを確認する
   - _Requirements: 5.1, 5.2_
 
-- [ ] 6.3 重複ファイル削除後の検証を実施する
+- [x] 6.3 重複ファイル削除後の検証を実施する
   - TypeScript型チェックを実行し、型エラーがないことを確認する
   - 両アプリケーションで`src/lib/`ディレクトリにアプリ固有ファイルのみが存在することを確認する
   - 約560行のコード削減が達成されたことを確認する
