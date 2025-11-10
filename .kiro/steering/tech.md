@@ -30,6 +30,7 @@
     - `satisfies`演算子適用: 型推論最適化とタイプミス防止（`as const satisfies Record<Locale, GlobalErrorMessages>`）
     - 厳格な型チェック: リテラル型の活用による実行時エラーの削減
     - JSDocコメント完備: 詳細な型定義ドキュメントによる開発者体験向上
+    - **locale型明示化**: i18n統合におけるlocale型をstringに明示的に変換（型エラー解消、next-intl互換性向上）
 - **Tailwind CSS**: ^4.0.0 (最新版CSS framework)
 - **next-intl**: ^3.x (多言語化対応、Error Boundaries i18n統合)
 
