@@ -1,0 +1,54 @@
+{
+  "feature_name": "admin-app-build-fix-simple-error-test",
+  "created_at": "2025-11-10T00:00:00Z",
+  "updated_at": "2025-11-10T17:40:00Z",
+  "language": "ja",
+  "phase": "tasks-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 124,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/124",
+    "title": "Fix: Admin App本番ビルド失敗（simple-error-test/page.tsx構造問題）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "frontend": ["Next.js", "React", "TypeScript", "App Router"]
+    },
+    "requirements_hints": [
+      "simple-error-test/page.tsx がアプリルート直下に配置されているが、ルートlayout.tsxが存在しない",
+      "Next.js App Routerの要件を満たしていない",
+      "開発サーバーは正常動作するが、本番ビルドが失敗する",
+      "CI/CDパイプラインでビルドステージが失敗する可能性がある"
+    ],
+    "project_structure": [
+      "frontend/admin-app/src/app/[locale]/layout.tsx",
+      "frontend/admin-app/src/app/simple-error-test/page.tsx",
+      "frontend/admin-app/src/app/layout.tsx",
+      "frontend/admin-app/src/app/global-error.tsx"
+    ],
+    "todo_items": [
+      "simple-error-test/page.tsx を [locale]/simple-error-test/page.tsx に移動（Option B推奨）",
+      "本番ビルド（npm run build）を実行して検証",
+      "本番サーバー起動とブラウザアクセス確認",
+      "CI/CDパイプライン統合確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
