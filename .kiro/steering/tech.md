@@ -54,13 +54,27 @@
 ### デュアルアプリケーション構成
 - **Admin App** (`frontend/admin-app/`): 管理者向けダッシュボード
 - **User App** (`frontend/user-app/`): エンドユーザー向けアプリケーション
-- **共通ライブラリ** (`frontend/lib/`): DRY原則に基づく共通モジュール
+- **🔧 共通ライブラリ** (`frontend/lib/`): DRY原則に基づく共通モジュール（frontend-lib-monorepo-consolidation完了）
+  - **@shared/*パスエイリアス実装**: TypeScript paths設定による共通モジュール参照
+    - `@shared/lib/*`: 共通ライブラリ関数（Global Error静的辞書等）
+    - `@shared/types/*`: 共通型定義（errors.ts、messages.d.ts、api/v1.ts）
+    - Admin App/User App両方から統一Import可能
   - **global-error-messages.ts**: Global Error静的辞書（共通モジュール化完了）
     - User AppとAdmin Appの重複メッセージ辞書を統一（~170行コード削減）
     - satisfies演算子適用による型安全性強化
     - 4カテゴリ構造（network, boundary, validation, global）
     - 日本語/英語対応（ja/en）
     - 全54テストpass
+  - **types/errors.ts**: エラー型定義（共通モジュール化完了）
+    - Laravel Enumから自動生成（generate-error-types.js）
+    - ErrorCode Enum/Union型定義
+    - RFC 7807準拠エラーレスポンス型
+  - **types/messages.d.ts**: メッセージ型定義（共通モジュール化完了）
+    - GlobalErrorMessages型定義
+    - 型安全なメッセージアクセス
+  - **types/api/v1.ts**: V1 API型定義（共通モジュール化完了）
+    - Presenter型、リクエスト型、レスポンス型
+    - Laravel APIとのインターフェース統一
 
 ### テスト環境
 - **Jest**: ^29.7.0 (テストランナー、モノレポ対応)

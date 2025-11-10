@@ -372,7 +372,7 @@ frontend/
 │                        #   - Testing Library推奨ルールセット（flat/react）
 │                        #   - Jest-DOM推奨ルールセット（flat/recommended）
 │                        # - Prettier競合ルール無効化
-├── lib/                 # 🎯 フロントエンド共通ライブラリ（DRY原則適用）
+├── lib/                 # 🔧 フロントエンド共通ライブラリ（frontend-lib-monorepo-consolidation完了）
 │   └── global-error-messages.ts  # ✅ Global Error静的辞書（共通モジュール化完了）
 │                        # - User AppとAdmin Appの重複メッセージ辞書を統一
 │                        # - DRY原則適用による保守性向上（~170行コード削減）
@@ -381,16 +381,34 @@ frontend/
 │                        # - 4カテゴリ構造: network, boundary, validation, global
 │                        # - 日本語/英語対応（ja/en）
 │                        # - TypeScript型推論最適化（as const + satisfies）
-├── types/               # 🎯 フロントエンド共通型定義
+│                        # - @shared/lib/global-error-messages 経由でImport可能
+├── types/               # 🔧 フロントエンド共通型定義（frontend-lib-monorepo-consolidation完了）
 │   ├── errors.ts        # エラー型定義（共通、自動生成対象、ErrorCode Enum）
+│   │                    # - @shared/types/errors 経由でImport可能
 │   ├── messages.d.ts    # メッセージ型定義（GlobalErrorMessages型、全54テストpass）
+│   │                    # - @shared/types/messages 経由でImport可能
 │   └── api/             # API型定義
 │       └── v1.ts        # 🔢 V1 API型定義（Presenter型、リクエスト型、レスポンス型）
+│                        # - @shared/types/api/v1 経由でImport可能
 ├── admin-app/           # 管理者向けアプリケーション
+│   ├── tsconfig.json    # 🔧 TypeScript設定（@shared/*パスエイリアス設定含む）
+│   │                    # - paths: { "@shared/*": ["../../../frontend/*"] }
+│   │                    # - 共通ライブラリへの統一Import設定
+│   └── ...
 ├── user-app/            # エンドユーザー向けアプリケーション
+│   ├── tsconfig.json    # 🔧 TypeScript設定（@shared/*パスエイリアス設定含む）
+│   │                    # - paths: { "@shared/*": ["../../../frontend/*"] }
+│   │                    # - 共通ライブラリへの統一Import設定
+│   └── ...
 ├── TESTING_GUIDE.md     # フロントエンドテストガイド
 └── TESTING_TROUBLESHOOTING.md  # テストトラブルシューティング
 ```
+
+**🔧 frontend-lib-monorepo-consolidation成果**:
+- **@shared/*パスエイリアス実装**: TypeScript paths設定による共通モジュール参照
+- **重複ファイル削除**: ~560行コード削減（User App/Admin Appの重複排除）
+- **Import文統一化**: 両アプリから `@shared/lib/*`, `@shared/types/*` 経由で統一Import
+- **単一ソース原則**: 変更影響範囲の最小化、型安全性維持
 
 **Docker最適化ポイント**:
 - **outputFileTracingRoot**: モノレポルート指定で依存関係トレース最適化
@@ -613,6 +631,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
+// 🔧 共通モジュール (@shared/*パスエイリアス、frontend-lib-monorepo-consolidation)
+import { GLOBAL_ERROR_MESSAGES } from '@shared/lib/global-error-messages'  // Global Error静的辞書
+import type { ErrorCode, ApiErrorResponse } from '@shared/types/errors'    // エラー型定義
+import type { GlobalErrorMessages } from '@shared/types/messages'          // メッセージ型定義
+import type { V1ApiResponse, V1LoginRequest } from '@shared/types/api/v1' // V1 API型定義
+
 // 内部モジュール (相対パス避ける)
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'        // 🔐 Sanctumトークン認証カスタムフック
@@ -629,6 +653,12 @@ import { apiClient } from '@/lib/api-client'     // Sanctum認証統合
 // - POST /api/tokens/{id}/revoke: Authorization Bearer token
 import { clsx } from 'clsx'
 ```
+
+**🔧 Import原則（frontend-lib-monorepo-consolidation適用後）**:
+- **@shared/*を優先**: 共通ライブラリ・型定義は`@shared/*`経由でImport
+- **@/は各アプリ固有モジュール**: コンポーネント、フック、ユーティリティは`@/`経由
+- **重複排除**: `@shared/lib/*`、`@shared/types/*`で重複コード削減
+- **単一ソース原則**: 共通モジュールは`frontend/lib/`、`frontend/types/`のみに配置
 
 ## 主要アーキテクチャ原則
 ### 🏗️ DDD/クリーンアーキテクチャ原則
