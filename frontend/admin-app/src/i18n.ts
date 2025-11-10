@@ -10,9 +10,9 @@ import { i18nConfig, type Locale } from "@shared/i18n-config";
 
 export default getRequestConfig(async ({ locale }) => {
   // Validate locale against supported locales
-  const validLocale = i18nConfig.locales.includes(locale as Locale)
-    ? locale
-    : i18nConfig.defaultLocale;
+  // Ensure validLocale is always string (not undefined)
+  const validLocale: string =
+    locale && i18nConfig.locales.includes(locale as Locale) ? locale : i18nConfig.defaultLocale;
 
   // Load messages for the validated locale
   return {

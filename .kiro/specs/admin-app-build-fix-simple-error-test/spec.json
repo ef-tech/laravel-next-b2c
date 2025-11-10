@@ -1,0 +1,64 @@
+{
+  "feature_name": "admin-app-build-fix-simple-error-test",
+  "created_at": "2025-11-10T07:00:00Z",
+  "updated_at": "2025-11-10T07:35:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 124,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/124",
+    "title": "Fix: Admin App本番ビルド失敗（simple-error-test/page.tsx構造問題）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": [],
+      "frontend": ["Next.js", "React", "TypeScript", "App Router"],
+      "infrastructure": [],
+      "tools": ["npm"]
+    },
+    "requirements_hints": [
+      "simple-error-test/page.tsx がアプリルート直下に配置されているが、ルートlayout.tsxが存在しない",
+      "Next.js App Routerの要件を満たしていない",
+      "開発サーバーは正常動作、本番ビルドが失敗",
+      "CI/CDパイプラインでビルドステージが失敗する可能性",
+      "Option B（[locale]配下に移動）を推奨：既存のi18n構造と一貫性が保たれる"
+    ],
+    "project_structure": [
+      "frontend/admin-app/src/app/[locale]/layout.tsx",
+      "frontend/admin-app/src/app/[locale]/page.tsx",
+      "frontend/admin-app/src/app/simple-error-test/page.tsx",
+      "frontend/admin-app/src/app/global-error.tsx",
+      "frontend/admin-app/src/app/layout.tsx"
+    ],
+    "services": {
+      "admin-app": {
+        "port": "13002",
+        "test_path": "/ja/simple-error-test"
+      }
+    },
+    "todo_items": [
+      "simple-error-test/page.tsx を [locale]/ ディレクトリ配下に移動",
+      "本番ビルド（npm run build）を実行して成功を確認",
+      "http://localhost:13002/ja/simple-error-test にアクセスして動作確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
