@@ -1,0 +1,85 @@
+{
+  "feature_name": "frontend-lib-monorepo-consolidation",
+  "created_at": "2025-11-09T09:00:00Z",
+  "updated_at": "2025-11-09T09:15:00Z",
+  "language": "ja",
+  "phase": "design-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 117,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/117",
+    "title": "frontend/lib/コード重複解消（モノレポ共通化）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "frontend": "Next.js 15.5, TypeScript, React",
+      "build_tools": "webpack, Jest, Playwright",
+      "config": "tsconfig.json, next.config.ts, jest.config.js"
+    },
+    "requirements_hints": [
+      "TypeScriptパスエイリアス設定による共通ライブラリ参照（@shared/*）",
+      "admin-app/user-app内の重複ファイル削除（api-client.ts, api-error.ts, network-error.ts）",
+      "Next.js webpack alias設定追加による安定性向上",
+      "Jest moduleNameMapper設定更新によるテスト環境対応",
+      "import文更新（@/lib/* → @shared/*）と段階的移行",
+      "コード重複削除による約560行削減と保守性向上"
+    ],
+    "project_structure": [
+      "frontend/lib/ (共通ライブラリディレクトリ)",
+      "frontend/user-app/tsconfig.json (パスエイリアス設定)",
+      "frontend/admin-app/tsconfig.json (パスエイリアス設定)",
+      "frontend/user-app/next.config.ts (webpack alias設定)",
+      "frontend/admin-app/next.config.ts (webpack alias設定)",
+      "frontend/user-app/jest.config.js (moduleNameMapper設定)",
+      "frontend/admin-app/jest.config.js (moduleNameMapper設定)",
+      "frontend/user-app/src/lib/ (削除対象: api-client.ts, api-error.ts, network-error.ts)",
+      "frontend/admin-app/src/lib/ (削除対象: api-client.ts, api-error.ts, network-error.ts)"
+    ],
+    "services": {
+      "user-app": {"port": "13001"},
+      "admin-app": {"port": "13002"},
+      "laravel-api": {"port": "13000"}
+    },
+    "todo_items": [
+      "tsconfig.json更新（user-app/admin-app）",
+      "next.config.ts更新（user-app/admin-app）",
+      "jest.config.js更新（user-app/admin-app）",
+      "TypeScript型チェック確認",
+      "import文影響範囲調査",
+      "import文一括置換（user-app）",
+      "import文一括置換（admin-app）",
+      "重複ファイル削除（6ファイル）",
+      "アプリ固有ファイル保持確認（api.ts, env.ts）",
+      "Jestユニットテスト実行（全テストパス確認）",
+      "カバレッジレポート確認（低下なし）",
+      "TypeScript型チェック実行",
+      "ESLint/Prettier実行",
+      "ビルド確認（user-app/admin-app）",
+      "E2Eテスト実行（全テストパス確認）",
+      "User App開発サーバー起動確認",
+      "Admin App開発サーバー起動確認",
+      "APIリクエスト動作確認",
+      "エラーハンドリング動作確認",
+      "ブラウザ開発者ツールでヘッダー確認",
+      "CHANGELOG.md更新（Breaking Changes無し記載）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}

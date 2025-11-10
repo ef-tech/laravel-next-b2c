@@ -13,8 +13,8 @@
 
 import { render, screen, waitFor } from "@testing-library/react";
 import GlobalError from "../global-error";
-import { NetworkError } from "@/lib/network-error";
-import { ApiError } from "@/lib/api-error";
+import { NetworkError } from "@shared/network-error";
+import { ApiError } from "@shared/api-error";
 
 describe("Global Error Boundary (Admin App)", () => {
   const mockReset = jest.fn();

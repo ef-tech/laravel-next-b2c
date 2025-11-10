@@ -1,4 +1,4 @@
-import { i18nConfig, type Locale } from "@/../../lib/i18n-config";
+import { i18nConfig, type Locale } from "@shared/i18n-config";
 
 describe("i18nConfig", () => {
   describe("locales", () => {

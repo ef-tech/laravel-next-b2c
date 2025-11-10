@@ -5,7 +5,7 @@
  * シンプルなエラーテスト - useRef/useStateを使わず直接throw
  */
 
-import { ApiError } from "@/lib/api-error";
+import { ApiError } from "@shared/api-error";
 import type { RFC7807Problem } from "@/types/errors";
 
 // Force dynamic rendering

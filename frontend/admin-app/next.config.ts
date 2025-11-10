@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-// import path from "path"; // Unused when output: "standalone" is disabled
+import path from "path";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
@@ -73,6 +73,15 @@ const nextConfig: NextConfig = {
   // Monorepo環境でのNext.jsビルド警告を解消するために設定
   // "Warning: Next.js inferred your workspace root, but it may not be correct..."を回避
   // outputFileTracingRoot: path.join(__dirname, "../../"),
+
+  // webpack alias設定（@shared/*パスエイリアス）
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@shared": path.resolve(__dirname, "../lib"),
+    };
+    return config;
+  },
 
   // セキュリティヘッダー設定（Admin App 用 - User App より厳格）
   async headers() {

@@ -6,7 +6,7 @@
  * (with translation function) modes.
  */
 
-import { NetworkError } from "@/../../lib/network-error";
+import { NetworkError } from "@shared/network-error";
 
 describe("NetworkError.getDisplayMessage()", () => {
   describe("Backward compatibility (no translation function)", () => {

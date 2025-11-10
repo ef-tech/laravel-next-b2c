@@ -13,8 +13,8 @@
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import ErrorBoundary from "../[locale]/error";
-import { NetworkError } from "@/lib/network-error";
-import { ApiError } from "@/lib/api-error";
+import { NetworkError } from "@shared/network-error";
+import { ApiError } from "@shared/api-error";
 
 // RFC 7807 Problem Details interface for error.cause
 interface RFC7807Cause {

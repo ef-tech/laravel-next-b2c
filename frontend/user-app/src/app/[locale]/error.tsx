@@ -15,9 +15,9 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ApiError } from "@/lib/api-error";
+import { ApiError } from "@shared/api-error";
 import type { RFC7807Problem } from "@/types/errors";
-import { NetworkError } from "@/lib/network-error";
+import { NetworkError } from "@shared/network-error";
 
 interface ErrorProps {
   error: Error & { digest?: string };

@@ -10,7 +10,7 @@
  */
 
 import createMiddleware from "next-intl/middleware";
-import { i18nConfig } from "@/../../lib/i18n-config";
+import { i18nConfig } from "@shared/i18n-config";
 
 export default createMiddleware({
   locales: i18nConfig.locales,
