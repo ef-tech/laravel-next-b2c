@@ -38,7 +38,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- 特になし
+- **セキュリティヘッダー設定の差異**: User App/Admin Appで異なるセキュリティポリシーを採用しています。
+
+  **User App（エンドユーザー向け）**:
+  - `X-Frame-Options: SAMEORIGIN` - 同一オリジンからのフレーム埋め込みを許可（利便性重視）
+  - `Referrer-Policy: strict-origin-when-cross-origin` - 標準的なReferrer制御
+
+  **Admin App（管理者向け）**:
+  - `X-Frame-Options: DENY` - フレーム埋め込みを完全に拒否（セキュリティ最優先）
+  - `Referrer-Policy: no-referrer` - Referrer情報を一切送信しない（情報漏洩防止）
+  - `Cross-Origin-Embedder-Policy: require-corp` - クロスオリジンリソース保護を強制
+  - `Cross-Origin-Opener-Policy: same-origin` - クロスオリジンウィンドウ分離
+
+  **理由**: Admin Appは管理者向けで機密情報を扱うため、より厳格なセキュリティポリシーを採用しています。User Appはエンドユーザー向けで、セキュリティと利便性のバランスを考慮した設定としています。
 
 ### Deprecated
 
