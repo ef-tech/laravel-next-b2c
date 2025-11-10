@@ -38,10 +38,6 @@ const customJestConfig = {
     "!src/i18n.ts",
     "!src/middleware.ts",
     "!src/types/error-codes.ts",
-    // Shared library files copied from monorepo (tested in monorepo root)
-    "!src/lib/api-client.ts",
-    "!src/lib/api-error.ts",
-    "!src/lib/network-error.ts",
   ],
 };
 
