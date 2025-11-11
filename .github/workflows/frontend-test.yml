@@ -155,3 +155,52 @@ jobs:
           name: coverage-${{ matrix.app }}-node${{ matrix.node-version }}
           path: frontend/${{ matrix.app }}/coverage/
           retention-days: 7
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20.x]
+        app: [admin-app, user-app]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/admin-app/package-lock.json
+            frontend/user-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create .env files from examples
+        run: |
+          cp .env.example .env
+          cp backend/laravel-api/.env.example backend/laravel-api/.env
+          [ -f e2e/.env.example ] && cp e2e/.env.example e2e/.env || true
+
+      - name: Validate environment variables
+        run: npm run env:check
+        env:
+          CI: true
+
+      - name: Run TypeScript type check
+        run: npm run type-check
+        working-directory: frontend/${{ matrix.app }}
+        env:
+          CI: true
+
+      - name: Build production bundle
+        run: npm run build
+        working-directory: frontend/${{ matrix.app }}
+        env:
+          CI: true
