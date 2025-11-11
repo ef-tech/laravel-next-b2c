@@ -48,6 +48,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `error-handling-pattern` - エラーハンドリングパターン作成（RFC 7807準拠、統一APIエラーレスポンス、Request ID伝播、多言語対応、Error Boundaries実装）
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
+- `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
 
 ### Completed Specifications
 - `global-error-static-dictionary-dry` - ✅ Global Error静的辞書の共通化完了（DRY原則適用、~170行コード削減、型安全性維持、全54テストpass）

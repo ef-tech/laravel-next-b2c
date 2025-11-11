@@ -1,0 +1,68 @@
+{
+  "feature_name": "frontend-cicd-build-validation",
+  "created_at": "2025-11-11T00:00:00Z",
+  "updated_at": "2025-11-11T03:45:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 127,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/127",
+    "title": "CI/CD: フロントエンド本番ビルドステップ欠落（TypeScript型チェック・npm run build未実行）",
+    "labels": ["enhancement", "CI/CD", "priority: high", "frontend"],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": [],
+      "frontend": ["TypeScript", "Next.js", "npm"],
+      "infrastructure": ["GitHub Actions", "ubuntu-latest"],
+      "tools": ["ESLint", "Jest", "TypeScript Compiler (tsc)"]
+    },
+    "requirements_hints": [
+      "TypeScript型チェック（npx tsc --noEmit）をCI/CDに追加",
+      "本番ビルド検証（npm run build）をCI/CDに追加",
+      "User AppとAdmin App両方に適用",
+      "ビルドエラーをPR時に検知できる仕組み",
+      "型安全性保証のための型エラー事前防止",
+      "本番環境デプロイ前の品質保証強化"
+    ],
+    "project_structure": [
+      ".github/workflows/frontend-test.yml",
+      "frontend/admin-app/",
+      "frontend/user-app/",
+      ".env.example",
+      "backend/laravel-api/.env.example"
+    ],
+    "services": {
+      "GitHub Actions Runner": {
+        "os": "ubuntu-latest",
+        "node_version": "20.x"
+      }
+    },
+    "todo_items": [
+      "新しいbuildジョブをfrontend-test.ymlに追加",
+      "TypeScript型チェックステップ（npx tsc --noEmit）の実装",
+      "本番ビルド検証ステップ（npm run build）の実装",
+      "Matrix戦略でadmin-app/user-app両方をテスト",
+      "環境変数ファイル（.env）の事前作成",
+      "CI環境でのビルド成功確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
