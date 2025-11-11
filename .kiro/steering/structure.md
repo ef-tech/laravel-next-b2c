@@ -12,7 +12,7 @@ laravel-next-b2c/
 ├── .github/             # GitHub設定
 │   └── workflows/       # GitHub Actionsワークフロー (CI/CD) - 発火タイミング最適化済み
 │       ├── e2e-tests.yml          # E2Eテスト（4 Shard並列、Concurrency + Paths最適化）
-│       ├── frontend-test.yml      # フロントエンドテスト（API契約監視含む）
+│       ├── frontend-test.yml      # フロントエンドテスト（Jest/Testing Library + TypeScript型チェック + Next.js本番ビルド検証、API契約監視含む）
 │       ├── php-quality.yml        # PHP品質チェック（Pint + Larastan）
 │       └── test.yml               # PHPテスト（Pest 4、Composerキャッシュ最適化）
 ├── .claude/             # Claude Code設定・コマンド

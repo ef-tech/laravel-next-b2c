@@ -487,6 +487,19 @@ parameters:
    - **レポート**: Playwright HTML/JUnitレポート、失敗時のスクリーンショット・トレース
    - **Artifacts**: 各Shardごとのテストレポート保存
 
+5. **フロントエンドCI/CD本番ビルド検証** (`.github/workflows/frontend-test.yml`)
+   - **実装完了**: 2025-01-12 (PR #132、frontend-cicd-build-validation spec完了)
+   - **検証内容**:
+     - **TypeScript型チェック**: `npm run type-check`（テストファイル除外、本番コードのみ検証）
+     - **Next.js本番ビルド**: `npm run build`（両アプリの本番ビルド成功確認）
+     - **環境変数検証**: ビルド前の必須環境変数チェック
+   - **最適化施策**:
+     - Next.jsテレメトリ無効化（`NEXT_TELEMETRY_DISABLED=1`）によるCI環境ログ簡潔化
+     - TypeScript型チェック対象最適化（`tsconfig.json` excludeでテストファイル除外）
+     - Matrix戦略によるAdmin App/User App並列ビルド
+   - **自動実行**: Pull Request時（frontend/**変更検知）、mainブランチpush時
+   - **エラー検知強化**: PR時の本番ビルドエラー早期発見、デプロイ前品質保証
+
 **ワークフロー実行条件マトリクス**:
 | 変更内容 | frontend-test | php-quality | test | e2e-tests |
 |---------|--------------|-------------|------|-----------|

@@ -57,6 +57,11 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **E2E CI/CD自動実行**: GitHub Actions統合完了、Pull Request時の自動E2Eテスト実行（4 Shard並列実行、約2分完了）
 - **CI/CDパフォーマンス最適化**: Composerキャッシング、並列実行（concurrency設定）、タイムアウト最適化（60分→20分）
 - **GitHub Actions発火最適化**: Concurrency設定による重複実行削減、Paths設定による担当領域明確化、API契約監視による整合性検証、実行頻度60-70%削減
+- **フロントエンドCI/CD本番ビルド検証**: TypeScript型チェック・Next.js本番ビルド検証完了（2025-01-12、PR #132）
+  - TypeScript型チェック導入（テストファイル除外、本番コードのみ検証）
+  - Next.js本番ビルド自動検証（Admin App/User App並列ビルド）
+  - Next.jsテレメトリ無効化（CI環境ログ簡潔化）
+  - PR時の本番ビルドエラー早期発見、デプロイ前品質保証強化
 - **固定ポート設定**: 開発環境ポート統一（User App: 13001、Admin App: 13002、API: 13000）による複数プロジェクト並行開発対応、Dockerfile APP_PORTデフォルト値最適化済み（80→13000）
 - **Dockerヘルスチェック**: 全サービスのヘルスチェック機能統合、依存関係の自動管理、障害検知の早期化（IPv4明示対応）、Laravel API `/api/health`エンドポイント統合
 - **詳細最適化ドキュメント**: 他プロジェクトへの移行ガイド完備、DDDアーキテクチャガイド・開発ガイド・テスト戦略ドキュメント統合、Dockerトラブルシューティング完全ガイド（DOCKER_TROUBLESHOOTING.md）
