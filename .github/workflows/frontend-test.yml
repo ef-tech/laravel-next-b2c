@@ -204,3 +204,4 @@ jobs:
         working-directory: frontend/${{ matrix.app }}
         env:
           CI: true
+          NEXT_TELEMETRY_DISABLED: 1
