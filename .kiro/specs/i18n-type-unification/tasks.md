@@ -106,40 +106,40 @@ User AppとAdmin Appの`validLocale`型定義を統一し、next-intl公式型�
   - ロケール検証ロジックが正常動作することを確認
   - _Requirements: 6.4_
 
-- [ ] 6. CI/CD自動検証
-- [ ] 6.1 PRブランチ作成
+- [x] 6. CI/CD自動検証
+- [x] 6.1 PRブランチ作成
   - `git checkout -b feature/131/i18n-type-unification`でブランチ作成（既存）
   - 変更をコミット
   - GitHubリモートにpush
   - _Requirements: 7.1_
 
-- [ ] 6.2 GitHub Actions lint検証確認
+- [x] 6.2 GitHub Actions lint検証確認
   - `.github/workflows/frontend-test.yml`ワークフローが自動実行されることを確認
   - `lint / user-app (20.x)`ジョブがGreenステータスになることを確認
   - ESLint静的解析が成功することを検証
   - _Requirements: 7.2_
 
-- [ ] 6.3 GitHub Actions test検証確認
+- [x] 6.3 GitHub Actions test検証確認
   - `test / user-app (20.x)`ジョブがGreenステータスになることを確認
   - Jest単体テストが成功することを検証
   - カバレッジレポートが生成されることを確認
   - _Requirements: 7.3_
 
-- [ ] 6.4 GitHub Actions build検証確認
+- [x] 6.4 GitHub Actions build検証確認
   - `build / user-app (20.x)`ジョブがGreenステータスになることを確認
   - TypeScript型チェックが成功することを検証
   - Next.js本番ビルドが成功することを確認
   - _Requirements: 7.4_
 
-- [ ] 7. PR作成とフィードバック
-- [ ] 7.1 PR作成
+- [x] 7. PR作成とフィードバック
+- [x] 7.1 PR作成
   - GitHub上でPull Requestを作成
   - タイトル: `✅ i18n型定義統一（User App/Admin App validLocale型をstring型に統一）`
   - 説明: 変更内容、検証結果サマリー、関連Issue #131へのリンクを記載
   - レビュアーを指定
   - _Requirements: 10.1, 10.2_
 
-- [ ] 7.2 PR #129へのフィードバック報告
+- [x] 7.2 PR #129へのフィードバック報告
   - PR #129にコメントを投稿
   - 対応完了の報告（User App `validLocale`型定義を`string`型に統一）
   - 全検証結果のサマリー（型チェック、ビルド、テスト、CI/CD）を記載
