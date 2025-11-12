@@ -10,70 +10,70 @@ User AppとAdmin Appの`validLocale`型定義を統一し、next-intl公式型�
 
 ## 実装タスク
 
-- [ ] 1. User App i18n設定の型定義変更
-- [ ] 1.1 User App i18n.tsファイルの型定義を変更
+- [x] 1. User App i18n設定の型定義変更
+- [x] 1.1 User App i18n.tsファイルの型定義を変更
   - `validLocale`変数の型定義を`Locale`型から`string`型に変更
   - 型キャストを`as Locale`から`as string`に変更
   - コードの実行時動作は変更せず、型定義のみ調整
   - _Requirements: 1.1, 1.4, 2.1_
 
-- [ ] 1.2 共通i18n設定の不変性を確認
+- [x] 1.2 共通i18n設定の不変性を確認
   - `frontend/lib/i18n-config.ts`が変更されていないことを確認
   - `locales`配列、`defaultLocale`、`Locale`型定義が既存のまま維持されていることを検証
   - _Requirements: 8.1, 8.2_
 
-- [ ] 1.3 Admin App実装との一貫性を確認
+- [x] 1.3 Admin App実装との一貫性を確認
   - User AppとAdmin Appの`i18n.ts`実装を比較
   - 両アプリで`validLocale: string`型定義が一致していることを確認
   - ロケール検証ロジックが同一パターンで実装されていることを検証
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 2. TypeScript型チェック検証
-- [ ] 2.1 ワークスペース全体の型チェック実行
+- [x] 2. TypeScript型チェック検証
+- [x] 2.1 ワークスペース全体の型チェック実行
   - `npm run type-check`を実行
   - TypeScript型推論エラーがないことを確認
   - 型定義の整合性を検証
   - _Requirements: 3.1_
 
-- [ ] 2.2 Admin App個別の型チェック実行
+- [x] 2.2 Admin App個別の型チェック実行
   - `cd frontend/admin-app && npm run type-check`を実行
   - Admin App固有の型推論エラーがないことを確認
   - _Requirements: 3.2_
 
-- [ ] 2.3 User App個別の型チェック実行
+- [x] 2.3 User App個別の型チェック実行
   - `cd frontend/user-app && npm run type-check`を実行
   - User App固有の型推論エラーがないことを確認
   - 変更後の型定義が正しく推論されることを検証
   - _Requirements: 3.3_
 
-- [ ] 3. 本番ビルド検証
-- [ ] 3.1 Admin App本番ビルド実行
+- [x] 3. 本番ビルド検証
+- [x] 3.1 Admin App本番ビルド実行
   - `cd frontend/admin-app && npm run build`を実行
   - ビルドエラーがないことを確認
   - ビルド時間が1-3分で完了することを確認
   - _Requirements: 4.1, 4.4_
 
-- [ ] 3.2 User App本番ビルド実行
+- [x] 3.2 User App本番ビルド実行
   - `cd frontend/user-app && npm run build`を実行
   - ビルドエラーがないことを確認
   - ビルド時間が1-3分で完了することを確認
   - 型定義変更後のビルド成功を検証
   - _Requirements: 4.2, 4.4_
 
-- [ ] 4. 単体テスト検証
-- [ ] 4.1 フロントエンド全体の単体テスト実行
+- [x] 4. 単体テスト検証
+- [x] 4.1 フロントエンド全体の単体テスト実行
   - `npm test`を実行
   - 全テストがpassすることを確認
   - テストカバレッジが維持されることを確認
   - _Requirements: 5.1_
 
-- [ ] 4.2 Admin App単体テスト実行
+- [x] 4.2 Admin App単体テスト実行
   - `npm run test:admin`を実行
   - Admin App単体テストが全passすることを確認
   - i18n設定ロジックが正常動作することを検証
   - _Requirements: 5.2, 5.4_
 
-- [ ] 4.3 User App単体テスト実行
+- [x] 4.3 User App単体テスト実行
   - `npm run test:user`を実行
   - User App単体テストが全passすることを確認
   - ロケール検証ロジックが正常動作することを検証
