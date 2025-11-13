@@ -103,12 +103,22 @@ Property 'toBeInTheDocument' does not exist on type 'Matchers<HTMLElement>'
 
 #### 対処法
 
-`tsconfig.test.json`が正しく設定されているか確認：
+`jest.setup.ts`で型定義が正しくインポートされているか確認：
+
+```typescript
+import "@testing-library/jest-dom";
+```
+
+また、各アプリの`tsconfig.json`が`tsconfig.base.json`を継承し、適切な型定義が含まれているか確認：
 
 ```json
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["jest", "@testing-library/jest-dom", "node"]
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["../lib/*"]
+    }
   }
 }
 ```

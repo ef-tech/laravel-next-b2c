@@ -40,6 +40,7 @@ lerna-debug.log*
 
 # === Monorepo Root ===
 /node_modules
+*.tsbuildinfo
 
 # Scripts (deprecated - to be removed per Issue #99)
 /scripts/dev/node_modules

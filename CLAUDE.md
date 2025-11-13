@@ -51,8 +51,12 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
 
 ### Completed Specifications
+- `frontend-common-tsconfig` - ✅ フロントエンド共通tsconfig.base.json導入完了（TypeScript設定の重複削減、15個の共通compilerOptions集約、保守性向上、スケーラビリティ確保）
+  - 実装完了日: 2025-11-13
+  - Issue: #126
+  - 成果: tsconfig.base.json作成、User App/Admin Appで共通設定継承、型チェック・Jest・Next.jsビルド全検証成功
 - `i18n-type-unification` - ✅ i18n型定義統一完了（User App/Admin AppのvalidLocale型を統一、string型明示化、next-intl公式型定義準拠、型安全性維持）
-  - 実装完了日: 2025-01-13
+  - 実装完了日: 2025-11-13
   - PR: #134
   - 成果: locale型をstringに明示的変換、Error Boundaries i18n完全実装、全ページを[locale]ルート配下に統一、型エラー完全解消
 - `global-error-static-dictionary-dry` - ✅ Global Error静的辞書の共通化完了（DRY原則適用、~170行コード削減、型安全性維持、全54テストpass）

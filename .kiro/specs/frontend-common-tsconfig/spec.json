@@ -1,0 +1,57 @@
+{
+  "feature_name": "frontend-common-tsconfig",
+  "created_at": "2025-11-13T10:00:00Z",
+  "updated_at": "2025-01-13T11:00:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 126,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/126",
+    "title": "Refactor: フロントエンド共通tsconfig.base.json導入（TypeScript設定の重複削減）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "frontend": ["TypeScript", "Next.js", "React"],
+      "tools": ["npm", "VSCode", "Jest"],
+      "build_tools": ["Next.js Build System"]
+    },
+    "requirements_hints": [
+      "frontend/tsconfig.base.json を作成して共通設定を集約",
+      "User App/Admin App の tsconfig.json を extends で継承してシンプル化",
+      "@/* と @shared/* のパスエイリアスはアプリ固有設定として維持",
+      "TypeScript型チェック・IDEの型補完・Jestテスト・Next.jsビルドの動作検証",
+      "将来的なスケーラビリティ（3つ目のアプリ追加）への対応"
+    ],
+    "project_structure": [
+      "frontend/tsconfig.base.json (新規作成)",
+      "frontend/user-app/tsconfig.json (リファクタリング)",
+      "frontend/admin-app/tsconfig.json (リファクタリング)"
+    ],
+    "services": {},
+    "todo_items": [
+      "TypeScript型チェック: npm run type-check が両アプリで成功すること",
+      "IDEの型補完: VSCodeで @/* と @shared/* が正しく解決されること",
+      "Jestテスト: 既存のテストが全パスすること",
+      "Next.jsビルド: npm run build が成功すること"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": false
+}
