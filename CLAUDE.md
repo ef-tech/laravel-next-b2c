@@ -49,6 +49,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
+- `frontend-common-tsconfig` - フロントエンド共通tsconfig.base.json導入（TypeScript設定の重複削減、保守性向上、スケーラビリティ確保）
 
 ### Completed Specifications
 - `i18n-type-unification` - ✅ i18n型定義統一完了（User App/Admin AppのvalidLocale型を統一、string型明示化、next-intl公式型定義準拠、型安全性維持）
