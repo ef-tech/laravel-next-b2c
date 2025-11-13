@@ -49,9 +49,12 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
-- `i18n-type-unification` - i18n型定義統一（User App/Admin AppのvalidLocale型を統一、next-intl公式型定義準拠、型安全性維持）
 
 ### Completed Specifications
+- `i18n-type-unification` - ✅ i18n型定義統一完了（User App/Admin AppのvalidLocale型を統一、string型明示化、next-intl公式型定義準拠、型安全性維持）
+  - 実装完了日: 2025-01-13
+  - PR: #134
+  - 成果: locale型をstringに明示的変換、Error Boundaries i18n完全実装、全ページを[locale]ルート配下に統一、型エラー完全解消
 - `global-error-static-dictionary-dry` - ✅ Global Error静的辞書の共通化完了（DRY原則適用、~170行コード削減、型安全性維持、全54テストpass）
   - 実装完了日: 2025-11-09
   - 成果: User App/Admin Appの重複メッセージ辞書を共通モジュール化、保守性向上

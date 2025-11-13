@@ -70,6 +70,11 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
 - **フロントエンドテストコードESLint統合**: Jest + Testing Library + Jest-DOM専用ESLintルール適用（errorレベル）、テストコード品質の自動検証、4つの包括的ガイドドキュメント完備
 - **PHP品質管理システム**: Laravel Pint + Larastan (PHPStan Level 8) + Pest 4 + Git Hooks + CI/CD統合による包括的コード品質保証
 - **🌐 CORS環境変数ドリブン設定**: 環境変数による柔軟なCORS設定、開発/本番環境対応、セキュリティ強化、フロントエンドアプリとのシームレスな統合
+- **🌍 i18n型定義統一完了**: User App/Admin AppのvalidLocale型を統一（2025-01-13、PR #134完了）
+  - **locale型明示化**: string型に明示的変換による型エラー完全解消
+  - **next-intl互換性向上**: next-intl公式型定義準拠による統合性強化
+  - **ルーティング統一**: 全ページを[locale]配下に統一配置、i18n対応の完全一貫性確保
+  - **Error Boundaries i18n**: グローバル/ページレベルError Boundariesでの多言語対応完全実装
 - **🔐 包括的セキュリティヘッダー実装**: OWASP準拠のセキュリティベストプラクティス統合
   - **セキュリティヘッダー**: X-Frame-Options、X-Content-Type-Options、Referrer-Policy、CSP、Permissions-Policy、HSTS
   - **段階的CSP導入**: Report-Onlyモード（監視）→ Enforceモード（強制）の段階的移行戦略

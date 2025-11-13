@@ -319,12 +319,12 @@ laravel-api/
 {admin-app|user-app}/
 ├── src/                 # ソースコード
 │   ├── app/             # App Router (Next.js 13+)
-│   │   ├── [locale]/    # 🌍 多言語対応ルート（next-intl統合、全ページ完全統一）
+│   │   ├── [locale]/    # 🌍 多言語対応ルート（next-intl統合、全ページ完全統一、2025-01-13 PR #134完了）
 │   │   │   ├── layout.tsx   # ロケール対応レイアウト
 │   │   │   ├── page.tsx     # ホームページ
-│   │   │   ├── error.tsx    # 🎯 Error Boundaries i18n実装（React 19、多言語Fallback UI）
-│   │   │   ├── global-error.tsx  # 🎯 グローバルError Boundaries i18n（NEXT_LOCALE Cookie検出）
-│   │   │   └── [...dynamic]/  # 動的ページ（[locale]配下に統一、i18n完全対応）
+│   │   │   ├── error.tsx    # 🎯 Error Boundaries i18n実装（React 19、多言語Fallback UI、locale as string型明示化）
+│   │   │   ├── global-error.tsx  # 🎯 グローバルError Boundaries i18n（NEXT_LOCALE Cookie検出、Accept-Language fallback）
+│   │   │   └── [...dynamic]/  # 動的ページ（[locale]配下に統一、i18n完全対応、validLocale型統一）
 │   │   ├── globals.css  # グローバルスタイル
 │   │   └── actions.ts   # Server Actions
 │   ├── messages/        # 🌍 多言語メッセージファイル（next-intl）
