@@ -34,6 +34,13 @@
       - User App/Admin App両方でvalidLocale型を統一（next-intl公式型定義準拠）
       - Error Boundaries i18n完全実装：`locale as string`による型安全性維持
       - 全ページを[locale]ルートに統一配置、i18n対応の完全一貫性確保
+  - **✅ 共通TypeScript設定（2025-11-13完了）**: tsconfig.base.json導入による設定共通化
+    - **frontend/tsconfig.base.json**: 15個の共通compilerOptionsを集約
+      - target: ES2017、strict mode有効、Next.jsプラグイン統合
+      - forceConsistentCasingInFileNames: true（大文字小文字一貫性チェック）
+    - **継承構造**: User App/Admin Appでextends: "../tsconfig.base.json"
+    - **baseUrl明示**: 各アプリでbaseUrl: "."を明示的に設定
+    - **保守性向上**: TypeScript設定の重複削減、一元管理による変更容易性向上
 - **Tailwind CSS**: ^4.0.0 (最新版CSS framework)
 - **next-intl**: ^3.x (多言語化対応、Error Boundaries i18n統合)
 

@@ -355,7 +355,11 @@ laravel-api/
 ├── middleware.ts        # 🔐 Next.jsミドルウェア（セキュリティヘッダー設定、i18nルーティング、環境変数駆動）
 ├── Dockerfile           # Next.js Dockerイメージ定義（本番ビルド最適化）
 ├── package.json         # フロントエンド依存関係管理（--port固定設定、next-intl含む）
-├── tsconfig.json        # TypeScript設定
+├── tsconfig.json        # ✅ TypeScript設定（tsconfig.base.json継承、2025-11-13更新）
+│                        # - extends: "../tsconfig.base.json"（共通設定継承）
+│                        # - baseUrl: "."（明示的設定、相対パス解決の基点）
+│                        # - paths: @/* と @shared/* パスエイリアス定義
+│                        # - exclude: テストファイル除外（型チェック対象から除外）
 ├── jest.config.js       # Jest設定（プロジェクト固有）
 ├── tailwind.config.js   # Tailwind CSS設定
 ├── next.config.ts       # Next.js設定（outputFileTracingRoot設定、モノレポ対応、next-intl統合）
@@ -373,6 +377,11 @@ frontend/
 │                        #   - Testing Library推奨ルールセット（flat/react）
 │                        #   - Jest-DOM推奨ルールセット（flat/recommended）
 │                        # - Prettier競合ルール無効化
+├── tsconfig.base.json   # ✅ 共通TypeScript設定（2025-11-13導入完了）
+│                        # - 15個の共通compilerOptions集約（target、strict、jsx等）
+│                        # - Next.jsプラグイン統合
+│                        # - forceConsistentCasingInFileNames: true（大文字小文字一貫性チェック）
+│                        # - User App/Admin Appで継承（extends: "../tsconfig.base.json"）
 ├── lib/                 # 🔧 フロントエンド共通ライブラリ（frontend-lib-monorepo-consolidation完了）
 │   └── global-error-messages.ts  # ✅ Global Error静的辞書（共通モジュール化完了）
 │                        # - User AppとAdmin Appの重複メッセージ辞書を統一
