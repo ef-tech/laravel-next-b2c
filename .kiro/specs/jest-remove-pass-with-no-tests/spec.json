@@ -1,0 +1,62 @@
+{
+  "feature_name": "jest-remove-pass-with-no-tests",
+  "created_at": "2025-01-14T00:00:00Z",
+  "updated_at": "2025-11-13T15:49:56Z",
+  "language": "ja",
+  "phase": "design-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 138,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/138",
+    "title": "Refactor: Jestの--passWithNoTestsオプション削除（テスト実行の確実性向上）",
+    "labels": [
+      "refactoring",
+      "testing",
+      "frontend"
+    ],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "",
+      "frontend": "Jest, npm",
+      "infrastructure": "CI/CD",
+      "tools": "package.json"
+    },
+    "requirements_hints": [
+      "User App と Admin App の package.json で --passWithNoTests オプションを削除する",
+      "テストファイルが見つからない場合は CI が失敗するようにする",
+      "テスト実行の確実性を向上させる",
+      "既存の 385 tests（173 + 212）が正常に動作することを確認する"
+    ],
+    "project_structure": [
+      "frontend/user-app/package.json",
+      "frontend/admin-app/package.json",
+      "jest.config.js"
+    ],
+    "services": {},
+    "todo_items": [
+      "User App の package.json から --passWithNoTests を削除",
+      "Admin App の package.json から --passWithNoTests を削除",
+      "ローカルで npm test が正常に動作する（173 tests + 212 tests）",
+      "CI/CD パイプラインが正常に動作する",
+      "テストファイルが見つからない場合、CI が失敗することを確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
