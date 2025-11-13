@@ -1,9 +1,9 @@
 {
   "feature_name": "jest-remove-pass-with-no-tests",
   "created_at": "2025-01-14T00:00:00Z",
-  "updated_at": "2025-11-13T15:49:56Z",
+  "updated_at": "2025-11-13T15:54:43Z",
   "language": "ja",
-  "phase": "design-generated",
+  "phase": "tasks-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 138,
@@ -51,10 +51,10 @@
     },
     "design": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "tasks": {
-      "generated": false,
+      "generated": true,
       "approved": false
     }
   },
