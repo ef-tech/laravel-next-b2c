@@ -76,8 +76,19 @@ No tests found, exiting with code 1
 
 - テストファイル命名規則に従っていない
 - `testMatch`パターンに一致しない
+- テストファイルが存在しない（意図的に削除された、または初期状態）
+
+#### 重要な動作
+
+このプロジェクトでは**テスト実行の確実性を保証するため**、テストファイルが0件の場合は**意図的に失敗（Exit Code 1）**します。
+
+- **理由**: CI/CDでテストファイルが誤って削除された場合に即座に検知
+- **Jest設定**: `--passWithNoTests` オプションを使用していません
+- **期待動作**: テストファイルが必ず1件以上存在することを強制
 
 #### 対処法
+
+**1. テストファイル命名規則の確認**
 
 ファイル名を `.test.ts` または `.test.tsx` に変更：
 
@@ -87,6 +98,40 @@ src/components/Button/__tests__/Button.spec.tsx
 
 # Good
 src/components/Button/Button.test.tsx
+```
+
+**2. testMatch設定の確認**
+
+`jest.base.js` の `testMatch` パターンを確認：
+
+```javascript
+testMatch: [
+  '<rootDir>/src/**/*.(test|spec).(ts|tsx)',
+  '<rootDir>/src/**/*.(test|spec).(js|jsx)',
+],
+```
+
+**3. テストファイルの存在確認**
+
+```bash
+# User App
+find frontend/user-app/src -name "*.test.*" -o -name "*.spec.*"
+
+# Admin App
+find frontend/admin-app/src -name "*.test.*" -o -name "*.spec.*"
+```
+
+**4. 初期開発時の注意**
+
+新規機能開発時は、最初に最小限のテストファイルを作成してください：
+
+```typescript
+// src/components/NewFeature/NewFeature.test.tsx
+describe("NewFeature", () => {
+  it("renders without crashing", () => {
+    expect(true).toBe(true); // 最小限のテスト
+  });
+});
 ```
 
 ### 4. 型エラー
