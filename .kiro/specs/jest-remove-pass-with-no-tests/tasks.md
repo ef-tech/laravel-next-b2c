@@ -74,12 +74,14 @@
   - 再度 `npm test` を実行し、正常にパスすることを確認（212 tests passed） ✅
   - _Requirements: 3.2, 3.4_
 
-- [ ] 3.3 testMatch 設定ミスシナリオ検証（オプション）
-  - `jest.config.js` の testMatch パターンを一時的に誤った設定に変更（例: `['**/*.spec.ts']`）
-  - `npm test` を実行し、exit code 1 で失敗することを確認
-  - エラーメッセージ "No tests found" が表示されることを確認
-  - testMatch 設定を元に戻す
-  - 再度 `npm test` を実行し、正常にパスすることを確認
+- [x] 3.3 testMatch 設定ミスシナリオ検証（オプション）
+  - `jest.base.js` の testMatch パターンを一時的に誤った設定に変更（`*.(test|spec)` → `*.spec` に変更） ✅
+  - `npm test` を実行し、exit code 1 で失敗することを確認 ✅
+  - エラーメッセージ "No tests found" が表示されることを確認 ✅
+  - testMatch 設定を元に戻す ✅
+  - 再度 `npm test` を実行し、正常にパスすることを確認 ✅
+  - User App: 15 test suites, 173 tests passed, 1.442s ✅
+  - Admin App: 17 test suites, 212 tests passed, 1.436s ✅
   - _Requirements: 3.3_
 
 - [x] 4. ローカル開発環境での動作確認
