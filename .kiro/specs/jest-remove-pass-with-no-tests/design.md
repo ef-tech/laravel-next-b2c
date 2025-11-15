@@ -32,7 +32,7 @@
 
 本プロジェクトは、モノレポ構成のフロントエンドテスト環境を採用している：
 
-- **Jest 30**: テストランナー（User App/Admin App共通）
+- **Jest 29.7.0**: テストランナー（User App/Admin App共通）
 - **モノレポ設定**: `jest.config.js` でプロジェクトを統括管理
 - **並列実行**: GitHub Actions Matrix戦略で両アプリを並列テスト
 - **既存テスト**: User App 173テスト、Admin App 212テスト、合計385テスト
@@ -73,7 +73,7 @@ graph TB
 本機能は既存のテスト技術スタックと完全に整合している：
 
 **既存技術スタック**:
-- **Jest 30**: テストランナー（`--passWithNoTests` オプションはJest標準機能）
+- **Jest 29.7.0**: テストランナー（`--passWithNoTests` オプションはJest標準機能）
 - **GitHub Actions**: CI/CDプラットフォーム（frontend-test.yml）
 - **npm scripts**: パッケージマネージャースクリプト（package.json）
 
