@@ -119,6 +119,9 @@ find frontend/user-app/src -name "*.test.*" -o -name "*.spec.*"
 
 # Admin App
 find frontend/admin-app/src -name "*.test.*" -o -name "*.spec.*"
+
+# Jestが検出するテストファイル一覧を確認（推奨）
+npx jest --listTests
 ```
 
 **4. 初期開発時の注意**
