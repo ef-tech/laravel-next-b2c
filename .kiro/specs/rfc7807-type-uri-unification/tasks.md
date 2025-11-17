@@ -65,21 +65,21 @@ RFC 7807準拠のエラーレスポンスにおけるtype URI生成を`ErrorCode
   - 動的type URI生成の禁止ルール検証を実装（config('app.url')による直接生成を検出）
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [x] 5. CI/CD統合とスクリプト拡張（スキップ: Architecture Testで代替）
-- [x] 5.1 verify-error-types.shスクリプト拡張（スキップ）
+- [x] 5. CI/CD統合とスクリプト拡張
+- [x] 5.1 verify-error-types.shスクリプト拡張
   - ddd/Shared/Exceptions/ディレクトリ内の直接的なtype URI生成パターン検出機能を追加
   - Architecture Testの自動実行機能を追加
   - 違反検出時のエラーメッセージ出力機能を実装
   - exit code制御機能を実装（違反検出時は1で終了）
   - _Requirements: 7.1, 7.2, 7.3, 7.4_
-  - **Note**: 既存スクリプト不在のため、ErrorTypeUriTest.php（Architecture Test）で代替検証を実装済み
+  - **実装完了**: RFC 7807 type URI統一検証ロジックを追加、ErrorTypeUriTest.php実行統合
 
-- [x] 5.2 GitHub ActionsワークフローへのArchitecture Test統合（スキップ）
+- [x] 5.2 GitHub ActionsワークフローへのArchitecture Test統合
   - .github/workflows/test.ymlにverify-error-types.sh実行ステップを追加
   - Architecture Testを既存テストスイートの一部として統合
   - 全テスト成功時のみマージを許可する品質ゲートを設定
   - _Requirements: 7.5, 7.6_
-  - **Note**: ErrorTypeUriTest.phpがテストスイートに統合済み（`pest`コマンドで自動実行）
+  - **実装完了**: verify-typesジョブ追加、testジョブの前に実行（needs: verify-types）
 
 - [x] 6. 品質保証と静的解析
 - [x] 6.1 PHPStan Level 8静的解析の実行と合格
@@ -150,7 +150,7 @@ RFC 7807準拠のエラーレスポンスにおけるtype URI生成を`ErrorCode
 - [x] 全Unit Tests（DomainException、ApplicationException、InfrastructureException）が成功
 - [x] 全Feature Tests（ExceptionHandler、認証エラー）が成功
 - [x] Architecture Tests（ErrorTypeUriTest.php）が成功
-- [x] verify-error-types.shスクリプト拡張完了とCI/CD統合完了（スキップ: 既存スクリプト不在のため）
+- [x] verify-error-types.shスクリプト拡張完了とCI/CD統合完了
 - [x] PHPStan Level 8静的解析合格（新規エラー0件）
 - [x] Laravel Pint自動フォーマット合格
 - [x] テストカバレッジ85%以上維持

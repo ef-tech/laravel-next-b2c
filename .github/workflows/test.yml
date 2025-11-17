@@ -14,6 +14,8 @@ on:
       - 'frontend/types/api/v1.ts'
       - 'frontend/lib/api-client-v1.ts'
       - 'e2e/projects/shared/tests/api-versioning.spec.ts'
+      - 'scripts/verify-error-types.sh'
+      - 'shared/error-codes.json'
       - '.github/workflows/test.yml'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -25,11 +27,46 @@ on:
       - 'frontend/types/api/v1.ts'
       - 'frontend/lib/api-client-v1.ts'
       - 'e2e/projects/shared/tests/api-versioning.spec.ts'
+      - 'scripts/verify-error-types.sh'
+      - 'shared/error-codes.json'
       - '.github/workflows/test.yml'
 
 jobs:
-  test:
+  verify-types:
+    name: Verify Error Types & RFC 7807
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite3
+          tools: composer:v2
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: backend/laravel-api
+
+      - name: Run verify-error-types.sh
+        run: ./scripts/verify-error-types.sh
+
+  test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: verify-types
 
     strategy:
       fail-fast: false
@@ -154,8 +191,9 @@ jobs:
           retention-days: 7
 
   coverage:
+    name: Test Coverage
     runs-on: ubuntu-latest
-    needs: test
+    needs: [verify-types, test]
 
     services:
       redis:
