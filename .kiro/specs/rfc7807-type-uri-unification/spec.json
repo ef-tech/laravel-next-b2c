@@ -1,9 +1,9 @@
 {
   "feature_name": "rfc7807-type-uri-unification",
   "created_at": "2025-11-18T01:04:00Z",
-  "updated_at": "2025-11-18T01:20:00Z",
+  "updated_at": "2025-11-18T01:30:00Z",
   "language": "ja",
-  "phase": "requirements-generated",
+  "phase": "design-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 114,
@@ -61,10 +61,10 @@
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
+      "generated": true,
       "approved": false
     },
     "tasks": {
