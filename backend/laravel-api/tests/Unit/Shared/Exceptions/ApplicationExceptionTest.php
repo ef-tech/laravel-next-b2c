@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 use Ddd\Shared\Exceptions\ApplicationException;
 
+use function Tests\Helpers\assertEnumDefinedTypeUri;
+use function Tests\Helpers\assertFallbackTypeUri;
+use function Tests\Helpers\assertRfc7807RequiredFields;
+use function Tests\Helpers\mockRequestContext;
+
 /**
  * ApplicationException実装テスト
  *
@@ -64,42 +69,29 @@ test('toProblemDetails() がRFC 7807形式の配列を生成する', function ()
     $exception = new ResourceNotFoundException('The requested user was not found.');
 
     // Request ID mockをセット
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
-    request()->server->set('REQUEST_URI', '/api/v1/users/123');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/users/123');
 
     $problemDetails = $exception->toProblemDetails();
 
     // RFC 7807必須フィールド
-    expect($problemDetails)->toHaveKey('type')
-        ->and($problemDetails['type'])->toBeString()
-        ->and($problemDetails)->toHaveKey('title')
-        ->and($problemDetails['title'])->toBe('Resource Not Found') // getTitle()
-        ->and($problemDetails)->toHaveKey('status')
-        ->and($problemDetails['status'])->toBe(404)
-        ->and($problemDetails)->toHaveKey('detail')
-        ->and($problemDetails['detail'])->toBe('The requested user was not found.');
-
-    // 拡張フィールド
-    expect($problemDetails)->toHaveKey('error_code')
-        ->and($problemDetails['error_code'])->toBe('APP-RESOURCE-4001')
-        ->and($problemDetails)->toHaveKey('trace_id')
-        ->and($problemDetails['trace_id'])->toBe('550e8400-e29b-41d4-a716-446655440000')
-        ->and($problemDetails)->toHaveKey('instance')
-        ->and($problemDetails['instance'])->toBe('/api/v1/users/123')
-        ->and($problemDetails)->toHaveKey('timestamp')
-        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式
+    assertRfc7807RequiredFields(
+        $problemDetails,
+        expectedTitle: 'Resource Not Found',
+        expectedStatus: 404,
+        expectedDetail: 'The requested user was not found.',
+        expectedErrorCode: 'APP-RESOURCE-4001',
+        expectedRequestId: '550e8400-e29b-41d4-a716-446655440000',
+        expectedInstance: '/api/v1/users/123'
+    );
 });
 
 test('toProblemDetails() のtypeフィールドがエラーコードを含むURIである', function () {
     $exception = new UnauthorizedAccessException('You do not have permission to access this resource.');
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/resources');
 
     $problemDetails = $exception->toProblemDetails();
 
-    expect($problemDetails['type'])
-        ->toContain(config('app.url'))
-        ->toContain('/errors/')
-        ->toContain('app-auth-4002'); // 小文字に変換されること
+    assertFallbackTypeUri($problemDetails, 'app-auth-4002');
 });
 
 test('ApplicationException は具象クラスとしてインスタンス化できる（デフォルト値）', function () {
@@ -130,26 +122,20 @@ final class AuthTokenExpiredException extends ApplicationException
 
 test('[RED] ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
     $exception = new AuthTokenExpiredException('Authentication token has expired');
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
-    request()->server->set('REQUEST_URI', '/api/v1/users/me');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/users/me');
 
     $problemDetails = $exception->toProblemDetails();
 
     // ErrorCode::AUTH_TOKEN_001->getType()が返すURIを期待
-    expect($problemDetails['type'])
-        ->toBe('https://example.com/errors/auth/token-expired');
+    assertEnumDefinedTypeUri($problemDetails, 'https://example.com/errors/auth/token-expired');
 });
 
 test('[RED] ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
     $exception = new ResourceNotFoundException('The requested resource was not found.');
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
-    request()->server->set('REQUEST_URI', '/api/v1/resources/999');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/resources/999');
 
     $problemDetails = $exception->toProblemDetails();
 
     // フォールバックURIが返される（既存の動的URI生成）
-    expect($problemDetails['type'])
-        ->toContain(config('app.url'))
-        ->toContain('/errors/')
-        ->toContain('app-resource-4001'); // 小文字変換
+    assertFallbackTypeUri($problemDetails, 'app-resource-4001');
 });
