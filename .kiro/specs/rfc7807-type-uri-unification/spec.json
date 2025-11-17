@@ -1,0 +1,76 @@
+{
+  "feature_name": "rfc7807-type-uri-unification",
+  "created_at": "2025-11-18T01:04:00Z",
+  "updated_at": "2025-11-18T01:20:00Z",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 114,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/114",
+    "title": "RFC 7807 type URIの完全統一",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "PHP, Laravel, Pest, PHPStan",
+      "frontend": "TypeScript, React",
+      "infrastructure": "Docker, GitHub Actions",
+      "tools": "Laravel Pint, Larastan, Playwright"
+    },
+    "requirements_hints": [
+      "ErrorCode::getType()を唯一のtype URI生成元とする単一ソース化",
+      "HasProblemDetails trait・DomainExceptionクラスのtoProblemDetails()メソッド修正",
+      "ErrorCode::fromString()によるenum変換とnull安全なフォールバック処理実装",
+      "未定義エラーコード対応のフォールバック動作（後方互換性保証）",
+      "@deprecatedアノテーションによる段階的移行戦略"
+    ],
+    "project_structure": [
+      "backend/laravel-api/ddd/Shared/Exceptions/HasProblemDetails.php",
+      "backend/laravel-api/ddd/Shared/Exceptions/DomainException.php",
+      "backend/laravel-api/ddd/Shared/Exceptions/ApplicationException.php",
+      "backend/laravel-api/ddd/Shared/Exceptions/InfrastructureException.php",
+      "backend/laravel-api/app/Enums/ErrorCode.php",
+      "backend/laravel-api/tests/Unit/Shared/Exceptions/DomainExceptionTest.php",
+      "backend/laravel-api/tests/Feature/ExceptionHandlerTest.php",
+      "backend/laravel-api/tests/Architecture/ErrorTypeUriTest.php",
+      "scripts/verify-error-types.sh",
+      "shared/error-codes.json"
+    ],
+    "services": {},
+    "todo_items": [
+      "HasProblemDetails trait の toProblemDetails() メソッド修正",
+      "DomainException class の toProblemDetails() / getErrorType() メソッド修正",
+      "ApplicationException class の同様修正",
+      "InfrastructureException class の同様修正",
+      "DomainExceptionTest.php の既存テスト修正",
+      "新規テストケース: enum定義エラーコード動作確認",
+      "新規テストケース: 未定義エラーコードフォールバック動作確認",
+      "ExceptionHandlerTest.php の既存テスト修正（type URI形式検証）",
+      "ErrorTypeUriTest.php Architecture Test作成",
+      "scripts/verify-error-types.sh 拡張（type URI統一検証ロジック追加）",
+      "CI/CDパイプラインでの自動実行確認（GitHub Actions）",
+      "PHPStan Level 8静的解析合格",
+      "テストカバレッジ85%以上維持",
+      "ステージング環境デプロイとE2Eテスト",
+      "本番環境デプロイ（カナリアリリース推奨）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
