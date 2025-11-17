@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ddd\Shared\Exceptions;
 
+use App\Enums\ErrorCode;
+
 /**
  * RFC 7807 Problem Details機能を提供するトレイト
  *
@@ -47,7 +49,8 @@ trait HasProblemDetails
     public function toProblemDetails(): array
     {
         return [
-            'type' => config('app.url').'/errors/'.strtolower($this->getErrorCode()),
+            'type' => ErrorCode::fromString($this->getErrorCode())?->getType()
+                ?? config('app.url').'/errors/'.strtolower($this->getErrorCode()),
             'title' => $this->getTitle(),
             'status' => $this->getStatusCode(),
             'detail' => $this->getMessage(),

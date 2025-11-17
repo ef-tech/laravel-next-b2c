@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ddd\Shared\Exceptions;
 
+use App\Enums\ErrorCode;
 use Exception;
 
 abstract class DomainException extends Exception
@@ -31,7 +32,8 @@ abstract class DomainException extends Exception
     public function toProblemDetails(): array
     {
         return [
-            'type' => $this->getErrorType(),
+            'type' => ErrorCode::fromString($this->getErrorCode())?->getType()
+                ?? config('app.url').'/errors/'.strtolower($this->getErrorCode()),
             'title' => $this->getTitle(),
             'status' => $this->getStatusCode(),
             'detail' => $this->getMessage(),
@@ -45,10 +47,13 @@ abstract class DomainException extends Exception
     /**
      * Get the error type URI for RFC 7807.
      *
-     * @return string エラータイプURI
+     * @deprecated Use ErrorCode::fromString()->getType() instead. Will be removed in v2.0
+     *
+     * @return string RFC 7807 compliant error type URI
      */
     protected function getErrorType(): string
     {
-        return config('app.url').'/errors/'.strtolower($this->getErrorCode());
+        return ErrorCode::fromString($this->getErrorCode())?->getType()
+            ?? config('app.url').'/errors/'.strtolower($this->getErrorCode());
     }
 }

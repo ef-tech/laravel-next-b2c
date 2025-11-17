@@ -126,3 +126,48 @@ test('toProblemDetails() がtimestampをISO 8601 Zulu形式で返却する', fun
         ->toBeString()
         ->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式（Z終端）
 });
+
+// テスト用具象クラス（ErrorCode enum定義済みエラーコード使用）
+final class AuthLoginFailedException extends DomainException
+{
+    public function getStatusCode(): int
+    {
+        return 401;
+    }
+
+    public function getErrorCode(): string
+    {
+        return 'AUTH-LOGIN-001'; // ErrorCode enumに定義済み
+    }
+
+    protected function getTitle(): string
+    {
+        return 'Unauthorized';
+    }
+}
+
+test('[RED] ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
+    $exception = new AuthLoginFailedException('Invalid email or password');
+    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    request()->server->set('REQUEST_URI', '/api/v1/auth/login');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // ErrorCode::AUTH_LOGIN_001->getType()が返すURIを期待
+    expect($problemDetails['type'])
+        ->toBe('https://example.com/errors/auth/invalid-credentials');
+});
+
+test('[RED] ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
+    $exception = new UserEmailAlreadyExistsException('The email address is already registered.');
+    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    request()->server->set('REQUEST_URI', '/api/v1/users');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // フォールバックURIが返される（既存の動的URI生成）
+    expect($problemDetails['type'])
+        ->toContain(config('app.url'))
+        ->toContain('/errors/')
+        ->toContain('domain-user-4001'); // 小文字変換
+});

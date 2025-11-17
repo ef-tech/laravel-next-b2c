@@ -114,3 +114,42 @@ test('ApplicationException は具象クラスとしてインスタンス化で�
     expect($exception->getStatusCode())->toBe(400) // デフォルト
         ->and($exception->getErrorCode())->toBe('APP-0001'); // デフォルト
 });
+
+// テスト用具象クラス（ErrorCode enum定義済みエラーコード使用）
+final class AuthTokenExpiredException extends ApplicationException
+{
+    protected int $statusCode = 401;
+
+    protected string $errorCode = 'AUTH-TOKEN-001'; // ErrorCode enumに定義済み
+
+    protected function getTitle(): string
+    {
+        return 'Token Expired';
+    }
+}
+
+test('[RED] ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
+    $exception = new AuthTokenExpiredException('Authentication token has expired');
+    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    request()->server->set('REQUEST_URI', '/api/v1/users/me');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // ErrorCode::AUTH_TOKEN_001->getType()が返すURIを期待
+    expect($problemDetails['type'])
+        ->toBe('https://example.com/errors/auth/token-expired');
+});
+
+test('[RED] ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
+    $exception = new ResourceNotFoundException('The requested resource was not found.');
+    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    request()->server->set('REQUEST_URI', '/api/v1/resources/999');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // フォールバックURIが返される（既存の動的URI生成）
+    expect($problemDetails['type'])
+        ->toContain(config('app.url'))
+        ->toContain('/errors/')
+        ->toContain('app-resource-4001'); // 小文字変換
+});
