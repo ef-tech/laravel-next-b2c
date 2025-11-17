@@ -89,6 +89,8 @@
 
 ### テスト環境
 - **Jest**: ^29.7.0 (テストランナー、モノレポ対応)
+  - **テスト実行の確実性向上**: `--passWithNoTests`オプション削除済み（2025-11-18、PR #140完了）
+  - テストファイル削除検知強化、CI品質保証向上、`jest --listTests`補助コマンド追加
 - **React Testing Library**: ^16.3.0 (React 19対応)
 - **@testing-library/jest-dom**: ^6.9.1 (DOM matcher拡張)
 - **jest-environment-jsdom**: ^29.7.0 (DOM環境シミュレーション)
