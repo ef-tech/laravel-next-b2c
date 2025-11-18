@@ -149,6 +149,125 @@ describe('Exception Handler - RFC 7807 Response Generation', function () {
         expect($json['trace_id'])->not->toBeNull();
         expect($json['trace_id'])->toBeString();
     });
+
+    test('ErrorCode enum定義済みエラーコードでErrorCode::getType()の静的URIが返される', function () {
+        // Arrange: AUTH-LOGIN-001を使用したDomainException
+        $testException = new class('Invalid email or password') extends \Ddd\Shared\Exceptions\DomainException
+        {
+            public function getStatusCode(): int
+            {
+                return 401;
+            }
+
+            public function getErrorCode(): string
+            {
+                return 'AUTH-LOGIN-001'; // ErrorCode enumに定義済み
+            }
+
+            protected function getTitle(): string
+            {
+                return 'Unauthorized';
+            }
+        };
+
+        \Illuminate\Support\Facades\Route::get('/test/enum-defined-error', function () use ($testException) {
+            throw $testException;
+        })->middleware('api');
+
+        // Act
+        $response = $this->withHeaders([
+            'X-Request-ID' => $this->requestId,
+        ])->getJson('/test/enum-defined-error');
+
+        // Assert: ErrorCode::AUTH_LOGIN_001->getType()が返すURIを厳密に検証
+        $response->assertStatus(401);
+        $json = $response->json();
+        expect($json['type'])->toBe('https://example.com/errors/auth/invalid-credentials');
+        expect($json['error_code'])->toBe('AUTH-LOGIN-001');
+        expect($json['trace_id'])->toBe($this->requestId);
+    });
+
+    test('ApplicationException発生時にErrorCode::getType()のURIが返される', function () {
+        // Arrange: AUTH-TOKEN-001を使用したApplicationException
+        $testException = new class('Authentication token has expired') extends \Ddd\Shared\Exceptions\ApplicationException
+        {
+            protected int $statusCode = 401;
+
+            protected string $errorCode = 'AUTH-TOKEN-001'; // ErrorCode enumに定義済み
+
+            protected function getTitle(): string
+            {
+                return 'Token Expired';
+            }
+        };
+
+        \Illuminate\Support\Facades\Route::get('/test/application-exception', function () use ($testException) {
+            throw $testException;
+        })->middleware('api');
+
+        // Act
+        $response = $this->withHeaders([
+            'X-Request-ID' => $this->requestId,
+        ])->getJson('/test/application-exception');
+
+        // Assert
+        $response->assertStatus(401);
+        $json = $response->json();
+        expect($json['type'])->toBe('https://example.com/errors/auth/token-expired');
+        expect($json['error_code'])->toBe('AUTH-TOKEN-001');
+        expect($json['trace_id'])->toBe($this->requestId);
+    });
+
+    test('InfrastructureException発生時にErrorCode::getType()のURIが返される', function () {
+        // Arrange: INFRA-DB-001を使用したInfrastructureException
+        $testException = new class('Unable to connect to database server') extends \Ddd\Shared\Exceptions\InfrastructureException
+        {
+            protected int $statusCode = 503;
+
+            protected string $errorCode = 'INFRA-DB-001'; // ErrorCode enumに定義済み
+
+            protected function getTitle(): string
+            {
+                return 'Database Unavailable';
+            }
+        };
+
+        \Illuminate\Support\Facades\Route::get('/test/infrastructure-exception', function () use ($testException) {
+            throw $testException;
+        })->middleware('api');
+
+        // Act
+        $response = $this->withHeaders([
+            'X-Request-ID' => $this->requestId,
+        ])->getJson('/test/infrastructure-exception');
+
+        // Assert
+        $response->assertStatus(503);
+        $json = $response->json();
+        expect($json['type'])->toBe('https://example.com/errors/infrastructure/database-unavailable');
+        expect($json['error_code'])->toBe('INFRA-DB-001');
+        expect($json['trace_id'])->toBe($this->requestId);
+    });
+
+    test('Request IDとtrace_idフィールドが一致することを検証', function () {
+        // Arrange
+        $customRequestId = '12345678-1234-1234-1234-123456789012';
+
+        \Illuminate\Support\Facades\Route::get('/test/request-id-match', function () {
+            throw EmailAlreadyExistsException::forEmail('test@example.com');
+        })->middleware('api');
+
+        // Act
+        $response = $this->withHeaders([
+            'X-Request-ID' => $customRequestId,
+        ])->getJson('/test/request-id-match');
+
+        // Assert: Request IDとtrace_idが完全一致することを検証
+        $response->assertStatus(422);
+        $response->assertHeader('X-Request-ID', $customRequestId);
+        $json = $response->json();
+        expect($json['trace_id'])->toBe($customRequestId);
+    });
 });
 
 describe('Exception Handler - Environment-based Error Masking', function () {
@@ -252,6 +371,154 @@ describe('Exception Handler - Environment-based Error Masking', function () {
         // ビジネスロジックエラーのメッセージはマスクされない
         expect($json['detail'])->toContain('Email already registered: test@example.com');
         expect($json['error_code'])->toBe('email_already_exists');
+    });
+});
+
+describe('Exception Handler - Authentication Error Type URI Verification', function () {
+    beforeEach(function () {
+        $this->requestId = '550e8400-e29b-41d4-a716-446655440000';
+    });
+
+    test('認証エラー（AUTH_LOGIN_001）でErrorCode::getType()のURIが返ることを検証', function () {
+        // Arrange: 認証失敗を模擬するDomainException
+        $authException = new class('Invalid email or password') extends \Ddd\Shared\Exceptions\DomainException
+        {
+            public function getStatusCode(): int
+            {
+                return 401;
+            }
+
+            public function getErrorCode(): string
+            {
+                return 'AUTH-LOGIN-001';
+            }
+
+            protected function getTitle(): string
+            {
+                return 'Unauthorized';
+            }
+        };
+
+        \Illuminate\Support\Facades\Route::post('/test/auth-login-error', function () use ($authException) {
+            throw $authException;
+        })->middleware('api');
+
+        // Act
+        $response = $this->withHeaders([
+            'X-Request-ID' => $this->requestId,
+        ])->postJson('/test/auth-login-error', [
+            'email' => 'invalid@example.com',
+            'password' => 'wrong-password',
+        ]);
+
+        // Assert: ErrorCode::AUTH_LOGIN_001->getType()が返すURIを検証
+        $response->assertStatus(401);
+        $json = $response->json();
+
+        expect($json['type'])->toBe('https://example.com/errors/auth/invalid-credentials');
+        expect($json['error_code'])->toBe('AUTH-LOGIN-001');
+        expect($json['title'])->toBe('Unauthorized');
+        expect($json['detail'])->toBe('Invalid email or password');
+        expect($json['trace_id'])->toBe($this->requestId);
+    });
+
+    test('カスタムエラーコードの後方互換性テストを追加', function () {
+        // Arrange: ErrorCode enumに未定義のカスタムエラーコード
+        $customException = new class('Custom business rule violation') extends \Ddd\Shared\Exceptions\DomainException
+        {
+            public function getStatusCode(): int
+            {
+                return 400;
+            }
+
+            public function getErrorCode(): string
+            {
+                return 'CUSTOM-BUSINESS-9999'; // ErrorCode enumに未定義
+            }
+
+            protected function getTitle(): string
+            {
+                return 'Custom Error';
+            }
+        };
+
+        \Illuminate\Support\Facades\Route::post('/test/custom-error-code', function () use ($customException) {
+            throw $customException;
+        })->middleware('api');
+
+        // Act
+        $response = $this->withHeaders([
+            'X-Request-ID' => $this->requestId,
+        ])->postJson('/test/custom-error-code', []);
+
+        // Assert: フォールバックURIが返されることを検証（後方互換性）
+        $response->assertStatus(400);
+        $json = $response->json();
+
+        expect($json['type'])
+            ->toContain(config('app.url'))
+            ->toContain('/errors/')
+            ->toContain('custom-business-9999'); // 小文字変換
+        expect($json['error_code'])->toBe('CUSTOM-BUSINESS-9999');
+        expect($json['title'])->toBe('Custom Error');
+        expect($json['trace_id'])->toBe($this->requestId);
+    });
+
+    test('エラーレスポンスの全フィールド検証を実装', function () {
+        // Arrange
+        $authException = new class('Token has expired') extends \Ddd\Shared\Exceptions\DomainException
+        {
+            public function getStatusCode(): int
+            {
+                return 401;
+            }
+
+            public function getErrorCode(): string
+            {
+                return 'AUTH-TOKEN-001';
+            }
+
+            protected function getTitle(): string
+            {
+                return 'Token Expired';
+            }
+        };
+
+        \Illuminate\Support\Facades\Route::get('/test/auth-token-expired', function () use ($authException) {
+            throw $authException;
+        })->middleware('api');
+
+        // Act
+        $response = $this->withHeaders([
+            'X-Request-ID' => $this->requestId,
+        ])->getJson('/test/auth-token-expired');
+
+        // Assert: RFC 7807全フィールドを厳密に検証
+        $response->assertStatus(401);
+        $response->assertHeader('Content-Type', 'application/problem+json');
+        $response->assertHeader('X-Request-ID', $this->requestId);
+
+        $json = $response->json();
+
+        // RFC 7807必須フィールド
+        expect($json)->toHaveKey('type')
+            ->and($json['type'])->toBe('https://example.com/errors/auth/token-expired')
+            ->and($json)->toHaveKey('title')
+            ->and($json['title'])->toBe('Token Expired')
+            ->and($json)->toHaveKey('status')
+            ->and($json['status'])->toBe(401)
+            ->and($json)->toHaveKey('detail')
+            ->and($json['detail'])->toBe('Token has expired');
+
+        // 拡張フィールド
+        expect($json)->toHaveKey('error_code')
+            ->and($json['error_code'])->toBe('AUTH-TOKEN-001')
+            ->and($json)->toHaveKey('trace_id')
+            ->and($json['trace_id'])->toBe($this->requestId)
+            ->and($json)->toHaveKey('instance')
+            ->and($json['instance'])->toBe('/test/auth-token-expired')
+            ->and($json)->toHaveKey('timestamp')
+            ->and($json['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/');
     });
 });
 

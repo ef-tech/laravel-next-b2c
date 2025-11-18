@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 use Ddd\Shared\Exceptions\DomainException;
 
+use function Tests\Helpers\assertEnumDefinedTypeUri;
+use function Tests\Helpers\assertFallbackTypeUri;
+use function Tests\Helpers\assertRfc7807RequiredFields;
+use function Tests\Helpers\mockRequestContext;
+
 /**
  * DomainException拡張テスト
  *
@@ -55,30 +60,20 @@ test('toProblemDetails() メソッドが RFC 7807形式の配列を生成する'
     $exception = new UserEmailAlreadyExistsException('The email address is already registered.');
 
     // Request ID mockをセット（SetRequestId middlewareが実行済みと仮定）
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
-    request()->server->set('REQUEST_URI', '/api/v1/users');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/users');
 
     $problemDetails = $exception->toProblemDetails();
 
     // RFC 7807必須フィールド
-    expect($problemDetails)->toHaveKey('type')
-        ->and($problemDetails['type'])->toBeString()
-        ->and($problemDetails)->toHaveKey('title')
-        ->and($problemDetails['title'])->toBe('User Email Already Exists')
-        ->and($problemDetails)->toHaveKey('status')
-        ->and($problemDetails['status'])->toBe(409)
-        ->and($problemDetails)->toHaveKey('detail')
-        ->and($problemDetails['detail'])->toBe('The email address is already registered.');
-
-    // 拡張フィールド
-    expect($problemDetails)->toHaveKey('error_code')
-        ->and($problemDetails['error_code'])->toBe('DOMAIN-USER-4001')
-        ->and($problemDetails)->toHaveKey('trace_id')
-        ->and($problemDetails['trace_id'])->toBe('550e8400-e29b-41d4-a716-446655440000')
-        ->and($problemDetails)->toHaveKey('instance')
-        ->and($problemDetails['instance'])->toBe('/api/v1/users')
-        ->and($problemDetails)->toHaveKey('timestamp')
-        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式
+    assertRfc7807RequiredFields(
+        $problemDetails,
+        expectedTitle: 'User Email Already Exists',
+        expectedStatus: 409,
+        expectedDetail: 'The email address is already registered.',
+        expectedErrorCode: 'DOMAIN-USER-4001',
+        expectedRequestId: '550e8400-e29b-41d4-a716-446655440000',
+        expectedInstance: '/api/v1/users'
+    );
 });
 
 test('getErrorType() がエラータイプURIを生成する', function () {
@@ -86,10 +81,7 @@ test('getErrorType() がエラータイプURIを生成する', function () {
 
     $problemDetails = $exception->toProblemDetails();
 
-    expect($problemDetails['type'])
-        ->toContain(config('app.url'))
-        ->toContain('/errors/')
-        ->toContain('domain-user-4001'); // 小文字に変換されること
+    assertFallbackTypeUri($problemDetails, 'domain-user-4001');
 });
 
 test('getStatusCode() がHTTPステータスコードを返却する（400番台）', function () {
@@ -118,11 +110,50 @@ test('getTitle() が抽象メソッドとして定義され、具象クラスで
 
 test('toProblemDetails() がtimestampをISO 8601 Zulu形式で返却する', function () {
     $exception = new InvalidUserAgeException('Age must be 18 or older');
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/users');
 
     $problemDetails = $exception->toProblemDetails();
 
     expect($problemDetails['timestamp'])
         ->toBeString()
         ->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式（Z終端）
+});
+
+// テスト用具象クラス（ErrorCode enum定義済みエラーコード使用）
+final class AuthLoginFailedException extends DomainException
+{
+    public function getStatusCode(): int
+    {
+        return 401;
+    }
+
+    public function getErrorCode(): string
+    {
+        return 'AUTH-LOGIN-001'; // ErrorCode enumに定義済み
+    }
+
+    protected function getTitle(): string
+    {
+        return 'Unauthorized';
+    }
+}
+
+test('ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
+    $exception = new AuthLoginFailedException('Invalid email or password');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/auth/login');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // ErrorCode::AUTH_LOGIN_001->getType()が返すURIを期待
+    assertEnumDefinedTypeUri($problemDetails, 'https://example.com/errors/auth/invalid-credentials');
+});
+
+test('ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
+    $exception = new UserEmailAlreadyExistsException('The email address is already registered.');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/users');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // フォールバックURIが返される（既存の動的URI生成）
+    assertFallbackTypeUri($problemDetails, 'domain-user-4001');
 });

@@ -291,6 +291,16 @@ const phpCategoryOutput = path.join(__dirname, '../backend/laravel-api/app/Enums
 writeFile(phpCategoryOutput, phpCategoryEnum);
 console.log(`✅ ${path.relative(process.cwd(), phpCategoryOutput)}`);
 
+// Prettierでフォーマット（TypeScriptファイルのみ）
+console.log('\n🎨 Prettierでフォーマット中...');
+const { execSync } = require('child_process');
+try {
+  execSync(`npx prettier --write ${ADMIN_APP_OUTPUT} ${USER_APP_OUTPUT}`, { stdio: 'ignore' });
+  console.log('✅ Prettierフォーマット完了');
+} catch (error) {
+  console.warn('⚠️  Prettierフォーマットに失敗しました（生成は成功）');
+}
+
 console.log('\n✨ 型定義の生成が完了しました！');
 console.log('\n📊 統計:');
 console.log(`  - エラーコード数: ${Object.keys(errorCodes).length}`);

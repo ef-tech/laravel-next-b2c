@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 use Ddd\Shared\Exceptions\InfrastructureException;
 
+use function Tests\Helpers\assertEnumDefinedTypeUri;
+use function Tests\Helpers\assertFallbackTypeUri;
+use function Tests\Helpers\assertRfc7807RequiredFields;
+use function Tests\Helpers\mockRequestContext;
+
 /**
  * InfrastructureException実装テスト
  *
@@ -79,42 +84,29 @@ test('toProblemDetails() がRFC 7807形式の配列を生成する', function ()
     $exception = new ExternalApiTimeoutException('The external API request timed out after 30 seconds.');
 
     // Request ID mockをセット
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
-    request()->server->set('REQUEST_URI', '/api/v1/orders');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/orders');
 
     $problemDetails = $exception->toProblemDetails();
 
     // RFC 7807必須フィールド
-    expect($problemDetails)->toHaveKey('type')
-        ->and($problemDetails['type'])->toBeString()
-        ->and($problemDetails)->toHaveKey('title')
-        ->and($problemDetails['title'])->toBe('External API Timeout') // getTitle()
-        ->and($problemDetails)->toHaveKey('status')
-        ->and($problemDetails['status'])->toBe(504)
-        ->and($problemDetails)->toHaveKey('detail')
-        ->and($problemDetails['detail'])->toBe('The external API request timed out after 30 seconds.');
-
-    // 拡張フィールド
-    expect($problemDetails)->toHaveKey('error_code')
-        ->and($problemDetails['error_code'])->toBe('INFRA-API-5002')
-        ->and($problemDetails)->toHaveKey('trace_id')
-        ->and($problemDetails['trace_id'])->toBe('550e8400-e29b-41d4-a716-446655440000')
-        ->and($problemDetails)->toHaveKey('instance')
-        ->and($problemDetails['instance'])->toBe('/api/v1/orders')
-        ->and($problemDetails)->toHaveKey('timestamp')
-        ->and($problemDetails['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'); // ISO 8601 Zulu形式
+    assertRfc7807RequiredFields(
+        $problemDetails,
+        expectedTitle: 'External API Timeout',
+        expectedStatus: 504,
+        expectedDetail: 'The external API request timed out after 30 seconds.',
+        expectedErrorCode: 'INFRA-API-5002',
+        expectedRequestId: '550e8400-e29b-41d4-a716-446655440000',
+        expectedInstance: '/api/v1/orders'
+    );
 });
 
 test('toProblemDetails() のtypeフィールドがエラーコードを含むURIである', function () {
     $exception = new DatabaseConnectionException('Database connection failed.');
-    request()->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/databases');
 
     $problemDetails = $exception->toProblemDetails();
 
-    expect($problemDetails['type'])
-        ->toContain(config('app.url'))
-        ->toContain('/errors/')
-        ->toContain('infra-db-5001'); // 小文字に変換されること
+    assertFallbackTypeUri($problemDetails, 'infra-db-5001');
 });
 
 test('InfrastructureException は具象クラスとしてインスタンス化できる（デフォルト値）', function () {
@@ -128,4 +120,47 @@ test('InfrastructureException は具象クラスとしてインスタンス化�
 
     expect($exception->getStatusCode())->toBe(503) // デフォルト
         ->and($exception->getErrorCode())->toBe('INFRA-0001'); // デフォルト
+});
+
+// テスト用具象クラス（ErrorCode enum定義済みエラーコード使用）
+final class DatabaseUnavailableException extends InfrastructureException
+{
+    protected int $statusCode = 503;
+
+    protected string $errorCode = 'INFRA-DB-001'; // ErrorCode enumに定義済み
+
+    protected function getTitle(): string
+    {
+        return 'Database Unavailable';
+    }
+}
+
+test('ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
+    $exception = new DatabaseUnavailableException('Unable to connect to database server');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/products');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // ErrorCode::INFRA_DB_001->getType()が返すURIを期待
+    assertEnumDefinedTypeUri($problemDetails, 'https://example.com/errors/infrastructure/database-unavailable');
+});
+
+test('ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
+    $exception = new ExternalApiTimeoutException('The external API request timed out after 30 seconds.');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/orders');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // フォールバックURIが返される（既存の動的URI生成）
+    assertFallbackTypeUri($problemDetails, 'infra-api-5002');
+});
+
+test('null安全性: ErrorCode::fromString()がnullを返してもフォールバックURIが生成される', function () {
+    $exception = new ServiceUnavailableException('Service is temporarily unavailable.');
+    mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/services');
+
+    $problemDetails = $exception->toProblemDetails();
+
+    // フォールバックURIが返される（null安全性検証）
+    assertFallbackTypeUri($problemDetails, 'infra-service-5003');
 });
