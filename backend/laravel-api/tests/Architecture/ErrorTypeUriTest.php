@@ -94,8 +94,8 @@ test('ErrorCode::fromString() with valid code must return type URI from getType(
 
 test('Dynamic type URI generation using config("app.url") is prohibited in exception classes', function () {
     $exceptionFiles = [
-        '/Users/okumura/Work/src/ef-tech/template/laravel-next-b2c/backend/laravel-api/ddd/Shared/Exceptions/DomainException.php',
-        '/Users/okumura/Work/src/ef-tech/template/laravel-next-b2c/backend/laravel-api/ddd/Shared/Exceptions/HasProblemDetails.php',
+        base_path('ddd/Shared/Exceptions/DomainException.php'),
+        base_path('ddd/Shared/Exceptions/HasProblemDetails.php'),
     ];
 
     foreach ($exceptionFiles as $file) {
