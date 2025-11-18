@@ -40,7 +40,7 @@ abstract class DomainException extends Exception
             'error_code' => $this->getErrorCode(),
             'trace_id' => request()->header('X-Request-ID'),
             'instance' => request()->getRequestUri(),
-            'timestamp' => now()->format('Y-m-d\TH:i:s\Z'),
+            'timestamp' => now()->toIso8601ZuluString(),
         ];
     }
 
