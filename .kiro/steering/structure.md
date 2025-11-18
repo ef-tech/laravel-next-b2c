@@ -136,6 +136,7 @@ laravel-api/
 │   ├── Enums/           # Enumクラス（PHP 8.1+）
 │   │   └── ErrorCode.php  # 🎯 エラーコード定義（型安全、TypeScript自動生成対象）
 │   │       # - Enum定義: VALIDATION_ERROR, AUTHENTICATION_FAILED等
+│   │       # - getType()メソッド: RFC 7807 type URI生成（単一ソース化、2025-11-19実装完了）
 │   │       # - tryFrom()メソッド: 型安全な変換処理
 │   │       # - Laravel/フロントエンド同期保証
 │   ├── Http/            # 🏗️ HTTP層（DDD統合）
@@ -299,7 +300,8 @@ laravel-api/
 │   │   ├── ApplicationLayerTest.php    # Application層依存チェック
 │   │   ├── InfrastructureLayerTest.php # Infrastructure層実装チェック
 │   │   ├── NamingConventionTest.php    # 命名規約検証
-│   │   └── MiddlewareGroupTest.php     # 🛡️ ミドルウェアグループ設定検証
+│   │   ├── MiddlewareGroupTest.php     # 🛡️ ミドルウェアグループ設定検証
+│   │   └── ErrorHandlingTest.php       # 🎯 RFC 7807エラーハンドリング検証（2025-11-19追加、絶対パス→相対パス修正）
 │   ├── Pest.php         # Pest設定・ヘルパー
 │   └── TestCase.php     # 基底テストクラス
 ├── vendor/              # Composer依存関係

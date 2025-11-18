@@ -138,6 +138,11 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **V2ロードマップ**: GraphQL対応、バッチAPI、WebSocket統合、高度な認可システム
 - **🎯 統一エラーハンドリングパターン実装**: RFC 7807準拠、型安全なエラーコード体系、多言語対応、Request ID伝播
   - **RFC 7807準拠APIエラーレスポンス**: `type`、`title`、`status`、`detail`、`instance`、`request_id`、`errors` の統一フォーマット
+  - **RFC 7807 type URI完全統一（2025-11-19完了）**: ErrorCode::getType()メソッドによる単一ソース化、DRY原則徹底
+    - HasProblemDetails trait統合による型安全性強化
+    - DomainExceptionクラスによるドメイン例外統一
+    - フォールバック処理実装（未定義エラーコード対応）
+    - Architecture Tests追加による依存方向検証
   - **型安全エラーコード体系**: TypeScript Enum/Union型による厳格な型チェック、Laravel Enumとの完全連携
   - **多言語エラーメッセージ対応（i18n）**: Accept-Language header自動検出、日本語/英語切り替え、SetLocaleFromAcceptLanguageミドルウェア
   - **Request ID伝播**: Laravel → フロントエンドへのError ID自動伝播、トレーサビリティ確保、ログ追跡の簡易化
@@ -146,7 +151,7 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **Error Boundaries i18n完全実装**: React Error Boundariesによるフロントエンドエラー捕捉、next-intl統合による多言語Fallback UI、NEXT_LOCALE Cookie連携、Accept-Language header自動検出
     - **型安全性向上**: locale型明示化（string型明示変換）による型エラー完全解消、next-intl互換性向上
     - **ルーティング統一**: 全ページを[locale]配下に統一配置、i18n対応の完全一貫性確保
-  - **自動コード生成**: `generate-error-types.js` スクリプトによるTypeScript型定義自動生成、Laravel/フロントエンド同期保証
+  - **自動コード生成**: `generate-error-types.js` スクリプトによるTypeScript型定義自動生成、Laravel/フロントエンド同期保証、Prettier自動実行統合
 
 ## アーキテクチャ上の特徴
 - **API専用最適化**: Web機能削除によるステートレス設計とパフォーマンス最大化

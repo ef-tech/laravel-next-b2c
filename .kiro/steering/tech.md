@@ -247,6 +247,15 @@ enum ErrorCode: string
     case RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND';
     // ... その他のエラーコード
 
+    /**
+     * RFC 7807 type URI完全統一（2025-11-19実装完了）
+     * ErrorCode::getType()メソッドによる単一ソース化（DRY原則徹底）
+     */
+    public function getType(): string
+    {
+        return config('app.url') . '/errors/' . strtolower(str_replace('_', '-', $this->value));
+    }
+
     public static function tryFrom(string $value): ?self
     {
         return self::cases()[$value] ?? null;
@@ -325,11 +334,12 @@ export default function Error({ error, reset }: ErrorProps) {
 
 **自動コード生成スクリプト**:
 ```bash
-# Laravel Enumから TypeScript型定義を自動生成
+# Laravel Enumから TypeScript型定義を自動生成（Prettier自動実行統合、2025-11-19更新）
 npm run generate:error-types
 
 # 生成先: frontend/types/errors.ts
 # 検証: npm run verify:error-types
+# 備考: 型定義生成後にPrettierが自動実行され、コードフォーマットを統一
 ```
 
 ### 🛡️ 基本ミドルウェアスタック詳細
