@@ -120,7 +120,7 @@ final class AuthTokenExpiredException extends ApplicationException
     }
 }
 
-test('[RED] ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
+test('ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
     $exception = new AuthTokenExpiredException('Authentication token has expired');
     mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/users/me');
 
@@ -130,7 +130,7 @@ test('[RED] ErrorCode enum定義済みエラーコードでErrorCode::getType()�
     assertEnumDefinedTypeUri($problemDetails, 'https://example.com/errors/auth/token-expired');
 });
 
-test('[RED] ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
+test('ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
     $exception = new ResourceNotFoundException('The requested resource was not found.');
     mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/resources/999');
 

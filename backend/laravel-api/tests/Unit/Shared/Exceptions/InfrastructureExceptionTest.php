@@ -135,7 +135,7 @@ final class DatabaseUnavailableException extends InfrastructureException
     }
 }
 
-test('[RED] ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
+test('ErrorCode enum定義済みエラーコードでErrorCode::getType()のURIが返される', function () {
     $exception = new DatabaseUnavailableException('Unable to connect to database server');
     mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/products');
 
@@ -145,7 +145,7 @@ test('[RED] ErrorCode enum定義済みエラーコードでErrorCode::getType()�
     assertEnumDefinedTypeUri($problemDetails, 'https://example.com/errors/infrastructure/database-unavailable');
 });
 
-test('[RED] ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
+test('ErrorCode enum未定義エラーコードでフォールバックURIが返される', function () {
     $exception = new ExternalApiTimeoutException('The external API request timed out after 30 seconds.');
     mockRequestContext('550e8400-e29b-41d4-a716-446655440000', '/api/v1/orders');
 
