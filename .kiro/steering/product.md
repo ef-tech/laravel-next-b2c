@@ -143,6 +143,12 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
     - DomainExceptionクラスによるドメイン例外統一
     - フォールバック処理実装（未定義エラーコード対応）
     - Architecture Tests追加による依存方向検証
+  - **DomainException HasProblemDetails trait適用完了（2025-11-20完了）**: トレイトベースアーキテクチャによるDRY原則徹底
+    - `toProblemDetails()`メソッド重複削除（全ドメイン例外でtrait使用）
+    - `HasProblemDetails` trait: RFC 7807準拠エラーレスポンス生成ロジック統一
+    - `DomainException` 基底クラス: trait適用による保守性向上
+    - コード重複排除: 複数例外クラスの共通ロジック集約
+    - Architecture Tests強化: trait使用検証、依存方向確認
   - **型安全エラーコード体系**: TypeScript Enum/Union型による厳格な型チェック、Laravel Enumとの完全連携
   - **多言語エラーメッセージ対応（i18n）**: Accept-Language header自動検出、日本語/英語切り替え、SetLocaleFromAcceptLanguageミドルウェア
   - **Request ID伝播**: Laravel → フロントエンドへのError ID自動伝播、トレーサビリティ確保、ログ追跡の簡易化
@@ -161,6 +167,11 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
   - **Repository Pattern**: データアクセスの抽象化、テスタビリティの向上
   - **SOLID原則準拠**: 単一責任、オープン・クローズド、リスコフの置換、インターフェース分離、依存性逆転
   - **Architecture Testing**: Pestによる依存方向とレイヤー分離の自動検証
+  - **トレイトベースアーキテクチャ（2025-11-20実装完了）**: HasProblemDetails traitによるDRY原則徹底
+    - RFC 7807準拠エラーレスポンス生成ロジックの統一実装
+    - DomainException基底クラスでのtrait適用
+    - `toProblemDetails()`メソッド重複排除（全ドメイン例外で共通化）
+    - 保守性向上: 単一ソース原則による変更影響範囲の最小化
 - **最小依存関係**: Laravel 12 + Sanctum + Tinker + Pintの4コアパッケージ構成
 - **フロントエンド分離**: 管理者とユーザーの異なるUIニーズに対応
 - **🔐 Laravel Sanctumトークンベース認証**:

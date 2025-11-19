@@ -4,6 +4,7 @@
 - **API専用最適化Laravel**: 必要最小限4パッケージ構成による超高速起動
 - **🏗️ DDD/クリーンアーキテクチャ (4層構造)**:
   - **Domain層** (`ddd/Domain/`): Entities、ValueObjects、Repository Interfaces、Domain Events、Domain Services
+    - **Shared/Exceptions** (2025-11-20追加): HasProblemDetails trait、DomainException基底クラス（RFC 7807準拠、DRY原則適用）
   - **Application層** (`ddd/Application/`): UseCases、DTOs、Service Interfaces、Queries、Application Exceptions
   - **Infrastructure層** (`ddd/Infrastructure/`): Repository実装（Eloquent）、External Services、Framework固有コード
   - **HTTP層** (`app/Http/`): Controllers、Requests、Resources
@@ -260,6 +261,48 @@ enum ErrorCode: string
     {
         return self::cases()[$value] ?? null;
     }
+}
+
+// ddd/Domain/Shared/Exceptions/HasProblemDetails.php
+/**
+ * HasProblemDetails trait（2025-11-20実装完了）
+ * RFC 7807準拠エラーレスポンス生成ロジック統一
+ */
+trait HasProblemDetails
+{
+    abstract public function getErrorCode(): ErrorCode;
+    abstract public function getTitle(): string;
+    abstract public function getDetail(): string;
+    abstract public function getStatus(): int;
+
+    /**
+     * RFC 7807 Problem Details形式に変換（DRY原則適用）
+     */
+    public function toProblemDetails(Request $request): array
+    {
+        $errorCode = $this->getErrorCode();
+
+        return [
+            'type' => $errorCode->getType(),
+            'title' => $this->getTitle(),
+            'status' => $this->getStatus(),
+            'detail' => $this->getDetail(),
+            'instance' => $request->path(),
+            'request_id' => $request->header('X-Request-ID'),
+        ];
+    }
+}
+
+// ddd/Domain/Shared/Exceptions/DomainException.php
+/**
+ * DomainException 基底クラス（2025-11-20更新）
+ * HasProblemDetails trait適用によるコード重複排除
+ */
+abstract class DomainException extends \Exception
+{
+    use HasProblemDetails;
+
+    // toProblemDetails()メソッドは trait から提供（重複削除完了）
 }
 ```
 

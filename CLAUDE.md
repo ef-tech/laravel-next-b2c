@@ -49,10 +49,15 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
-- `rfc7807-type-uri-unification` - RFC 7807 type URI完全統一（ErrorCode::getType()単一ソース化、HasProblemDetails/DomainException修正、フォールバック処理実装、Architecture Tests追加）
-- `domain-exception-has-problem-details` - DomainExceptionへのHasProblemDetails trait適用（DRY原則徹底、toProblemDetails()重複削除、保守性向上、Architecture Test強化）
-
 ### Completed Specifications
+- `domain-exception-has-problem-details` - ✅ DomainExceptionへのHasProblemDetails trait適用完了（DRY原則徹底、toProblemDetails()重複削除、保守性向上、Architecture Test強化）
+  - 実装完了日: 2025-11-20
+  - Issue: #142
+  - PR: #145
+  - 成果: HasProblemDetails trait統合、DomainException基底クラス更新、全ドメイン例外でtrait使用、コード重複排除、Architecture Tests追加（trait使用検証、依存方向確認）
+- `rfc7807-type-uri-unification` - ✅ RFC 7807 type URI完全統一完了（ErrorCode::getType()単一ソース化、HasProblemDetails/DomainException修正、フォールバック処理実装、Architecture Tests追加）
+  - 実装完了日: 2025-11-19
+  - 成果: ErrorCode::getType()メソッド実装、type URI生成ロジック統一、DRY原則適用、全テスト検証成功
 - `frontend-common-tsconfig` - ✅ フロントエンド共通tsconfig.base.json導入完了（TypeScript設定の重複削減、15個の共通compilerOptions集約、保守性向上、スケーラビリティ確保）
   - 実装完了日: 2025-11-13
   - Issue: #126
