@@ -76,7 +76,7 @@ test('toProblemDetails() メソッドが RFC 7807形式の配列を生成する'
     );
 });
 
-test('getErrorType() がエラータイプURIを生成する', function () {
+test('toProblemDetails() がフォールバックtype URIを生成する', function () {
     $exception = new UserEmailAlreadyExistsException('The email address is already registered.');
 
     $problemDetails = $exception->toProblemDetails();
