@@ -25,8 +25,8 @@ final class UserPresenter
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'created_at' => $user->created_at?->toIso8601String() ?? now()->toIso8601String(),
-            'updated_at' => $user->updated_at?->toIso8601String() ?? now()->toIso8601String(),
+            'created_at' => $user->created_at?->utc()->toIso8601String() ?? now()->utc()->toIso8601String(),
+            'updated_at' => $user->updated_at?->utc()->toIso8601String() ?? now()->utc()->toIso8601String(),
         ];
     }
 }

@@ -60,7 +60,7 @@ final class SanctumTokenVerification
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'user_agent' => $request->userAgent(),
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ]);
     }
 
@@ -76,7 +76,7 @@ final class SanctumTokenVerification
             'user_id' => $user->id,
             'url' => $request->fullUrl(),
             'method' => $request->method(),
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ]);
     }
 }

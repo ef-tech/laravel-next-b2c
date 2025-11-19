@@ -23,7 +23,7 @@ final class HealthPresenter
     {
         return [
             'status' => 'ok',
-            'timestamp' => $timestamp->toIso8601String(),
+            'timestamp' => $timestamp->utc()->toIso8601String(),
         ];
     }
 }

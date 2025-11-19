@@ -74,7 +74,7 @@ final class PerformanceMonitoring
             'response_time_ms' => round($responseTime * 1000, 2),
             'peak_memory_mb' => round($peakMemoryMb, 2),
             'db_queries_count' => $this->queryCount,
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ];
 
         // monitoringチャンネルにメトリクスを出力

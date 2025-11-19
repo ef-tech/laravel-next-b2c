@@ -160,7 +160,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error_code' => 'validation_error',
                 'trace_id' => $requestId,
                 'instance' => $request->getRequestUri(),
-                'timestamp' => now()->toIso8601String(),
+                'timestamp' => now()->utc()->toIso8601String(),
                 'errors' => $e->errors(),
             ], 422)
                 ->header('Content-Type', 'application/problem+json')
@@ -194,7 +194,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error_code' => 'unauthenticated',
                 'trace_id' => $requestId,
                 'instance' => $request->getRequestUri(),
-                'timestamp' => now()->toIso8601String(),
+                'timestamp' => now()->utc()->toIso8601String(),
             ], 401)
                 ->header('Content-Type', 'application/problem+json')
                 ->header('X-Request-ID', $requestId);
@@ -227,7 +227,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error_code' => 'too_many_requests',
                 'trace_id' => $requestId,
                 'instance' => $request->getRequestUri(),
-                'timestamp' => now()->toIso8601String(),
+                'timestamp' => now()->utc()->toIso8601String(),
             ], 429)
                 ->header('Content-Type', 'application/problem+json')
                 ->header('X-Request-ID', $requestId)
@@ -271,7 +271,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error_code' => 'internal_server_error',
                 'trace_id' => $requestId,
                 'instance' => $request->getRequestUri(),
-                'timestamp' => now()->toIso8601String(),
+                'timestamp' => now()->utc()->toIso8601String(),
             ];
 
             // 開発環境ではデバッグ情報を追加

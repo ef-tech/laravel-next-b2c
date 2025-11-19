@@ -79,7 +79,7 @@ final class RequestLogging
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'request_data' => json_encode($requestData),
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ];
 
         // middlewareチャンネルに構造化ログを出力

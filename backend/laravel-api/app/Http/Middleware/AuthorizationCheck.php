@@ -87,7 +87,7 @@ final class AuthorizationCheck
             'reason' => $reason,
             'status_code' => $statusCode,
             'ip' => $request->ip(),
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ];
 
         $message = $userId === null
@@ -109,7 +109,7 @@ final class AuthorizationCheck
             'method' => $request->method(),
             'permission' => $permission,
             'result' => true,
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ]);
     }
 }
