@@ -8,108 +8,108 @@
 
 ## 実装タスク
 
-- [ ] 1. DomainExceptionクラスのリファクタリング実施
-- [ ] 1.1 HasProblemDetailsトレイトの適用とコード重複排除
+- [x] 1. DomainExceptionクラスのリファクタリング実施
+- [x] 1.1 HasProblemDetailsトレイトの適用とコード重複排除
   - DomainExceptionクラスにHasProblemDetailsトレイトのuse宣言を追加する
   - 重複しているtoProblemDetails()メソッド実装を削除する（トレイトから継承）
   - 非推奨のgetErrorType()メソッド実装を削除する
   - 既存の抽象メソッド（getStatusCode、getErrorCode、getTitle、getMessage）の宣言を維持する
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 1.2 ApplicationException・InfrastructureExceptionとの設計パターン統一検証
+- [x] 1.2 ApplicationException・InfrastructureExceptionとの設計パターン統一検証
   - ApplicationExceptionとInfrastructureExceptionのトレイト使用パターンを確認する
   - DomainExceptionが同じトレイト適用パターンに従っていることを検証する
   - 3つの例外基底クラス間でtoProblemDetails()メソッドシグネチャが統一されていることを確認する
   - _Requirements: 1.4_
 
-- [ ] 2. Architecture Testによる設計検証の追加
-- [ ] 2.1 DomainExceptionトレイト使用検証テストの実装
+- [x] 2. Architecture Testによる設計検証の追加
+- [x] 2.1 DomainExceptionトレイト使用検証テストの実装
   - ErrorHandlingTest.phpにDomainExceptionがHasProblemDetailsトレイトを使用していることを検証するテストケースを追加する
   - Pest Architecture Testでトレイトのuse宣言を確認するテストを作成する
   - ReflectionAPIを使用してtoProblemDetails()メソッドがトレイトから継承されていることを検証するテストを作成する
   - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 2.2 Domain層依存性検証テストの確認
+- [x] 2.2 Domain層依存性検証テストの確認
   - DomainExceptionがHTTP層に依存していないことを確認する既存Architecture Testを実行する
   - DomainExceptionがInfrastructure層に依存していないことを確認する
   - DDD依存性逆転原則が遵守されていることを検証する
   - _Requirements: 4.4, 6.3_
 
-- [ ] 3. RFC 7807準拠の保証とエラーレスポンス形式検証
-- [ ] 3.1 RFC 7807レスポンス形式の継続動作確認
+- [x] 3. RFC 7807準拠の保証とエラーレスポンス形式検証
+- [x] 3.1 RFC 7807レスポンス形式の継続動作確認
   - toProblemDetails()メソッドがRFC 7807必須フィールド（type、title、status、detail）を含む配列を返却することを確認する
   - 拡張フィールド（error_code、trace_id、instance、timestamp）が正しく含まれることを確認する
   - ErrorCode::fromString()がErrorCodeオブジェクトを返す場合、getType()の結果がtypeフィールドに設定されることを確認する
   - ErrorCode::fromString()がnullを返す場合、フォールバックURI（config('app.url') + '/errors/' + エラーコード小文字）が設定されることを確認する
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 3.2 Request ID伝播とタイムスタンプ生成の検証
+- [x] 3.2 Request ID伝播とタイムスタンプ生成の検証
   - X-Request-IDヘッダーが正しくtrace_idフィールドに設定されることを確認する
   - リクエストURIがinstanceフィールドに設定されることを確認する
   - ISO 8601 Zulu形式のタイムスタンプがtimestampフィールドに生成されることを確認する
   - _Requirements: 3.4, 3.5, 3.6_
 
-- [ ] 4. 既存テストスイートの継続動作保証
-- [ ] 4.1 Unit Testの実行と結果確認
+- [x] 4. 既存テストスイートの継続動作保証
+- [x] 4.1 Unit Testの実行と結果確認
   - 全Unit Testを実行し、継続してパスすることを確認する
   - DomainException関連のUnit Testが正常に動作することを確認する
   - HasProblemDetailsトレイト関連のUnit Testが正常に動作することを確認する
   - _Requirements: 5.1_
 
-- [ ] 4.2 Feature Testの実行と結果確認
+- [x] 4.2 Feature Testの実行と結果確認
   - 全Feature Testを実行し、継続してパスすることを確認する
   - Exception Handler統合テストが正常に動作することを確認する
   - DomainException発生時のRFC 7807レスポンス生成が正常に動作することを確認する
   - _Requirements: 5.2, 7.1, 7.3_
 
-- [ ] 4.3 Architecture Testの実行と結果確認
+- [x] 4.3 Architecture Testの実行と結果確認
   - 全Architecture Test（既存分 + 新規追加分）を実行し、パスすることを確認する
   - Domain層依存性検証テストが正常に動作することを確認する
   - トレイト使用検証テストが正常に動作することを確認する
   - _Requirements: 5.3_
 
-- [ ] 4.4 E2Eテストの実行と結果確認（該当する場合）
+- [x] 4.4 E2Eテストの実行と結果確認（該当する場合）
   - E2Eテストを実行し、継続してパスすることを確認する
   - フロントエンドがAPIエラーレスポンスを受け取った際、リファクタリング前と同じJSON構造が返却されることを確認する
   - _Requirements: 5.4, 7.4_
 
-- [ ] 5. 静的解析とコード品質チェックの実施
-- [ ] 5.1 Larastan Level 8静的解析の実行
+- [x] 5. 静的解析とコード品質チェックの実施
+- [x] 5.1 Larastan Level 8静的解析の実行
   - Larastan Level 8静的解析を実行し、型エラーが0件であることを確認する
   - 未定義プロパティエラーが0件であることを確認する
   - 未定義メソッドエラーが0件であることを確認する
   - HasProblemDetailsトレイトの抽象メソッドがDomainExceptionで実装されていることを確認する
   - _Requirements: 5.5, 6.2_
 
-- [ ] 5.2 Laravel Pintコードスタイルチェックの実行
+- [x] 5.2 Laravel Pintコードスタイルチェックの実行
   - Laravel Pintを実行し、コードスタイル違反が0件であることを確認する
   - PSR-12コーディング規約に準拠していることを確認する
   - _Requirements: 5.6_
 
-- [ ] 5.3 コードカバレッジ測定と品質基準維持確認
+- [x] 5.3 コードカバレッジ測定と品質基準維持確認
   - コードカバレッジを測定し、96.1%以上であることを確認する
   - Domain層のコードカバレッジが100%であることを確認する
   - _Requirements: 6.1_
 
-- [ ] 6. 後方互換性とフレームワーク依存性の検証
-- [ ] 6.1 DomainExceptionサブクラスの動作検証
+- [x] 6. 後方互換性とフレームワーク依存性の検証
+- [x] 6.1 DomainExceptionサブクラスの動作検証
   - DomainExceptionのサブクラスでtoProblemDetails()メソッドを呼び出し、リファクタリング前と同じRFC 7807形式のレスポンスが返却されることを確認する
   - サブクラスのgetErrorCode()、getStatusCode()、getTitle()メソッドが正常に動作することを確認する
   - _Requirements: 7.1, 7.2_
 
-- [ ] 6.2 HasProblemDetailsトレイトのLaravelフレームワーク依存性確認
+- [x] 6.2 HasProblemDetailsトレイトのLaravelフレームワーク依存性確認
   - HasProblemDetailsトレイトがLaravelフレームワークに最小限の依存（request()、now()、config()ヘルパーのみ）を持つことを確認する
   - トレイトがHTTP層、Infrastructure層に依存していないことを確認する
   - _Requirements: 6.4_
 
-- [ ] 7. 最終統合検証とリリース準備
-- [ ] 7.1 全テストスイートの統合実行
+- [x] 7. 最終統合検証とリリース準備
+- [x] 7.1 全テストスイートの統合実行
   - Unit Test、Feature Test、Architecture Test、E2Eテストを一括実行する
   - 全テストがパスすることを確認する
   - テスト実行時間がリファクタリング前と同等であることを確認する
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 7.2 品質ゲート完全チェック
+- [x] 7.2 品質ゲート完全チェック
   - Larastan Level 8静的解析で型エラー0件を確認する
   - Laravel Pintでコードスタイル違反0件を確認する
   - コードカバレッジ96.1%以上を確認する

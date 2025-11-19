@@ -52,3 +52,23 @@ arch('Domain exceptions should extend DomainException')
         'Ddd\Shared\Exceptions\ApplicationException',
         'Ddd\Shared\Exceptions\InfrastructureException',
     ]);
+
+arch('DomainException should use HasProblemDetails trait')
+    ->expect('Ddd\Shared\Exceptions\DomainException')
+    ->toUse('Ddd\Shared\Exceptions\HasProblemDetails');
+
+it('DomainException should not have duplicated toProblemDetails method', function () {
+    $reflection = new ReflectionClass(\Ddd\Shared\Exceptions\DomainException::class);
+
+    // DomainExceptionがHasProblemDetailsトレイトを使用していることを確認
+    $traits = $reflection->getTraitNames();
+    expect($traits)->toContain(\Ddd\Shared\Exceptions\HasProblemDetails::class);
+
+    // DomainExceptionのソースコードにtoProblemDetails()メソッドが定義されていないことを確認
+    $source = file_get_contents($reflection->getFileName());
+
+    // toProblemDetails()メソッドの定義パターン（public function toProblemDetails）
+    $methodPattern = '/public\s+function\s+toProblemDetails\s*\(/';
+
+    expect(preg_match($methodPattern, $source))->toBe(0);
+});

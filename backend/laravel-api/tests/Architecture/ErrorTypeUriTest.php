@@ -14,10 +14,12 @@ use App\Enums\ErrorCode;
  * - 6.4: type URIがhttps://で始まり/errors/を含むこと
  * - 6.5: config('app.url')による直接的な動的URI生成を禁止すること（フォールバック除く）
  */
-arch('DomainException toProblemDetails() must use ErrorCode::fromString()->getType()')
+// DomainExceptionはHasProblemDetailsトレイトを使用し、
+// トレイトがErrorCodeを使用するため、間接的にErrorCodeを使用します
+arch('DomainException must use HasProblemDetails trait which uses ErrorCode')
     ->expect('Ddd\Shared\Exceptions\DomainException')
     ->toUse([
-        'App\Enums\ErrorCode',
+        'Ddd\Shared\Exceptions\HasProblemDetails',
     ]);
 
 arch('HasProblemDetails trait toProblemDetails() must use ErrorCode::fromString()->getType()')
@@ -26,19 +28,17 @@ arch('HasProblemDetails trait toProblemDetails() must use ErrorCode::fromString(
         'App\Enums\ErrorCode',
     ]);
 
-test('DomainException toProblemDetails() source code contains ErrorCode::fromString()->getType()', function () {
+// DomainExceptionはHasProblemDetailsトレイトからtoProblemDetails()を継承するため、
+// トレイトのソースコードを検証します
+test('DomainException uses HasProblemDetails trait for toProblemDetails()', function () {
     $reflection = new ReflectionClass(\Ddd\Shared\Exceptions\DomainException::class);
-    $method = $reflection->getMethod('toProblemDetails');
-    $fileName = $method->getFileName();
+    $traits = $reflection->getTraitNames();
 
-    expect($fileName)->not->toBeFalse();
+    // HasProblemDetailsトレイトを使用していることを検証
+    expect($traits)->toContain('Ddd\Shared\Exceptions\HasProblemDetails');
 
-    $content = file_get_contents($fileName);
-
-    // ErrorCode::fromString()を使用していることを検証
-    expect($content)->toContain('ErrorCode::fromString(')
-        ->and($content)->toContain('?->getType()')
-        ->and($content)->toContain('??'); // null coalescing operator for fallback
+    // toProblemDetails()メソッドが存在することを検証
+    expect($reflection->hasMethod('toProblemDetails'))->toBeTrue();
 });
 
 test('HasProblemDetails trait source code contains ErrorCode::fromString()->getType()', function () {
@@ -93,8 +93,9 @@ test('ErrorCode::fromString() with valid code must return type URI from getType(
 });
 
 test('Dynamic type URI generation using config("app.url") is prohibited in exception classes', function () {
+    // DomainExceptionはHasProblemDetailsトレイトを使用するため、
+    // トレイトのみを検証します
     $exceptionFiles = [
-        base_path('ddd/Shared/Exceptions/DomainException.php'),
         base_path('ddd/Shared/Exceptions/HasProblemDetails.php'),
     ];
 
