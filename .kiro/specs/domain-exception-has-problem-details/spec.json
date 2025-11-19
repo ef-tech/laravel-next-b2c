@@ -1,0 +1,66 @@
+{
+  "feature_name": "domain-exception-has-problem-details",
+  "created_at": "2025-11-19T14:10:00+09:00",
+  "updated_at": "2025-11-19T16:29:02+09:00",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 142,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/142",
+    "title": "🔧 DomainExceptionへのHasProblemDetails trait適用（DRY原則）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "PHP 8.4, Laravel 12, DDD/Clean Architecture",
+      "testing": "Pest 4, PHPStan/Larastan Level 8, Laravel Pint",
+      "tools": "GitHub CLI (gh), Git"
+    },
+    "requirements_hints": [
+      "DomainExceptionへのHasProblemDetailsトレイト適用",
+      "DomainExceptionから重複するtoProblemDetails()メソッドの削除",
+      "DomainExceptionから非推奨のgetErrorType()メソッドの削除",
+      "Architecture Testでのトレイト使用検証追加",
+      "既存テストの動作確認（機能的変更なし）",
+      "DRY原則の徹底、保守性向上、一貫性保証"
+    ],
+    "project_structure": [
+      "backend/laravel-api/ddd/Shared/Exceptions/DomainException.php",
+      "backend/laravel-api/ddd/Shared/Exceptions/HasProblemDetails.php",
+      "backend/laravel-api/tests/Arch/ErrorHandlingTest.php"
+    ],
+    "services": {},
+    "todo_items": [
+      "DomainExceptionにHasProblemDetailsトレイト適用完了",
+      "DomainExceptionからtoProblemDetails()メソッド削除完了",
+      "DomainExceptionから非推奨getErrorType()メソッド削除完了",
+      "全Unit/Feature/Architecture Test PASS（96.1%カバレッジ維持）",
+      "Larastan Level 8静的解析 PASS（エラー0件）",
+      "Laravel Pint PASS（コードスタイル準拠）",
+      "Architecture Test追加完了（トレイト使用検証）",
+      "E2Eテスト PASS（該当する場合）",
+      "コードカバレッジ96.1%以上維持",
+      "PHPStan Level 8準拠（型エラーなし）",
+      "DDD原則準拠（Domain層HTTP非依存）",
+      "RFC 7807準拠（エラーレスポンス形式不変）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
