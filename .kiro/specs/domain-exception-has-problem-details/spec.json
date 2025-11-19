@@ -1,9 +1,9 @@
 {
   "feature_name": "domain-exception-has-problem-details",
   "created_at": "2025-11-19T14:10:00+09:00",
-  "updated_at": "2025-11-19T16:29:02+09:00",
+  "updated_at": "2025-11-19T07:42:15+09:00",
   "language": "ja",
-  "phase": "requirements-generated",
+  "phase": "design-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 142,
@@ -51,10 +51,10 @@
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
+      "generated": true,
       "approved": false
     },
     "tasks": {
