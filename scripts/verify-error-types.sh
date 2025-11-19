@@ -76,8 +76,8 @@ if [ -d "$EXCEPTION_DIR" ]; then
   # ErrorCode::fromString()を使わずにconfig('app.url')でtype URIを生成しているパターンを検出
   # ただし、フォールバック用のnull coalescing operator (??)の右辺にある場合は許可
 
-  # HasProblemDetails.php と DomainException.php をチェック
-  for file in "$EXCEPTION_DIR/HasProblemDetails.php" "$EXCEPTION_DIR/DomainException.php"; do
+  # HasProblemDetails.php をチェック（DomainExceptionはトレイト経由で使用）
+  for file in "$EXCEPTION_DIR/HasProblemDetails.php"; do
     if [ -f "$file" ]; then
       # ErrorCode::fromString()が存在することを確認
       if ! grep -q "ErrorCode::fromString" "$file"; then
