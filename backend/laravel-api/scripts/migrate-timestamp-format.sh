@@ -1,12 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
+# スクリプトの絶対パスを取得し、Laravel APIルートディレクトリに移動
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+LARAVEL_API_ROOT="$SCRIPT_DIR/.."
+cd "$LARAVEL_API_ROOT"
+
 echo "=========================================="
 echo "Timestamp Format Migration Script"
 echo "=========================================="
+echo "Working directory: $(pwd)"
+echo ""
 
 # 1. 対象ファイル検出
-echo ""
 echo "🔍 Detecting target files..."
 echo ""
 
