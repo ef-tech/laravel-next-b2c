@@ -62,7 +62,7 @@ class CspReportController extends Controller
             'status_code' => $cspReport['status-code'] ?? null,
             'user_agent' => $request->userAgent(),
             'ip_address' => $request->ip(),
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ]);
 
         return response()->noContent();

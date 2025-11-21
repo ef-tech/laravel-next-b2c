@@ -372,7 +372,7 @@ final class LogMetrics implements RateLimitMetrics
             'decay_minutes' => $rule->getDecayMinutes(),
             'attempts' => $attempts,
             'allowed' => $allowed,
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ]);
     }
 
@@ -383,7 +383,7 @@ final class LogMetrics implements RateLimitMetrics
             'max_attempts' => $rule->getMaxAttempts(),
             'attempts' => $attempts,
             'retry_after' => $retryAfter,
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ]);
     }
 }

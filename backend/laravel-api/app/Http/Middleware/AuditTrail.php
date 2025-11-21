@@ -94,7 +94,7 @@ final class AuditTrail
             'resource' => $request->path(),
             'changes' => $changes,
             'ip' => $request->ip(),
-            'timestamp' => now()->toIso8601String(),
+            'timestamp' => now()->utc()->toIso8601String(),
         ];
 
         // Application層のAuditServiceポートを経由してイベント発火

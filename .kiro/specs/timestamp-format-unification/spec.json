@@ -1,0 +1,87 @@
+{
+  "feature_name": "timestamp-format-unification",
+  "created_at": "2025-11-20T09:00:00+00:00",
+  "updated_at": "2025-11-19T18:30:23+00:00",
+  "language": "ja",
+  "phase": "tasks-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 115,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/115",
+    "title": "timestampフォーマット統一（toIso8601String()）",
+    "labels": [],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Carbon",
+      "frontend": "Next.js (タイムスタンプパース側)",
+      "infrastructure": "Docker, PHPStan, Laravel Pint, Pest 4",
+      "tools": "ripgrep, Perl, Rector (optional), Composer"
+    },
+    "requirements_hints": [
+      "手動フォーマット `now()->format('Y-m-d\\TH:i:s\\Z')` を `now()->utc()->toIso8601String()` に統一",
+      "toIso8601String()の前に utc() を追加してUTC統一",
+      "RFC 3339（ISO 8601のプロファイル）準拠形式への変更",
+      "タイムゾーン不明確問題の解消",
+      "ログ・API・Problem Detailsで一貫したタイムスタンプフォーマット",
+      "後方互換性の考慮（フロントエンドは new Date() で両形式対応）"
+    ],
+    "project_structure": [
+      "backend/laravel-api/ddd/Shared/Exceptions/HasProblemDetails.php",
+      "backend/laravel-api/ddd/Shared/Exceptions/DomainException.php",
+      "backend/laravel-api/app/Support/ExceptionHandler.php",
+      "backend/laravel-api/bootstrap/app.php",
+      "backend/laravel-api/ddd/Infrastructure/Http/Presenters/V1/HealthPresenter.php",
+      "backend/laravel-api/ddd/Infrastructure/Http/Presenters/V1/TokenPresenter.php",
+      "backend/laravel-api/ddd/Infrastructure/Http/Presenters/V1/UserPresenter.php",
+      "backend/laravel-api/app/Http/Middleware/RequestLogging.php",
+      "backend/laravel-api/app/Http/Middleware/PerformanceMonitoring.php",
+      "backend/laravel-api/app/Http/Middleware/AuthorizationCheck.php",
+      "backend/laravel-api/app/Http/Middleware/AuditTrail.php",
+      "backend/laravel-api/app/Http/Controllers/Api/V1/CspReportController.php",
+      "backend/laravel-api/tests/TestCase.php"
+    ],
+    "services": {},
+    "todo_items": [
+      "ripgrepによる対象ファイル検出完了",
+      "影響範囲レポート作成（約20ファイル確認）",
+      "チーム内レビュー完了",
+      "Git作業ブランチ作成（feature/timestamp-format-unification）",
+      "バックアップタグ作成（backup/before-timestamp-migration）",
+      "Perl一括置換コマンド実行（4パターン）",
+      "手動確認が必要な箇所の修正（DateTime/DateTimeImmutable等）",
+      "git diff で変更内容確認",
+      "tests/TestCase.php にヘルパーメソッド追加",
+      "timestampアサーション修正（約10ファイル）",
+      "Carbon::setTestNow() の徹底",
+      "ローカル環境でPestテスト実行（php artisan test）",
+      "PHPStan Level 8静的解析パス",
+      "Laravel Pint自動フォーマット適用",
+      "全テスト成功（php artisan test --parallel、実行時間<2分）",
+      "テストカバレッジ85%以上維持",
+      "手動APIテスト完了（ヘルスチェック、エラーレスポンス確認）",
+      "プルリクエスト作成（タイトル: chore: timestampフォーマットをISO 8601 UTC形式に統一）",
+      "コードレビュー承認取得",
+      "ステージング環境デプロイ",
+      "ステージング環境動作確認（24時間）",
+      "本番環境デプロイ（カナリアリリース推奨）"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}

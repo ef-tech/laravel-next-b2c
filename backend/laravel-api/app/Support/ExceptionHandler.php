@@ -53,7 +53,7 @@ final class ExceptionHandler
                 'error_code' => 'internal_server_error',
                 'trace_id' => $requestId,
                 'instance' => $request->getRequestUri(),
-                'timestamp' => now()->format('Y-m-d\TH:i:s\Z'),
+                'timestamp' => now()->utc()->toIso8601String(),
             ];
 
         $statusCode = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;

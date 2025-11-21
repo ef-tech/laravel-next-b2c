@@ -35,7 +35,7 @@ describe('Idempotency and Performance E2E', function () {
         Route::post('/test/idempotency/webhook', function () {
             return response()->json([
                 'status' => 'processed',
-                'timestamp' => now()->toIso8601String(),
+                'timestamp' => now()->utc()->toIso8601String(),
             ]);
         })->middleware(['webhook']);
     });

@@ -13,14 +13,15 @@ describe('HealthPresenter', function () {
         expect($result)->toBeArray()
             ->and($result)->toHaveKey('status', 'ok')
             ->and($result)->toHaveKey('timestamp')
-            ->and($result['timestamp'])->toBe($timestamp->toIso8601String());
+            ->and($result['timestamp'])->toBe($timestamp->utc()->toIso8601String());
     });
 
-    test('タイムスタンプが正しくISO8601形式に変換される', function (): void {
-        $timestamp = now()->setTimestamp(1609459200); // 2021-01-01 00:00:00 UTC
+    test('タイムスタンプが正しくISO8601 UTC形式に変換される', function (): void {
+        $frozenTime = $this->freezeTimeAt('2021-01-01 00:00:00');
 
-        $result = HealthPresenter::present($timestamp);
+        $result = HealthPresenter::present($frozenTime);
 
-        expect($result['timestamp'])->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/');
+        $this->assertIso8601Timestamp($result['timestamp']);
+        expect($result['timestamp'])->toBe('2021-01-01T00:00:00+00:00');
     });
 });
