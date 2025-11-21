@@ -1,9 +1,9 @@
 {
   "feature_name": "frontend-accept-header-problem-json",
   "created_at": "2025-11-22T10:30:00Z",
-  "updated_at": "2025-11-22T10:45:00Z",
+  "updated_at": "2025-11-22T11:30:00Z",
   "language": "ja",
-  "phase": "requirements-generated",
+  "phase": "design-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 116,
@@ -68,10 +68,10 @@
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
+      "generated": true,
       "approved": false
     },
     "tasks": {
