@@ -49,8 +49,12 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
-- `timestamp-format-unification` - timestampフォーマット統一（`now()->utc()->toIso8601String()`統一、RFC 3339準拠、タイムゾーン不明確問題解消）
 ### Completed Specifications
+- `timestamp-format-unification` - ✅ timestampフォーマット統一完了（`now()->utc()->toIso8601String()`統一、RFC 3339準拠、タイムゾーン不明確問題解消）
+  - 実装完了日: 2025-11-22
+  - Issue: #115
+  - PR: #147
+  - 成果: 全timestampをRFC 3339 UTC ISO 8601形式に統一（backend/laravel-api/の14ファイル修正）、タイムゾーン不明確問題の完全解消、CspReportControllerのContent-Type判定をstr_contains()に統一、マイグレーションスクリプトの堅牢性向上（絶対パス化）、ドキュメントのタイムスタンプ例示統一（RATELIMIT_IMPLEMENTATION.md）
 - `domain-exception-has-problem-details` - ✅ DomainExceptionへのHasProblemDetails trait適用完了（DRY原則徹底、toProblemDetails()重複削除、保守性向上、Architecture Test強化）
   - 実装完了日: 2025-11-20
   - Issue: #142
