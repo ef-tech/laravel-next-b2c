@@ -173,11 +173,12 @@ export class ApiClient {
       headers.set('Accept-Language', this.getBrowserLanguage());
     }
 
-    // Accept: application/jsonヘッダーを設定
-    // Laravel accepts both application/json and application/problem+json
-    // but requires at least application/json in the Accept header
+    // RFC 7807準拠: application/problem+jsonを優先的にサポート
+    // Content Negotiation: problem+jsonを先頭に配置し、後方互換性のためapplication/jsonも含める
+    // @see https://www.rfc-editor.org/rfc/rfc7807 (Problem Details for HTTP APIs)
+    // @see https://www.rfc-editor.org/rfc/rfc7231#section-5.3.2 (Accept header)
     if (!headers.has('Accept')) {
-      headers.set('Accept', 'application/json');
+      headers.set('Accept', 'application/problem+json, application/json');
     }
 
     return headers;

@@ -49,6 +49,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
+- `frontend-accept-header-problem-json` - Frontend AcceptヘッダーにRFC 7807対応（application/problem+json追加、Content Negotiation実装、後方互換性維持）
 ### Completed Specifications
 - `timestamp-format-unification` - ✅ timestampフォーマット統一完了（`now()->utc()->toIso8601String()`統一、RFC 3339準拠、タイムゾーン不明確問題解消）
   - 実装完了日: 2025-11-22
