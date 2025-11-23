@@ -39,9 +39,13 @@ async function fetchV1<T>(
 ): Promise<V1ApiResponse<T>> {
   const url = `${API_V1_BASE_URL}${endpoint}`;
 
+  // RFC 7807準拠: application/problem+jsonを優先的にサポート
+  // Content Negotiation: problem+jsonを先頭に配置し、後方互換性のためapplication/jsonも含める
+  // @see https://www.rfc-editor.org/rfc/rfc7807 (Problem Details for HTTP APIs)
+  // @see https://www.rfc-editor.org/rfc/rfc7231#section-5.3.2 (Accept header)
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    Accept: 'application/json',
+    Accept: 'application/problem+json, application/json',
     ...options?.headers,
   };
 

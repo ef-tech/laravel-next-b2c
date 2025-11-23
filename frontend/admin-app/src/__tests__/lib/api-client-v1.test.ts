@@ -23,6 +23,29 @@ describe("API V1 Client", () => {
     jest.clearAllMocks();
   });
 
+  describe("HTTP Headers", () => {
+    it("AcceptヘッダーがRFC 7807準拠で設定される", async () => {
+      const mockResponse = { status: "ok" };
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await getHealth();
+
+      // RFC 7807準拠: application/problem+jsonを優先的にサポート
+      // Content Negotiation: problem+jsonを先頭に配置し、後方互換性のためapplication/jsonも含める
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/health"),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Accept: "application/problem+json, application/json",
+          }),
+        }),
+      );
+    });
+  });
+
   describe("getHealth", () => {
     it("should fetch health status", async () => {
       const mockResponse = { status: "ok" };

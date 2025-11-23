@@ -73,7 +73,7 @@ describe("ApiClient", () => {
       expect(typeof headers.get("Accept-Language")).toBe("string");
     });
 
-    it("Acceptヘッダーがapplication/jsonに設定される", async () => {
+    it("AcceptヘッダーがRFC 7807準拠で設定される", async () => {
       const client = new ApiClient("https://api.example.com");
 
       mockFetch.mockResolvedValueOnce({
@@ -85,9 +85,32 @@ describe("ApiClient", () => {
       await client.request("/test", { method: "GET" });
 
       // Headers オブジェクトの検証
+      // RFC 7807準拠: application/problem+jsonを優先的にサポート
+      // Content Negotiation: problem+jsonを先頭に配置し、後方互換性のためapplication/jsonも含める
       const callArgs = mockFetch.mock.calls[0];
       const headers = callArgs?.[1]?.headers as Headers;
-      expect(headers.get("Accept")).toBe("application/json");
+      expect(headers.get("Accept")).toBe("application/problem+json, application/json");
+    });
+
+    it("カスタムAcceptヘッダーが指定された場合は上書きしない", async () => {
+      const client = new ApiClient("https://api.example.com");
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: "success" }),
+      });
+
+      // カスタムAcceptヘッダーを指定
+      await client.request("/test", {
+        method: "GET",
+        headers: { Accept: "application/xml" },
+      });
+
+      // カスタムヘッダーがそのまま使用される（デフォルト値で上書きされない）
+      const callArgs = mockFetch.mock.calls[0];
+      const headers = callArgs?.[1]?.headers as Headers;
+      expect(headers.get("Accept")).toBe("application/xml");
     });
 
     it("30秒タイムアウトが設定される（AbortController使用）", async () => {
