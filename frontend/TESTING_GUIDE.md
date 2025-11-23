@@ -319,25 +319,25 @@ it('renders correctly', () => {
 });
 ```
 
-### 環境変数モック
+### 環境変数バリデーション
 
-**場所**: `/test-utils/env.ts`
+**方式**: 起動時Zodバリデーション
 
-テスト用の環境変数設定・リセットユーティリティ。
+環境変数の検証は、テストコードではなく**起動時バリデーション**（`check-env.ts` + `env.ts` Zodスキーマ）によって保証されます。
 
-```typescript
-import { setEnv, resetEnv } from "../../../../../test-utils/env";
+**品質保証層**:
 
-describe("Environment-dependent Component", () => {
-  afterEach(() => {
-    resetEnv();
-  });
+1. **起動時バリデーション**: `npm run dev` / `npm run build` 実行時に自動検証
+2. **CI/CD自動検証**: `env-validation.yml` によるPull Request時の自動チェック
+3. **手動検証**: `npm run env:check` による差分検出
 
-  it("uses API_URL from environment", () => {
-    setEnv({ API_URL: "https://test-api.example.com" });
-    // テストコード
-  });
-});
+```bash
+# 環境変数の手動検証
+npm run env:check
+
+# 不正な環境変数がある場合のエラー例
+# 環境変数が正しく設定されていません。.env.local を確認してください。
+# 詳細: NEXT_PUBLIC_API_URL: Invalid url
 ```
 
 ### Next.js Routerモック拡張
