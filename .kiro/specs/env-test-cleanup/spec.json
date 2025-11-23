@@ -1,0 +1,67 @@
+{
+  "feature_name": "env-test-cleanup",
+  "created_at": "2025-11-23T15:00:00+09:00",
+  "updated_at": "2025-11-23T17:50:00+09:00",
+  "language": "ja",
+  "phase": "requirements-generated",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 105,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/105",
+    "title": "ENV 系のテストコードが不要そうであれば削除したい",
+    "labels": ["CI/CD", "refactoring", "testing", "priority: medium", "frontend"],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel 12, PHP 8.4, Zod (via frontend)",
+      "frontend": "Next.js 15.5, TypeScript, Jest 29",
+      "infrastructure": "GitHub Actions CI/CD",
+      "tools": "Zod (環境変数バリデーション), Jest (テスト)"
+    },
+    "requirements_hints": [
+      "環境変数関連テストファイルの分析と削除判断",
+      "未使用ユーティリティ（test-utils/env.ts）の削除",
+      "テスト削除に伴うドキュメント更新",
+      "CI/CDワークフローのpaths設定調整"
+    ],
+    "project_structure": [
+      "frontend/admin-app/src/lib/__tests__/env.test.ts",
+      "frontend/user-app/src/lib/__tests__/env.test.ts",
+      "test-utils/env.ts",
+      "scripts/__tests__/env-sync.test.ts",
+      ".github/workflows/frontend-test.yml",
+      ".github/workflows/env-validation.yml",
+      "frontend/TESTING_GUIDE.md"
+    ],
+    "services": {},
+    "todo_items": [
+      "test-utils/env.tsの参照がないことを確認（grep検索）",
+      "CI/CDワークフローの影響範囲を確認",
+      "削除前のテストカバレッジを記録",
+      "test-utils/env.tsを削除",
+      "frontend/admin-app/src/lib/__tests__/env.test.tsを削除",
+      "frontend/user-app/src/lib/__tests__/env.test.tsを削除",
+      "scripts/__tests__/env-sync.test.tsを簡素化（3ケースに削減）",
+      ".github/workflows/frontend-test.ymlのpathsを調整",
+      "frontend/TESTING_GUIDE.mdを更新",
+      "全テスト実行確認"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": false
+    },
+    "design": {
+      "generated": false,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
