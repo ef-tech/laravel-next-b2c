@@ -92,6 +92,27 @@ describe("ApiClient", () => {
       expect(headers.get("Accept")).toBe("application/problem+json, application/json");
     });
 
+    it("カスタムAcceptヘッダーが指定された場合は上書きしない", async () => {
+      const client = new ApiClient("https://api.example.com");
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: "success" }),
+      });
+
+      // カスタムAcceptヘッダーを指定
+      await client.request("/test", {
+        method: "GET",
+        headers: { Accept: "application/xml" },
+      });
+
+      // カスタムヘッダーがそのまま使用される（デフォルト値で上書きされない）
+      const callArgs = mockFetch.mock.calls[0];
+      const headers = callArgs?.[1]?.headers as Headers;
+      expect(headers.get("Accept")).toBe("application/xml");
+    });
+
     it("30秒タイムアウトが設定される（AbortController使用）", async () => {
       const client = new ApiClient("https://api.example.com");
 
