@@ -1,9 +1,9 @@
 {
   "feature_name": "env-test-cleanup",
   "created_at": "2025-11-23T15:00:00+09:00",
-  "updated_at": "2025-11-23T18:30:00+09:00",
+  "updated_at": "2025-11-23T20:45:00+09:00",
   "language": "ja",
-  "phase": "design-generated",
+  "phase": "tasks-generated",
   "source": {
     "type": "github_issue",
     "issue_number": 105,
@@ -56,10 +56,10 @@
     },
     "design": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "tasks": {
-      "generated": false,
+      "generated": true,
       "approved": false
     }
   },
