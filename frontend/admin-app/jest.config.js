@@ -38,6 +38,9 @@ const customJestConfig = {
     "!src/i18n.ts",
     "!src/middleware.ts",
     "!src/types/error-codes.ts",
+    // Environment variable configuration - excluded from coverage as it's validated at runtime
+    // Validation occurs during application startup via check-env.ts + Zod schema
+    "!src/lib/env.ts",
   ],
 };
 
