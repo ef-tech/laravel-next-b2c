@@ -6,6 +6,18 @@ describe('環境変数同期スクリプト', () => {
   const examplePath = path.join(testDir, '.env.example');
   const envPath = path.join(testDir, '.env');
 
+  /**
+   * .envファイルからキー名の配列を抽出する
+   * @param content - .envファイルの内容
+   * @returns キー名の配列
+   */
+  const parseEnv = (content: string): string[] => {
+    return content
+      .split('\n')
+      .filter((line) => line.trim() && !line.startsWith('#'))
+      .map((line) => line.split('=')[0]);
+  };
+
   beforeEach(() => {
     // テストディレクトリを作成
     if (!fs.existsSync(testDir)) {
@@ -34,14 +46,6 @@ describe('環境変数同期スクリプト', () => {
     fs.writeFileSync(examplePath, 'KEY1=value1\nKEY2=value2\n');
     fs.writeFileSync(envPath, 'KEY1=value1\n');
 
-    // 差分検出ロジック
-    const parseEnv = (content: string): string[] => {
-      return content
-        .split('\n')
-        .filter((line) => line.trim() && !line.startsWith('#'))
-        .map((line) => line.split('=')[0]);
-    };
-
     const exampleKeys = parseEnv(fs.readFileSync(examplePath, 'utf-8'));
     const envKeys = parseEnv(fs.readFileSync(envPath, 'utf-8'));
     const missingKeys = exampleKeys.filter((key) => !envKeys.includes(key));
@@ -52,14 +56,6 @@ describe('環境変数同期スクリプト', () => {
   test('未知キーが検出される', () => {
     fs.writeFileSync(examplePath, 'KEY1=value1\n');
     fs.writeFileSync(envPath, 'KEY1=value1\nUNKNOWN_KEY=value\n');
-
-    // 差分検出ロジック
-    const parseEnv = (content: string): string[] => {
-      return content
-        .split('\n')
-        .filter((line) => line.trim() && !line.startsWith('#'))
-        .map((line) => line.split('=')[0]);
-    };
 
     const exampleKeys = parseEnv(fs.readFileSync(examplePath, 'utf-8'));
     const envKeys = parseEnv(fs.readFileSync(envPath, 'utf-8'));
