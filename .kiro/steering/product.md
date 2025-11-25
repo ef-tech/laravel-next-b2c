@@ -158,6 +158,15 @@ Laravel Next.js B2Cアプリケーションテンプレート - **API専用最�
     - **型安全性向上**: locale型明示化（string型明示変換）による型エラー完全解消、next-intl互換性向上
     - **ルーティング統一**: 全ページを[locale]配下に統一配置、i18n対応の完全一貫性確保
   - **自動コード生成**: `generate-error-types.js` スクリプトによるTypeScript型定義自動生成、Laravel/フロントエンド同期保証、Prettier自動実行統合
+- **📡 Frontend AcceptヘッダーRFC 7807対応完了（2025-11-23、PR #152完了）**: RFC 7807準拠のContent Negotiation実装
+  - **application/problem+json追加**: Acceptヘッダーに`application/problem+json`を含む設定
+  - **後方互換性維持**: 既存の`application/json`も併用、優先度設定（problem+json;q=1, json;q=0.9）
+  - **全APIクライアント統一**: api-client.ts、fetch-api.ts等の共通ヘッダー設定
+  - **包括的テスト**: カスタムAcceptヘッダーのユニットテスト追加
+- **⏰ timestampフォーマット統一完了（2025-11-22、PR #147完了）**: RFC 3339 UTC ISO 8601形式統一
+  - **now()->utc()->toIso8601String()統一**: 全timestampフィールドを統一フォーマットに
+  - **タイムゾーン不明確問題解消**: UTC明示によるタイムゾーン問題の完全解消
+  - **14ファイル修正**: backend/laravel-api/内の全timestamp関連コードを統一
 
 ## アーキテクチャ上の特徴
 - **API専用最適化**: Web機能削除によるステートレス設計とパフォーマンス最大化
