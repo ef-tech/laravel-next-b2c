@@ -49,8 +49,12 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
-- `env-test-cleanup` - ENV系テストコード整理（不要テストファイル削除、test-utils/env.ts削除、CI/CDワークフロー調整、保守コスト削減）
 ### Completed Specifications
+- `env-test-cleanup` - ✅ ENV系テストコード整理完了（不要テストファイル削除、test-utils/env.ts削除、CI/CDワークフロー調整、保守コスト削減）
+  - 実装完了日: 2025-11-25
+  - Issue: #105
+  - PR: #154
+  - 成果: 不要テストファイル削除（frontend/admin-app/src/__tests__/env.test.ts等）、test-utils/env.ts削除（環境変数モックユーティリティ、実際のテストで未使用）、env-sync.test.ts DRY原則適用（重複コード削減）、env.tsカバレッジ計測除外（設定ファイルのためカバレッジ不要）、TESTING_GUIDE.mdカバレッジ除外理由追記、保守コスト削減、テストスイート簡潔化、コードベース整理
 - `frontend-accept-header-problem-json` - ✅ Frontend AcceptヘッダーRFC 7807対応完了（application/problem+json追加、Content Negotiation実装、後方互換性維持）
   - 実装完了日: 2025-11-23
   - Issue: #116

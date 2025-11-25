@@ -460,8 +460,8 @@ laravel-next-b2c/
 ├── jest.setup.ts        # グローバルテストセットアップ
 ├── test-utils/          # 共通テストユーティリティ
 │   ├── render.tsx       # カスタムrender関数
-│   ├── router.ts        # Next.js Router モック設定
-│   └── env.ts           # 環境変数モック
+│   └── router.ts        # Next.js Router モック設定
+│   # 注: env.ts削除済み（2025-11-25、PR #154 - 実際のテストで未使用のため保守コスト削減）
 ├── coverage/            # 統合カバレッジレポート
 ├── test-results/        # テスト実行結果（JUnit XML統合レポート）
 │   ├── backend-results.xml      # バックエンドテスト結果（Pest JUnit出力）
