@@ -2,27 +2,27 @@
 
 ## タスク一覧
 
-- [ ] 1. サニタイズロジックの実装
-- [ ] 1.1 HasProblemDetailsトレイトにフォールバックURI生成時のサニタイズ処理を追加
+- [x] 1. サニタイズロジックの実装
+- [x] 1.1 HasProblemDetailsトレイトにフォールバックURI生成時のサニタイズ処理を追加
   - `toProblemDetails()`メソッドにインラインサニタイズロジックを実装
   - 正規表現 `/[^a-z0-9\-]/` を使用して安全な文字セットのみを許可
   - 小文字変換（`strtolower()`）後にサニタイズ処理を適用
   - 空文字列の場合はデフォルト値 `unknown` を設定
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 1.2 元のエラーコード文字列の保持機能を確認
+- [x] 1.2 元のエラーコード文字列の保持機能を確認
   - `error_code` フィールドにサニタイズ前の元のエラーコード文字列が保持されることを確認
   - RFC 7807レスポンスの `type` フィールド（サニタイズ済み）と `error_code` フィールド（サニタイズ前）の両方が正しく出力されることを確認
   - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 1.3 PHPDocコメントとコードコメントの追加
+- [x] 1.3 PHPDocコメントとコードコメントの追加
   - サニタイズ処理の目的（セキュリティ強化、RFC 3986準拠）を明記
   - 正規表現パターン、空文字列のデフォルト値の説明を追加
   - Codexレビュー指摘（PR #141）を実装の背景として引用
   - _Requirements: 6.1, 6.2, 6.4_
 
-- [ ] 2. ユニットテストの実装
-- [ ] 2.1 HasProblemDetailsトレイトのサニタイズパターンテストを作成
+- [x] 2. ユニットテストの実装
+- [x] 2.1 HasProblemDetailsトレイトのサニタイズパターンテストを作成
   - 正常系: `CUSTOM_ERROR_001` → `customerror001`
   - アンダースコア削除: `CUSTOM_ERROR` → `customerror`
   - 特殊文字削除: `CUSTOM@ERROR!` → `customerror`
@@ -31,57 +31,57 @@
   - 数字・ハイフン保持: `ERROR-123-TEST` → `error-123-test`
   - _Requirements: 5.1_
 
-- [ ] 2.2 ErrorCode enum定義済みエラーの既存動作テストを追加
+- [x] 2.2 ErrorCode enum定義済みエラーの既存動作テストを追加
   - `ErrorCode::fromString()` が有効なインスタンスを返す場合、サニタイズ処理が実行されないことを検証
   - `ErrorCode::getType()` の戻り値がそのまま `type` フィールドに使用されることを検証
   - 既存のtype URI生成結果が変更されていないことを確認
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 2.3 RFC 3986準拠の文字セット検証テストを追加
+- [x] 2.3 RFC 3986準拠の文字セット検証テストを追加
   - フォールバックtype URIに英数字（小文字）とハイフンのみが含まれることを検証
   - URI安全性検証（RFC 3986のunreserved文字セットサブセット `[a-z0-9\-]`）
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 3. Feature Testsの実装
-- [ ] 3.1 未定義エラーコードのHTTPレスポンステストを作成
+- [x] 3. Feature Testsの実装
+- [x] 3.1 未定義エラーコードのHTTPレスポンステストを作成
   - 未定義エラーコードを返すHTTPリクエストを送信
   - RFC 7807準拠のレスポンスが返されることを検証
   - `type` フィールドがサニタイズ済みURIであることを確認
   - `error_code` フィールドがサニタイズ前の元のエラーコードであることを確認
   - _Requirements: 5.3_
 
-- [ ] 3.2 ErrorCode enum定義済みエラーのHTTPレスポンステストを追加
+- [x] 3.2 ErrorCode enum定義済みエラーのHTTPレスポンステストを追加
   - 定義済みエラーコードを返すHTTPリクエストを送信
   - `type` フィールドが `ErrorCode::getType()` の戻り値と一致することを検証
   - サニタイズ処理が実行されていないことを確認
   - _Requirements: 4.1, 4.2_
 
-- [ ] 3.3 空文字列デフォルト値のHTTPレスポンステストを追加
+- [x] 3.3 空文字列デフォルト値のHTTPレスポンステストを追加
   - 特殊文字のみのエラーコードを返すHTTPリクエストを送信
   - `type` フィールドが `https://api.example.com/errors/unknown` であることを検証
   - `error_code` フィールドに元の特殊文字エラーコードが保持されていることを確認
   - _Requirements: 1.5, 2.1_
 
-- [ ] 4. Architecture Testsの実装
-- [ ] 4.1 HasProblemDetailsトレイト使用検証テストを追加
+- [x] 4. Architecture Testsの実装
+- [x] 4.1 HasProblemDetailsトレイト使用検証テストを追加
   - `ddd/**/Exceptions/` 配下の全例外クラスが `HasProblemDetails` トレイトを使用していることを検証
   - `toProblemDetails()` メソッドが正しく実装されていることを確認
   - _Requirements: 5.2_
 
-- [ ] 5. テストカバレッジの検証と最適化
-- [ ] 5.1 テストカバレッジを計測し85%以上を達成
+- [x] 5. テストカバレッジの検証と最適化
+- [x] 5.1 テストカバレッジを計測し85%以上を達成
   - HasProblemDetailsトレイトのコードカバレッジを100%にする
   - サニタイズロジックの全コードパスをカバー
   - `./vendor/bin/pest --coverage` でカバレッジレポートを生成
   - _Requirements: 5.4_
 
-- [ ] 5.2 PHPStan Level 8静的解析を実行し型安全性を検証
+- [x] 5.2 PHPStan Level 8静的解析を実行し型安全性を検証
   - `./vendor/bin/phpstan analyse` で静的解析を実行
   - 型安全性の問題がないことを確認
   - _Requirements: Technical Constraints - PHPStan Level 8_
 
-- [ ] 6. ドキュメント更新
-- [ ] 6.1 tech.mdにフォールバックURI生成時のサニタイズ処理を記載
+- [x] 6. ドキュメント更新
+- [x] 6.1 tech.mdにフォールバックURI生成時のサニタイズ処理を記載
   - RFC 7807エラーハンドリングセクションにサニタイズ処理の説明を追加
   - 正規表現パターン、デフォルト値、セキュリティ向上の目的を記載
   - _Requirements: 6.3_

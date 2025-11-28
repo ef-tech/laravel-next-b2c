@@ -1,9 +1,9 @@
 {
   "feature_name": "fallback-type-uri-sanitize",
   "created_at": "2025-11-28T00:00:00.000000Z",
-  "updated_at": "2025-11-28T09:40:00.000000Z",
+  "updated_at": "2025-11-28T10:30:00.000000Z",
   "language": "ja",
-  "phase": "tasks-generated",
+  "phase": "completed",
   "source": {
     "type": "github_issue",
     "issue_number": 143,
