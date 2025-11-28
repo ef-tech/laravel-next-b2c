@@ -53,7 +53,8 @@ test('HasProblemDetails trait source code contains ErrorCode::fromString()->getT
     // ErrorCode::fromString()を使用していることを検証
     expect($content)->toContain('ErrorCode::fromString(')
         ->and($content)->toContain('?->getType()')
-        ->and($content)->toContain('??'); // null coalescing operator for fallback
+        // フォールバック処理: null判定によるサニタイズロジック実行
+        ->and($content)->toContain('if ($typeUri === null)');
 });
 
 test('ErrorCode enum all cases must have type URIs', function () {
@@ -105,19 +106,23 @@ test('Dynamic type URI generation using config("app.url") is prohibited in excep
         // ErrorCode::fromString()を使用していることを検証
         expect($content)->toContain('ErrorCode::fromString(');
 
-        // フォールバックとしてのconfig('app.url')使用は許可（null coalescing operator右辺）
+        // フォールバックとしてのconfig('app.url')使用は許可（null判定ブロック内）
         // 直接的な動的URI生成（ErrorCode::fromString()なし）を禁止
         $lines = explode("\n", $content);
         foreach ($lines as $lineNumber => $line) {
             // config('app.url')を含む行を検出
             if (str_contains($line, "config('app.url')")) {
                 // フォールバックとして使用されている場合のみ許可
-                // null coalescing operator (??) の右辺にある場合は許可
-                $previousLine = $lines[$lineNumber - 1] ?? '';
-                $currentLine = $line;
+                // if ($typeUri === null) ブロック内で使われている場合は許可
+
+                // 前後5行のコンテキストを取得
+                $contextStart = max(0, $lineNumber - 5);
+                $contextEnd = min(count($lines) - 1, $lineNumber + 5);
+                $context = implode("\n", array_slice($lines, $contextStart, $contextEnd - $contextStart + 1));
 
                 // ErrorCode::fromString()とセットで使われているかチェック
-                expect($previousLine.$currentLine)->toContain('ErrorCode::fromString(');
+                // または if ($typeUri === null) ブロック内であることをチェック
+                expect($context)->toMatch('/(ErrorCode::fromString|if \(\$typeUri === null\))/');
             }
         }
     }

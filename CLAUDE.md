@@ -49,6 +49,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - `frontend-error-message-i18n` - フロントエンドエラーメッセージ多言語化対応（next-intl統合、Error Boundaries i18n、NetworkError多言語化、Accept-Language連携）
 - `frontend-lib-monorepo-consolidation` - frontend/lib/コード重複解消（TypeScriptパスエイリアス@shared、重複ファイル削除、約560行削減、メンテナンス性向上）
 - `frontend-cicd-build-validation` - フロントエンドCI/CD本番ビルド検証追加（TypeScript型チェック・npm run build・PR時エラー検知強化）
+- `fallback-type-uri-sanitize` - フォールバックtype URIサニタイズ検討（未定義エラーコードURI生成時の簡易サニタイズ追加、RFC 3986準拠、セキュリティ強化）
 ### Completed Specifications
 - `env-test-cleanup` - ✅ ENV系テストコード整理完了（不要テストファイル削除、test-utils/env.ts削除、CI/CDワークフロー調整、保守コスト削減）
   - 実装完了日: 2025-11-25
