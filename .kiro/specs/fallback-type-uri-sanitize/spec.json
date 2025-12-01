@@ -1,0 +1,69 @@
+{
+  "feature_name": "fallback-type-uri-sanitize",
+  "created_at": "2025-11-28T00:00:00.000000Z",
+  "updated_at": "2025-11-28T10:30:00.000000Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 143,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/143",
+    "title": "🔒 フォールバックtype URIのサニタイズ検討（セキュリティ強化）",
+    "labels": [
+      "enhancement",
+      "security"
+    ],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": [
+        "PHP",
+        "Laravel",
+        "RFC 7807 (Problem Details)",
+        "RFC 3986 (URI構文)"
+      ],
+      "frontend": [],
+      "infrastructure": [],
+      "tools": []
+    },
+    "requirements_hints": [
+      "未定義エラーコードのフォールバックtype URI生成時に簡易サニタイズを追加",
+      "セキュリティ向上: 不正な文字列からURIを生成するリスクを軽減",
+      "URI の一貫性: [a-z0-9\\-] のみを許可し、RFC 3986準拠",
+      "デバッグ時の視認性低下への対応（error_codeフィールドで元のエラーコード確認可能）",
+      "案1（推奨）: サニタイズ実装 vs 案2: 現状維持"
+    ],
+    "project_structure": [
+      "ddd/Shared/Exceptions/HasProblemDetails.php"
+    ],
+    "services": {},
+    "todo_items": [],
+    "implementation_approaches": [
+      "案1: サニタイズ実装（推奨） - セキュリティ優先、error_codeフィールドでデバッグ対応",
+      "案2: 現状維持 - ErrorCode enumに全定義を前提、フォールバックは例外的ケースのみ"
+    ],
+    "priority": "低（現状で実用上の問題なし、将来的な検討課題）",
+    "references": [
+      "PR #141: RFC 7807 type URI完全統一",
+      "Codexレビューコメント: https://github.com/ef-tech/laravel-next-b2c/pull/141#issuecomment-3546020850",
+      "RFC 3986 (URI構文): https://datatracker.ietf.org/doc/html/rfc3986"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}

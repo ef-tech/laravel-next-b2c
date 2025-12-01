@@ -57,9 +57,11 @@ describe('Exception Handler - RFC 7807 Response Generation', function () {
         ])->getJson('/test/error-type-uri');
 
         // Assert: typeフィールドがエラータイプURIを含むことを検証
+        // 注: 未定義エラーコード 'email_already_exists' はサニタイズにより 'emailalreadyexists' になる（アンダースコア削除）
         $json = $response->json();
         expect($json['type'])->toContain('/errors/');
-        expect($json['type'])->toContain('email_already_exists');
+        expect($json['type'])->toContain('emailalreadyexists'); // サニタイズ後のURI
+        expect($json['error_code'])->toBe('email_already_exists'); // 元のエラーコードは保持
     });
 
     test('RFC 7807レスポンスのinstanceフィールドがリクエストURIを含む', function () {
