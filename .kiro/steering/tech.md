@@ -276,7 +276,7 @@ enum ErrorCode: string
      * - 小文字変換後にサニタイズ処理を適用
      * - 空文字列の場合はデフォルト値 'unknown' を使用
      * - 元のエラーコードは error_code フィールドで保持（トレーサビリティ確保）
-     * - 参考: PR #141 Codexレビュー指摘（セキュリティ強化）
+     * - 参考: Issue #143, PR #156（Codexレビュー指摘によるセキュリティ強化）
      */
     public function getType(): string
     {
