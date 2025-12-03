@@ -234,19 +234,19 @@ install_dependencies() {
 
     # Composer install (Laravel)
     echo "   - Composer install (Laravel API)..." >&2
-    if ! (cd "${worktree_path}/backend/laravel-api" && composer install --no-interaction --prefer-dist 2>&1 | grep -E '(Installing|Nothing to|Generated)' >&2); then
+    if ! (cd "${worktree_path}/backend/laravel-api" && composer install --no-interaction --prefer-dist >&2); then
         error "Composer installに失敗しました"
     fi
 
     # npm install (User App)
     echo "   - npm install (User App)..." >&2
-    if ! (cd "${worktree_path}/frontend/user-app" && npm install --silent 2>&1 | grep -E '(added|up to date)' >&2); then
+    if ! (cd "${worktree_path}/frontend/user-app" && npm install >&2); then
         error "npm install (User App) に失敗しました"
     fi
 
     # npm install (Admin App)
     echo "   - npm install (Admin App)..." >&2
-    if ! (cd "${worktree_path}/frontend/admin-app" && npm install --silent 2>&1 | grep -E '(added|up to date)' >&2); then
+    if ! (cd "${worktree_path}/frontend/admin-app" && npm install >&2); then
         error "npm install (Admin App) に失敗しました"
     fi
 
