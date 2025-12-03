@@ -234,10 +234,6 @@ E2E_USER_URL=http://localhost:${port_user}
 E2E_API_URL=http://localhost:${port_laravel}
 EOF
 
-    # APP_KEY生成（ENV_VALIDATION_SKIP=trueで環境変数検証をスキップ）
-    echo "   - APP_KEY生成中..." >&2
-    (cd "${worktree_path}/backend/laravel-api" && ENV_VALIDATION_SKIP=true php artisan key:generate --no-interaction >&2 2>&1 || true)
-
     echo "✅ 環境変数ファイル生成完了" >&2
 }
 
@@ -278,6 +274,12 @@ install_dependencies() {
     echo "   - ストレージディレクトリ権限設定..." >&2
     chmod -R 775 "${worktree_path}/backend/laravel-api/storage" 2>/dev/null || true
     chmod -R 775 "${worktree_path}/backend/laravel-api/bootstrap/cache" 2>/dev/null || true
+
+    # APP_KEY生成（ENV_VALIDATION_SKIP=trueで環境変数検証をスキップ）
+    echo "   - APP_KEY生成中..." >&2
+    if ! (cd "${worktree_path}/backend/laravel-api" && ENV_VALIDATION_SKIP=true php artisan key:generate --no-interaction >&2); then
+        error "APP_KEY生成に失敗しました"
+    fi
 
     echo "✅ 依存関係インストール完了" >&2
 }
