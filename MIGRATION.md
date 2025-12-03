@@ -401,7 +401,7 @@ make worktree-ports
 
 ```bash
 # Worktree内でDocker起動
-cd ~/worktrees/wt0
+cd ../laravel-next-b2c-wt0
 make dev
 
 # 別ターミナルでメインブランチもDocker起動
@@ -422,7 +422,7 @@ cd /path/to/laravel-next-b2c
 make worktree-clean ID=0
 
 # または、Worktree削除のみ
-make worktree-remove PATH=~/worktrees/wt0
+make worktree-remove PATH=../laravel-next-b2c-wt0
 
 # 確認
 make worktree-list

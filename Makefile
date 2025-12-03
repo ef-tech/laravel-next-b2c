@@ -304,22 +304,22 @@ worktree-list: ## Git Worktree一覧表示
 worktree-ports: ## Git Worktreeポート番号一覧表示
 	@./$(SCRIPTS_DIR)/worktree/port-manager.sh list
 
-worktree-remove: ## Git Worktree削除 (例: make worktree-remove PATH=~/worktrees/wt0)
+worktree-remove: ## Git Worktree削除 (例: make worktree-remove PATH=../laravel-next-b2c-wt0)
 	@if [ -z "$(PATH)" ]; then \
 		echo "❌ エラー: PATH引数が必要です"; \
-		echo "使用例: make worktree-remove PATH=~/worktrees/wt0"; \
+		echo "使用例: make worktree-remove PATH=../laravel-next-b2c-wt0"; \
 		exit 1; \
 	fi
 	@echo "🗑️  Worktreeを削除しています: $(PATH)"
 	@git worktree remove $(PATH)
 	@echo "✅ Worktree削除完了"
 
-worktree-clean: ## Git Worktree完全削除 (Docker + Worktree) (例: make worktree-clean ID=0 または ID=~/worktrees/wt0)
+worktree-clean: ## Git Worktree完全削除 (Docker + Worktree) (例: make worktree-clean ID=0 または ID=../laravel-next-b2c-wt0)
 	@if [ -z "$(ID)" ]; then \
 		echo "❌ エラー: ID引数が必要です"; \
 		echo "使用例:"; \
 		echo "  make worktree-clean ID=0"; \
-		echo "  make worktree-clean ID=~/worktrees/wt0"; \
+		echo "  make worktree-clean ID=../laravel-next-b2c-wt0"; \
 		exit 1; \
 	fi
 	@./$(SCRIPTS_DIR)/worktree/cleanup.sh $(ID)

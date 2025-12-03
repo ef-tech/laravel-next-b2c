@@ -20,6 +20,7 @@ set -euo pipefail
 # ============================================
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+readonly PROJECT_NAME="$(basename "${PROJECT_ROOT}")"
 
 # ============================================
 # port-manager.sh読み込み
@@ -141,7 +142,7 @@ main() {
     local worktree_id
     worktree_id=$(get_worktree_id_from_input "${input}")
 
-    local worktree_path="${HOME}/worktrees/wt${worktree_id}"
+    local worktree_path="${PROJECT_ROOT}/../${PROJECT_NAME}-wt${worktree_id}"
 
     echo "" >&2
     echo "=========================================" >&2

@@ -67,7 +67,7 @@ error() {
 # ============================================
 get_used_worktree_ids() {
     # git worktree listからworktree IDを抽出
-    # パス形式の想定: ~/worktrees/wt0, ~/worktrees/wt1, etc.
+    # パス形式の想定: ../<プロジェクト名>-wt0, ../<プロジェクト名>-wt1, etc.
     git worktree list --porcelain 2>/dev/null | \
         grep '^worktree' | \
         awk '{print $2}' | \
@@ -262,4 +262,8 @@ main() {
     esac
 }
 
-main "$@"
+# スクリプトが直接実行された場合のみmain関数を呼び出す
+# (sourceされた場合は呼び出さない)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

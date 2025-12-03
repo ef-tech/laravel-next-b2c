@@ -17,6 +17,7 @@ set -euo pipefail
 # ============================================
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+readonly PROJECT_NAME="$(basename "${PROJECT_ROOT}")"
 readonly PORT_MANAGER="${SCRIPT_DIR}/port-manager.sh"
 
 # ============================================
@@ -45,7 +46,7 @@ Git Worktreeを作成し、開発環境を自動セットアップします。
 
 処理内容:
   1. 次に利用可能なWorktree IDを自動取得
-  2. Git Worktreeを作成 (パス: ~/worktrees/wt<ID>)
+  2. Git Worktreeを作成 (パス: ../<プロジェクト名>-wt<ID>)
   3. .envファイルを自動生成 (ポート番号、DB名、キャッシュプレフィックス設定)
   4. Composer install実行 (Laravel依存関係)
   5. npm install実行 (User App, Admin App)
@@ -103,7 +104,7 @@ create_worktree() {
     local branch_name="$1"
     local worktree_id="$2"
     local from_ref="${3:-}"
-    local worktree_path="${HOME}/worktrees/wt${worktree_id}"
+    local worktree_path="${PROJECT_ROOT}/../${PROJECT_NAME}-wt${worktree_id}"
 
     echo "📁 Worktreeを作成しています..." >&2
     echo "   ID: ${worktree_id}" >&2
@@ -113,8 +114,8 @@ create_worktree() {
     fi
     echo "   パス: ${worktree_path}" >&2
 
-    # Worktreeディレクトリ作成
-    mkdir -p "${HOME}/worktrees"
+    # Worktreeディレクトリの親ディレクトリが存在することを確認
+    mkdir -p "$(dirname "${worktree_path}")"
 
     # git worktree add実行
     if [[ -n "${from_ref}" ]]; then

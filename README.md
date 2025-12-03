@@ -1091,7 +1091,7 @@ make worktree-create BRANCH=feature/new-feature FROM=origin/main
 
 # 実行内容:
 # - 次に利用可能なWorktree ID自動取得 (0-99)
-# - Git Worktreeを ~/worktrees/wt<ID> に作成
+# - Git Worktreeを ../laravel-next-b2c-wt<ID> に作成
 # - .envファイルを自動生成（ポート番号、DB名、キャッシュプレフィックス設定）
 # - Composer/npm依存関係を自動インストール
 # - セットアップ完了メッセージ表示
@@ -1104,14 +1104,14 @@ make worktree-create BRANCH=feature/new-feature FROM=origin/main
 # 例: Worktree ID: 0
 
 # Worktreeディレクトリに移動
-cd ~/worktrees/wt0
+cd ../laravel-next-b2c-wt0
 
 # Docker環境起動
 make dev
 
 # フロントエンドアプリ起動（別ターミナル）
-cd ~/worktrees/wt0/frontend/user-app && npm run dev
-cd ~/worktrees/wt0/frontend/admin-app && npm run dev
+cd ../laravel-next-b2c-wt0/frontend/user-app && npm run dev
+cd ../laravel-next-b2c-wt0/frontend/admin-app && npm run dev
 ```
 
 #### 3. Worktree一覧確認
@@ -1128,15 +1128,15 @@ make worktree-ports
 
 ```bash
 # Worktree削除のみ
-make worktree-remove PATH=~/worktrees/wt0
+make worktree-remove PATH=../laravel-next-b2c-wt0
 
 # Worktree + Docker完全削除（推奨）
 make worktree-clean ID=0
 # または
-make worktree-clean ID=~/worktrees/wt0
+make worktree-clean ID=../laravel-next-b2c-wt0
 
 # Docker環境も停止する場合（Worktree内で実行）
-cd ~/worktrees/wt0
+cd ../laravel-next-b2c-wt0
 make stop
 ```
 
@@ -1149,7 +1149,7 @@ make stop
 | `make worktree-create BRANCH=<branch-name> [FROM=<ref>]` | 新しいWorktree環境を作成 | `make worktree-create BRANCH=feature/new-feature FROM=origin/main` |
 | `make worktree-list` | Worktree一覧表示 | `make worktree-list` |
 | `make worktree-ports` | Worktreeポート番号一覧表示 | `make worktree-ports` |
-| `make worktree-remove PATH=<path>` | Worktreeを削除 | `make worktree-remove PATH=~/worktrees/wt0` |
+| `make worktree-remove PATH=<path>` | Worktreeを削除 | `make worktree-remove PATH=../laravel-next-b2c-wt0` |
 | `make worktree-clean ID=<id or path>` | Worktree完全削除（Docker + Worktree） | `make worktree-clean ID=0` |
 
 #### ポート管理スクリプト
@@ -1173,12 +1173,12 @@ make stop
 ```bash
 # Terminal 1: Worktree 0でfeature/user-authを開発
 make worktree-create BRANCH=feature/user-auth
-cd ~/worktrees/wt0
+cd ../laravel-next-b2c-wt0
 make dev  # ポート: Laravel API=13000, User App=13100, Admin App=13200
 
 # Terminal 2: Worktree 1でfix/cors-issueを開発
 make worktree-create BRANCH=fix/cors-issue
-cd ~/worktrees/wt1
+cd ../laravel-next-b2c-wt1
 make dev  # ポート: Laravel API=13001, User App=13101, Admin App=13201
 
 # 両方のWorktreeが独立して動作
@@ -1255,11 +1255,11 @@ docker compose exec laravel-api php artisan cache:clear
 **解決方法**:
 ```bash
 # Git操作を完了させる
-cd ~/worktrees/wt0
+cd ../laravel-next-b2c-wt0
 git status
 
 # 強制削除（注意：未コミットの変更は失われます）
-git worktree remove ~/worktrees/wt0 --force
+git worktree remove ../laravel-next-b2c-wt0 --force
 ```
 
 ### 📚 関連ドキュメント
