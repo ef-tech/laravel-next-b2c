@@ -1124,8 +1124,13 @@ make worktree-ports
 #### 4. Worktree削除
 
 ```bash
-# Worktree削除
+# Worktree削除のみ
 make worktree-remove PATH=~/worktrees/wt0
+
+# Worktree + Docker完全削除（推奨）
+make worktree-clean ID=0
+# または
+make worktree-clean ID=~/worktrees/wt0
 
 # Docker環境も停止する場合（Worktree内で実行）
 cd ~/worktrees/wt0
@@ -1142,6 +1147,7 @@ make stop
 | `make worktree-list` | Worktree一覧表示 | `make worktree-list` |
 | `make worktree-ports` | Worktreeポート番号一覧表示 | `make worktree-ports` |
 | `make worktree-remove PATH=<path>` | Worktreeを削除 | `make worktree-remove PATH=~/worktrees/wt0` |
+| `make worktree-clean ID=<id or path>` | Worktree完全削除（Docker + Worktree） | `make worktree-clean ID=0` |
 
 #### ポート管理スクリプト
 
