@@ -81,20 +81,20 @@ create_worktree() {
     local worktree_id="$2"
     local worktree_path="${HOME}/worktrees/wt${worktree_id}"
 
-    echo "📁 Worktreeを作成しています..."
-    echo "   ID: ${worktree_id}"
-    echo "   ブランチ: ${branch_name}"
-    echo "   パス: ${worktree_path}"
+    echo "📁 Worktreeを作成しています..." >&2
+    echo "   ID: ${worktree_id}" >&2
+    echo "   ブランチ: ${branch_name}" >&2
+    echo "   パス: ${worktree_path}" >&2
 
     # Worktreeディレクトリ作成
     mkdir -p "${HOME}/worktrees"
 
     # git worktree add実行
-    if ! git worktree add "${worktree_path}" "${branch_name}"; then
+    if ! git worktree add "${worktree_path}" "${branch_name}" >&2; then
         error "Worktreeの作成に失敗しました"
     fi
 
-    echo "✅ Worktree作成完了"
+    echo "✅ Worktree作成完了" >&2
     echo "${worktree_path}"
 }
 
@@ -106,8 +106,8 @@ generate_env_file() {
     local worktree_id="$2"
     local ports_json="$3"
 
-    echo ""
-    echo "⚙️  環境変数ファイルを生成しています..."
+    echo "" >&2
+    echo "⚙️  環境変数ファイルを生成しています..." >&2
 
     # .env.exampleをコピー
     cp "${PROJECT_ROOT}/.env.example" "${worktree_path}/.env"
@@ -220,7 +220,7 @@ E2E_USER_URL=http://localhost:${port_user}
 E2E_API_URL=http://localhost:${port_laravel}
 EOF
 
-    echo "✅ 環境変数ファイル生成完了"
+    echo "✅ 環境変数ファイル生成完了" >&2
 }
 
 # ============================================
@@ -229,39 +229,39 @@ EOF
 install_dependencies() {
     local worktree_path="$1"
 
-    echo ""
-    echo "📦 依存関係をインストールしています..."
+    echo "" >&2
+    echo "📦 依存関係をインストールしています..." >&2
 
     # Composer install (Laravel)
-    echo "   - Composer install (Laravel API)..."
-    if ! (cd "${worktree_path}/backend/laravel-api" && composer install --no-interaction --prefer-dist 2>&1 | grep -E '(Installing|Nothing to|Generated)'); then
+    echo "   - Composer install (Laravel API)..." >&2
+    if ! (cd "${worktree_path}/backend/laravel-api" && composer install --no-interaction --prefer-dist 2>&1 | grep -E '(Installing|Nothing to|Generated)' >&2); then
         error "Composer installに失敗しました"
     fi
 
     # npm install (User App)
-    echo "   - npm install (User App)..."
-    if ! (cd "${worktree_path}/frontend/user-app" && npm install --silent 2>&1 | grep -E '(added|up to date)'); then
+    echo "   - npm install (User App)..." >&2
+    if ! (cd "${worktree_path}/frontend/user-app" && npm install --silent 2>&1 | grep -E '(added|up to date)' >&2); then
         error "npm install (User App) に失敗しました"
     fi
 
     # npm install (Admin App)
-    echo "   - npm install (Admin App)..."
-    if ! (cd "${worktree_path}/frontend/admin-app" && npm install --silent 2>&1 | grep -E '(added|up to date)'); then
+    echo "   - npm install (Admin App)..." >&2
+    if ! (cd "${worktree_path}/frontend/admin-app" && npm install --silent 2>&1 | grep -E '(added|up to date)' >&2); then
         error "npm install (Admin App) に失敗しました"
     fi
 
     # Laravelキャッシュクリア
-    echo "   - Laravelキャッシュクリア..."
+    echo "   - Laravelキャッシュクリア..." >&2
     (cd "${worktree_path}/backend/laravel-api" && php artisan cache:clear >/dev/null 2>&1 || true)
     (cd "${worktree_path}/backend/laravel-api" && php artisan config:clear >/dev/null 2>&1 || true)
     (cd "${worktree_path}/backend/laravel-api" && php artisan route:clear >/dev/null 2>&1 || true)
 
     # Laravelストレージディレクトリ権限設定
-    echo "   - ストレージディレクトリ権限設定..."
+    echo "   - ストレージディレクトリ権限設定..." >&2
     chmod -R 775 "${worktree_path}/backend/laravel-api/storage" 2>/dev/null || true
     chmod -R 775 "${worktree_path}/backend/laravel-api/bootstrap/cache" 2>/dev/null || true
 
-    echo "✅ 依存関係インストール完了"
+    echo "✅ 依存関係インストール完了" >&2
 }
 
 # ============================================
@@ -328,24 +328,24 @@ main() {
     fi
 
     # 1. 次に利用可能なWorktree IDを取得
-    echo "🔍 次に利用可能なWorktree IDを取得しています..."
+    echo "🔍 次に利用可能なWorktree IDを取得しています..." >&2
     local worktree_id
     if ! worktree_id=$("${PORT_MANAGER}" next-id); then
         error "Worktree IDの取得に失敗しました"
     fi
-    echo "✅ Worktree ID: ${worktree_id}"
+    echo "✅ Worktree ID: ${worktree_id}" >&2
 
     # 2. ポート番号を計算
-    echo ""
-    echo "🔢 ポート番号を計算しています..."
+    echo "" >&2
+    echo "🔢 ポート番号を計算しています..." >&2
     local ports_json
     if ! ports_json=$("${PORT_MANAGER}" calculate-ports "${worktree_id}"); then
         error "ポート番号の計算に失敗しました"
     fi
-    echo "✅ ポート番号計算完了"
+    echo "✅ ポート番号計算完了" >&2
 
     # 3. Worktree作成
-    echo ""
+    echo "" >&2
     local worktree_path
     if ! worktree_path=$(create_worktree "${branch_name}" "${worktree_id}"); then
         error "Worktree作成に失敗しました"
