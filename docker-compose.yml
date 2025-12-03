@@ -46,7 +46,7 @@ services:
       # ソースコードのvolume mount（:cachedでパフォーマンス向上）
       - './backend/laravel-api:/var/www/html:cached'
     networks:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
+      - 'app-network'
     depends_on:
       - pgsql
       - redis
@@ -95,7 +95,7 @@ services:
     volumes:
       - './e2e:/app'
     networks:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
+      - 'app-network'
     depends_on:
       # Next.jsアプリはネイティブ起動のため、Laravel APIのみに依存
       laravel-api:
@@ -129,7 +129,7 @@ services:
       - './backend/laravel-api/vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
       - './backend/laravel-api/docker/pgsql/init.d/create-database.sh:/docker-entrypoint-initdb.d/20-create-database.sh'
     networks:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
+      - 'app-network'
     healthcheck:
       test:
         - CMD
@@ -156,7 +156,7 @@ services:
     volumes:
       - 'redis:/data'
     networks:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
+      - 'app-network'
     healthcheck:
       test:
         - CMD
@@ -180,7 +180,7 @@ services:
       MP_SMTP_BIND_ADDR: ':${FORWARD_MAILPIT_PORT:-14300}'
       MP_UI_BIND_ADDR: ':${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}'
     networks:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
+      - 'app-network'
     profiles:
       - infra
 
@@ -199,7 +199,7 @@ services:
     volumes:
       - 'minio:/data'
     networks:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
+      - 'app-network'
     command: 'minio server /data --address ":${FORWARD_MINIO_PORT:-14400}" --console-address ":${FORWARD_MINIO_CONSOLE_PORT:-13300}"'
     healthcheck:
       test:
@@ -219,7 +219,8 @@ services:
 # Git Worktree並列開発対応: ネットワーク名を動的に設定
 # 例: wt0-network, wt1-network, wt2-network...
 networks:
-  '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network':
+  app-network:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
     driver: bridge
 
 # ============================================
