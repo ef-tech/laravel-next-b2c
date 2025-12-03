@@ -20,6 +20,7 @@ SCRIPTS_DIR := scripts
 .PHONY: docker-up docker-down docker-logs docker-reset
 .PHONY: lint lint-fix health
 .PHONY: validate-i18n test-i18n
+.PHONY: worktree-create worktree-list worktree-ports worktree-remove
 
 # =============================================================================
 # デフォルトターゲット
@@ -276,3 +277,33 @@ test-i18n: ## i18n関連テスト実行（Unit + Component + E2E）
 	@npm run test:coverage
 	@echo ""
 	@echo "✅ i18n関連テスト実行完了！"
+
+# =============================================================================
+# Git Worktree並列開発コマンド
+# =============================================================================
+
+worktree-create: ## Git Worktree作成 (例: make worktree-create BRANCH=feature/new-feature)
+	@if [ -z "$(BRANCH)" ]; then \
+		echo "❌ エラー: BRANCH引数が必要です"; \
+		echo "使用例: make worktree-create BRANCH=feature/new-feature"; \
+		exit 1; \
+	fi
+	@./$(SCRIPTS_DIR)/worktree/setup.sh $(BRANCH)
+
+worktree-list: ## Git Worktree一覧表示
+	@echo "📋 Git Worktree一覧:"
+	@echo ""
+	@git worktree list
+
+worktree-ports: ## Git Worktreeポート番号一覧表示
+	@./$(SCRIPTS_DIR)/worktree/port-manager.sh list
+
+worktree-remove: ## Git Worktree削除 (例: make worktree-remove PATH=~/worktrees/wt0)
+	@if [ -z "$(PATH)" ]; then \
+		echo "❌ エラー: PATH引数が必要です"; \
+		echo "使用例: make worktree-remove PATH=~/worktrees/wt0"; \
+		exit 1; \
+	fi
+	@echo "🗑️  Worktreeを削除しています: $(PATH)"
+	@git worktree remove $(PATH)
+	@echo "✅ Worktree削除完了"

@@ -147,3 +147,14 @@ temp/
 # System files
 *.orig
 *~
+
+# ============================================
+# Git Worktree並列開発
+# ============================================
+# Worktreeディレクトリ除外 (リポジトリ内に作成された場合)
+/wt-*
+/worktree-*
+/worktrees/
+
+# Worktreeメタデータ除外
+/.git/worktrees/

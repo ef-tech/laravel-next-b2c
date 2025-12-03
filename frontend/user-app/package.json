@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "predev": "tsx scripts/check-env.ts",
-    "dev": "next dev --turbopack --port 13001",
+    "dev": "next dev --turbopack --port 13100",
     "prebuild": "tsx scripts/check-env.ts",
     "build": "next build",
-    "start": "next start --port 13001",
+    "start": "next start --port 13100",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
