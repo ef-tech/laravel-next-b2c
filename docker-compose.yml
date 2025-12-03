@@ -125,7 +125,7 @@ services:
       POSTGRES_USER: '${DB_USERNAME:-sail}'
       POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
     volumes:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-pgsql:/var/lib/postgresql/data'
+      - 'pgsql:/var/lib/postgresql/data'
       - './backend/laravel-api/vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
       - './backend/laravel-api/docker/pgsql/init.d/create-database.sh:/docker-entrypoint-initdb.d/20-create-database.sh'
     networks:
@@ -154,7 +154,7 @@ services:
       - '${FORWARD_REDIS_PORT:-14100}:${FORWARD_REDIS_PORT:-14100}'
     command: 'redis-server --port ${FORWARD_REDIS_PORT:-14100}'
     volumes:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-redis:/data'
+      - 'redis:/data'
     networks:
       - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
     healthcheck:
@@ -197,7 +197,7 @@ services:
       MINIO_ROOT_USER: sail
       MINIO_ROOT_PASSWORD: password
     volumes:
-      - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-minio:/data'
+      - 'minio:/data'
     networks:
       - '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
     command: 'minio server /data --address ":${FORWARD_MINIO_PORT:-14400}" --console-address ":${FORWARD_MINIO_CONSOLE_PORT:-13300}"'
@@ -228,9 +228,12 @@ networks:
 # Git Worktree並列開発対応: ボリューム名を動的に設定
 # 例: wt0-pgsql, wt1-pgsql, wt2-pgsql...
 volumes:
-  '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-pgsql':
+  pgsql:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-pgsql'
     driver: local
-  '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-redis':
+  redis:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-redis'
     driver: local
-  '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-minio':
+  minio:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-minio'
     driver: local
