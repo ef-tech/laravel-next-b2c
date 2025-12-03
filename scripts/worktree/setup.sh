@@ -135,6 +135,71 @@ create_worktree() {
 }
 
 # ============================================
+# 環境変数ヘルパー関数
+# ============================================
+# 環境変数を設定または追加（macOS互換）
+update_env_var() {
+    local env_file="$1"
+    local key="$2"
+    local value="$3"
+
+    if grep -q "^${key}=" "${env_file}"; then
+        # 既存行を上書き（macOS互換のためsed -i ''を使用）
+        sed -i '' "s|^${key}=.*|${key}=${value}|" "${env_file}"
+    else
+        # 新規行を追加
+        echo "${key}=${value}" >> "${env_file}"
+    fi
+}
+
+# ポート番号をJSONから抽出
+extract_port() {
+    local ports_json="$1"
+    local service_key="$2"
+    echo "${ports_json}" | grep -o "\"${service_key}\": [0-9]*" | awk '{print $2}'
+}
+
+# ============================================
+# バックエンド環境変数ファイル更新
+# ============================================
+update_backend_env() {
+    local env_file="$1"
+    local worktree_id="$2"
+    local port_laravel="$3"
+    local port_user="$4"
+    local port_admin="$5"
+    local port_pgsql="$6"
+    local port_redis="$7"
+    local port_mailpit_smtp="$8"
+    local port_mailpit_ui="$9"
+    local port_minio_api="${10}"
+    local port_minio_console="${11}"
+
+    # ポート番号設定
+    update_env_var "${env_file}" "WORKTREE_ID" "${worktree_id}"
+    update_env_var "${env_file}" "APP_PORT" "${port_laravel}"
+    update_env_var "${env_file}" "E2E_USER_URL" "http://localhost:${port_user}"
+    update_env_var "${env_file}" "E2E_ADMIN_URL" "http://localhost:${port_admin}"
+    update_env_var "${env_file}" "E2E_API_URL" "http://localhost:${port_laravel}"
+    update_env_var "${env_file}" "FORWARD_DB_PORT" "${port_pgsql}"
+    update_env_var "${env_file}" "FORWARD_REDIS_PORT" "${port_redis}"
+    update_env_var "${env_file}" "FORWARD_MAILPIT_PORT" "${port_mailpit_smtp}"
+    update_env_var "${env_file}" "FORWARD_MAILPIT_DASHBOARD_PORT" "${port_mailpit_ui}"
+    update_env_var "${env_file}" "FORWARD_MINIO_PORT" "${port_minio_api}"
+    update_env_var "${env_file}" "FORWARD_MINIO_CONSOLE_PORT" "${port_minio_console}"
+
+    # Worktree並列開発設定
+    if ! grep -q "# Git Worktree並列開発設定" "${env_file}"; then
+        echo "" >> "${env_file}"
+        echo "# Git Worktree並列開発設定" >> "${env_file}"
+    fi
+    update_env_var "${env_file}" "COMPOSE_PROJECT_NAME" "wt${worktree_id}"
+    update_env_var "${env_file}" "DB_DATABASE" "laravel_wt${worktree_id}"
+    update_env_var "${env_file}" "CACHE_PREFIX" "wt${worktree_id}_"
+    update_env_var "${env_file}" "CORS_ALLOWED_ORIGINS" "http://localhost:${port_user},http://localhost:${port_admin}"
+}
+
+# ============================================
 # 環境変数ファイル生成
 # ============================================
 generate_env_file() {
@@ -145,100 +210,31 @@ generate_env_file() {
     echo "" >&2
     echo "⚙️  環境変数ファイルを生成しています..." >&2
 
-    # .env.exampleをコピー
-    cp "${PROJECT_ROOT}/.env.example" "${worktree_path}/.env"
-
     # ポート番号を抽出
-    local port_laravel=$(echo "${ports_json}" | grep -o '"laravel_api": [0-9]*' | awk '{print $2}')
-    local port_user=$(echo "${ports_json}" | grep -o '"user_app": [0-9]*' | awk '{print $2}')
-    local port_admin=$(echo "${ports_json}" | grep -o '"admin_app": [0-9]*' | awk '{print $2}')
-    local port_minio_console=$(echo "${ports_json}" | grep -o '"minio_console": [0-9]*' | awk '{print $2}')
-    local port_pgsql=$(echo "${ports_json}" | grep -o '"pgsql": [0-9]*' | awk '{print $2}')
-    local port_redis=$(echo "${ports_json}" | grep -o '"redis": [0-9]*' | awk '{print $2}')
-    local port_mailpit_ui=$(echo "${ports_json}" | grep -o '"mailpit_ui": [0-9]*' | awk '{print $2}')
-    local port_mailpit_smtp=$(echo "${ports_json}" | grep -o '"mailpit_smtp": [0-9]*' | awk '{print $2}')
-    local port_minio_api=$(echo "${ports_json}" | grep -o '"minio_api": [0-9]*' | awk '{print $2}')
+    local port_laravel=$(extract_port "${ports_json}" "laravel_api")
+    local port_user=$(extract_port "${ports_json}" "user_app")
+    local port_admin=$(extract_port "${ports_json}" "admin_app")
+    local port_minio_console=$(extract_port "${ports_json}" "minio_console")
+    local port_pgsql=$(extract_port "${ports_json}" "pgsql")
+    local port_redis=$(extract_port "${ports_json}" "redis")
+    local port_mailpit_ui=$(extract_port "${ports_json}" "mailpit_ui")
+    local port_mailpit_smtp=$(extract_port "${ports_json}" "mailpit_smtp")
+    local port_minio_api=$(extract_port "${ports_json}" "minio_api")
 
-    # 環境変数を設定 (macOS互換のためsed -i ''を使用)
-    sed -i '' "s/^WORKTREE_ID=.*/WORKTREE_ID=${worktree_id}/" "${worktree_path}/.env"
-    sed -i '' "s/^APP_PORT=.*/APP_PORT=${port_laravel}/" "${worktree_path}/.env"
-    sed -i '' "s|^E2E_USER_URL=.*|E2E_USER_URL=http://localhost:${port_user}|" "${worktree_path}/.env"
-    sed -i '' "s|^E2E_ADMIN_URL=.*|E2E_ADMIN_URL=http://localhost:${port_admin}|" "${worktree_path}/.env"
-    sed -i '' "s|^E2E_API_URL=.*|E2E_API_URL=http://localhost:${port_laravel}|" "${worktree_path}/.env"
-    sed -i '' "s/^FORWARD_DB_PORT=.*/FORWARD_DB_PORT=${port_pgsql}/" "${worktree_path}/.env"
-    sed -i '' "s/^FORWARD_REDIS_PORT=.*/FORWARD_REDIS_PORT=${port_redis}/" "${worktree_path}/.env"
-    sed -i '' "s/^FORWARD_MAILPIT_PORT=.*/FORWARD_MAILPIT_PORT=${port_mailpit_smtp}/" "${worktree_path}/.env"
-    sed -i '' "s/^FORWARD_MAILPIT_DASHBOARD_PORT=.*/FORWARD_MAILPIT_DASHBOARD_PORT=${port_mailpit_ui}/" "${worktree_path}/.env"
-    sed -i '' "s/^FORWARD_MINIO_PORT=.*/FORWARD_MINIO_PORT=${port_minio_api}/" "${worktree_path}/.env"
-    sed -i '' "s/^FORWARD_MINIO_CONSOLE_PORT=.*/FORWARD_MINIO_CONSOLE_PORT=${port_minio_console}/" "${worktree_path}/.env"
+    # ルートの.env設定
+    cp "${PROJECT_ROOT}/.env.example" "${worktree_path}/.env"
+    update_backend_env "${worktree_path}/.env" "${worktree_id}" \
+        "${port_laravel}" "${port_user}" "${port_admin}" \
+        "${port_pgsql}" "${port_redis}" "${port_mailpit_smtp}" \
+        "${port_mailpit_ui}" "${port_minio_api}" "${port_minio_console}"
 
-    # COMPOSE_PROJECT_NAME, DB_DATABASE, CACHE_PREFIXを追加/設定
-    # 既存行があれば上書き、なければ追加
-    if grep -q "^COMPOSE_PROJECT_NAME=" "${worktree_path}/.env"; then
-        sed -i '' "s/^COMPOSE_PROJECT_NAME=.*/COMPOSE_PROJECT_NAME=wt${worktree_id}/" "${worktree_path}/.env"
-    else
-        echo "" >> "${worktree_path}/.env"
-        echo "# Git Worktree並列開発設定" >> "${worktree_path}/.env"
-        echo "COMPOSE_PROJECT_NAME=wt${worktree_id}" >> "${worktree_path}/.env"
-    fi
-
-    if grep -q "^DB_DATABASE=" "${worktree_path}/.env"; then
-        sed -i '' "s/^DB_DATABASE=.*/DB_DATABASE=laravel_wt${worktree_id}/" "${worktree_path}/.env"
-    else
-        echo "DB_DATABASE=laravel_wt${worktree_id}" >> "${worktree_path}/.env"
-    fi
-
-    if grep -q "^CACHE_PREFIX=" "${worktree_path}/.env"; then
-        sed -i '' "s/^CACHE_PREFIX=.*/CACHE_PREFIX=wt${worktree_id}_/" "${worktree_path}/.env"
-    else
-        echo "CACHE_PREFIX=wt${worktree_id}_" >> "${worktree_path}/.env"
-    fi
-
-    # CORS_ALLOWED_ORIGINSを動的に設定
-    if grep -q "^CORS_ALLOWED_ORIGINS=" "${worktree_path}/.env"; then
-        sed -i '' "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}|" "${worktree_path}/.env"
-    else
-        echo "CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}" >> "${worktree_path}/.env"
-    fi
-
-    # backend/laravel-api/.envも同様に設定
+    # backend/laravel-api/.env設定
     if [[ -f "${PROJECT_ROOT}/.env.example" ]]; then
         cp "${PROJECT_ROOT}/.env.example" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^WORKTREE_ID=.*/WORKTREE_ID=${worktree_id}/" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^APP_PORT=.*/APP_PORT=${port_laravel}/" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^FORWARD_DB_PORT=.*/FORWARD_DB_PORT=${port_pgsql}/" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^FORWARD_REDIS_PORT=.*/FORWARD_REDIS_PORT=${port_redis}/" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^FORWARD_MAILPIT_PORT=.*/FORWARD_MAILPIT_PORT=${port_mailpit_smtp}/" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^FORWARD_MAILPIT_DASHBOARD_PORT=.*/FORWARD_MAILPIT_DASHBOARD_PORT=${port_mailpit_ui}/" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^FORWARD_MINIO_PORT=.*/FORWARD_MINIO_PORT=${port_minio_api}/" "${worktree_path}/backend/laravel-api/.env"
-        sed -i '' "s/^FORWARD_MINIO_CONSOLE_PORT=.*/FORWARD_MINIO_CONSOLE_PORT=${port_minio_console}/" "${worktree_path}/backend/laravel-api/.env"
-
-        if grep -q "^COMPOSE_PROJECT_NAME=" "${worktree_path}/backend/laravel-api/.env"; then
-            sed -i '' "s/^COMPOSE_PROJECT_NAME=.*/COMPOSE_PROJECT_NAME=wt${worktree_id}/" "${worktree_path}/backend/laravel-api/.env"
-        else
-            echo "" >> "${worktree_path}/backend/laravel-api/.env"
-            echo "# Git Worktree並列開発設定" >> "${worktree_path}/backend/laravel-api/.env"
-            echo "COMPOSE_PROJECT_NAME=wt${worktree_id}" >> "${worktree_path}/backend/laravel-api/.env"
-        fi
-
-        if grep -q "^DB_DATABASE=" "${worktree_path}/backend/laravel-api/.env"; then
-            sed -i '' "s/^DB_DATABASE=.*/DB_DATABASE=laravel_wt${worktree_id}/" "${worktree_path}/backend/laravel-api/.env"
-        else
-            echo "DB_DATABASE=laravel_wt${worktree_id}" >> "${worktree_path}/backend/laravel-api/.env"
-        fi
-
-        if grep -q "^CACHE_PREFIX=" "${worktree_path}/backend/laravel-api/.env"; then
-            sed -i '' "s/^CACHE_PREFIX=.*/CACHE_PREFIX=wt${worktree_id}_/" "${worktree_path}/backend/laravel-api/.env"
-        else
-            echo "CACHE_PREFIX=wt${worktree_id}_" >> "${worktree_path}/backend/laravel-api/.env"
-        fi
-
-        # CORS_ALLOWED_ORIGINSを動的に設定
-        if grep -q "^CORS_ALLOWED_ORIGINS=" "${worktree_path}/backend/laravel-api/.env"; then
-            sed -i '' "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}|" "${worktree_path}/backend/laravel-api/.env"
-        else
-            echo "CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}" >> "${worktree_path}/backend/laravel-api/.env"
-        fi
+        update_backend_env "${worktree_path}/backend/laravel-api/.env" "${worktree_id}" \
+            "${port_laravel}" "${port_user}" "${port_admin}" \
+            "${port_pgsql}" "${port_redis}" "${port_mailpit_smtp}" \
+            "${port_mailpit_ui}" "${port_minio_api}" "${port_minio_console}"
     fi
 
     # フロントエンド環境変数設定 (User App, Admin App)
