@@ -158,6 +158,13 @@ generate_env_file() {
         echo "CACHE_PREFIX=wt${worktree_id}_" >> "${worktree_path}/.env"
     fi
 
+    # CORS_ALLOWED_ORIGINSを動的に設定
+    if grep -q "^CORS_ALLOWED_ORIGINS=" "${worktree_path}/.env"; then
+        sed -i '' "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}|" "${worktree_path}/.env"
+    else
+        echo "CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}" >> "${worktree_path}/.env"
+    fi
+
     # backend/laravel-api/.envも同様に設定
     if [[ -f "${PROJECT_ROOT}/.env.example" ]]; then
         cp "${PROJECT_ROOT}/.env.example" "${worktree_path}/backend/laravel-api/.env"
@@ -189,6 +196,13 @@ generate_env_file() {
         else
             echo "CACHE_PREFIX=wt${worktree_id}_" >> "${worktree_path}/backend/laravel-api/.env"
         fi
+
+        # CORS_ALLOWED_ORIGINSを動的に設定
+        if grep -q "^CORS_ALLOWED_ORIGINS=" "${worktree_path}/backend/laravel-api/.env"; then
+            sed -i '' "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}|" "${worktree_path}/backend/laravel-api/.env"
+        else
+            echo "CORS_ALLOWED_ORIGINS=http://localhost:${port_user},http://localhost:${port_admin}" >> "${worktree_path}/backend/laravel-api/.env"
+        fi
     fi
 
     # フロントエンド環境変数設定 (User App, Admin App)
@@ -219,6 +233,10 @@ E2E_ADMIN_URL=http://localhost:${port_admin}
 E2E_USER_URL=http://localhost:${port_user}
 E2E_API_URL=http://localhost:${port_laravel}
 EOF
+
+    # APP_KEY生成（ENV_VALIDATION_SKIP=trueで環境変数検証をスキップ）
+    echo "   - APP_KEY生成中..." >&2
+    (cd "${worktree_path}/backend/laravel-api" && ENV_VALIDATION_SKIP=true php artisan key:generate --no-interaction >&2 2>&1 || true)
 
     echo "✅ 環境変数ファイル生成完了" >&2
 }
