@@ -256,15 +256,15 @@ install_dependencies() {
         error "Composer installに失敗しました"
     fi
 
-    # npm install (User App)
+    # npm install (User App) - CI=trueでhuskyのprepareスクリプトをスキップ
     echo "   - npm install (User App)..." >&2
-    if ! (cd "${worktree_path}/frontend/user-app" && npm install >&2); then
+    if ! (cd "${worktree_path}/frontend/user-app" && CI=true npm install >&2); then
         error "npm install (User App) に失敗しました"
     fi
 
-    # npm install (Admin App)
+    # npm install (Admin App) - CI=trueでhuskyのprepareスクリプトをスキップ
     echo "   - npm install (Admin App)..." >&2
-    if ! (cd "${worktree_path}/frontend/admin-app" && npm install >&2); then
+    if ! (cd "${worktree_path}/frontend/admin-app" && CI=true npm install >&2); then
         error "npm install (Admin App) に失敗しました"
     fi
 
