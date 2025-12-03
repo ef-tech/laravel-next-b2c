@@ -24,15 +24,24 @@ readonly PORT_MANAGER="${SCRIPT_DIR}/port-manager.sh"
 # ============================================
 show_help() {
     cat <<EOF
-使用方法: $0 <ブランチ名>
+使用方法: $0 <ブランチ名> [作成元]
 
 Git Worktreeを作成し、開発環境を自動セットアップします。
 
 引数:
   <ブランチ名>  作成するブランチ名 (例: feature/new-feature)
+  [作成元]      ブランチ作成元の参照 (例: origin/main, main, HEAD)
+                省略時は既存ブランチが必要
 
 例:
-  $0 feature/new-feature
+  # 既存ブランチからWorktree作成
+  $0 feature/existing-branch
+
+  # origin/mainから新しいブランチを作成
+  $0 feature/new-feature origin/main
+
+  # mainから新しいブランチを作成
+  $0 feature/new-feature main
 
 処理内容:
   1. 次に利用可能なWorktree IDを自動取得
@@ -60,16 +69,30 @@ error() {
 # 入力検証
 # ============================================
 validate_input() {
-    if [[ $# -ne 1 ]]; then
+    if [[ $# -lt 1 ]] || [[ $# -gt 2 ]]; then
         show_help
         exit 1
     fi
 
     local branch_name="$1"
+    local from_ref="${2:-}"
 
-    # ブランチ存在確認
-    if ! git rev-parse --verify "${branch_name}" >/dev/null 2>&1; then
-        error "ブランチ '${branch_name}' が存在しません。先にブランチを作成してください。"
+    # FROM引数が指定されている場合
+    if [[ -n "${from_ref}" ]]; then
+        # FROM参照の存在確認
+        if ! git rev-parse --verify "${from_ref}" >/dev/null 2>&1; then
+            error "FROM参照 '${from_ref}' が見つかりません"
+        fi
+
+        # ブランチが既に存在する場合はエラー
+        if git rev-parse --verify "${branch_name}" >/dev/null 2>&1; then
+            error "ブランチ '${branch_name}' は既に存在します。FROM引数は新しいブランチ作成時のみ使用できます。"
+        fi
+    else
+        # FROM引数がない場合は既存ブランチが必要
+        if ! git rev-parse --verify "${branch_name}" >/dev/null 2>&1; then
+            error "ブランチ '${branch_name}' が存在しません。先にブランチを作成するか、FROM引数を指定してください。"
+        fi
     fi
 }
 
@@ -79,19 +102,31 @@ validate_input() {
 create_worktree() {
     local branch_name="$1"
     local worktree_id="$2"
+    local from_ref="${3:-}"
     local worktree_path="${HOME}/worktrees/wt${worktree_id}"
 
     echo "📁 Worktreeを作成しています..." >&2
     echo "   ID: ${worktree_id}" >&2
     echo "   ブランチ: ${branch_name}" >&2
+    if [[ -n "${from_ref}" ]]; then
+        echo "   作成元: ${from_ref}" >&2
+    fi
     echo "   パス: ${worktree_path}" >&2
 
     # Worktreeディレクトリ作成
     mkdir -p "${HOME}/worktrees"
 
     # git worktree add実行
-    if ! git worktree add "${worktree_path}" "${branch_name}" >&2; then
-        error "Worktreeの作成に失敗しました"
+    if [[ -n "${from_ref}" ]]; then
+        # FROM引数がある場合：新しいブランチを作成
+        if ! git worktree add -b "${branch_name}" "${worktree_path}" "${from_ref}" >&2; then
+            error "Worktreeの作成に失敗しました"
+        fi
+    else
+        # FROM引数がない場合：既存ブランチをチェックアウト
+        if ! git worktree add "${worktree_path}" "${branch_name}" >&2; then
+            error "Worktreeの作成に失敗しました"
+        fi
     fi
 
     echo "✅ Worktree作成完了" >&2
@@ -341,6 +376,7 @@ main() {
     # 入力検証
     validate_input "$@"
     local branch_name="$1"
+    local from_ref="${2:-}"
 
     # port-manager.sh存在確認
     if [[ ! -x "${PORT_MANAGER}" ]]; then
@@ -367,7 +403,7 @@ main() {
     # 3. Worktree作成
     echo "" >&2
     local worktree_path
-    if ! worktree_path=$(create_worktree "${branch_name}" "${worktree_id}"); then
+    if ! worktree_path=$(create_worktree "${branch_name}" "${worktree_id}" "${from_ref}"); then
         error "Worktree作成に失敗しました"
     fi
 

@@ -1083,8 +1083,11 @@ git push --no-verify
 #### 1. Worktree作成
 
 ```bash
-# 新しいWorktree環境を作成
-make worktree-create BRANCH=feature/new-feature
+# 既存ブランチからWorktree作成
+make worktree-create BRANCH=feature/existing-branch
+
+# origin/mainから新しいブランチを作成してWorktree作成
+make worktree-create BRANCH=feature/new-feature FROM=origin/main
 
 # 実行内容:
 # - 次に利用可能なWorktree ID自動取得 (0-99)
@@ -1143,7 +1146,7 @@ make stop
 
 | コマンド | 説明 | 例 |
 |---------|------|-----|
-| `make worktree-create BRANCH=<branch-name>` | 新しいWorktree環境を作成 | `make worktree-create BRANCH=feature/new-feature` |
+| `make worktree-create BRANCH=<branch-name> [FROM=<ref>]` | 新しいWorktree環境を作成 | `make worktree-create BRANCH=feature/new-feature FROM=origin/main` |
 | `make worktree-list` | Worktree一覧表示 | `make worktree-list` |
 | `make worktree-ports` | Worktreeポート番号一覧表示 | `make worktree-ports` |
 | `make worktree-remove PATH=<path>` | Worktreeを削除 | `make worktree-remove PATH=~/worktrees/wt0` |

@@ -820,11 +820,11 @@ cd frontend/admin-app && npm run dev
 make help
 
 # Worktree管理コマンド
-make worktree-create BRANCH=feature/xxx  # Worktree作成
-make worktree-list                        # Worktree一覧
-make worktree-ports                       # ポート番号一覧
-make worktree-remove PATH=<path>          # Worktree削除のみ
-make worktree-clean ID=<id or path>       # Worktree + Docker完全削除（推奨）
+make worktree-create BRANCH=feature/xxx [FROM=origin/main]  # Worktree作成
+make worktree-list                                           # Worktree一覧
+make worktree-ports                                          # ポート番号一覧
+make worktree-remove PATH=<path>                             # Worktree削除のみ
+make worktree-clean ID=<id or path>                          # Worktree + Docker完全削除（推奨）
 
 # Docker管理コマンド
 make dev          # Docker起動

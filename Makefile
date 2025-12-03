@@ -282,13 +282,19 @@ test-i18n: ## i18n関連テスト実行（Unit + Component + E2E）
 # Git Worktree並列開発コマンド
 # =============================================================================
 
-worktree-create: ## Git Worktree作成 (例: make worktree-create BRANCH=feature/new-feature)
+worktree-create: ## Git Worktree作成 (例: make worktree-create BRANCH=feature/new-feature [FROM=origin/main])
 	@if [ -z "$(BRANCH)" ]; then \
 		echo "❌ エラー: BRANCH引数が必要です"; \
-		echo "使用例: make worktree-create BRANCH=feature/new-feature"; \
+		echo "使用例:"; \
+		echo "  make worktree-create BRANCH=feature/new-feature"; \
+		echo "  make worktree-create BRANCH=feature/new-feature FROM=origin/main"; \
 		exit 1; \
 	fi
-	@./$(SCRIPTS_DIR)/worktree/setup.sh $(BRANCH)
+	@if [ -n "$(FROM)" ]; then \
+		./$(SCRIPTS_DIR)/worktree/setup.sh $(BRANCH) $(FROM); \
+	else \
+		./$(SCRIPTS_DIR)/worktree/setup.sh $(BRANCH); \
+	fi
 
 worktree-list: ## Git Worktree一覧表示
 	@echo "📋 Git Worktree一覧:"
