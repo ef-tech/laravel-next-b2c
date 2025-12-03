@@ -418,7 +418,10 @@ docker ps
 # プロジェクトルートに戻る
 cd /path/to/laravel-next-b2c
 
-# Worktree削除
+# Worktree + Docker完全削除（推奨）
+make worktree-clean ID=0
+
+# または、Worktree削除のみ
 make worktree-remove PATH=~/worktrees/wt0
 
 # 確認
@@ -488,7 +491,7 @@ make worktree-list
 - [ ] テスト用Worktreeを作成した（`make worktree-create`）
 - [ ] ポート番号一覧を確認した（`make worktree-ports`）
 - [ ] 並列起動を確認した（メインブランチとWorktree同時起動）
-- [ ] テストWorktreeを削除した（`make worktree-remove`）
+- [ ] テストWorktreeを削除した（`make worktree-clean ID=0` または `make worktree-remove`）
 
 ---
 
@@ -699,7 +702,9 @@ make worktree-list
 # /Users/okumura/worktrees/wt0  def5678 [feature/auth]
 # /Users/okumura/worktrees/wt1  ghi9012 [feature/payment]
 
-# 2. 不要なWorktreeを削除
+# 2. 不要なWorktreeを削除（Docker + Worktree完全削除推奨）
+make worktree-clean ID=0
+# または
 make worktree-remove PATH=/Users/okumura/worktrees/wt0
 
 # 3. ポート番号一覧を確認
@@ -818,7 +823,8 @@ make help
 make worktree-create BRANCH=feature/xxx  # Worktree作成
 make worktree-list                        # Worktree一覧
 make worktree-ports                       # ポート番号一覧
-make worktree-remove PATH=<path>          # Worktree削除
+make worktree-remove PATH=<path>          # Worktree削除のみ
+make worktree-clean ID=<id or path>       # Worktree + Docker完全削除（推奨）
 
 # Docker管理コマンド
 make dev          # Docker起動
