@@ -250,9 +250,9 @@ install_dependencies() {
     echo "" >&2
     echo "📦 依存関係をインストールしています..." >&2
 
-    # Composer install (Laravel)
+    # Composer install (Laravel) - ENV_VALIDATION_SKIP=trueで環境変数検証をスキップ
     echo "   - Composer install (Laravel API)..." >&2
-    if ! (cd "${worktree_path}/backend/laravel-api" && composer install --no-interaction --prefer-dist >&2); then
+    if ! (cd "${worktree_path}/backend/laravel-api" && ENV_VALIDATION_SKIP=true composer install --no-interaction --prefer-dist >&2); then
         error "Composer installに失敗しました"
     fi
 
