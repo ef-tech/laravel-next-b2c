@@ -1113,6 +1113,100 @@ E2E_USER_PASSWORD=password            # ユーザーパスワード
 - **Mail**: ログ出力 / Mailpit (開発環境)
 - **File Storage**: Local / MinIO (オブジェクトストレージ)
 
+## 🌳 Git Worktree並列開発環境
+
+### 概要
+**Git Worktree並列開発環境**により、**5-8個の独立した開発環境**を同時に起動し、複数の機能開発やバグ修正を並行して進めることができます。Claude Code等のAI支援開発ツールとの並列実行に最適化された環境です。
+
+### 🎯 主な特徴
+- ✅ **完全分離アーキテクチャ**: 各WorktreeにDB、Redis、Docker環境を独立して構築
+- ✅ **ポート番号レンジ分離**: 自動ポート割り当て（衝突なし）
+- ✅ **自動セットアップ**: `make worktree-create`コマンド一つで環境構築完了
+- ✅ **ID再利用**: Worktree削除後、IDを自動的に再利用
+- ✅ **Breaking Change対応**: 既存環境からの移行手順を完備
+
+### 📊 ポート番号レンジ分離方式
+各Worktreeは100ポートレンジを使用し、完全に分離されています：
+
+| サービス | Worktree 0 | Worktree 1 | Worktree 2 | レンジ |
+|---------|-----------|-----------|-----------|--------|
+| **Laravel API** | 13000 | 13001 | 13002 | 13000-13099 |
+| **User App** | 13100 | 13101 | 13102 | 13100-13199 |
+| **Admin App** | 13200 | 13201 | 13202 | 13200-13299 |
+| **MinIO Console** | 13300 | 13301 | 13302 | 13300-13399 |
+| **PostgreSQL** | 14000 | 14001 | 14002 | 14000-14099 |
+| **Redis** | 14100 | 14101 | 14102 | 14100-14199 |
+| **Mailpit UI** | 14200 | 14201 | 14202 | 14200-14299 |
+| **Mailpit SMTP** | 14300 | 14301 | 14302 | 14300-14399 |
+| **MinIO API** | 14400 | 14401 | 14402 | 14400-14499 |
+
+### 🗄️ データベース分離戦略
+各Worktreeは完全に独立したデータベースを使用します：
+- **DB名**: `laravel_wt0`, `laravel_wt1`, `laravel_wt2`...
+- **キャッシュプレフィックス**: `wt0_`, `wt1_`, `wt2_`...
+- **Dockerネットワーク**: `wt0-network`, `wt1-network`, `wt2-network`...
+- **Dockerボリューム**: `wt0-pgsql`, `wt1-pgsql`, `wt2-pgsql`...
+
+### 💾 リソース使用量
+| Worktree数 | メモリ使用量 | 推奨システム要件 |
+|-----------|------------|----------------|
+| 1-2個 | ~1-2GB | 最小 8GB RAM |
+| 3-5個 | ~3-5GB | 推奨 16GB RAM |
+| 6-8個 | ~6-8GB | 推奨 32GB RAM |
+
+### 🚀 Makefileコマンド
+```bash
+# Worktree作成
+make worktree-create BRANCH=feature/existing-branch
+make worktree-create BRANCH=feature/new-feature FROM=origin/main
+
+# Worktree一覧表示
+make worktree-list
+
+# ポート番号一覧表示
+make worktree-ports
+
+# Worktree削除のみ
+make worktree-remove PATH=../laravel-next-b2c-wt0
+
+# Worktree + Docker完全削除（推奨）
+make worktree-clean ID=0
+make worktree-clean ID=../laravel-next-b2c-wt0
+```
+
+### 💡 使用例：2つのWorktreeで並列開発
+```bash
+# Terminal 1: Worktree 0でfeature/user-authを開発
+make worktree-create BRANCH=feature/user-auth
+cd ../laravel-next-b2c-wt0
+make dev  # ポート: Laravel API=13000, User App=13100, Admin App=13200
+
+# Terminal 2: Worktree 1でfix/cors-issueを開発
+make worktree-create BRANCH=fix/cors-issue
+cd ../laravel-next-b2c-wt1
+make dev  # ポート: Laravel API=13001, User App=13101, Admin App=13201
+
+# 両方のWorktreeが独立して動作
+# - DB: laravel_wt0, laravel_wt1
+# - キャッシュ: wt0_, wt1_
+# - Dockerネットワーク: wt0-network, wt1-network
+```
+
+### 🔧 ポート管理スクリプト
+```bash
+# 次に利用可能なWorktree IDを取得
+./scripts/worktree/port-manager.sh next-id
+
+# Worktree IDからポート番号を計算
+./scripts/worktree/port-manager.sh calculate-ports 0
+
+# 全Worktreeのポート番号一覧を表示
+./scripts/worktree/port-manager.sh list
+
+# ポート番号からWorktree IDを逆算
+./scripts/worktree/port-manager.sh reverse-lookup 13100
+```
+
 ## セキュリティ・品質管理
 - **トークンベース認証**: Laravel Sanctum 4.0によるセキュアなステートレス認証
 - **🔐 包括的セキュリティヘッダー**: OWASP準拠の攻撃防御実装

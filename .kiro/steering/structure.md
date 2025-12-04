@@ -50,6 +50,12 @@ laravel-next-b2c/
 │                        #   - make test-diagnose: テスト環境診断（ポート・環境変数・Docker・DB等確認）
 │                        # 🧪 テストインフラ管理タスク（バックエンドテストDB）:
 │                        #   - make quick-test, test-pgsql, test-parallel, test-setup, etc.
+│                        # 🌳 Git Worktree並列開発環境管理（Issue #157完了）:
+│                        #   - make worktree-create BRANCH=<branch-name> [FROM=<ref>]: 新しいWorktree環境を作成
+│                        #   - make worktree-list: Worktree一覧表示
+│                        #   - make worktree-ports: Worktreeポート番号一覧表示
+│                        #   - make worktree-remove PATH=<path>: Worktreeを削除
+│                        #   - make worktree-clean ID=<id or path>: Worktree完全削除（Docker + Worktree）
 ├── package.json         # モノレポルート設定 (ワークスペース管理、共通スクリプト)
 ├── node_modules/        # 共通依存関係
 ├── docs/                # 📝 プロジェクトドキュメント（フロントエンドテストコードESLint、CORS設定、セキュリティヘッダー、テスト運用）
@@ -72,6 +78,10 @@ laravel-next-b2c/
 │   │   ├── run-e2e-tests.sh              # E2Eテスト実行（Playwright 4 Shard並列、JUnit XML出力）
 │   │   ├── generate-test-report.sh       # テストレポート生成（JUnit XML統合、カバレッジ集約、サマリー出力）
 │   │   └── diagnose-test-env.sh          # テスト環境診断（ポート・環境変数・Docker・DB・ディスク・メモリ確認）
+│   ├── worktree/                         # 🌳 Git Worktree並列開発環境スクリプト（Issue #157完了）
+│   │   ├── port-manager.sh               # ポート番号管理スクリプト（next-id、calculate-ports、list、reverse-lookup）
+│   │   ├── setup.sh                      # Worktree環境セットアップスクリプト（.env生成、依存関係インストール）
+│   │   └── cleanup.sh                    # Worktree環境クリーンアップスクリプト（Docker + Worktree削除）
 │   ├── analyze-csp-violations.sh         # 🔐 CSP違反ログ分析スクリプト
 │   ├── validate-security-headers.sh      # 🔐 セキュリティヘッダー検証スクリプト（Laravel/Next.js対応）
 │   ├── validate-cors-config.sh           # 🌐 CORS設定整合性確認スクリプト
