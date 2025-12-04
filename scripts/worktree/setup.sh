@@ -137,15 +137,21 @@ create_worktree() {
 # ============================================
 # 環境変数ヘルパー関数
 # ============================================
-# 環境変数を設定または追加（macOS互換）
+# 環境変数を設定または追加（クロスプラットフォーム対応）
 update_env_var() {
     local env_file="$1"
     local key="$2"
     local value="$3"
 
     if grep -q "^${key}=" "${env_file}"; then
-        # 既存行を上書き（macOS互換のためsed -i ''を使用）
-        sed -i '' "s|^${key}=.*|${key}=${value}|" "${env_file}"
+        # 既存行を上書き（macOS/Linux両対応）
+        if [[ "$(uname)" == "Darwin" ]]; then
+            # macOS: sed -i '' が必要
+            sed -i '' "s|^${key}=.*|${key}=${value}|" "${env_file}"
+        else
+            # Linux: sed -i のみ
+            sed -i "s|^${key}=.*|${key}=${value}|" "${env_file}"
+        fi
     else
         # 新規行を追加
         echo "${key}=${value}" >> "${env_file}"
