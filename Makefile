@@ -208,8 +208,8 @@ dev: ## Dockerサービス起動（Laravel API + Infra）
 	@echo ""
 	@echo "🌐 アクセスURL:"
 	@echo "  Laravel API: http://localhost:13000"
-	@echo "  Admin App:   http://localhost:13002"
-	@echo "  User App:    http://localhost:13001"
+	@echo "  Admin App:   http://localhost:13200"
+	@echo "  User App:    http://localhost:13100"
 
 stop: ## Dockerサービス停止
 	@echo "🛑 Dockerサービスを停止中..."
