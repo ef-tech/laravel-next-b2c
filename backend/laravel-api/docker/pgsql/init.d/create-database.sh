@@ -3,7 +3,8 @@
 # PostgreSQL データベース自動作成スクリプト
 # ============================================
 # 機能:
-#   - DB_DATABASE環境変数からデータベース名を読み込み
+#   - POSTGRES_DB環境変数からデータベース名を読み込み
+#     （フォールバック: DB_DATABASE → laravel）
 #   - データベースが存在しない場合のみ作成
 #   - エラーハンドリングとログ出力
 # ============================================
@@ -16,8 +17,10 @@ set -euo pipefail
 # ============================================
 # 環境変数読み込み
 # ============================================
-readonly DB_NAME="${DB_DATABASE:-laravel}"
-readonly DB_USER="${DB_USERNAME:-sail}"
+# PostgreSQL公式の環境変数（POSTGRES_DB/POSTGRES_USER）を優先参照
+# フォールバック: Laravel側の環境変数（DB_DATABASE/DB_USERNAME）
+readonly DB_NAME="${POSTGRES_DB:-${DB_DATABASE:-laravel}}"
+readonly DB_USER="${POSTGRES_USER:-${DB_USERNAME:-sail}}"
 
 # ============================================
 # ログ出力
