@@ -229,8 +229,8 @@ generate_env_file() {
         "${port_mailpit_ui}" "${port_minio_api}" "${port_minio_console}"
 
     # backend/laravel-api/.env設定
-    if [[ -f "${PROJECT_ROOT}/.env.example" ]]; then
-        cp "${PROJECT_ROOT}/.env.example" "${worktree_path}/backend/laravel-api/.env"
+    if [[ -f "${PROJECT_ROOT}/backend/laravel-api/.env.example" ]]; then
+        cp "${PROJECT_ROOT}/backend/laravel-api/.env.example" "${worktree_path}/backend/laravel-api/.env"
         update_backend_env "${worktree_path}/backend/laravel-api/.env" "${worktree_id}" \
             "${port_laravel}" "${port_user}" "${port_admin}" \
             "${port_pgsql}" "${port_redis}" "${port_mailpit_smtp}" \
