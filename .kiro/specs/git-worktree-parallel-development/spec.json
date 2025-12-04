@@ -1,0 +1,91 @@
+{
+  "feature_name": "git-worktree-parallel-development",
+  "created_at": "2025-12-03T00:00:00Z",
+  "updated_at": "2025-12-04T00:00:00Z",
+  "language": "ja",
+  "phase": "completed",
+  "source": {
+    "type": "github_issue",
+    "issue_number": 157,
+    "url": "https://github.com/ef-tech/laravel-next-b2c/issues/157",
+    "title": "Git Worktree 並列開発環境の構築（レンジ分離方式・完全分離アーキテクチャ）",
+    "labels": ["enhancement", "Docker", "priority: medium", "backend", "frontend"],
+    "milestone": null,
+    "assignees": []
+  },
+  "extracted_info": {
+    "tech_stack": {
+      "backend": "Laravel API, PostgreSQL 17-alpine, Redis alpine, Mailpit",
+      "frontend": "Next.js 15.5, React 19, TypeScript",
+      "infrastructure": "Docker Compose, git worktree, MinIO",
+      "tools": "Makefile, Bash scripts, GitHub CLI"
+    },
+    "requirements_hints": [
+      "git worktreeを使った5-8個の並列開発環境構築",
+      "ポート番号レンジ分離方式の採用（13000-13099, 13100-13199等）",
+      "完全分離アーキテクチャ（データベース、ネットワーク、キャッシュ）",
+      "自動ポート割り当てスクリプトの実装",
+      "Breaking Change: 既存環境のポート番号変更が必要"
+    ],
+    "project_structure": [
+      "scripts/worktree/port-manager.sh",
+      "scripts/worktree/setup.sh",
+      ".env.example",
+      "docker-compose.yml",
+      "frontend/user-app/package.json",
+      "frontend/admin-app/package.json",
+      "Makefile",
+      "README.md",
+      ".gitignore"
+    ],
+    "services": {
+      "Laravel API": {"port_range": "13000-13099", "worktree_0": "13000"},
+      "User App": {"port_range": "13100-13199", "worktree_0": "13100"},
+      "Admin App": {"port_range": "13200-13299", "worktree_0": "13200"},
+      "MinIO Console": {"port_range": "13300-13399", "worktree_0": "13300"},
+      "PostgreSQL": {"port_range": "14000-14099", "worktree_0": "14000"},
+      "Redis": {"port_range": "14100-14199", "worktree_0": "14100"},
+      "Mailpit UI": {"port_range": "14200-14299", "worktree_0": "14200"},
+      "Mailpit SMTP": {"port_range": "14300-14399", "worktree_0": "14300"},
+      "MinIO API": {"port_range": "14400-14499", "worktree_0": "14400"}
+    },
+    "todo_items": [
+      ".env.example ポート番号変更（9サービス）",
+      "docker-compose.yml 修正（container_name/networks/volumes）",
+      "フロントエンド package.json 修正（user-app/admin-app）",
+      "データベース名動的設定（DB_DATABASE=laravel_wt${WORKTREE_ID}）",
+      "キャッシュプレフィックス設定（CACHE_PREFIX=wt${WORKTREE_ID}_）",
+      "Dockerネットワーク/コンテナ名分離",
+      "ストレージ/ボリューム分離",
+      "フロントエンド環境変数設定",
+      ".gitignore 更新",
+      "scripts/worktree/port-manager.sh 作成",
+      "scripts/worktree/setup.sh 作成",
+      "PostgreSQL DB自動作成機能実装",
+      "Makefile コマンド追加（worktree-create/list/ports/remove）",
+      "README.md 更新（並列開発セクション）",
+      "移行手順ドキュメント作成",
+      "トラブルシューティングガイド作成",
+      "2つのworktreeで並列Docker起動の検証",
+      "ポート番号再利用の検証",
+      "DB分離の検証（マイグレーション実行）",
+      "Redisキャッシュ分離の検証",
+      "E2Eテスト並列実行の検証"
+    ]
+  },
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}

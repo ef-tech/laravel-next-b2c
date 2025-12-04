@@ -51,7 +51,7 @@ describe('Middleware Group Integration', function () {
 
         // readonlyグループ
         Route::get('/test/readonly-group', function () {
-            return response()->json(['group' => 'readonly', 'timestamp' => now()->utc()->toIso8601String()]);
+            return response()->json(['group' => 'readonly']);
         })->middleware(['readonly']);
     });
 

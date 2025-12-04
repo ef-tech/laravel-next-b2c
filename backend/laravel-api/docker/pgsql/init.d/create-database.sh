@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# ============================================
+# PostgreSQL データベース自動作成スクリプト
+# ============================================
+# 機能:
+#   - POSTGRES_DB環境変数からデータベース名を読み込み
+#     （フォールバック: DB_DATABASE → laravel）
+#   - データベースが存在しない場合のみ作成
+#   - エラーハンドリングとログ出力
+# ============================================
+# 実行タイミング: PostgreSQLコンテナ初回起動時
+# 実行場所: docker-entrypoint-initdb.d/
+# ============================================
+
+set -euo pipefail
+
+# ============================================
+# 環境変数読み込み
+# ============================================
+# PostgreSQL公式の環境変数（POSTGRES_DB/POSTGRES_USER）を優先参照
+# フォールバック: Laravel側の環境変数（DB_DATABASE/DB_USERNAME）
+readonly DB_NAME="${POSTGRES_DB:-${DB_DATABASE:-laravel}}"
+readonly DB_USER="${POSTGRES_USER:-${DB_USERNAME:-sail}}"
+
+# ============================================
+# ログ出力
+# ============================================
+log() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
+}
+
+# ============================================
+# データベース作成
+# ============================================
+create_database() {
+    log "データベース作成を開始します: ${DB_NAME}"
+
+    # データベース存在確認
+    if psql -U "${DB_USER}" -lqt | cut -d \| -f 1 | grep -qw "${DB_NAME}"; then
+        log "データベース '${DB_NAME}' は既に存在します (スキップ)"
+        return 0
+    fi
+
+    # データベース作成
+    log "データベース '${DB_NAME}' を作成しています..."
+    if psql -v ON_ERROR_STOP=1 --username "${DB_USER}" --dbname postgres <<-EOSQL
+        CREATE DATABASE "${DB_NAME}" OWNER "${DB_USER}";
+        GRANT ALL PRIVILEGES ON DATABASE "${DB_NAME}" TO "${DB_USER}";
+EOSQL
+    then
+        log "✅ データベース '${DB_NAME}' の作成が完了しました"
+    else
+        log "❌ データベース '${DB_NAME}' の作成に失敗しました"
+        return 1
+    fi
+}
+
+# ============================================
+# メイン処理
+# ============================================
+main() {
+    log "========================================="
+    log "PostgreSQL データベース自動作成スクリプト"
+    log "========================================="
+    log "DB_DATABASE: ${DB_NAME}"
+    log "DB_USERNAME: ${DB_USER}"
+    log "========================================="
+
+    create_database
+
+    log "========================================="
+    log "スクリプト実行完了"
+    log "========================================="
+}
+
+main "$@"

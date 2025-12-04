@@ -6,6 +6,14 @@
 #   make stop   - すべてのサービス停止
 #   make clean  - コンテナ・ボリューム削除
 # ============================================
+# Git Worktree並列開発対応:
+#   - COMPOSE_PROJECT_NAME: wt${WORKTREE_ID} (例: wt0, wt1, wt2...)
+#   - コンテナ名: ${COMPOSE_PROJECT_NAME}-laravel-api, ${COMPOSE_PROJECT_NAME}-pgsql等
+#   - ネットワーク名: ${COMPOSE_PROJECT_NAME}-network
+#   - ボリューム名: ${COMPOSE_PROJECT_NAME}-pgsql, ${COMPOSE_PROJECT_NAME}-redis等
+#   - DB_DATABASE: laravel_wt${WORKTREE_ID}
+#   - CACHE_PREFIX: wt${WORKTREE_ID}_
+# ============================================
 
 services:
   # ============================================
@@ -18,7 +26,7 @@ services:
       args:
         WWWGROUP: '${WWWGROUP:-1000}'
     image: laravel-next-b2c/app
-    container_name: laravel-api
+    container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-laravel-api'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     ports:
@@ -31,11 +39,14 @@ services:
       XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
       XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
       IGNITION_LOCAL_SITES_PATH: '${PWD}/backend/laravel-api'
+      # Git Worktree並列開発対応: DB名とキャッシュプレフィックスを動的設定
+      DB_DATABASE: '${DB_DATABASE:-laravel}'
+      CACHE_PREFIX: '${CACHE_PREFIX:-}'
     volumes:
       # ソースコードのvolume mount（:cachedでパフォーマンス向上）
       - './backend/laravel-api:/var/www/html:cached'
     networks:
-      - app-network
+      - 'app-network'
     depends_on:
       - pgsql
       - redis
@@ -70,13 +81,13 @@ services:
   # ============================================
   e2e-tests:
     image: mcr.microsoft.com/playwright:v1.47.2-jammy
-    container_name: e2e-tests
+    container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-e2e-tests'
     working_dir: /app
     environment:
       # Next.jsアプリはネイティブ起動のため、localhostでアクセス
-      E2E_ADMIN_URL: 'http://localhost:13002'
-      E2E_USER_URL: 'http://localhost:13001'
-      E2E_API_URL: 'http://localhost:13000'
+      E2E_ADMIN_URL: '${E2E_ADMIN_URL:-http://localhost:13200}'
+      E2E_USER_URL: '${E2E_USER_URL:-http://localhost:13100}'
+      E2E_API_URL: '${E2E_API_URL:-http://localhost:13000}'
       E2E_ADMIN_EMAIL: '${E2E_ADMIN_EMAIL:-admin@example.com}'
       E2E_ADMIN_PASSWORD: '${E2E_ADMIN_PASSWORD:-password}'
       E2E_USER_EMAIL: '${E2E_USER_EMAIL:-user@example.com}'
@@ -84,7 +95,7 @@ services:
     volumes:
       - './e2e:/app'
     networks:
-      - app-network
+      - 'app-network'
     depends_on:
       # Next.jsアプリはネイティブ起動のため、Laravel APIのみに依存
       laravel-api:
@@ -104,20 +115,21 @@ services:
   # ============================================
   pgsql:
     image: 'postgres:17-alpine'
-    container_name: pgsql
+    container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-pgsql'
     ports:
-      - '${FORWARD_DB_PORT:-13432}:${FORWARD_DB_PORT:-13432}'
-    command: 'postgres -p ${FORWARD_DB_PORT:-13432}'
+      - '${FORWARD_DB_PORT:-14000}:${FORWARD_DB_PORT:-14000}'
+    command: 'postgres -p ${FORWARD_DB_PORT:-14000}'
     environment:
       PGPASSWORD: '${DB_PASSWORD:-secret}'
       POSTGRES_DB: '${DB_DATABASE:-laravel}'
       POSTGRES_USER: '${DB_USERNAME:-sail}'
       POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
     volumes:
-      - 'sail-pgsql:/var/lib/postgresql/data'
+      - 'pgsql:/var/lib/postgresql/data'
       - './backend/laravel-api/vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+      - './backend/laravel-api/docker/pgsql/init.d/create-database.sh:/docker-entrypoint-initdb.d/20-create-database.sh'
     networks:
-      - app-network
+      - 'app-network'
     healthcheck:
       test:
         - CMD
@@ -137,14 +149,14 @@ services:
   # ============================================
   redis:
     image: 'redis:alpine'
-    container_name: redis
+    container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-redis'
     ports:
-      - '${FORWARD_REDIS_PORT:-13379}:${FORWARD_REDIS_PORT:-13379}'
-    command: 'redis-server --port ${FORWARD_REDIS_PORT:-13379}'
+      - '${FORWARD_REDIS_PORT:-14100}:${FORWARD_REDIS_PORT:-14100}'
+    command: 'redis-server --port ${FORWARD_REDIS_PORT:-14100}'
     volumes:
-      - 'sail-redis:/data'
+      - 'redis:/data'
     networks:
-      - app-network
+      - 'app-network'
     healthcheck:
       test:
         - CMD
@@ -160,15 +172,15 @@ services:
   # ============================================
   mailpit:
     image: 'axllent/mailpit:latest'
-    container_name: mailpit
+    container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-mailpit'
     ports:
-      - '${FORWARD_MAILPIT_PORT:-11025}:${FORWARD_MAILPIT_PORT:-11025}'
-      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-13025}:${FORWARD_MAILPIT_DASHBOARD_PORT:-13025}'
+      - '${FORWARD_MAILPIT_PORT:-14300}:${FORWARD_MAILPIT_PORT:-14300}'
+      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}:${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}'
     environment:
-      MP_SMTP_BIND_ADDR: ':${FORWARD_MAILPIT_PORT:-11025}'
-      MP_UI_BIND_ADDR: ':${FORWARD_MAILPIT_DASHBOARD_PORT:-13025}'
+      MP_SMTP_BIND_ADDR: ':${FORWARD_MAILPIT_PORT:-14300}'
+      MP_UI_BIND_ADDR: ':${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}'
     networks:
-      - app-network
+      - 'app-network'
     profiles:
       - infra
 
@@ -177,24 +189,24 @@ services:
   # ============================================
   minio:
     image: 'minio/minio:latest'
-    container_name: minio
+    container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-minio'
     ports:
-      - '${FORWARD_MINIO_PORT:-13900}:${FORWARD_MINIO_PORT:-13900}'
-      - '${FORWARD_MINIO_CONSOLE_PORT:-13010}:${FORWARD_MINIO_CONSOLE_PORT:-13010}'
+      - '${FORWARD_MINIO_PORT:-14400}:${FORWARD_MINIO_PORT:-14400}'
+      - '${FORWARD_MINIO_CONSOLE_PORT:-13300}:${FORWARD_MINIO_CONSOLE_PORT:-13300}'
     environment:
       MINIO_ROOT_USER: sail
       MINIO_ROOT_PASSWORD: password
     volumes:
-      - 'sail-minio:/data'
+      - 'minio:/data'
     networks:
-      - app-network
-    command: 'minio server /data --address ":${FORWARD_MINIO_PORT:-13900}" --console-address ":${FORWARD_MINIO_CONSOLE_PORT:-13010}"'
+      - 'app-network'
+    command: 'minio server /data --address ":${FORWARD_MINIO_PORT:-14400}" --console-address ":${FORWARD_MINIO_CONSOLE_PORT:-13300}"'
     healthcheck:
       test:
         - CMD
         - sh
         - -c
-        - 'wget --no-verbose --tries=1 --spider http://127.0.0.1:${FORWARD_MINIO_PORT:-13900}/minio/health/live || exit 1'
+        - 'wget --no-verbose --tries=1 --spider http://127.0.0.1:${FORWARD_MINIO_PORT:-14400}/minio/health/live || exit 1'
       interval: 10s
       retries: 3
       timeout: 5s
@@ -204,17 +216,25 @@ services:
 # ============================================
 # ネットワーク設定
 # ============================================
+# Git Worktree並列開発対応: ネットワーク名を動的に設定
+# 例: wt0-network, wt1-network, wt2-network...
 networks:
   app-network:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-network'
     driver: bridge
 
 # ============================================
 # ボリューム設定
 # ============================================
+# Git Worktree並列開発対応: ボリューム名を動的に設定
+# 例: wt0-pgsql, wt1-pgsql, wt2-pgsql...
 volumes:
-  sail-pgsql:
+  pgsql:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-pgsql'
     driver: local
-  sail-redis:
+  redis:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-redis'
     driver: local
-  sail-minio:
+  minio:
+    name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-minio'
     driver: local

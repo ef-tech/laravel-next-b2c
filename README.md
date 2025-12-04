@@ -1031,6 +1031,243 @@ git push --no-verify
 
 **注意**: `--no-verify`は緊急時のみ使用してください。通常は品質チェックを通過させることを推奨します。
 
+## 🌳 並列開発（Git Worktree）
+
+### 概要
+
+**Git Worktree並列開発環境**により、**5-8個の独立した開発環境**を同時に起動し、複数の機能開発やバグ修正を並行して進めることができます。Claude Code等のAI支援開発ツールとの並列実行に最適化された環境です。
+
+### 🎯 主な特徴
+
+- ✅ **完全分離アーキテクチャ**: 各WorとreeにDB、Redis、Docker環境を独立して構築
+- ✅ **ポート番号レンジ分離**: 自動ポート割り当て（衝突なし）
+- ✅ **自動セットアップ**: `make worktree-create`コマンド一つで環境構築完了
+- ✅ **ID再利用**: Worktree削除後、IDを自動的に再利用
+- ✅ **Breaking Change対応**: 既存環境からの移行手順を完備
+
+### 📊 ポート番号レンジ分離方式
+
+各Worktreeは100ポートレンジを使用し、完全に分離されています:
+
+| サービス | Worktree 0 | Worktree 1 | Worktree 2 | レンジ |
+|---------|-----------|-----------|-----------|--------|
+| **Laravel API** | 13000 | 13001 | 13002 | 13000-13099 |
+| **User App** | 13100 | 13101 | 13102 | 13100-13199 |
+| **Admin App** | 13200 | 13201 | 13202 | 13200-13299 |
+| **MinIO Console** | 13300 | 13301 | 13302 | 13300-13399 |
+| **PostgreSQL** | 14000 | 14001 | 14002 | 14000-14099 |
+| **Redis** | 14100 | 14101 | 14102 | 14100-14199 |
+| **Mailpit UI** | 14200 | 14201 | 14202 | 14200-14299 |
+| **Mailpit SMTP** | 14300 | 14301 | 14302 | 14300-14399 |
+| **MinIO API** | 14400 | 14401 | 14402 | 14400-14499 |
+
+### 🗄️ データベース分離戦略
+
+各Worktreeは完全に独立したデータベースを使用します:
+
+- **DB名**: `laravel_wt0`, `laravel_wt1`, `laravel_wt2`...
+- **キャッシュプレフィックス**: `wt0_`, `wt1_`, `wt2_`...
+- **Dockerネットワーク**: `wt0-network`, `wt1-network`, `wt2-network`...
+- **Dockerボリューム**: `wt0-pgsql`, `wt1-pgsql`, `wt2-pgsql`...
+
+### 💾 リソース使用量
+
+| Worktree数 | メモリ使用量 | 推奨システム要件 |
+|-----------|------------|----------------|
+| 1-2個 | ~1-2GB | 最小 8GB RAM |
+| 3-5個 | ~3-5GB | 推奨 16GB RAM |
+| 6-8個 | ~6-8GB | 推奨 32GB RAM |
+
+### 🚀 クイックスタート
+
+#### 1. Worktree作成
+
+```bash
+# 既存ブランチからWorktree作成
+make worktree-create BRANCH=feature/existing-branch
+
+# origin/mainから新しいブランチを作成してWorktree作成
+make worktree-create BRANCH=feature/new-feature FROM=origin/main
+
+# 実行内容:
+# - 次に利用可能なWorktree ID自動取得 (0-99)
+# - Git Worktreeを ../laravel-next-b2c-wt<ID> に作成
+# - .envファイルを自動生成（ポート番号、DB名、キャッシュプレフィックス設定）
+# - Composer/npm依存関係を自動インストール
+# - セットアップ完了メッセージ表示
+```
+
+#### 2. Worktreeに移動してDocker起動
+
+```bash
+# Worktree IDを確認（セットアップ完了メッセージに表示）
+# 例: Worktree ID: 0
+
+# Worktreeディレクトリに移動
+cd ../laravel-next-b2c-wt0
+
+# Docker環境起動
+make dev
+
+# フロントエンドアプリ起動（別ターミナル）
+cd ../laravel-next-b2c-wt0/frontend/user-app && npm run dev
+cd ../laravel-next-b2c-wt0/frontend/admin-app && npm run dev
+```
+
+#### 3. Worktree一覧確認
+
+```bash
+# Worktree一覧表示
+make worktree-list
+
+# ポート番号一覧表示
+make worktree-ports
+```
+
+#### 4. Worktree削除
+
+```bash
+# Worktree削除のみ
+make worktree-remove PATH=../laravel-next-b2c-wt0
+
+# Worktree + Docker完全削除（推奨）
+make worktree-clean ID=0
+# または
+make worktree-clean ID=../laravel-next-b2c-wt0
+
+# Docker環境も停止する場合（Worktree内で実行）
+cd ../laravel-next-b2c-wt0
+make stop
+```
+
+### 📋 コマンドリファレンス
+
+#### Makefileコマンド
+
+| コマンド | 説明 | 例 |
+|---------|------|-----|
+| `make worktree-create BRANCH=<branch-name> [FROM=<ref>]` | 新しいWorktree環境を作成 | `make worktree-create BRANCH=feature/new-feature FROM=origin/main` |
+| `make worktree-list` | Worktree一覧表示 | `make worktree-list` |
+| `make worktree-ports` | Worktreeポート番号一覧表示 | `make worktree-ports` |
+| `make worktree-remove PATH=<path>` | Worktreeを削除 | `make worktree-remove PATH=../laravel-next-b2c-wt0` |
+| `make worktree-clean ID=<id or path>` | Worktree完全削除（Docker + Worktree） | `make worktree-clean ID=0` |
+
+#### ポート管理スクリプト
+
+```bash
+# 次に利用可能なWorktree IDを取得
+./scripts/worktree/port-manager.sh next-id
+
+# Worktree IDからポート番号を計算
+./scripts/worktree/port-manager.sh calculate-ports 0
+
+# 全Worktreeのポート番号一覧を表示
+./scripts/worktree/port-manager.sh list
+
+# ポート番号からWorktree IDを逆算
+./scripts/worktree/port-manager.sh reverse-lookup 13100
+```
+
+### 💡 使用例：2つのWorktreeで並列開発
+
+```bash
+# Terminal 1: Worktree 0でfeature/user-authを開発
+make worktree-create BRANCH=feature/user-auth
+cd ../laravel-next-b2c-wt0
+make dev  # ポート: Laravel API=13000, User App=13100, Admin App=13200
+
+# Terminal 2: Worktree 1でfix/cors-issueを開発
+make worktree-create BRANCH=fix/cors-issue
+cd ../laravel-next-b2c-wt1
+make dev  # ポート: Laravel API=13001, User App=13101, Admin App=13201
+
+# 両方のWorktreeが独立して動作
+# - DB: laravel_wt0, laravel_wt1
+# - キャッシュ: wt0_, wt1_
+# - Dockerネットワーク: wt0-network, wt1-network
+```
+
+### 🔧 トラブルシューティング
+
+#### ポート衝突
+
+**症状**: `Error: listen EADDRINUSE: address already in use`
+
+**原因**: ポート番号が既に使用されています。
+
+**解決方法**:
+```bash
+# ポート使用状況確認
+lsof -i :13000  # Laravel API (Worktree 0)
+lsof -i :13001  # Laravel API (Worktree 1)
+
+# プロセス終了
+kill -9 [PID]
+
+# Worktreeポート番号一覧を確認
+make worktree-ports
+```
+
+#### DB接続エラー
+
+**症状**: `SQLSTATE[08006] [7] could not connect to server`
+
+**原因**: PostgreSQLコンテナが起動していない、またはDB名が間違っています。
+
+**解決方法**:
+```bash
+# Dockerサービス状態確認
+docker compose ps
+
+# PostgreSQLログ確認
+docker compose logs pgsql
+
+# DB名確認（Worktreeディレクトリで実行）
+grep DB_DATABASE .env
+# 例: DB_DATABASE=laravel_wt0
+
+# マイグレーション実行
+docker compose exec laravel-api php artisan migrate
+```
+
+#### Redisキー衝突
+
+**症状**: キャッシュデータが別のWorktreeと混在する
+
+**原因**: CACHE_PREFIX環境変数が設定されていない。
+
+**解決方法**:
+```bash
+# CACHE_PREFIX確認（Worktreeディレクトリで実行）
+grep CACHE_PREFIX .env
+# 例: CACHE_PREFIX=wt0_
+
+# キャッシュクリア
+docker compose exec laravel-api php artisan cache:clear
+```
+
+#### Worktree削除時のエラー
+
+**症状**: `fatal: 'remove' is not locked`
+
+**原因**: Worktreeが別のGit操作でロックされています。
+
+**解決方法**:
+```bash
+# Git操作を完了させる
+cd ../laravel-next-b2c-wt0
+git status
+
+# 強制削除（注意：未コミットの変更は失われます）
+git worktree remove ../laravel-next-b2c-wt0 --force
+```
+
+### 📚 関連ドキュメント
+
+- **移行手順**: [MIGRATION.md](./MIGRATION.md) - 既存環境からの移行手順
+- **ポート管理スクリプト**: `scripts/worktree/port-manager.sh`
+- **セットアップスクリプト**: `scripts/worktree/setup.sh`
+
 ## ⚙️ 環境設定
 
 ### 重要な環境変数
