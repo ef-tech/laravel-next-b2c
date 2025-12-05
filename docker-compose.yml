@@ -113,12 +113,14 @@ services:
   # ============================================
   # PostgreSQL 17
   # ============================================
+  # Git Worktree並列開発対応: 内部ネットワーク専用（ポート衝突なし）
+  # - ホストから直接接続不可（内部サービスからのみアクセス可能）
+  # - デフォルトポート5432使用
+  # - 必要に応じて `docker compose exec pgsql psql` でアクセス
   pgsql:
     image: 'postgres:17-alpine'
     container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-pgsql'
-    ports:
-      - '${FORWARD_DB_PORT:-14000}:${FORWARD_DB_PORT:-14000}'
-    command: 'postgres -p ${FORWARD_DB_PORT:-14000}'
+    # ports削除: 内部ネットワーク専用（ホスト公開なし）
     environment:
       PGPASSWORD: '${DB_PASSWORD:-secret}'
       POSTGRES_DB: '${DB_DATABASE:-laravel}'
@@ -147,12 +149,14 @@ services:
   # ============================================
   # Redis
   # ============================================
+  # Git Worktree並列開発対応: 内部ネットワーク専用（ポート衝突なし）
+  # - ホストから直接接続不可（内部サービスからのみアクセス可能）
+  # - デフォルトポート6379使用
+  # - 必要に応じて `docker compose exec redis redis-cli` でアクセス
   redis:
     image: 'redis:alpine'
     container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-redis'
-    ports:
-      - '${FORWARD_REDIS_PORT:-14100}:${FORWARD_REDIS_PORT:-14100}'
-    command: 'redis-server --port ${FORWARD_REDIS_PORT:-14100}'
+    # ports削除: 内部ネットワーク専用（ホスト公開なし）
     volumes:
       - 'redis:/data'
     networks:
@@ -170,15 +174,18 @@ services:
   # ============================================
   # Mailpit (開発用メールサーバー)
   # ============================================
+  # Git Worktree並列開発対応: 外部ポートのみ動的、内部ポートはデフォルト値
+  # - 内部ポート: 1025 (SMTP), 8025 (UI) - デフォルト値固定
+  # - 外部ポート: ${FORWARD_MAILPIT_PORT} (SMTP), ${FORWARD_MAILPIT_DASHBOARD_PORT} (UI) - 環境変数で変更可能
   mailpit:
     image: 'axllent/mailpit:latest'
     container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-mailpit'
     ports:
-      - '${FORWARD_MAILPIT_PORT:-14300}:${FORWARD_MAILPIT_PORT:-14300}'
-      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}:${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}'
+      - '${FORWARD_MAILPIT_PORT:-14300}:1025'              # 内部1025 → 外部14300
+      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}:8025'    # 内部8025 → 外部14200
     environment:
-      MP_SMTP_BIND_ADDR: ':${FORWARD_MAILPIT_PORT:-14300}'
-      MP_UI_BIND_ADDR: ':${FORWARD_MAILPIT_DASHBOARD_PORT:-14200}'
+      MP_SMTP_BIND_ADDR: ':1025'      # デフォルト値
+      MP_UI_BIND_ADDR: ':8025'        # デフォルト値
     networks:
       - 'app-network'
     profiles:
@@ -187,12 +194,15 @@ services:
   # ============================================
   # MinIO (S3互換オブジェクトストレージ)
   # ============================================
+  # Git Worktree並列開発対応: 外部ポートのみ動的、内部ポートはデフォルト値
+  # - 内部ポート: 9000 (API), 9001 (Console) - デフォルト値固定
+  # - 外部ポート: ${FORWARD_MINIO_PORT} (API), ${FORWARD_MINIO_CONSOLE_PORT} (Console) - 環境変数で変更可能
   minio:
     image: 'minio/minio:latest'
     container_name: '${COMPOSE_PROJECT_NAME:-laravel-next-b2c}-minio'
     ports:
-      - '${FORWARD_MINIO_PORT:-14400}:${FORWARD_MINIO_PORT:-14400}'
-      - '${FORWARD_MINIO_CONSOLE_PORT:-13300}:${FORWARD_MINIO_CONSOLE_PORT:-13300}'
+      - '${FORWARD_MINIO_PORT:-14400}:9000'           # 内部9000 → 外部14400
+      - '${FORWARD_MINIO_CONSOLE_PORT:-13300}:9001'   # 内部9001 → 外部13300
     environment:
       MINIO_ROOT_USER: sail
       MINIO_ROOT_PASSWORD: password
@@ -200,13 +210,13 @@ services:
       - 'minio:/data'
     networks:
       - 'app-network'
-    command: 'minio server /data --address ":${FORWARD_MINIO_PORT:-14400}" --console-address ":${FORWARD_MINIO_CONSOLE_PORT:-13300}"'
+    command: 'minio server /data --console-address ":9001"'  # デフォルト値
     healthcheck:
       test:
         - CMD
         - sh
         - -c
-        - 'wget --no-verbose --tries=1 --spider http://127.0.0.1:${FORWARD_MINIO_PORT:-14400}/minio/health/live || exit 1'
+        - 'wget --no-verbose --tries=1 --spider http://127.0.0.1:9000/minio/health/live || exit 1'  # 内部ポート使用
       interval: 10s
       retries: 3
       timeout: 5s

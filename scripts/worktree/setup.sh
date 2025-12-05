@@ -187,12 +187,20 @@ update_backend_env() {
     update_env_var "${env_file}" "E2E_USER_URL" "http://localhost:${port_user}"
     update_env_var "${env_file}" "E2E_ADMIN_URL" "http://localhost:${port_admin}"
     update_env_var "${env_file}" "E2E_API_URL" "http://localhost:${port_laravel}"
-    update_env_var "${env_file}" "FORWARD_DB_PORT" "${port_pgsql}"
-    update_env_var "${env_file}" "FORWARD_REDIS_PORT" "${port_redis}"
     update_env_var "${env_file}" "FORWARD_MAILPIT_PORT" "${port_mailpit_smtp}"
     update_env_var "${env_file}" "FORWARD_MAILPIT_DASHBOARD_PORT" "${port_mailpit_ui}"
     update_env_var "${env_file}" "FORWARD_MINIO_PORT" "${port_minio_api}"
     update_env_var "${env_file}" "FORWARD_MINIO_CONSOLE_PORT" "${port_minio_console}"
+
+    # Docker環境用の接続設定（内部ネットワーク専用）
+    update_env_var "${env_file}" "DB_CONNECTION" "pgsql"
+    update_env_var "${env_file}" "DB_HOST" "pgsql"
+    update_env_var "${env_file}" "DB_PORT" "5432"
+    update_env_var "${env_file}" "REDIS_HOST" "redis"
+    update_env_var "${env_file}" "REDIS_PORT" "6379"
+    update_env_var "${env_file}" "MAIL_HOST" "mailpit"
+    update_env_var "${env_file}" "MAIL_PORT" "1025"
+    update_env_var "${env_file}" "AWS_ENDPOINT" "http://minio:9000"
 
     # Worktree並列開発設定
     if ! grep -q "# Git Worktree並列開発設定" "${env_file}"; then
