@@ -175,6 +175,7 @@ services:
   # Mailpit (開発用メールサーバー)
   # ============================================
   # Git Worktree並列開発対応: 外部ポートのみ動的、内部ポートはデフォルト値
+  # - ホストアクセス: 外部ポート経由でアクセス可能
   # - 内部ポート: 1025 (SMTP), 8025 (UI) - デフォルト値固定
   # - 外部ポート: ${FORWARD_MAILPIT_PORT} (SMTP), ${FORWARD_MAILPIT_DASHBOARD_PORT} (UI) - 環境変数で変更可能
   mailpit:
@@ -195,6 +196,7 @@ services:
   # MinIO (S3互換オブジェクトストレージ)
   # ============================================
   # Git Worktree並列開発対応: 外部ポートのみ動的、内部ポートはデフォルト値
+  # - ホストアクセス: 外部ポート経由でアクセス可能
   # - 内部ポート: 9000 (API), 9001 (Console) - デフォルト値固定
   # - 外部ポート: ${FORWARD_MINIO_PORT} (API), ${FORWARD_MINIO_CONSOLE_PORT} (Console) - 環境変数で変更可能
   minio:

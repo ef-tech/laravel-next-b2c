@@ -174,14 +174,12 @@ update_backend_env() {
     local port_laravel="$3"
     local port_user="$4"
     local port_admin="$5"
-    local port_pgsql="$6"
-    local port_redis="$7"
-    local port_mailpit_smtp="$8"
-    local port_mailpit_ui="$9"
-    local port_minio_api="${10}"
-    local port_minio_console="${11}"
+    local port_mailpit_smtp="$6"
+    local port_mailpit_ui="$7"
+    local port_minio_api="$8"
+    local port_minio_console="$9"
 
-    # ポート番号設定
+    # ポート番号設定（外部公開ポートのみ）
     update_env_var "${env_file}" "WORKTREE_ID" "${worktree_id}"
     update_env_var "${env_file}" "APP_PORT" "${port_laravel}"
     update_env_var "${env_file}" "E2E_USER_URL" "http://localhost:${port_user}"
@@ -193,6 +191,7 @@ update_backend_env() {
     update_env_var "${env_file}" "FORWARD_MINIO_CONSOLE_PORT" "${port_minio_console}"
 
     # Docker環境用の接続設定（内部ネットワーク専用）
+    # PostgreSQL/Redis/Mailpit/MinIOは全てservice名で接続、デフォルトポート使用
     update_env_var "${env_file}" "DB_CONNECTION" "pgsql"
     update_env_var "${env_file}" "DB_HOST" "pgsql"
     update_env_var "${env_file}" "DB_PORT" "5432"
@@ -224,13 +223,11 @@ generate_env_file() {
     echo "" >&2
     echo "⚙️  環境変数ファイルを生成しています..." >&2
 
-    # ポート番号を抽出
+    # ポート番号を抽出（外部公開ポートのみ）
     local port_laravel=$(extract_port "${ports_json}" "laravel_api")
     local port_user=$(extract_port "${ports_json}" "user_app")
     local port_admin=$(extract_port "${ports_json}" "admin_app")
     local port_minio_console=$(extract_port "${ports_json}" "minio_console")
-    local port_pgsql=$(extract_port "${ports_json}" "pgsql")
-    local port_redis=$(extract_port "${ports_json}" "redis")
     local port_mailpit_ui=$(extract_port "${ports_json}" "mailpit_ui")
     local port_mailpit_smtp=$(extract_port "${ports_json}" "mailpit_smtp")
     local port_minio_api=$(extract_port "${ports_json}" "minio_api")
@@ -239,16 +236,16 @@ generate_env_file() {
     cp "${PROJECT_ROOT}/.env.example" "${worktree_path}/.env"
     update_backend_env "${worktree_path}/.env" "${worktree_id}" \
         "${port_laravel}" "${port_user}" "${port_admin}" \
-        "${port_pgsql}" "${port_redis}" "${port_mailpit_smtp}" \
-        "${port_mailpit_ui}" "${port_minio_api}" "${port_minio_console}"
+        "${port_mailpit_smtp}" "${port_mailpit_ui}" \
+        "${port_minio_api}" "${port_minio_console}"
 
     # backend/laravel-api/.env設定
     if [[ -f "${PROJECT_ROOT}/backend/laravel-api/.env.example" ]]; then
         cp "${PROJECT_ROOT}/backend/laravel-api/.env.example" "${worktree_path}/backend/laravel-api/.env"
         update_backend_env "${worktree_path}/backend/laravel-api/.env" "${worktree_id}" \
             "${port_laravel}" "${port_user}" "${port_admin}" \
-            "${port_pgsql}" "${port_redis}" "${port_mailpit_smtp}" \
-            "${port_mailpit_ui}" "${port_minio_api}" "${port_minio_console}"
+            "${port_mailpit_smtp}" "${port_mailpit_ui}" \
+            "${port_minio_api}" "${port_minio_console}"
     fi
 
     # フロントエンド環境変数設定 (User App, Admin App)
