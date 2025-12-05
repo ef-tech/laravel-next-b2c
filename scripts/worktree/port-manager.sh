@@ -14,12 +14,12 @@ set -euo pipefail
 # ============================================
 # 定数定義: ポート番号レンジ (ベースポート)
 # ============================================
+# 注意: PostgreSQL (5432) と Redis (6379) は内部ネットワーク専用のため、
+#       ホストに公開されません。ポート番号レンジから除外されています。
 readonly PORT_LARAVEL_API_BASE=13000
 readonly PORT_USER_APP_BASE=13100
 readonly PORT_ADMIN_APP_BASE=13200
 readonly PORT_MINIO_CONSOLE_BASE=13300
-readonly PORT_PGSQL_BASE=14000
-readonly PORT_REDIS_BASE=14100
 readonly PORT_MAILPIT_UI_BASE=14200
 readonly PORT_MAILPIT_SMTP_BASE=14300
 readonly PORT_MINIO_API_BASE=14400
@@ -115,8 +115,6 @@ calculate_ports() {
     local port_user_app=$((PORT_USER_APP_BASE + worktree_id))
     local port_admin_app=$((PORT_ADMIN_APP_BASE + worktree_id))
     local port_minio_console=$((PORT_MINIO_CONSOLE_BASE + worktree_id))
-    local port_pgsql=$((PORT_PGSQL_BASE + worktree_id))
-    local port_redis=$((PORT_REDIS_BASE + worktree_id))
     local port_mailpit_ui=$((PORT_MAILPIT_UI_BASE + worktree_id))
     local port_mailpit_smtp=$((PORT_MAILPIT_SMTP_BASE + worktree_id))
     local port_minio_api=$((PORT_MINIO_API_BASE + worktree_id))
@@ -130,8 +128,6 @@ calculate_ports() {
     "user_app": ${port_user_app},
     "admin_app": ${port_admin_app},
     "minio_console": ${port_minio_console},
-    "pgsql": ${port_pgsql},
-    "redis": ${port_redis},
     "mailpit_ui": ${port_mailpit_ui},
     "mailpit_smtp": ${port_mailpit_smtp},
     "minio_api": ${port_minio_api}
@@ -147,9 +143,9 @@ list_worktrees() {
     echo "========================================="
     echo "Git Worktree ポート番号一覧"
     echo "========================================="
-    printf "%-4s %-30s %-10s %-10s %-10s %-10s %-10s %-10s %-10s %-10s %-10s\n" \
-        "ID" "ブランチ" "Laravel" "User" "Admin" "MinIO C" "PostgreSQL" "Redis" "Mailpit UI" "Mailpit SMTP" "MinIO API"
-    echo "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    printf "%-4s %-30s %-10s %-10s %-10s %-10s %-10s %-10s %-10s\n" \
+        "ID" "ブランチ" "Laravel" "User" "Admin" "MinIO C" "Mailpit UI" "Mailpit SMTP" "MinIO API"
+    echo "-----------------------------------------------------------------------------------------------------------------------------------"
 
     # git worktree listから情報を取得
     git worktree list --porcelain 2>/dev/null | \
@@ -158,8 +154,10 @@ list_worktrees() {
             /^branch/ { branch=$2; gsub(/.*\//, "", branch) }
             /^$/ {
                 if (worktree ~ /wt[0-9]+$/) {
-                    match(worktree, /wt([0-9]+)$/, arr)
-                    print arr[1], branch, worktree
+                    # BSD awk互換: matchの代わりにsubを使用
+                    id = worktree
+                    sub(/.*wt/, "", id)
+                    print id, branch, worktree
                 }
                 worktree=""; branch=""
             }
@@ -170,15 +168,13 @@ list_worktrees() {
             local port_user=$((PORT_USER_APP_BASE + id))
             local port_admin=$((PORT_ADMIN_APP_BASE + id))
             local port_minio_c=$((PORT_MINIO_CONSOLE_BASE + id))
-            local port_pgsql=$((PORT_PGSQL_BASE + id))
-            local port_redis=$((PORT_REDIS_BASE + id))
             local port_mailpit_ui=$((PORT_MAILPIT_UI_BASE + id))
             local port_mailpit_smtp=$((PORT_MAILPIT_SMTP_BASE + id))
             local port_minio_api=$((PORT_MINIO_API_BASE + id))
 
-            printf "%-4s %-30s %-10s %-10s %-10s %-10s %-10s %-10s %-10s %-10s %-10s\n" \
+            printf "%-4s %-30s %-10s %-10s %-10s %-10s %-10s %-10s %-10s\n" \
                 "${id}" "${branch}" "${port_laravel}" "${port_user}" "${port_admin}" "${port_minio_c}" \
-                "${port_pgsql}" "${port_redis}" "${port_mailpit_ui}" "${port_mailpit_smtp}" "${port_minio_api}"
+                "${port_mailpit_ui}" "${port_mailpit_smtp}" "${port_minio_api}"
         done
 
     echo "========================================="
@@ -201,8 +197,6 @@ reverse_lookup() {
         "${PORT_USER_APP_BASE}:User App"
         "${PORT_ADMIN_APP_BASE}:Admin App"
         "${PORT_MINIO_CONSOLE_BASE}:MinIO Console"
-        "${PORT_PGSQL_BASE}:PostgreSQL"
-        "${PORT_REDIS_BASE}:Redis"
         "${PORT_MAILPIT_UI_BASE}:Mailpit UI"
         "${PORT_MAILPIT_SMTP_BASE}:Mailpit SMTP"
         "${PORT_MINIO_API_BASE}:MinIO API"

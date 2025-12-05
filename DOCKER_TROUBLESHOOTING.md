@@ -10,6 +10,7 @@ Next.js + Laravel Docker環境の問題解決ガイド
 - [ネットワーク接続エラー](#ネットワーク接続エラー)
 - [Hot Reload動作不良](#hot-reload動作不良)
 - [E2Eテスト接続エラー](#e2eテスト接続エラー)
+- [Docker内部ネットワーク接続](#docker内部ネットワーク接続)
 
 ---
 
@@ -524,3 +525,116 @@ docker-compose up -d
 3. **再現手順**: 問題が発生するまでの具体的な操作手順
 
 4. **試した解決策**: このドキュメントで試した内容
+
+---
+
+## Docker内部ネットワーク接続
+
+### 🚨 PostgreSQL/Redis にホストから接続できない
+
+**症状**:
+```
+psql: error: connection to server at "127.0.0.1", port 5432 failed
+redis-cli -h 127.0.0.1 -p 6379: Could not connect to Redis
+```
+
+**原因**: PostgreSQL と Redis はDocker内部ネットワーク専用のため、ホストに公開されていません。
+
+**解決方法**:
+
+#### 方法1: Docker経由でアクセス（推奨）
+
+```bash
+# PostgreSQL
+docker compose exec pgsql psql -U sail -d laravel
+
+# Redis
+docker compose exec redis redis-cli
+```
+
+#### 方法2: 一時的にポート公開
+
+開発中にホストから直接接続が必要な場合は、`docker-compose.yml` を一時的に変更します:
+
+```yaml
+# docker-compose.yml
+pgsql:
+  ports:
+    - '5432:5432'  # 一時的に追加
+
+redis:
+  ports:
+    - '6379:6379'  # 一時的に追加
+```
+
+その後、Docker環境を再起動:
+
+```bash
+docker compose down
+docker compose up -d --profile infra --profile api
+```
+
+**注意**: この設定は Git Worktree 並列開発時にポート衝突を引き起こす可能性があります。作業完了後は設定を元に戻してください。
+
+### 🚨 Laravel API からデータベース接続エラー
+
+**症状**:
+```
+SQLSTATE[08006] [7] could not translate host name "127.0.0.1" to address
+SQLSTATE[HY000] [2002] Connection refused
+```
+
+**原因**: `.env` ファイルで `DB_HOST=127.0.0.1` を使用している（Docker環境では service 名を使用する必要があります）。
+
+**解決方法**:
+
+`backend/laravel-api/.env` を確認・修正:
+
+```bash
+# ❌ 間違った設定（ホスト環境用）
+DB_HOST=127.0.0.1
+DB_PORT=5432
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+# ✅ 正しい設定（Docker環境用）
+DB_HOST=pgsql         # service名
+DB_PORT=5432          # 内部ポート
+REDIS_HOST=redis      # service名
+REDIS_PORT=6379       # 内部ポート
+MAIL_HOST=mailpit     # service名
+MAIL_PORT=1025        # 内部ポート
+AWS_ENDPOINT=http://minio:9000  # service名
+```
+
+設定変更後、Docker環境を再起動:
+
+```bash
+docker compose restart laravel-api
+```
+
+### 🚨 Git Worktree でポート衝突エラー
+
+**症状**:
+```
+Error: Bind for 0.0.0.0:14000 failed: port is already allocated
+```
+
+**原因**: 複数の Worktree が同じポート番号を使用している。
+
+**解決方法**:
+
+1. **既存の Worktree のポート確認**:
+
+```bash
+make worktree-ports
+```
+
+2. **新規 Worktree 作成時に WORKTREE_ID を指定**:
+
+```bash
+# Worktree 1を作成（ポートレンジ: 13001, 13101, 13201...）
+make worktree-create WORKTREE_ID=1 BRANCH=feature/new-feature
+```
+
+**注意**: 内部ネットワーク最適化により、PostgreSQL と Redis のポート衝突は完全に解消されています。外部公開ポート（Laravel API、Next.js、Mailpit、MinIO）のみ管理が必要です。

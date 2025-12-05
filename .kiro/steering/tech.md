@@ -492,8 +492,11 @@ npm run generate:error-types
   - **環境別設定**: Docker/Native/Production環境に応じた接続パラメータ最適化
   - **信頼性向上**: ServiceProvider方式によるタイムアウト設定、エラーハンドリング強化
   - **🔧 主キー設計**: bigint自動採番主キー（Laravel標準構成準拠、UUID比較でパフォーマンス最適化）
+  - **Docker内部ネットワーク**: ポート5432（内部専用、ホスト公開なし）、service名`pgsql`でアクセス
 - **Redis**: alpine (キャッシュ管理 - セッションストレージ不使用)
+  - **Docker内部ネットワーク**: ポート6379（内部専用、ホスト公開なし）、service名`redis`でアクセス
 - **MinIO**: オブジェクトストレージ (S3互換)
+  - **Docker内部ネットワーク**: ポート9000（API、内部デフォルト値）、service名`minio`でアクセス
 
 **最適化ポイント**:
 - セッションストレージをRedisから除去、キャッシュのみ使用
