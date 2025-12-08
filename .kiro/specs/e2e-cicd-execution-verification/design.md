@@ -45,7 +45,7 @@
 - **Docker環境ドメイン**: `docker-compose.yml`の既存サービス定義を変更せず利用
 
 **統合ポイント維持**:
-- Docker Compose起動コマンド: `docker-compose up -d --build`（既存パターン）
+- Docker Compose起動コマンド: `docker compose up -d --build`（既存パターン）
 - ポート設定: 13000番台統一（user-app: 13001, admin-app: 13002, laravel-api: 13000）
 - 環境変数設定: `.env`ファイルパターン（E2E_ADMIN_URL等）
 
@@ -143,11 +143,11 @@ graph TB
 **Context**:
 - 要件: laravel-api, admin-app, user-app, pgsql, redisの5サービス起動が必要
 - 既存環境: Issue #14でDocker Compose統合環境が構築済み
-- GitHub Actions環境: Docker標準搭載、docker-composeコマンド利用可能
+- GitHub Actions環境: Docker標準搭載、docker composeコマンド利用可能
 
 **Alternatives**:
 1. **個別サービス起動**: `php artisan serve`、`npm start`を個別実行（既存disabledワークフロー）
-2. **Docker Compose統合**: `docker-compose up -d --build`で一括起動
+2. **Docker Compose統合**: `docker compose up -d --build`で一括起動
 3. **Kubernetes**: Minikube等でKubernetes環境構築
 
 **Selected Approach**: Docker Compose統合
@@ -236,7 +236,7 @@ sequenceDiagram
         GHA->>GHA: Matrix Strategy起動（4 shard）
 
         par Shard 1
-            GHA->>Docker: docker-compose up -d --build
+            GHA->>Docker: docker compose up -d --build
             Docker->>Docker: Services起動（laravel-api, admin-app, user-app, pgsql, redis）
             GHA->>Docker: wait-on ヘルスチェック（13000/13001/13002）
             Docker-->>GHA: Services Ready
@@ -247,7 +247,7 @@ sequenceDiagram
             PW-->>GHA: Test Results（成功/失敗/スキップ）
             GHA->>Artifacts: upload playwright-report-1
         and Shard 2
-            GHA->>Docker: docker-compose up -d --build
+            GHA->>Docker: docker compose up -d --build
             Docker->>Docker: Services起動
             GHA->>Docker: wait-on ヘルスチェック
             Docker-->>GHA: Services Ready
@@ -258,7 +258,7 @@ sequenceDiagram
             PW-->>GHA: Test Results
             GHA->>Artifacts: upload playwright-report-2
         and Shard 3
-            GHA->>Docker: docker-compose up -d --build
+            GHA->>Docker: docker compose up -d --build
             Docker->>Docker: Services起動
             GHA->>Docker: wait-on ヘルスチェック
             Docker-->>GHA: Services Ready
@@ -269,7 +269,7 @@ sequenceDiagram
             PW-->>GHA: Test Results
             GHA->>Artifacts: upload playwright-report-3
         and Shard 4
-            GHA->>Docker: docker-compose up -d --build
+            GHA->>Docker: docker compose up -d --build
             Docker->>Docker: Services起動
             GHA->>Docker: wait-on ヘルスチェック
             Docker-->>GHA: Services Ready
@@ -301,7 +301,7 @@ flowchart TD
 
     C --> D[Docker Compose起動]
     D --> E{起動成功?}
-    E -->|No| F[docker-compose logs出力]
+    E -->|No| F[docker compose logs出力]
     F --> G[Workflow Failed]
 
     E -->|Yes| H[wait-on ヘルスチェック]
@@ -348,7 +348,7 @@ flowchart TD
 | 1.1 | ワークフロー有効化 | GitHub Actions Workflow | `.disabled`削除、git push | - |
 | 1.2 | ワークフロー一覧表示 | GitHub Actions UI | ワークフロー定義（name: E2E Tests） | - |
 | 1.3 | 手動実行可能化 | workflow_dispatch trigger | 「Run workflow」ボタン | - |
-| 2.1 | Docker Compose起動 | Docker Compose Service | `docker-compose up -d --build` | シーケンス図: Services起動 |
+| 2.1 | Docker Compose起動 | Docker Compose Service | `docker compose up -d --build` | シーケンス図: Services起動 |
 | 2.2 | サービス起動確認 | Docker Compose + wait-on | ヘルスチェック（13000/13001/13002） | シーケンス図: wait-on |
 | 2.3 | ヘルスチェック実行 | wait-on CLI | HTTP GET（/up） | シーケンス図: wait-on |
 | 2.4 | タイムアウト処理 | wait-on timeout設定 | 120秒タイムアウト | エラーフロー: Timeout分岐 |
@@ -382,7 +382,7 @@ flowchart TD
 | 9.1 | 60分タイムアウト | timeout-minutes | 60 | エラーフロー: Job Timeout |
 | 9.2 | 超過時強制終了 | GitHub Actions | 失敗ステータス | エラーフロー: Timeout |
 | 9.3 | wait-onタイムアウト | --timeout設定 | 120000ms | エラーフロー: wait-on Timeout |
-| 9.4 | Docker失敗ログ | docker-compose logs | エラーログ出力 | エラーフロー: logs出力 |
+| 9.4 | Docker失敗ログ | docker compose logs | エラーログ出力 | エラーフロー: logs出力 |
 | 10.1 | README.md更新 | Documentation | CI/CD手順追加 | - |
 | 10.2 | e2e/README.md更新 | Documentation | Shard説明追加 | - |
 | 10.3 | トラブルシューティング | Documentation | 問題解決方法 | - |
@@ -425,7 +425,7 @@ flowchart TD
     node-version: '20'
 
 # Step 3: Docker Compose起動
-- run: docker-compose up -d --build
+- run: docker compose up -d --build
 
 # Step 4: Services Health Check
 - run: npx wait-on http://localhost:13001 http://localhost:13002 http://localhost:13000/up --timeout 120000
@@ -671,7 +671,7 @@ E2E CI/CD実行における各エラーカテゴリーに対して、明確な�
 - **無効なブランチ指定**: workflow_dispatch時の存在しないブランチ → GitHub UI側で入力検証、デフォルト値（main）提供
 
 **System Errors (5xx相当)**:
-- **Docker起動失敗**: サービス起動エラー → `docker-compose logs`出力、リトライ不可、即座に失敗
+- **Docker起動失敗**: サービス起動エラー → `docker compose logs`出力、リトライ不可、即座に失敗
 - **wait-onタイムアウト**: 120秒以内にサービス起動しない → タイムアウトエラー出力、wait-on設定延長ガイド提示
 - **Playwright実行失敗**: ブラウザクラッシュ → スクリーンショット・トレース保存、リトライ（最大2回）
 
@@ -685,7 +685,7 @@ E2E CI/CD実行における各エラーカテゴリーに対して、明確な�
 flowchart TD
     A[Error発生] --> B{Error Category}
 
-    B -->|Docker起動失敗| C[docker-compose logs出力]
+    B -->|Docker起動失敗| C[docker compose logs出力]
     C --> D[Workflow Failed]
     D --> E[PR Checks Failed]
     E --> F[開発者に通知]
@@ -716,8 +716,8 @@ flowchart TD
 ```
 
 **Docker起動失敗時の回復メカニズム**:
-1. `docker-compose up -d --build`失敗検出
-2. `docker-compose logs laravel-api admin-app user-app`実行
+1. `docker compose up -d --build`失敗検出
+2. `docker compose logs laravel-api admin-app user-app`実行
 3. エラーログをGitHub Actionsログに出力
 4. Workflow即座に失敗、リトライなし
 5. 開発者に通知、手動調査必要
@@ -779,7 +779,7 @@ flowchart TD
 5. **Artifacts保存**: playwright-report-1/2/3/4のzip保存確認
 
 **Docker Compose統合テスト（手動検証）**:
-1. **Services起動**: `docker-compose up -d --build`成功、全サービス起動確認
+1. **Services起動**: `docker compose up -d --build`成功、全サービス起動確認
 2. **Health Check**: `wait-on`で3エンドポイント（13000/13001/13002）応答確認
 3. **E2E実行**: Playwrightテストが全サービスにアクセス可能確認
 
@@ -837,7 +837,7 @@ flowchart TD
 | メトリクス | 目標値 | 測定方法 |
 |-----------|--------|---------|
 | **E2E実行時間** | 60分以内 | GitHub Actions実行時間 |
-| **Docker起動時間** | 5分以内 | docker-compose up完了時間 |
+| **Docker起動時間** | 5分以内 | docker compose up完了時間 |
 | **wait-on待機時間** | 120秒以内 | wait-onコマンド実行時間 |
 | **Shard実行時間** | 均等分散（±10%以内） | 各Shard実行時間比較 |
 | **Artifacts保存時間** | 1分以内 | upload-artifact実行時間 |

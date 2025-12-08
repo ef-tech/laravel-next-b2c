@@ -10,6 +10,7 @@ Next.js + Laravel Docker環境の問題解決ガイド
 - [ネットワーク接続エラー](#ネットワーク接続エラー)
 - [Hot Reload動作不良](#hot-reload動作不良)
 - [E2Eテスト接続エラー](#e2eテスト接続エラー)
+- [Docker内部ネットワーク接続](#docker内部ネットワーク接続)
 
 ---
 
@@ -132,19 +133,19 @@ lsof -i :13000  # Laravel API
 kill -9 [PID]
 
 # 3. Docker Composeプロセス確認
-docker-compose ps
-docker-compose down
+docker compose ps
+docker compose down
 
 # 4. 残留コンテナ削除
 docker ps -a | grep "admin-app\|user-app\|laravel-api"
 docker rm -f [CONTAINER_ID]
 
 # 5. 再起動
-docker-compose up -d
+docker compose up -d
 ```
 
 **予防策**:
-- 開発終了時は必ず `docker-compose down` で停止
+- 開発終了時は必ず `docker compose down` で停止
 - ポート競合を避けるため、他のプロジェクトと異なるポート番号を使用
 
 ---
@@ -163,23 +164,23 @@ Dependency failed to start: container laravel-api is unhealthy
 
 ```bash
 # 1. Laravel APIログ確認
-docker-compose logs laravel-api
+docker compose logs laravel-api
 
 # 2. ヘルスチェック状態確認
-docker-compose ps
+docker compose ps
 # STATUS列で "healthy" か確認
 
 # 3. Laravel API個別起動テスト
-docker-compose up -d pgsql redis mailpit minio
-docker-compose up laravel-api
+docker compose up -d pgsql redis mailpit minio
+docker compose up laravel-api
 
 # 4. データベース接続確認
-docker-compose exec laravel-api php artisan tinker
+docker compose exec laravel-api php artisan tinker
 # DB::connection()->getPdo();
 
 # 5. 全サービス再起動
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 ---
@@ -218,8 +219,8 @@ ls -ld frontend/admin-app
 # Docker Desktop > Settings > Restart
 
 # 6. 再ビルド
-docker-compose down -v
-docker-compose up -d --build
+docker compose down -v
+docker compose up -d --build
 ```
 
 ---
@@ -251,7 +252,7 @@ docker-compose run --rm admin-app ls -la /app/frontend/admin-app/.next/standalon
 
 # 4. 再ビルド（キャッシュなし）
 docker-compose build admin-app --no-cache
-docker-compose up -d admin-app
+docker compose up -d admin-app
 ```
 
 ---
@@ -278,19 +279,19 @@ cat backend/laravel-api/.env | grep DB_
 # DB_PASSWORD=secret
 
 # 2. PostgreSQL起動確認
-docker-compose ps pgsql
+docker compose ps pgsql
 # STATE列で "Up" かつ "healthy" であることを確認
 
 # 3. PostgreSQL接続テスト
-docker-compose exec pgsql psql -U sail -d laravel
+docker compose exec pgsql psql -U sail -d laravel
 # \dt で テーブル一覧表示
 
 # 4. Laravel接続確認
-docker-compose exec laravel-api php artisan tinker
+docker compose exec laravel-api php artisan tinker
 # DB::connection()->getPdo();
 
 # 5. マイグレーション再実行
-docker-compose exec laravel-api php artisan migrate:fresh
+docker compose exec laravel-api php artisan migrate:fresh
 ```
 
 ---
@@ -311,7 +312,7 @@ User Appログ: Network request failed
 
 ```bash
 # 1. 環境変数確認
-docker-compose exec admin-app env | grep NEXT_PUBLIC_API_URL
+docker compose exec admin-app env | grep NEXT_PUBLIC_API_URL
 # NEXT_PUBLIC_API_URL=http://laravel-api:13000
 # （Docker内部ではサービス名 "laravel-api" を使用）
 
@@ -321,13 +322,13 @@ cat docker-compose.yml | grep NEXT_PUBLIC_API_URL
 # Docker内部: http://laravel-api:13000
 
 # 3. ネットワーク接続テスト
-docker-compose exec admin-app wget -O- http://laravel-api:13000/up
+docker compose exec admin-app wget -O- http://laravel-api:13000/up
 # Laravel API応答があることを確認
 
 # 4. 環境変数再設定
 # docker-compose.yml の environment セクションを修正
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 ---
@@ -386,18 +387,18 @@ docker volume ls | grep admin-app
 echo "// test" >> frontend/admin-app/src/app/page.tsx
 
 # コンテナ側で変更確認
-docker-compose exec admin-app cat /app/frontend/admin-app/src/app/page.tsx
+docker compose exec admin-app cat /app/frontend/admin-app/src/app/page.tsx
 # → "// test" が追加されていることを確認
 
 # 4. Next.js開発サーバーログ確認
-docker-compose logs -f admin-app
+docker compose logs -f admin-app
 # → "compiled client and server successfully" メッセージが表示されるか確認
 
 # 5. Hot Reload無効の場合、環境変数追加
 # docker-compose.yml の admin-app service に追加:
 # environment:
 #   - WATCHPACK_POLLING=true
-docker-compose up -d admin-app
+docker compose up -d admin-app
 ```
 
 ---
@@ -418,7 +419,7 @@ TimeoutError: page.goto: Timeout 30000ms exceeded.
 
 ```bash
 # 1. フロントエンド起動確認
-docker-compose ps admin-app user-app
+docker compose ps admin-app user-app
 # STATE列で "Up" であることを確認
 
 # 2. E2E環境変数確認
@@ -466,7 +467,7 @@ cat docker-compose.yml | grep -A 5 "e2e-tests:" | grep command
 docker-compose run --rm e2e-tests sh -c "npx playwright install --with-deps chromium"
 
 # 4. イメージ再ビルド
-docker-compose down
+docker compose down
 docker-compose build e2e-tests --no-cache
 docker-compose run --rm e2e-tests
 ```
@@ -479,13 +480,13 @@ docker-compose run --rm e2e-tests
 
 ```bash
 # 全サービス状態確認
-docker-compose ps
+docker compose ps
 
 # 特定サービスログ確認
-docker-compose logs -f [service-name]
+docker compose logs -f [service-name]
 
 # コンテナ内シェル起動
-docker-compose exec [service-name] sh
+docker compose exec [service-name] sh
 docker-compose run --rm [service-name] sh
 
 # ネットワーク確認
@@ -497,12 +498,12 @@ docker volume ls
 docker volume inspect laravel-next-b2c_sail-pgsql
 
 # 完全クリーンアップ
-docker-compose down -v --remove-orphans
+docker compose down -v --remove-orphans
 docker system prune -a --volumes
 
 # 再ビルド（キャッシュなし）
 docker-compose build --no-cache
-docker-compose up -d
+docker compose up -d
 ```
 
 ---
@@ -518,9 +519,122 @@ docker-compose up -d
 
 2. **エラーログ**:
    ```bash
-   docker-compose logs [service-name] > error.log
+   docker compose logs [service-name] > error.log
    ```
 
 3. **再現手順**: 問題が発生するまでの具体的な操作手順
 
 4. **試した解決策**: このドキュメントで試した内容
+
+---
+
+## Docker内部ネットワーク接続
+
+### 🚨 PostgreSQL/Redis にホストから接続できない
+
+**症状**:
+```
+psql: error: connection to server at "127.0.0.1", port 5432 failed
+redis-cli -h 127.0.0.1 -p 6379: Could not connect to Redis
+```
+
+**原因**: PostgreSQL と Redis はDocker内部ネットワーク専用のため、ホストに公開されていません。
+
+**解決方法**:
+
+#### 方法1: Docker経由でアクセス（推奨）
+
+```bash
+# PostgreSQL
+docker compose exec pgsql psql -U sail -d laravel
+
+# Redis
+docker compose exec redis redis-cli
+```
+
+#### 方法2: 一時的にポート公開
+
+開発中にホストから直接接続が必要な場合は、`docker-compose.yml` を一時的に変更します:
+
+```yaml
+# docker-compose.yml
+pgsql:
+  ports:
+    - '5432:5432'  # 一時的に追加
+
+redis:
+  ports:
+    - '6379:6379'  # 一時的に追加
+```
+
+その後、Docker環境を再起動:
+
+```bash
+docker compose down
+docker compose up -d --profile infra --profile api
+```
+
+**注意**: この設定は Git Worktree 並列開発時にポート衝突を引き起こす可能性があります。作業完了後は設定を元に戻してください。
+
+### 🚨 Laravel API からデータベース接続エラー
+
+**症状**:
+```
+SQLSTATE[08006] [7] could not translate host name "127.0.0.1" to address
+SQLSTATE[HY000] [2002] Connection refused
+```
+
+**原因**: `.env` ファイルで `DB_HOST=127.0.0.1` を使用している（Docker環境では service 名を使用する必要があります）。
+
+**解決方法**:
+
+`backend/laravel-api/.env` を確認・修正:
+
+```bash
+# ❌ 間違った設定（ホスト環境用）
+DB_HOST=127.0.0.1
+DB_PORT=5432
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+# ✅ 正しい設定（Docker環境用）
+DB_HOST=pgsql         # service名
+DB_PORT=5432          # 内部ポート
+REDIS_HOST=redis      # service名
+REDIS_PORT=6379       # 内部ポート
+MAIL_HOST=mailpit     # service名
+MAIL_PORT=1025        # 内部ポート
+AWS_ENDPOINT=http://minio:9000  # service名
+```
+
+設定変更後、Docker環境を再起動:
+
+```bash
+docker compose restart laravel-api
+```
+
+### 🚨 Git Worktree でポート衝突エラー
+
+**症状**:
+```
+Error: Bind for 0.0.0.0:14000 failed: port is already allocated
+```
+
+**原因**: 複数の Worktree が同じポート番号を使用している。
+
+**解決方法**:
+
+1. **既存の Worktree のポート確認**:
+
+```bash
+make worktree-ports
+```
+
+2. **新規 Worktree 作成時に WORKTREE_ID を指定**:
+
+```bash
+# Worktree 1を作成（ポートレンジ: 13001, 13101, 13201...）
+make worktree-create WORKTREE_ID=1 BRANCH=feature/new-feature
+```
+
+**注意**: 内部ネットワーク最適化により、PostgreSQL と Redis のポート衝突は完全に解消されています。外部公開ポート（Laravel API、Next.js、Mailpit、MinIO）のみ管理が必要です。

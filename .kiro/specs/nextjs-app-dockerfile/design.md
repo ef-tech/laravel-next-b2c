@@ -2,7 +2,7 @@
 
 ## Overview
 
-本機能は、Next.js 15.5フロントエンドアプリケーション（Admin App / User App）のDocker化と、Laravel APIとの統合Docker Compose環境構築を実現します。既存のLaravel Sail Docker環境に、Next.jsコンテナとE2Eテストコンテナを統合し、`docker-compose up`一発で全サービスを起動可能にします。
+本機能は、Next.js 15.5フロントエンドアプリケーション（Admin App / User App）のDocker化と、Laravel APIとの統合Docker Compose環境構築を実現します。既存のLaravel Sail Docker環境に、Next.jsコンテナとE2Eテストコンテナを統合し、`docker compose up`一発で全サービスを起動可能にします。
 
 **Purpose**: Docker ComposeによるLaravel + Next.js統合開発環境を提供し、開発環境の統一、E2Eテストの完全自動化、CI/CD基盤強化を実現します。
 
@@ -80,8 +80,8 @@ graph TB
         end
     end
 
-    Developer -->|docker-compose up| AdminApp
-    Developer -->|docker-compose up| UserApp
+    Developer -->|docker compose up| AdminApp
+    Developer -->|docker compose up| UserApp
     Browser -->|http://localhost:3001| AdminApp
     Browser -->|http://localhost:3000| UserApp
     Browser -->|http://localhost:13000| LaravelAPI
@@ -226,7 +226,7 @@ sequenceDiagram
     participant User as User App
     participant E2E as E2E Tests
 
-    Dev->>Docker: docker-compose up -d --build
+    Dev->>Docker: docker compose up -d --build
 
     Note over Docker: サービス依存関係解決
     Docker->>DB: 起動 (PostgreSQL, Redis, MinIO, Mailpit)
@@ -1009,14 +1009,14 @@ Docker環境における3層エラーハンドリング戦略:
 #### Docker Composeサービス起動エラー（起動時）
 
 **ポート競合エラー**:
-- **症状**: `docker-compose up`実行時にポート競合（既に使用中）
+- **症状**: `docker compose up`実行時にポート競合（既に使用中）
 - **対応**: 競合ポート確認（`lsof -i :3001`）→ 既存プロセス停止 → 再起動
 - **例**: `ERROR: for admin-app  Cannot start service admin-app: driver failed programming external connectivity: Bind for 0.0.0.0:3001 failed: port is already allocated`
 - **Circuit Breaker**: 3回連続失敗でサービス起動中止、ログにポート競合診断情報を出力
 
 **依存サービス起動待機タイムアウト**:
 - **症状**: depends_onで定義された依存サービスが起動しない（healthcheck失敗）
-- **対応**: 依存サービスログ確認（`docker-compose logs laravel-api`）→ 根本原因修正 → 再起動
+- **対応**: 依存サービスログ確認（`docker compose logs laravel-api`）→ 根本原因修正 → 再起動
 - **例**: `ERROR: admin-app depends_on condition "service_started" for service "laravel-api" failed`
 - **Graceful Degradation**: 依存サービス起動失敗時、フロントエンドは起動するがAPI接続エラー表示
 
@@ -1062,7 +1062,7 @@ flowchart TB
     StartError --> CheckPort{ポート競合?}
     CheckPort -->|Yes| KillProcess[競合プロセス停止<br/>lsof -i :PORT]
     CheckPort -->|No| CheckDepends{依存サービス?}
-    CheckDepends -->|Yes| CheckLogs[依存サービスログ確認<br/>docker-compose logs]
+    CheckDepends -->|Yes| CheckLogs[依存サービスログ確認<br/>docker compose logs]
     CheckDepends -->|No| CheckVolume{ボリューム<br/>マウント?}
     CheckVolume -->|Yes| FixVolume[ディレクトリ作成<br/>権限修正]
 
@@ -1095,17 +1095,17 @@ flowchart TB
 **サービス別ログ確認コマンド**:
 ```bash
 # 全サービスログ（リアルタイム）
-docker-compose logs -f
+docker compose logs -f
 
 # 特定サービスログ
-docker-compose logs -f admin-app
-docker-compose logs -f user-app
-docker-compose logs -f laravel-api
-docker-compose logs -f e2e-tests
+docker compose logs -f admin-app
+docker compose logs -f user-app
+docker compose logs -f laravel-api
+docker compose logs -f e2e-tests
 
 # エラーログのみ抽出
-docker-compose logs | grep ERROR
-docker-compose logs | grep WARN
+docker compose logs | grep ERROR
+docker compose logs | grep WARN
 ```
 
 **ログレベル設定**:
@@ -1123,7 +1123,7 @@ docker-compose logs | grep WARN
 **ヘルスチェック確認コマンド**:
 ```bash
 # サービスヘルスステータス確認
-docker-compose ps
+docker compose ps
 
 # ヘルスチェックログ確認
 docker inspect <container-id> | jq '.[0].State.Health'
@@ -1171,13 +1171,13 @@ docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
 
 1. **サービス起動統合テスト**: 全サービスが正常起動し、依存関係が解決されることを確認
    ```bash
-   docker-compose up -d --build
-   docker-compose ps | grep "Up" | wc -l  # 期待値: 8サービス
+   docker compose up -d --build
+   docker compose ps | grep "Up" | wc -l  # 期待値: 8サービス
    ```
 2. **ネットワーク接続テスト**: Admin App/User AppからLaravel APIへのHTTP接続確認
    ```bash
-   docker-compose exec admin-app curl -f http://laravel-api:13000/up
-   docker-compose exec user-app curl -f http://laravel-api:13000/up
+   docker compose exec admin-app curl -f http://laravel-api:13000/up
+   docker compose exec user-app curl -f http://laravel-api:13000/up
    ```
 3. **Hot Reload統合テスト**: ホスト側ファイル変更がコンテナに即座に反映されることを確認
    ```bash
@@ -1226,10 +1226,10 @@ docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
    docker-compose build admin-app | ts '[%Y-%m-%d %H:%M:%S]'
    # 期待値: 1分以内
    ```
-3. **サービス起動時間測定**: docker-compose up実行から全サービスReady状態までの時間計測
+3. **サービス起動時間測定**: docker compose up実行から全サービスReady状態までの時間計測
    ```bash
-   time docker-compose up -d --build && \
-   while [ $(docker-compose ps | grep "Up" | wc -l) -lt 8 ]; do sleep 1; done
+   time docker compose up -d --build && \
+   while [ $(docker compose ps | grep "Up" | wc -l) -lt 8 ]; do sleep 1; done
    # 期待値: 3分以内
    ```
 4. **Hot Reload応答時間測定**: ファイル変更からブラウザ反映までの時間計測
@@ -1245,7 +1245,7 @@ docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
 **最小権限実行**:
 - **nextjsユーザー**: UID 1001、GID 1001でnon-rootユーザー実行
 - **理由**: rootユーザー実行によるコンテナ脱出攻撃リスク低減
-- **検証**: `docker-compose exec admin-app whoami`で"nextjs"が表示されることを確認
+- **検証**: `docker compose exec admin-app whoami`で"nextjs"が表示されることを確認
 
 **イメージスキャン**:
 - **Trivy**: DockerイメージのCVE脆弱性スキャン
@@ -1284,8 +1284,8 @@ docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
 **Node.js依存関係スキャン**:
 - **npm audit**: package-lock.jsonの既知脆弱性スキャン
   ```bash
-  docker-compose exec admin-app npm audit
-  docker-compose exec user-app npm audit
+  docker compose exec admin-app npm audit
+  docker compose exec user-app npm audit
   ```
 - **自動修正**: `npm audit fix`で自動修正可能な脆弱性を修正
 
@@ -1323,7 +1323,7 @@ docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
 
 **水平スケーリング対応**:
 - **ステートレス設計**: Next.jsアプリはステートレス（セッション管理なし、Laravel API側で管理）
-- **Docker Compose Scale**: `docker-compose up --scale admin-app=3`で複数インスタンス起動可能
+- **Docker Compose Scale**: `docker compose up --scale admin-app=3`で複数インスタンス起動可能
 - **ロードバランサー統合**: Nginx、Traefikなどのリバースプロキシと統合可能
 
 **CI/CDパイプライン最適化**:
@@ -1350,7 +1350,7 @@ flowchart LR
     CreateDockerfiles --> ConfigStandalone[next.config.ts<br/>standalone設定追加]
     ConfigStandalone --> CreateCompose[docker-compose.yml<br/>統合設定作成]
     CreateCompose --> TestBuild[ビルドテスト<br/>docker-compose build]
-    TestBuild --> TestRun[起動テスト<br/>docker-compose up]
+    TestBuild --> TestRun[起動テスト<br/>docker compose up]
     TestRun --> ValidationPhase1{Phase 1<br/>完了条件?}
     ValidationPhase1 -->|Yes| Phase2[Phase 2へ]
     ValidationPhase1 -->|No| Debug1[エラー修正<br/>ログ確認]
@@ -1366,8 +1366,8 @@ flowchart LR
 
 **検証ポイント**:
 - [ ] `docker-compose build`が成功（全サービスビルド完了）
-- [ ] `docker-compose up -d`が成功（全サービス起動）
-- [ ] `docker-compose ps`で8サービスが"Up"状態
+- [ ] `docker compose up -d`が成功（全サービス起動）
+- [ ] `docker compose ps`で8サービスが"Up"状態
 - [ ] http://localhost:3001（Admin App）、http://localhost:3000（User App）、http://localhost:13000（Laravel API）にアクセス可能
 
 **Rollback Trigger**: ビルドエラーが3日以内に解決しない場合、Phase 1を中断しDockerfile設計見直し
@@ -1431,7 +1431,7 @@ flowchart LR
 ### 移行完了後の運用
 
 **並行運用期間**（4週間）:
-- ローカル実行（`npm run dev`）とDocker実行（`docker-compose up`）を並行利用可能
+- ローカル実行（`npm run dev`）とDocker実行（`docker compose up`）を並行利用可能
 - 開発者は好みの環境を選択可能（強制移行なし）
 - Docker環境での問題発生時はローカル実行にフォールバック
 

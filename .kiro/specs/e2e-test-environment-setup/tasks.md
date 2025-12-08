@@ -180,7 +180,7 @@
 - [x] 8.2 ワークフローステップを実装する（チェックアウト、Node.jsセットアップ、Docker起動、サービス待機）
   - actions/checkout@v4でリポジトリをチェックアウト
   - actions/setup-node@v4でNode.js 20をセットアップ
-  - docker-compose up -d --buildでサービスを起動
+  - docker compose up -d --buildでサービスを起動
   - npx wait-onでhttp://localhost:3000、http://localhost:3001、http://localhost:8000/upの起動を待機
   - _要件: 8.9, 8.10, 8.11, 8.12_
 
@@ -241,7 +241,7 @@
   - _要件: 全要件のローカル環境検証_
 
 - [ ] 13.2 Docker環境でテスト実行成功を確認する
-  - docker-compose up -d --buildで全サービスを起動
+  - docker compose up -d --buildで全サービスを起動
   - e2e-testsサービスが正常実行され、テストが成功することを確認
   - Docker環境の環境変数が正しく適用されることを確認
   - _要件: 全要件のDocker環境検証_

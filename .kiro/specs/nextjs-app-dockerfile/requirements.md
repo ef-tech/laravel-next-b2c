@@ -8,7 +8,7 @@
 - **開発環境統一**: チーム全体で一貫したDocker環境を利用し、環境差異によるトラブルを削減
 - **E2Eテスト自動化**: Playwright E2EテストをDocker環境で実行可能にし、CI/CDパイプライン強化
 - **スケーラビリティ**: 本番環境へのデプロイ準備（standalone output検証）
-- **開発者体験向上**: `docker-compose up`一発で全サービス起動、迅速な開発開始
+- **開発者体験向上**: `docker compose up`一発で全サービス起動、迅速な開発開始
 
 ## Requirements
 
@@ -38,7 +38,7 @@
 5. WHEN next.config.tsを設定する THEN 設定ファイル SHALL 既存のoutputFileTracingRoot設定を保持し、モノレポ環境でのビルド警告を回避する
 
 ### Requirement 3: 統合Docker Compose設定（ルート配置）
-**Objective:** 開発チームとして、Laravel API、Admin App、User App、E2Eテストを一つのdocker-compose.ymlで管理し、`docker-compose up`一発で全サービスを起動したい
+**Objective:** 開発チームとして、Laravel API、Admin App、User App、E2Eテストを一つのdocker-compose.ymlで管理し、`docker compose up`一発で全サービスを起動したい
 
 #### Acceptance Criteria
 
@@ -72,22 +72,22 @@
 
 1. WHEN 開発者が.env.exampleファイルを更新する THEN ファイル SHALL Frontend環境変数セクションにNEXT_PUBLIC_API_URL=http://localhost:13000を追加する
 2. WHEN 開発者が.env.exampleファイルを更新する THEN ファイル SHALL E2E Tests環境変数セクションにE2E_ADMIN_URL、E2E_USER_URL、E2E_API_URL、認証情報を追加する
-3. WHEN 開発者がdocker-compose upを実行する THEN システム SHALL .envファイルから環境変数を読み込み、各サービスに適切な値を注入する
+3. WHEN 開発者がdocker compose upを実行する THEN システム SHALL .envファイルから環境変数を読み込み、各サービスに適切な値を注入する
 4. WHEN 環境変数が設定される THEN Admin App/User App SHALL NEXT_PUBLIC_API_URLを利用してLaravel APIに接続する
 5. WHEN 環境変数が設定される THEN E2Eテスト SHALL E2E_ADMIN_URL、E2E_USER_URL、E2E_API_URLを利用して各サービスにアクセスする
 
 ### Requirement 6: Docker環境でのサービス起動
-**Objective:** 開発チームとして、`docker-compose up`コマンドで全サービスを一括起動し、即座に開発・テストを開始したい
+**Objective:** 開発チームとして、`docker compose up`コマンドで全サービスを一括起動し、即座に開発・テストを開始したい
 
 #### Acceptance Criteria
 
-1. WHEN 開発者がdocker-compose up -d --buildを実行する THEN システム SHALL 全サービス（Laravel API、Admin App、User App、PostgreSQL、Redis、Mailpit、MinIO）をバックグラウンドで起動する
-2. WHEN docker-compose upが完了する THEN Admin App SHALL http://localhost:3001でアクセス可能になる
-3. WHEN docker-compose upが完了する THEN User App SHALL http://localhost:3000でアクセス可能になる
-4. WHEN docker-compose upが完了する THEN Laravel API SHALL http://localhost:13000でアクセス可能になる
-5. WHEN 開発者がdocker-compose psを実行する THEN システム SHALL 全サービスの起動状態を表示する
-6. WHEN 開発者がdocker-compose logs -f [service-name]を実行する THEN システム SHALL 指定サービスのリアルタイムログを表示する
-7. WHEN 開発者がdocker-compose downを実行する THEN システム SHALL 全サービスを停止し、コンテナを削除する
+1. WHEN 開発者がdocker compose up -d --buildを実行する THEN システム SHALL 全サービス（Laravel API、Admin App、User App、PostgreSQL、Redis、Mailpit、MinIO）をバックグラウンドで起動する
+2. WHEN docker compose upが完了する THEN Admin App SHALL http://localhost:3001でアクセス可能になる
+3. WHEN docker compose upが完了する THEN User App SHALL http://localhost:3000でアクセス可能になる
+4. WHEN docker compose upが完了する THEN Laravel API SHALL http://localhost:13000でアクセス可能になる
+5. WHEN 開発者がdocker compose psを実行する THEN システム SHALL 全サービスの起動状態を表示する
+6. WHEN 開発者がdocker compose logs -f [service-name]を実行する THEN システム SHALL 指定サービスのリアルタイムログを表示する
+7. WHEN 開発者がdocker compose downを実行する THEN システム SHALL 全サービスを停止し、コンテナを削除する
 
 ### Requirement 7: E2EテストDocker実行
 **Objective:** 開発チームとして、PlaywrightによるE2EテストをDocker環境で実行し、CI/CDパイプラインでの自動テストを可能にしたい
@@ -108,11 +108,11 @@
 
 1. WHEN 開発者がREADME.mdを更新する THEN ドキュメント SHALL 「Docker環境でのセットアップ」セクションを追加する
 2. WHEN README.mdに手順を記載する THEN ドキュメント SHALL 環境変数設定手順（cp .env.example .env）を含む
-3. WHEN README.mdに手順を記載する THEN ドキュメント SHALL 全サービス起動手順（docker-compose up -d --build）を含む
-4. WHEN README.mdに手順を記載する THEN ドキュメント SHALL 起動確認手順（docker-compose ps）を含む
-5. WHEN README.mdに手順を記載する THEN ドキュメント SHALL ログ確認手順（docker-compose logs -f [service-name]）を含む
+3. WHEN README.mdに手順を記載する THEN ドキュメント SHALL 全サービス起動手順（docker compose up -d --build）を含む
+4. WHEN README.mdに手順を記載する THEN ドキュメント SHALL 起動確認手順（docker compose ps）を含む
+5. WHEN README.mdに手順を記載する THEN ドキュメント SHALL ログ確認手順（docker compose logs -f [service-name]）を含む
 6. WHEN README.mdに手順を記載する THEN ドキュメント SHALL E2Eテスト実行手順（docker-compose run --rm e2e-tests）を含む
-7. WHEN README.mdに手順を記載する THEN ドキュメント SHALL サービス停止手順（docker-compose down）を含む
+7. WHEN README.mdに手順を記載する THEN ドキュメント SHALL サービス停止手順（docker compose down）を含む
 8. WHEN README.mdに手順を記載する THEN ドキュメント SHALL トラブルシューティングセクションを追加し、よくある問題と解決策を記載する
 
 ### Requirement 9: 開発時Hot Reload対応
@@ -122,7 +122,7 @@
 
 1. WHEN docker-compose.ymlがadmin-app/user-appサービスを定義する THEN サービス SHALL ホスト側ソースコードディレクトリをコンテナにマウントする
 2. WHEN docker-compose.ymlがvolumes設定を定義する THEN 設定 SHALL 匿名ボリューム（/app/frontend/{app-name}/node_modules）でnode_modulesをコンテナ内に保持する
-3. WHEN 開発者がホスト側でソースコードを変更する AND docker-compose upで起動中 THEN Next.js SHALL ファイル変更を検知し、自動的に再ビルドとブラウザリロードを実行する
+3. WHEN 開発者がホスト側でソースコードを変更する AND docker compose upで起動中 THEN Next.js SHALL ファイル変更を検知し、自動的に再ビルドとブラウザリロードを実行する
 4. WHEN Hot Reloadが動作する THEN システム SHALL 変更反映まで数秒以内で完了する
 
 ### Requirement 10: ビルド最適化
@@ -141,7 +141,7 @@
 - ✅ Admin App/User App用のDockerfile（frontend/admin-app/Dockerfile、frontend/user-app/Dockerfile）が作成され、docker buildが成功する
 - ✅ next.config.tsにoutput: 'standalone'設定が追加され、ビルド時に.next/standaloneディレクトリが生成される
 - ✅ リポジトリルートにdocker-compose.ymlが作成され、全サービス定義が完了している
-- ✅ docker-compose up -d --buildコマンドで全サービスが起動する
+- ✅ docker compose up -d --buildコマンドで全サービスが起動する
 - ✅ Admin App（http://localhost:3001）、User App（http://localhost:3000）、Laravel API（http://localhost:13000）にブラウザでアクセス可能
 - ✅ docker-compose run --rm e2e-testsコマンドでE2Eテストが実行され、成功する
 - ✅ README.mdにDocker環境セットアップ手順が記載されている
@@ -151,7 +151,7 @@
 ### 推奨条件
 - ✅ Docker環境でNext.js Hot Reloadが動作し、ソースコード変更が即座に反映される
 - ✅ Dockerビルド時間が最適化され、初回ビルド後の再ビルドが高速化される
-- ✅ docker-compose logs -fで各サービスのログが適切に表示される
+- ✅ docker compose logs -fで各サービスのログが適切に表示される
 - ✅ トラブルシューティングドキュメントが作成され、よくある問題の解決策が記載されている
 
 ## 参考資料

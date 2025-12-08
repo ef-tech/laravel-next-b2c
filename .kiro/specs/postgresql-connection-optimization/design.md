@@ -527,7 +527,7 @@ PostgreSQL接続設定最適化における具体的なエラー処理パター�
 
 **System Errors (インフラエラー):**
 - **Connection Timeout**: 接続タイムアウト（5秒以内に接続確立できない） → ネットワーク疎通を確認、PostgreSQLサーバーの起動状態を確認、Docker Composeヘルスチェックを確認
-- **PostgreSQL Server Down**: PostgreSQLサーバーが起動していない → `docker-compose ps`でサービス状態確認、`docker-compose up -d pgsql`で起動
+- **PostgreSQL Server Down**: PostgreSQLサーバーが起動していない → `docker compose ps`でサービス状態確認、`docker compose up -d pgsql`で起動
 - **PDO Extension Missing**: `pdo_pgsql`拡張が有効でない → PHPの`pdo_pgsql`拡張を有効化、Dockerイメージのビルド確認
 
 **Business Logic Errors (クエリエラー):**

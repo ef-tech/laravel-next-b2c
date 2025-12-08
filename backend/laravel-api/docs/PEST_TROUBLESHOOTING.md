@@ -101,7 +101,7 @@ SQLSTATE[HY000] [2002] Connection refused
 # .env.testing または phpunit.xml の設定確認
 # DB_CONNECTION=pgsql
 # DB_HOST=pgsql
-# DB_PORT=13432
+# DB_PORT=5432
 # DB_DATABASE=testing
 # DB_USERNAME=sail
 # DB_PASSWORD=password
@@ -121,7 +121,7 @@ SQLSTATE[3D000]: Invalid catalog name: database "testing" does not exist
 **解決方法**:
 ```bash
 # Docker環境の場合
-./vendor/bin/sail shell -c "PGPASSWORD=password createdb -h pgsql -U sail -p 13432 laravel_test"
+./vendor/bin/sail shell -c "PGPASSWORD=password createdb -h pgsql -U sail -p 5432 laravel_test"
 
 # または手動作成
 ./vendor/bin/sail exec pgsql psql -U sail -c "CREATE DATABASE testing;"

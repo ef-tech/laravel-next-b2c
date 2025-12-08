@@ -229,7 +229,7 @@ Connection refused [tcp://redis:6379]
 #### 解決方法
 - **Redisコンテナが停止している場合**
   ```bash
-  docker-compose up -d redis
+  docker compose up -d redis
   ```
 
 - **Redis接続設定が誤っている場合**

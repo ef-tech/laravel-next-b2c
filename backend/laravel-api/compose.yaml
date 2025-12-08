@@ -1,3 +1,21 @@
+# ============================================
+# ⚠️ DEPRECATION WARNING
+# ============================================
+# このファイルは旧設計（外部ポート公開方式）に基づいています。
+# 新しいGit Worktree並列開発環境では、ルートの docker-compose.yml を使用してください。
+#
+# 主な違い:
+# - 旧: PostgreSQL/Redisも外部ポート公開（FORWARD_DB_PORT/FORWARD_REDIS_PORT使用）
+# - 新: PostgreSQL/Redisは内部ネットワーク専用（デフォルトポート5432/6379）
+#
+# 詳細は以下を参照:
+# - README.md: Git Worktree並列開発環境セクション
+# - DOCKER_TROUBLESHOOTING.md: Docker内部ネットワーク接続セクション
+# - docker-compose.yml: ルートのDocker Compose設定（推奨）
+#
+# このファイルは後方互換性のために残されていますが、将来的に削除される予定です。
+# ============================================
+
 services:
     laravel.test:
         build:
@@ -30,7 +48,7 @@ services:
     redis:
         image: 'redis:alpine'
         ports:
-            # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
+            # ⚠️ 旧設計: 外部ポート公開方式（非推奨）
             - '${FORWARD_REDIS_PORT:-13379}:${FORWARD_REDIS_PORT:-13379}'
         command: 'redis-server --port ${FORWARD_REDIS_PORT:-13379}'
         volumes:
@@ -45,7 +63,7 @@ services:
             retries: 3
             timeout: 5s
     mailpit:
-        image: 'axllent/mailpit:latest'
+        image: 'axllent/mailpit:v1.20'
         ports:
             # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
             - '${FORWARD_MAILPIT_PORT:-11025}:${FORWARD_MAILPIT_PORT:-11025}'
@@ -58,7 +76,7 @@ services:
     pgsql:
         image: 'postgres:17-alpine'
         ports:
-            # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
+            # ⚠️ 旧設計: 外部ポート公開方式（非推奨）
             - '${FORWARD_DB_PORT:-13432}:${FORWARD_DB_PORT:-13432}'
         command: 'postgres -p ${FORWARD_DB_PORT:-13432}'
         environment:
@@ -83,7 +101,7 @@ services:
             retries: 3
             timeout: 5s
     minio:
-        image: 'minio/minio:latest'
+        image: 'minio/minio:RELEASE.2024-10-02T17-50-41Z'
         ports:
             # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
             - '${FORWARD_MINIO_PORT:-13900}:${FORWARD_MINIO_PORT:-13900}'

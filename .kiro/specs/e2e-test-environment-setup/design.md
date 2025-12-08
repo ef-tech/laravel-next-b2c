@@ -272,7 +272,7 @@ sequenceDiagram
     participant AdminApp as Admin App
     participant Reporter as Reporter
 
-    GHA->>Docker: docker-compose up -d --build
+    GHA->>Docker: docker compose up -d --build
     Docker->>AdminApp: サービス起動（admin-app, user-app, laravel-api）
     GHA->>GHA: npx wait-on (3000, 3001, 8000/up)
 
@@ -708,7 +708,7 @@ export class AdminLoginPage {
 - **Transaction Boundary**: サービス起動時の依存サービス起動完了保証
 
 **Dependencies**
-- **Inbound**: Docker Compose（docker-compose up実行時）
+- **Inbound**: Docker Compose（docker compose up実行時）
 - **Outbound**: admin-app、user-app、laravel-apiサービス（depends_on）
 - **External**: mcr.microsoft.com/playwright:v1.47.2-jammy Dockerイメージ
 
@@ -809,7 +809,7 @@ jobs:
           node-version: '20'
 
       - name: Start services
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
 
       - name: Wait for services
         run: |
@@ -1233,7 +1233,7 @@ graph LR
 - `e2e/docker/Dockerfile.e2e`（カスタムイメージが必要な場合）
 
 **検証基準**:
-- `docker-compose up e2e-tests`でDocker環境テストが成功する
+- `docker compose up e2e-tests`でDocker環境テストが成功する
 - ワークフローファイルに手動トリガー（workflow_dispatch）とpath制限を実装
 - `.disabled`拡張子により、初期構築時はGitHub Actions実行を抑制
 

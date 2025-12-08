@@ -191,7 +191,7 @@ Playwright 1.47.2を採用したE2Eテスト環境を導入することで、以
 11. WHERE e2e-testsジョブ THE E2Eテスト環境 SHALL `fail-fast: false`を設定する
 12. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `actions/checkout@v4`でリポジトリをチェックアウトする
 13. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `actions/setup-node@v4`でNode.js 20をセットアップする
-14. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `docker-compose up -d --build`でサービスを起動する
+14. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `docker compose up -d --build`でサービスを起動する
 15. WHEN ワークフローステップが実行される THEN E2Eテスト環境 SHALL `npx wait-on`で以下のサービスの起動を待機する：
     - `http://localhost:3000`
     - `http://localhost:3001`

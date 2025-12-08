@@ -18,13 +18,14 @@
   - User App: `13001` → `13100`
   - Admin App: `13002` → `13200`
   - MinIO Console: `13010` → `13300`
-  - PostgreSQL: `13432` → `14000`
-  - Redis: `13379` → `14100`
+  - ~~PostgreSQL: `13432` → `14000`~~ → **内部ネットワーク専用（ホスト公開なし）**
+  - ~~Redis: `13379` → `14100`~~ → **内部ネットワーク専用（ホスト公開なし）**
   - Mailpit UI: `13025` → `14200`
   - Mailpit SMTP: `11025` → `14300`
   - MinIO API: `13900` → `14400`
 - **既存開発者は環境再構築が必要**
 - **ブックマーク/スクリプトの更新が必要**
+- **PostgreSQL/Redis はホストから直接接続不可**（`docker compose exec` 経由でアクセス）
 
 #### 影響範囲
 - `.env.example`: 9サービスのポート番号更新
@@ -176,11 +177,11 @@ graph TB
 | User App | 13100-13199 | 13100 | 13101 | 13107 |
 | Admin App | 13200-13299 | 13200 | 13201 | 13207 |
 | MinIO Console | 13300-13399 | 13300 | 13301 | 13307 |
-| PostgreSQL | 14000-14099 | 14000 | 14001 | 14007 |
-| Redis | 14100-14199 | 14100 | 14101 | 14107 |
 | Mailpit UI | 14200-14299 | 14200 | 14201 | 14207 |
 | Mailpit SMTP | 14300-14399 | 14300 | 14301 | 14307 |
 | MinIO API | 14400-14499 | 14400 | 14401 | 14407 |
+
+**注意**: PostgreSQL (5432) と Redis (6379) は内部ネットワーク専用のため、ホストに公開されません。
 
 ### 2. 完全分離アーキテクチャの採用
 
@@ -267,7 +268,7 @@ sequenceDiagram
     Setup->>Setup: CACHE_PREFIX=wt2_
     Setup-->>Make: .env生成完了
 
-    Make->>Docker: docker-compose up -d
+    Make->>Docker: docker compose up -d
     Docker->>Docker: コンテナ起動 (wt2_laravel-api等)
     Docker->>Docker: ネットワーク作成 (wt2_network)
     Docker->>Docker: PostgreSQL DB作成 (laravel_wt2)
@@ -458,8 +459,6 @@ EOSQL
         "USER_PORT": 13100,
         "ADMIN_PORT": 13200,
         "FORWARD_MINIO_CONSOLE_PORT": 13300,
-        "FORWARD_DB_PORT": 14000,
-        "FORWARD_REDIS_PORT": 14100,
         "FORWARD_MAILPIT_DASHBOARD_PORT": 14200,
         "FORWARD_MAILPIT_PORT": 14300,
         "FORWARD_MINIO_PORT": 14400
@@ -475,8 +474,6 @@ EOSQL
         "USER_PORT": 13101,
         "ADMIN_APP": 13201,
         "FORWARD_MINIO_CONSOLE_PORT": 13301,
-        "FORWARD_DB_PORT": 14001,
-        "FORWARD_REDIS_PORT": 14101,
         "FORWARD_MAILPIT_DASHBOARD_PORT": 14201,
         "FORWARD_MAILPIT_PORT": 14301,
         "FORWARD_MINIO_PORT": 14401
@@ -504,11 +501,11 @@ EOSQL
 | `USER_PORT` | 13100 + ID | 13100 | 13102 |
 | `ADMIN_PORT` | 13200 + ID | 13200 | 13202 |
 | `FORWARD_MINIO_CONSOLE_PORT` | 13300 + ID | 13300 | 13302 |
-| `FORWARD_DB_PORT` | 14000 + ID | 14000 | 14002 |
-| `FORWARD_REDIS_PORT` | 14100 + ID | 14100 | 14102 |
 | `FORWARD_MAILPIT_DASHBOARD_PORT` | 14200 + ID | 14200 | 14202 |
 | `FORWARD_MAILPIT_PORT` | 14300 + ID | 14300 | 14302 |
 | `FORWARD_MINIO_PORT` | 14400 + ID | 14400 | 14402 |
+
+**注意**: `FORWARD_DB_PORT` と `FORWARD_REDIS_PORT` は削除されました（内部ネットワーク専用）。
 
 ---
 
@@ -874,8 +871,8 @@ flowchart TD
   - `APP_PORT=13000` ✅
   - `USER_PORT=13100` ✅（新規追加）
   - `ADMIN_PORT=13200` ✅（新規追加）
-  - `FORWARD_DB_PORT=14000` ✅
-  - `FORWARD_REDIS_PORT=14100` ✅
+  - ~~`FORWARD_DB_PORT=14000`~~ → **削除**（内部ネットワーク専用）
+  - ~~`FORWARD_REDIS_PORT=14100`~~ → **削除**（内部ネットワーク専用）
   - `FORWARD_MAILPIT_DASHBOARD_PORT=14200` ✅
   - `FORWARD_MAILPIT_PORT=14300` ✅
   - `FORWARD_MINIO_PORT=14400` ✅
@@ -928,8 +925,8 @@ Error: Cannot start service laravel-api
 **解決策**:
 1. `.env`ファイルの存在確認: `ls -la .env`
 2. Docker Compose設定検証: `docker-compose config`
-3. Dockerログ確認: `docker-compose logs`
-4. Docker再起動: `docker-compose down && make dev`
+3. Dockerログ確認: `docker compose logs`
+4. Docker再起動: `docker compose down && make dev`
 
 #### 問題3: フロントエンドビルドエラー
 ```
@@ -1149,16 +1146,18 @@ worktree IDをデプロイ環境識別子として利用し、Blue-Greenデプ�
 
 ## 付録A: 完全なポート番号マッピング表
 
-| Worktree ID | Laravel API | User App | Admin App | MinIO Console | PostgreSQL | Redis | Mailpit UI | Mailpit SMTP | MinIO API |
-|-------------|-------------|----------|-----------|---------------|------------|-------|------------|--------------|-----------|
-| 0 | 13000 | 13100 | 13200 | 13300 | 14000 | 14100 | 14200 | 14300 | 14400 |
-| 1 | 13001 | 13101 | 13201 | 13301 | 14001 | 14101 | 14201 | 14301 | 14401 |
-| 2 | 13002 | 13102 | 13202 | 13302 | 14002 | 14102 | 14202 | 14302 | 14402 |
-| 3 | 13003 | 13103 | 13203 | 13303 | 14003 | 14103 | 14203 | 14303 | 14403 |
-| 4 | 13004 | 13104 | 13204 | 13304 | 14004 | 14104 | 14204 | 14304 | 14404 |
-| 5 | 13005 | 13105 | 13205 | 13305 | 14005 | 14105 | 14205 | 14305 | 14405 |
-| 6 | 13006 | 13106 | 13206 | 13306 | 14006 | 14106 | 14206 | 14306 | 14406 |
-| 7 | 13007 | 13107 | 13207 | 13307 | 14007 | 14107 | 14207 | 14307 | 14407 |
+| Worktree ID | Laravel API | User App | Admin App | MinIO Console | Mailpit UI | Mailpit SMTP | MinIO API |
+|-------------|-------------|----------|-----------|---------------|------------|--------------|-----------|
+| 0 | 13000 | 13100 | 13200 | 13300 | 14200 | 14300 | 14400 |
+| 1 | 13001 | 13101 | 13201 | 13301 | 14201 | 14301 | 14401 |
+| 2 | 13002 | 13102 | 13202 | 13302 | 14202 | 14302 | 14402 |
+| 3 | 13003 | 13103 | 13203 | 13303 | 14203 | 14303 | 14403 |
+| 4 | 13004 | 13104 | 13204 | 13304 | 14204 | 14304 | 14404 |
+| 5 | 13005 | 13105 | 13205 | 13305 | 14205 | 14305 | 14405 |
+| 6 | 13006 | 13106 | 13206 | 13306 | 14206 | 14306 | 14406 |
+| 7 | 13007 | 13107 | 13207 | 13307 | 14207 | 14307 | 14407 |
+
+**注意**: PostgreSQL (5432) と Redis (6379) は内部ネットワーク専用のため、表から削除されています。
 
 ---
 
