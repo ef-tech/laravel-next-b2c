@@ -1,3 +1,21 @@
+# ============================================
+# ⚠️ DEPRECATION WARNING
+# ============================================
+# このファイルは旧設計（外部ポート公開方式）に基づいています。
+# 新しいGit Worktree並列開発環境では、ルートの docker-compose.yml を使用してください。
+#
+# 主な違い:
+# - 旧: PostgreSQL/Redisも外部ポート公開（FORWARD_DB_PORT/FORWARD_REDIS_PORT使用）
+# - 新: PostgreSQL/Redisは内部ネットワーク専用（デフォルトポート5432/6379）
+#
+# 詳細は以下を参照:
+# - README.md: Git Worktree並列開発環境セクション
+# - DOCKER_TROUBLESHOOTING.md: Docker内部ネットワーク接続セクション
+# - docker-compose.yml: ルートのDocker Compose設定（推奨）
+#
+# このファイルは後方互換性のために残されていますが、将来的に削除される予定です。
+# ============================================
+
 services:
     laravel.test:
         build:
