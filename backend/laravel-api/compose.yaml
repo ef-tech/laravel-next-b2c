@@ -63,7 +63,7 @@ services:
             retries: 3
             timeout: 5s
     mailpit:
-        image: 'axllent/mailpit:latest'
+        image: 'axllent/mailpit:v1.20'
         ports:
             # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
             - '${FORWARD_MAILPIT_PORT:-11025}:${FORWARD_MAILPIT_PORT:-11025}'
@@ -101,7 +101,7 @@ services:
             retries: 3
             timeout: 5s
     minio:
-        image: 'minio/minio:latest'
+        image: 'minio/minio:RELEASE.2024-10-02T17-50-41Z'
         ports:
             # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
             - '${FORWARD_MINIO_PORT:-13900}:${FORWARD_MINIO_PORT:-13900}'
