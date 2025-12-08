@@ -48,7 +48,7 @@ services:
     redis:
         image: 'redis:alpine'
         ports:
-            # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
+            # ⚠️ 旧設計: 外部ポート公開方式（非推奨）
             - '${FORWARD_REDIS_PORT:-13379}:${FORWARD_REDIS_PORT:-13379}'
         command: 'redis-server --port ${FORWARD_REDIS_PORT:-13379}'
         volumes:
@@ -76,7 +76,7 @@ services:
     pgsql:
         image: 'postgres:17-alpine'
         ports:
-            # 複数案件同時起動のため外部ポートと内部ポートを統一（変更不可）
+            # ⚠️ 旧設計: 外部ポート公開方式（非推奨）
             - '${FORWARD_DB_PORT:-13432}:${FORWARD_DB_PORT:-13432}'
         command: 'postgres -p ${FORWARD_DB_PORT:-13432}'
         environment:

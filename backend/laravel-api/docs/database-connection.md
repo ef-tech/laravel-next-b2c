@@ -36,7 +36,7 @@ Docker Compose使用時の推奨設定です。
 # .env
 DB_CONNECTION=pgsql
 DB_HOST=pgsql                    # Docker内: service名
-DB_PORT=13432                    # Docker内: 13432（内部・外部とも統一）
+DB_PORT=5432                     # Docker内: デフォルトポート（内部ネットワーク専用）
 DB_DATABASE=laravel
 DB_USERNAME=sail
 DB_PASSWORD=secret
@@ -71,39 +71,50 @@ DB_APP_NAME=laravel-next-b2c-api
 
 ホストマシンからDockerコンテナPostgreSQLへ接続する場合の設定です。
 
-```env
-# .env
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1                # ネイティブ: localhost
-DB_PORT=13432                    # ネイティブ: 外部公開ポート
-DB_DATABASE=laravel
-DB_USERNAME=sail
-DB_PASSWORD=secret
-DB_SSLMODE=prefer                # SSL推奨
+**注意**: PostgreSQLは内部ネットワーク専用のため、ホストから直接TCP接続はできません。以下の方法でアクセスしてください：
 
-# タイムアウト設定（Docker環境と同じ）
-DB_STATEMENT_TIMEOUT=60000
-DB_IDLE_TX_TIMEOUT=60000
-DB_LOCK_TIMEOUT=0
-DB_CONNECT_TIMEOUT=5
+1. **Docker exec経由でアクセス（推奨）**:
+   ```bash
+   docker compose exec pgsql psql -U sail -d laravel
+   ```
 
-# アプリケーション名
-DB_APP_NAME=laravel-next-b2c-api
-```
+2. **Laravel Sail経由でアクセス**:
+   ```env
+   # .env
+   DB_CONNECTION=pgsql
+   DB_HOST=pgsql                    # Docker内: service名
+   DB_PORT=5432                     # Docker内: デフォルトポート
+   DB_DATABASE=laravel
+   DB_USERNAME=sail
+   DB_PASSWORD=secret
+   DB_SSLMODE=disable               # ローカル環境はSSL不要
+
+   # タイムアウト設定（Docker環境と同じ）
+   DB_STATEMENT_TIMEOUT=60000
+   DB_IDLE_TX_TIMEOUT=60000
+   DB_LOCK_TIMEOUT=0
+   DB_CONNECT_TIMEOUT=5
+
+   # アプリケーション名
+   DB_APP_NAME=laravel-next-b2c-api
+   ```
 
 **起動手順:**
 
 ```bash
-# PostgreSQLコンテナを起動（Sailなしで）
-docker-compose up -d pgsql
+# PostgreSQLコンテナを起動
+docker compose up -d pgsql
 
-# 接続確認
-php artisan tinker
+# 接続確認（Docker exec経由）
+docker compose exec pgsql psql -U sail -d laravel -c "SELECT version();"
+
+# または、Sail経由でアプリケーションから接続
+./vendor/bin/sail artisan tinker
 >>> DB::connection()->getPdo();
 >>> DB::select('SELECT version()');
 
 # テスト実行
-php artisan test
+./vendor/bin/sail test
 ```
 
 ### 本番環境
@@ -273,15 +284,15 @@ SQLSTATE[08006] [7] could not connect to server
 
 2. **ホスト名またはポート番号が間違っている**
    - Docker環境: `DB_HOST=pgsql`, `DB_PORT=5432`
-   - ネイティブ環境: `DB_HOST=127.0.0.1`, `DB_PORT=13432`
+   - PostgreSQLは内部ネットワーク専用のため、ホストから直接TCP接続は不可
 
 3. **ネットワーク疎通ができない**
    ```bash
-   # 接続確認
-   docker exec -it pgsql pg_isready -U sail -p 5432
+   # 接続確認（Docker exec経由）
+   docker compose exec pgsql pg_isready -U sail -p 5432
 
-   # ネイティブ環境からの接続確認
-   psql -h 127.0.0.1 -p 13432 -U sail -d laravel
+   # または、コンテナ内から接続確認
+   docker compose exec pgsql psql -U sail -d laravel -c "SELECT 1;"
    ```
 
 ### タイムアウトエラー

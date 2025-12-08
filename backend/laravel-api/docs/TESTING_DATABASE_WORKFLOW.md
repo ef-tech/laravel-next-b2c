@@ -55,7 +55,7 @@ Laravel 12 Pest 4テスト環境における、SQLiteとPostgreSQLのハイブ�
 **特徴:**
 - 環境変数 `DB_TEST_*` を優先、未設定時は `DB_*` にフォールバック
 - デフォルトデータベース名: `app_test`
-- Docker環境対応（ホスト: `pgsql`、ポート: `13432`）
+- Docker環境対応（ホスト: `pgsql`、ポート: `5432`、内部ネットワーク専用）
 
 #### 2. SQLite高速テスト接続
 
@@ -91,7 +91,7 @@ DB_CONNECTION=pgsql_testing
 
 # Docker環境用
 DB_TEST_HOST=pgsql
-DB_TEST_PORT=13432
+DB_TEST_PORT=5432
 DB_TEST_DATABASE=app_test
 DB_TEST_USERNAME=sail
 DB_TEST_PASSWORD=password
@@ -155,7 +155,7 @@ make test-pgsql
 cd backend/laravel-api
 DB_CONNECTION=pgsql_testing \
 DB_TEST_HOST=pgsql \
-DB_TEST_PORT=13432 \
+DB_TEST_PORT=5432 \
 DB_TEST_DATABASE=app_test \
 DB_TEST_USERNAME=sail \
 DB_TEST_PASSWORD=password \
@@ -240,7 +240,7 @@ jobs:
     strategy:
       matrix:
         shard: [1, 2, 3, 4]
-    
+
     services:
       postgres:
         image: postgres:17-alpine
@@ -248,18 +248,18 @@ jobs:
           POSTGRES_USER: sail
           POSTGRES_PASSWORD: password
         ports:
-          - 13432:5432
-    
+          - 5432:5432
+
     steps:
       - name: Create shard test database
-        run: PGPASSWORD=password psql -h 127.0.0.1 -p 13432 -U sail -d postgres -c "CREATE DATABASE testing_${{ matrix.shard }} OWNER sail;"
-      
+        run: PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U sail -d postgres -c "CREATE DATABASE testing_${{ matrix.shard }} OWNER sail;"
+
       - name: Run Pest Tests (Shard ${{ matrix.shard }})
         run: ./vendor/bin/pest --shard=${{ matrix.shard }}/4
         env:
           DB_CONNECTION: pgsql_testing
           DB_TEST_HOST: 127.0.0.1
-          DB_TEST_PORT: 13432
+          DB_TEST_PORT: 5432
           DB_TEST_DATABASE: testing_${{ matrix.shard }}
           DB_TEST_USERNAME: sail
           DB_TEST_PASSWORD: password
@@ -267,7 +267,7 @@ jobs:
 
 #### 並列実行の仕組み
 
-1. **PostgreSQL Serviceコンテナ起動** - ポート `13432:5432` でマッピング
+1. **PostgreSQL Serviceコンテナ起動** - ポート `5432:5432` でマッピング
 2. **4並列Matrixジョブ** - Shard 1〜4が同時実行
 3. **各Shard専用DB作成** - `testing_1`、`testing_2`、`testing_3`、`testing_4`
 4. **並列テスト実行** - `./vendor/bin/pest --shard=${{ matrix.shard }}/4`
@@ -321,10 +321,10 @@ docker compose up -d pgsql
 
 **解決策:**
 ```bash
-# 正しいポート（13432）を指定
-docker compose exec -T pgsql psql -U sail -h localhost -p 13432 -d postgres -c '\l'
+# 正しいポート（5432、内部ネットワーク専用）を指定
+docker compose exec -T pgsql psql -U sail -h localhost -p 5432 -d postgres -c '\l'
 
-# または.env.testing.pgsqlでDB_TEST_PORT=13432を確認
+# または.env.testing.pgsqlでDB_TEST_PORT=5432を確認
 ```
 
 ### マイグレーション失敗時の対処法

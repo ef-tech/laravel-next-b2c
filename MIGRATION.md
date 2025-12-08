@@ -35,11 +35,11 @@
 | **User App** | 13001 | **13100** | レンジ分離（13100-13199） |
 | **Admin App** | 13002 | **13200** | レンジ分離（13200-13299） |
 | **MinIO Console** | 13010 | **13300** | レンジ分離（13300-13399） |
-| **PostgreSQL** | 13432 | **14000** | レンジ分離（14000-14099） |
-| **Redis** | 13379 | **14100** | レンジ分離（14100-14199） |
-| **Mailpit UI** | 13025 | **14200** | レンジ分離（14200-14299） |
-| **Mailpit SMTP** | 11025 | **14300** | レンジ分離（14300-14399） |
-| **MinIO API** | 13900 | **14400** | レンジ分離（14400-14499） |
+| **PostgreSQL** | 13432 | **5432（内部）** | 内部ネットワーク専用化（ホスト公開なし） |
+| **Redis** | 13379 | **6379（内部）** | 内部ネットワーク専用化（ホスト公開なし） |
+| **Mailpit UI** | 13025 | **外部ポート経由** | レンジ分離（14200-14299、内部8025） |
+| **Mailpit SMTP** | 11025 | **外部ポート経由** | レンジ分離（14300-14399、内部1025） |
+| **MinIO API** | 13900 | **外部ポート経由** | レンジ分離（14400-14499、内部9000） |
 
 ### 新規追加された設定
 
@@ -184,8 +184,7 @@ grep -E "^(APP_PORT|FORWARD_.*_PORT|E2E_.*_URL)" .env
 期待される出力：
 ```bash
 APP_PORT=13000
-FORWARD_DB_PORT=14000
-FORWARD_REDIS_PORT=14100
+# Note: FORWARD_DB_PORT と FORWARD_REDIS_PORT は削除されました（内部ネットワーク専用化のため）
 FORWARD_MAILPIT_PORT=14300
 FORWARD_MAILPIT_DASHBOARD_PORT=14200
 FORWARD_MINIO_PORT=14400
@@ -194,6 +193,8 @@ E2E_USER_URL=http://localhost:13100
 E2E_ADMIN_URL=http://localhost:13200
 E2E_API_URL=http://localhost:13000
 ```
+
+**注意**: PostgreSQLとRedisは内部ネットワーク専用のため、FORWARD_*_PORT環境変数は不要です。ホストから直接アクセスする必要がある場合は、`docker compose exec`コマンドを使用してください。
 
 ---
 
@@ -451,8 +452,7 @@ make worktree-list
 - [ ] `APP_KEY`等の秘密情報を復元した
 - [ ] ポート番号が新レンジになっていることを確認した
   - [ ] `APP_PORT=13000` ✅
-  - [ ] `FORWARD_DB_PORT=14000` ✅
-  - [ ] `FORWARD_REDIS_PORT=14100` ✅
+  - [ ] FORWARD_DB_PORT と FORWARD_REDIS_PORT が削除されている ✅（内部ネットワーク専用化）
   - [ ] `FORWARD_MAILPIT_DASHBOARD_PORT=14200` ✅
   - [ ] `FORWARD_MAILPIT_PORT=14300` ✅
   - [ ] `FORWARD_MINIO_PORT=14400` ✅
@@ -587,14 +587,14 @@ grep -E "^DB_" .env
 
 # 期待される出力
 # DB_CONNECTION=pgsql
-# DB_HOST=127.0.0.1
-# DB_PORT=14000  # <- 新しいポート番号
+# DB_HOST=pgsql  # <- Docker内: service名
+# DB_PORT=5432   # <- 内部ネットワーク専用（デフォルトポート）
 # DB_DATABASE=laravel
 # DB_USERNAME=sail
 # DB_PASSWORD=secret
 
-# 4. PostgreSQL手動接続テスト
-docker exec -it laravel-next-b2c-pgsql psql -U sail -d laravel
+# 4. PostgreSQL手動接続テスト（Docker exec経由）
+docker compose exec pgsql psql -U sail -d laravel
 ```
 
 ---
@@ -603,13 +603,13 @@ docker exec -it laravel-next-b2c-pgsql psql -U sail -d laravel
 
 #### 症状
 ```
-Connection refused [tcp://127.0.0.1:14100]
+Connection refused [tcp://redis:6379]
 ```
 
 #### 原因
 - Redisコンテナが起動していない
 - `.env`のRedis設定が不正
-- ポート番号が間違っている
+- ホスト名またはポート番号が間違っている
 
 #### 解決策
 ```bash
@@ -623,16 +623,17 @@ docker compose up -d redis
 docker logs laravel-next-b2c-redis
 
 # 3. .envのRedis設定を確認
-grep -E "^REDIS_|^FORWARD_REDIS_PORT" .env
+grep -E "^REDIS_" .env
 
 # 期待される出力
-# REDIS_HOST=127.0.0.1
+# REDIS_HOST=redis  # <- Docker内: service名
 # REDIS_PASSWORD=null
-# REDIS_PORT=14100  # <- 新しいポート番号
-# FORWARD_REDIS_PORT=14100
+# REDIS_PORT=6379   # <- 内部ネットワーク専用（デフォルトポート）
 
-# 4. Redis手動接続テスト
-docker exec -it laravel-next-b2c-redis redis-cli PING
+# Note: FORWARD_REDIS_PORTは削除されました（内部ネットワーク専用化のため）
+
+# 4. Redis手動接続テスト（Docker exec経由）
+docker compose exec redis redis-cli PING
 ```
 
 ---
