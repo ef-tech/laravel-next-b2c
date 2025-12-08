@@ -276,10 +276,10 @@ SQLSTATE[08006] [7] could not connect to server
    ./vendor/bin/sail up -d
 
    # ネイティブ環境
-   docker-compose up -d pgsql
+   docker compose up -d pgsql
 
    # 状態確認
-   docker-compose ps
+   docker compose ps
    ```
 
 2. **ホスト名またはポート番号が間違っている**
@@ -400,7 +400,7 @@ PostgreSQL接続を使用してタイムアウトテストを実行する場合:
 
 ```bash
 # 1. PostgreSQLコンテナが起動していることを確認
-docker-compose ps pgsql
+docker compose ps pgsql
 
 # 2. .env.testing.pgsqlを使用してテスト実行
 cp .env.testing.pgsql .env.testing

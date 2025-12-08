@@ -268,7 +268,7 @@ sequenceDiagram
     Setup->>Setup: CACHE_PREFIX=wt2_
     Setup-->>Make: .env生成完了
 
-    Make->>Docker: docker-compose up -d
+    Make->>Docker: docker compose up -d
     Docker->>Docker: コンテナ起動 (wt2_laravel-api等)
     Docker->>Docker: ネットワーク作成 (wt2_network)
     Docker->>Docker: PostgreSQL DB作成 (laravel_wt2)
@@ -925,8 +925,8 @@ Error: Cannot start service laravel-api
 **解決策**:
 1. `.env`ファイルの存在確認: `ls -la .env`
 2. Docker Compose設定検証: `docker-compose config`
-3. Dockerログ確認: `docker-compose logs`
-4. Docker再起動: `docker-compose down && make dev`
+3. Dockerログ確認: `docker compose logs`
+4. Docker再起動: `docker compose down && make dev`
 
 #### 問題3: フロントエンドビルドエラー
 ```

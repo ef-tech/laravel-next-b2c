@@ -47,7 +47,7 @@
 
 #### Acceptance Criteria
 
-1. WHEN GitHub Actionsワークフロー実行が開始される THEN CI/CD環境 SHALL `docker-compose up -d --build` コマンドでサービスをビルド・起動する
+1. WHEN GitHub Actionsワークフロー実行が開始される THEN CI/CD環境 SHALL `docker compose up -d --build` コマンドでサービスをビルド・起動する
 2. WHEN Docker Composeサービス起動が完了する THEN CI/CD環境 SHALL 以下のサービスが正常起動していることを確認する:
    - `laravel-api` (ポート 13000)
    - `admin-app` (ポート 13002)
@@ -165,7 +165,7 @@
 1. WHEN E2Eテストワークフローが開始される THEN CI/CD環境 SHALL ジョブ実行時間を60分に制限する（`timeout-minutes: 60`）
 2. IF ワークフロー実行が60分を超過する THEN CI/CD環境 SHALL ジョブを強制終了し失敗ステータスを記録する
 3. WHEN `wait-on` コマンドでサービス起動待機が実行される AND デフォルトタイムアウト（60秒）を超過する THEN CI/CD環境 SHALL エラーを出力しワークフローを失敗させる
-4. IF Docker Composeサービス起動が失敗する THEN CI/CD環境 SHALL `docker-compose logs` 相当のエラーログを出力する
+4. IF Docker Composeサービス起動が失敗する THEN CI/CD環境 SHALL `docker compose logs` 相当のエラーログを出力する
 
 ---
 

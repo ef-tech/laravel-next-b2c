@@ -73,8 +73,8 @@
 
 - [x] 4. Docker環境動作検証
 - [x] 4.1 全サービス起動テスト実行
-  - docker-compose up -d --buildで全サービスビルド + 起動 ✅
-  - docker-compose psで7サービスがUp状態であることを確認 ✅（admin-app, user-app, laravel-api, pgsql, redis, mailpit, minio）
+  - docker compose up -d --buildで全サービスビルド + 起動 ✅
+  - docker compose psで7サービスがUp状態であることを確認 ✅（admin-app, user-app, laravel-api, pgsql, redis, mailpit, minio）
   - 各サービスのヘルスチェック状態確認（PostgreSQL、Redis、MinIO）✅
   - _Requirements: 6.1, 6.5_
 
@@ -92,9 +92,9 @@
   - _Requirements: 9.3, 9.4_ ※開発環境は別途npm run devで対応
 
 - [x] 4.4 Docker Composeログ確認機能テスト
-  - docker-compose logs -f admin-appでリアルタイムログ表示確認 ✅
-  - docker-compose logs -f user-appでリアルタイムログ表示確認 ✅
-  - docker-compose downで全サービス停止 + コンテナ削除確認 ✅
+  - docker compose logs -f admin-appでリアルタイムログ表示確認 ✅
+  - docker compose logs -f user-appでリアルタイムログ表示確認 ✅
+  - docker compose downで全サービス停止 + コンテナ削除確認 ✅
   - _Requirements: 6.6, 6.7_
 
 - [x] 5. E2EテストDocker実行検証
@@ -120,14 +120,14 @@
 - [x] 6.1 README.mdにDocker環境セットアップ手順追加
   - 「Docker環境でのセットアップ」セクション作成
   - 環境変数設定手順（cp .env.example .env）記載
-  - 全サービス起動手順（docker-compose up -d --build）記載
-  - 起動確認手順（docker-compose ps）記載
+  - 全サービス起動手順（docker compose up -d --build）記載
+  - 起動確認手順（docker compose ps）記載
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
 - [x] 6.2 README.mdに運用手順追加
-  - ログ確認手順（docker-compose logs -f [service-name]）記載
+  - ログ確認手順（docker compose logs -f [service-name]）記載
   - E2Eテスト実行手順（docker-compose run --rm e2e-tests）記載
-  - サービス停止手順（docker-compose down）記載
+  - サービス停止手順（docker compose down）記載
   - _Requirements: 8.5, 8.6, 8.7_
 
 - [x] 6.3 トラブルシューティングドキュメント作成
@@ -238,7 +238,7 @@
 - [x] Admin App/User App用のDockerfile作成完了、docker buildが成功
 - [x] next.config.tsにoutput: 'standalone'設定追加、.next/standalone生成確認
 - [x] リポジトリルートにdocker-compose.yml作成、全サービス定義完了
-- [x] docker-compose up -d --buildで全サービス起動成功
+- [x] docker compose up -d --buildで全サービス起動成功
 - [x] Admin App（http://localhost:3001）、User App（http://localhost:3000）、Laravel API（http://localhost:13000）にブラウザでアクセス可能
 - [x] docker-compose --profile e2e run --rm e2e-testsでE2Eテスト実行成功（4 passed）
 - [x] README.mdにDocker環境セットアップ手順記載完了
@@ -248,5 +248,5 @@
 ### 推奨条件
 - [x] Docker環境でNext.js Hot Reload動作確認（5秒以内で変更反映）※standalone優先のため開発環境は`npm run dev`推奨
 - [x] Dockerビルド時間最適化確認（初回2分5秒、2回目14秒 - 目標大幅達成）
-- [x] docker-compose logs -fで各サービスログが適切に表示
+- [x] docker compose logs -fで各サービスログが適切に表示
 - [x] トラブルシューティングドキュメント作成完了（最低5つの問題と解決策）

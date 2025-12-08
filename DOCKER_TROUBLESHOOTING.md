@@ -133,19 +133,19 @@ lsof -i :13000  # Laravel API
 kill -9 [PID]
 
 # 3. Docker Composeプロセス確認
-docker-compose ps
-docker-compose down
+docker compose ps
+docker compose down
 
 # 4. 残留コンテナ削除
 docker ps -a | grep "admin-app\|user-app\|laravel-api"
 docker rm -f [CONTAINER_ID]
 
 # 5. 再起動
-docker-compose up -d
+docker compose up -d
 ```
 
 **予防策**:
-- 開発終了時は必ず `docker-compose down` で停止
+- 開発終了時は必ず `docker compose down` で停止
 - ポート競合を避けるため、他のプロジェクトと異なるポート番号を使用
 
 ---
@@ -164,23 +164,23 @@ Dependency failed to start: container laravel-api is unhealthy
 
 ```bash
 # 1. Laravel APIログ確認
-docker-compose logs laravel-api
+docker compose logs laravel-api
 
 # 2. ヘルスチェック状態確認
-docker-compose ps
+docker compose ps
 # STATUS列で "healthy" か確認
 
 # 3. Laravel API個別起動テスト
-docker-compose up -d pgsql redis mailpit minio
-docker-compose up laravel-api
+docker compose up -d pgsql redis mailpit minio
+docker compose up laravel-api
 
 # 4. データベース接続確認
-docker-compose exec laravel-api php artisan tinker
+docker compose exec laravel-api php artisan tinker
 # DB::connection()->getPdo();
 
 # 5. 全サービス再起動
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 ---
@@ -219,8 +219,8 @@ ls -ld frontend/admin-app
 # Docker Desktop > Settings > Restart
 
 # 6. 再ビルド
-docker-compose down -v
-docker-compose up -d --build
+docker compose down -v
+docker compose up -d --build
 ```
 
 ---
@@ -252,7 +252,7 @@ docker-compose run --rm admin-app ls -la /app/frontend/admin-app/.next/standalon
 
 # 4. 再ビルド（キャッシュなし）
 docker-compose build admin-app --no-cache
-docker-compose up -d admin-app
+docker compose up -d admin-app
 ```
 
 ---
@@ -279,19 +279,19 @@ cat backend/laravel-api/.env | grep DB_
 # DB_PASSWORD=secret
 
 # 2. PostgreSQL起動確認
-docker-compose ps pgsql
+docker compose ps pgsql
 # STATE列で "Up" かつ "healthy" であることを確認
 
 # 3. PostgreSQL接続テスト
-docker-compose exec pgsql psql -U sail -d laravel
+docker compose exec pgsql psql -U sail -d laravel
 # \dt で テーブル一覧表示
 
 # 4. Laravel接続確認
-docker-compose exec laravel-api php artisan tinker
+docker compose exec laravel-api php artisan tinker
 # DB::connection()->getPdo();
 
 # 5. マイグレーション再実行
-docker-compose exec laravel-api php artisan migrate:fresh
+docker compose exec laravel-api php artisan migrate:fresh
 ```
 
 ---
@@ -312,7 +312,7 @@ User Appログ: Network request failed
 
 ```bash
 # 1. 環境変数確認
-docker-compose exec admin-app env | grep NEXT_PUBLIC_API_URL
+docker compose exec admin-app env | grep NEXT_PUBLIC_API_URL
 # NEXT_PUBLIC_API_URL=http://laravel-api:13000
 # （Docker内部ではサービス名 "laravel-api" を使用）
 
@@ -322,13 +322,13 @@ cat docker-compose.yml | grep NEXT_PUBLIC_API_URL
 # Docker内部: http://laravel-api:13000
 
 # 3. ネットワーク接続テスト
-docker-compose exec admin-app wget -O- http://laravel-api:13000/up
+docker compose exec admin-app wget -O- http://laravel-api:13000/up
 # Laravel API応答があることを確認
 
 # 4. 環境変数再設定
 # docker-compose.yml の environment セクションを修正
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 ---
@@ -387,18 +387,18 @@ docker volume ls | grep admin-app
 echo "// test" >> frontend/admin-app/src/app/page.tsx
 
 # コンテナ側で変更確認
-docker-compose exec admin-app cat /app/frontend/admin-app/src/app/page.tsx
+docker compose exec admin-app cat /app/frontend/admin-app/src/app/page.tsx
 # → "// test" が追加されていることを確認
 
 # 4. Next.js開発サーバーログ確認
-docker-compose logs -f admin-app
+docker compose logs -f admin-app
 # → "compiled client and server successfully" メッセージが表示されるか確認
 
 # 5. Hot Reload無効の場合、環境変数追加
 # docker-compose.yml の admin-app service に追加:
 # environment:
 #   - WATCHPACK_POLLING=true
-docker-compose up -d admin-app
+docker compose up -d admin-app
 ```
 
 ---
@@ -419,7 +419,7 @@ TimeoutError: page.goto: Timeout 30000ms exceeded.
 
 ```bash
 # 1. フロントエンド起動確認
-docker-compose ps admin-app user-app
+docker compose ps admin-app user-app
 # STATE列で "Up" であることを確認
 
 # 2. E2E環境変数確認
@@ -467,7 +467,7 @@ cat docker-compose.yml | grep -A 5 "e2e-tests:" | grep command
 docker-compose run --rm e2e-tests sh -c "npx playwright install --with-deps chromium"
 
 # 4. イメージ再ビルド
-docker-compose down
+docker compose down
 docker-compose build e2e-tests --no-cache
 docker-compose run --rm e2e-tests
 ```
@@ -480,13 +480,13 @@ docker-compose run --rm e2e-tests
 
 ```bash
 # 全サービス状態確認
-docker-compose ps
+docker compose ps
 
 # 特定サービスログ確認
-docker-compose logs -f [service-name]
+docker compose logs -f [service-name]
 
 # コンテナ内シェル起動
-docker-compose exec [service-name] sh
+docker compose exec [service-name] sh
 docker-compose run --rm [service-name] sh
 
 # ネットワーク確認
@@ -498,12 +498,12 @@ docker volume ls
 docker volume inspect laravel-next-b2c_sail-pgsql
 
 # 完全クリーンアップ
-docker-compose down -v --remove-orphans
+docker compose down -v --remove-orphans
 docker system prune -a --volumes
 
 # 再ビルド（キャッシュなし）
 docker-compose build --no-cache
-docker-compose up -d
+docker compose up -d
 ```
 
 ---
@@ -519,7 +519,7 @@ docker-compose up -d
 
 2. **エラーログ**:
    ```bash
-   docker-compose logs [service-name] > error.log
+   docker compose logs [service-name] > error.log
    ```
 
 3. **再現手順**: 問題が発生するまでの具体的な操作手順
